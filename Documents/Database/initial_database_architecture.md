@@ -8,15 +8,25 @@ notevault_db
 
 ## Tables
 
+### users
+
+| Field         | Type            | Description              |      
+|---------------|-----------------|--------------------------|
+| id            | INT (PK)        | Unique user ID           |
+| username      | VARCHAR(255)    | Login name               |
+| password_hash | VARCHAR(255)    | Hashed password          |
+| created_at    | TIMESTAMP       | User registration time   |
+
 ### notes
 
-| Field | Type | Description                     |
-|------|-----|---------------------------------|
-| id | INT (PK) | Unique identifier for each note |
-| title | VARCHAR(255) | Title of the note               |
-| content | TEXT | Contents of the note            |
-| created_at | TIMESTAMP | Note creation time              |
-| updated_at | TIMESTAMP | Last modification time          |
+| Field      | Type               | Description                     |
+|------------|--------------------|---------------------------------|
+| id         | INT (PK)           | Unique identifier for each note |
+| title      | VARCHAR(255)       | Title of the note               |
+| content    | TEXT               | Contents of the note            |
+| user_id    | INT (FK, nullable) | Registered user; NULL -> guest  |
+| created_at | TIMESTAMP          | Note creation time              |
+| updated_at | TIMESTAMP          | Last modification time          |
 
 ## Notes
 This schema represents the initial design and will be refined in later sprints as new requirements are identified.
@@ -24,7 +34,6 @@ This schema represents the initial design and will be refined in later sprints a
 ## Future Extensions
 
 In future iterations of the project, the database design may be extended to support:
-- User authentication and authorization
 - Note sharing and tagging
 
 These features are outside the scope of Software Engineering Project 1 and are not implemented in the current version.
