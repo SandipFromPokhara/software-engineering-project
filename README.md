@@ -47,6 +47,8 @@ Its use ensures that all data-related functionalities are fully supported withou
 
 - Docker – Application packaging and environment consistency
 
+- Kubernetes (Minikube) - local container orchestration and experimentation
+
 - GitHub – Version control and collaboration
 
 - Trello – Agile project management and sprint tracking
@@ -62,4 +64,5 @@ These tools collectively support automation, testing, quality assurance, and Dev
 The project follows DevOps principles by integrating automated build, testing, and packaging processes.
 Jenkins pipelines are used to automate compilation, unit testing, and code coverage analysis.
 Docker is used to package the application into a consistent runtime environment, ensuring reliable deployment across different systems.
+Kubernetes is used in local development environment to demonstrate basic orchestration concepts and is not intended for production-scale deployment in this project.
 
