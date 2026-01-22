@@ -1,4 +1,5 @@
 ## Project Overview
+
 NoteVault is a Java-based digital note-taking and annotation desktop application developed as a part of *Software Engineering Project 1* course.
 
 The project focuses on applying DevOps practices, Agile development, automated testing, and CI/CD pipelines.
