@@ -48,6 +48,7 @@ GitHub Repository Setup
 
 ## Team Capacity & Assumptions
 Capacity: 4 members x 4 hours/day x 7 days = about 112 hours
+
 Assumptions: We assume database integration will require multiple testing.
 
 ## Definition of Done
@@ -56,4 +57,4 @@ Before any task or user story is moved to 'Done', the following criteria must be
 - Testing: Unit tests written and passing with 80% success margin.
 - UI/UX: Design and layout matches Figma low-fidelity mockup.
 - Minimal Bug: No critical bugs.
-- Review: All team member pass the review.
+- Review: All team member must agree and pass the demonstration during review.
