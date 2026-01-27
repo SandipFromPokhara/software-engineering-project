@@ -67,6 +67,7 @@ Communication - WhatsApp, GoogleMeet, Email
 ### Sprint 1 Outcome
 Sprint 1 was concluded successfully. All the planned backlog items were completed ahead of time, the team aligned on the product vision and product plan documentation.
 All the required technical environment and tools were set up. The project is now ready to move into second phase or Sprint 2, where core NoteVault features will begin development.
+
 ---
 
 ### Sprint Retrospective (4Ls)
