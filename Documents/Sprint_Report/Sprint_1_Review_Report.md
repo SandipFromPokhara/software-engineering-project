@@ -15,6 +15,7 @@ A private GitHub repository was set up for version control and team collaboratio
 The branches will be merged to `main` by the end of the project.
 Development environment was set up and necessary DevOps tools were installed.
 This sprint ensured that the team had a clear direction, shared understanding and technical infrastructure required for future development.
+
 ---
 
 ### Sprint 1 Planning
