@@ -62,16 +62,19 @@ Communication - WhatsApp, GoogleMeet, Email
 | Gam Twe He            | Write product vision, project planning, review reports, Sprint meetings, Presenatation                                                                                                                                               |
 | Dinal Maha Vidanelage | Sprint meetings, create user stories, review reports, project planning, Use case diagram v.2                                                                                                                                         |
 | Swostika Lama | Sprint meetings, project planning, create user stories, review reports, Figma design v.2, Use case diagram v.3 |
+---
 
 ### Sprint 1 Outcome
 Sprint 1 was concluded successfully. All the planned backlog items were completed ahead of time, the team aligned on the product vision and product plan documentation.
 All the required technical environment and tools were set up. The project is now ready to move into second phase or Sprint 2, where core NoteVault features will begin development.
+---
 
 ### Sprint Retrospective (4Ls)
 - Liked: Smooth communication, collaborative UI design and clear prototype vision.
 - Learned: About Unit tests and how to set up Docker, minikube and Jenkins.
 - Lacked: Everything went well.
 - Longed For: Earlier database structure.
+---
 
 ### Sprint 2 Planning.
 - Select new Scrum master for Sprint 2 (Swostika Lama).
