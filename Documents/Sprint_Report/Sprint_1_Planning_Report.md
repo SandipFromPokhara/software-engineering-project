@@ -1,6 +1,10 @@
 # Software Engineering Project 1 - Sprint Planning Report
 
+## NoteVault - Digital Note-taking and Annotation App
+
 ## Sprint Number 1
+### Scrum Master: Sandip Ranjit
+### Team: Dinal Maha Vidanelage, Sandip Ranjit, Swostika Lama, Twe He Gam
 Dates: 13.01.2026 - 27.01.2026
 
 ---
@@ -35,21 +39,25 @@ GitHub Repository Setup
 ```
 
 ## Planned Tasks / Breakdown
-- The team discussed before starting any group related tasks and asked for review.
-- The deliverables were completed before the deadline.
-- Smooth communication was maintained during the whole sprint.
-- All the planned tasks for Sprint 1 were achieved properly.
-- Unrealistic goals were eliminated.
-- All the required development tools were set up.
-- New scrum master for Sprint 2 was selected.
-- GitHub folders were properly structured.
-- Each member were assigned tasks for Sprint 2.
-- New goals were agreed for Sprint 2.
+- Discuss before starting any group related tasks and ask for review.
+- Complete the deliverables as early as possible, review before submission and submit before the deadline.
+- Maintain smooth communication during the whole sprint.
+- Eliminate unrealistic goals.
+- Setup all the required development tools.
+- Structure GitHub folders properly.
+- Achieve all planned tasks for Sprint 1.
+- Agree new goals for Sprint 2.
+- Assign each member the tasks for Sprint 2.
+- Select new scrum master for Sprint 2.
+
+---
 
 ## Team Capacity & Assumptions
 Capacity: 4 members x 4 hours/day x 7 days = about 112 hours
 
 Assumptions: We assume database integration will require multiple testing.
+
+---
 
 ## Definition of Done
 Before any task or user story is moved to 'Done', the following criteria must be met:
@@ -59,4 +67,4 @@ Before any task or user story is moved to 'Done', the following criteria must be
 - UI/UX: Design and layout matches Figma low-fidelity mockup.
 - Minimal Bug: No critical bugs.
 - Review: All team member must agree and pass the demonstration during review.
-- Updated GitHub and Trello
+- Updated GitHub and Trello.
