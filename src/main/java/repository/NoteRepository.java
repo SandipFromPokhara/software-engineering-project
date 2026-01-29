@@ -1,13 +1,13 @@
-package temporary_note_storage;
+package repository;
 
 import model.Note;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NoteStorage {
+public class NoteRepository {
     private List<Note> notes;
 
-    public NoteStorage() {
+    public NoteRepository() {
         notes = new ArrayList<>();
     }
 
