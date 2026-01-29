@@ -11,14 +11,17 @@ public class NoteStorage {
         notes = new ArrayList<>();
     }
 
+    // Gam
     public void createNote(Note note) {
         //implement yourselves
     }
 
+    // Swostika
     public void updateNote(Note note) {
         //implement yourselves
     }
 
+    // Dinal
     public void deleteNote(Note note) {
         //implement yourselves
     }
