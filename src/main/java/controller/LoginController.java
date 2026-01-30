@@ -1,5 +1,6 @@
 package controller;
 
+import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.fxml.FXML;
 
@@ -44,4 +45,9 @@ public class LoginController {
         errorLabel.setVisible(false);
 
     }
+
+    @FXML
+    private void handleSignup(ActionEvent event) {
+    }
+
 }
