@@ -10,12 +10,14 @@ notevault_db
 
 ### users
 
-| Field         | Type            | Description              |      
-|---------------|-----------------|--------------------------|
-| id            | INT (PK)        | Unique user ID           |
-| username      | VARCHAR(255)    | Login name               |
-| password_hash | VARCHAR(255)    | Hashed password          |
-| created_at    | TIMESTAMP       | User registration time   |
+| Field         | Type         | Description            |      
+|---------------|--------------|------------------------|
+| id            | INT (PK)     | Unique user ID         |
+| firstName     | VARCHAR(255) | User's first name      |
+| lastName      | VARCHAR(255) | User's last name       |
+| username      | VARCHAR(255) | Login name             |
+| password_hash | VARCHAR(255) | Hashed password        |
+| created_at    | TIMESTAMP    | User registration time |
 
 ### notes
 
