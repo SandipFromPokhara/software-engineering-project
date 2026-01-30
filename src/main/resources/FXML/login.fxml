@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #EAF7F7;" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Login">
+    <left>
+        <AnchorPane prefHeight="400.0" prefWidth="241.0" BorderPane.alignment="CENTER">
+            <children>
+                <ImageView fitHeight="400.0" fitWidth="283.0" layoutX="-1.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@../Images/notevolt1.png" />
+                    </image>
+                </ImageView>
+            </children>
+        </AnchorPane>
+    </left>
+    <center>
+        <AnchorPane prefHeight="400.0" prefWidth="300.0" style="-fx-background-color: #ebf4f5;" BorderPane.alignment="CENTER">
+            <children>
+                <Label layoutX="31.0" layoutY="31.0" prefHeight="53.0" prefWidth="189.0" text="Welcome back" textFill="#297883" textOverrun="CLIP">
+                    <font>
+                        <Font name="Brush Script MT Italic" size="35.0" />
+                    </font>
+                </Label>
+                <Label layoutX="30.0" layoutY="76.0" prefHeight="35.0" prefWidth="237.0" text="Please Login to access your notes" textFill="#307494">
+                    <font>
+                        <Font name="Songti TC Bold" size="17.0" />
+                    </font>
+                </Label>
+                <VBox layoutX="50.0" layoutY="163.0" prefHeight="116.0" prefWidth="220.0" spacing="8.0">
+                    <children>
+                        <TextField fx:id="usernameField" alignment="CENTER" prefHeight="26.0" prefWidth="130.0" promptText="Username" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-padding: 6 10 6 10; -fx-border-color: rgba(37,105,115,0.18); -fx-background-color: white;">
+                     <font>
+                        <Font size="12.0" />
+                     </font></TextField>
+                        <PasswordField fx:id="passwordField" alignment="CENTER" prefHeight="26.0" prefWidth="130.0" promptText="Password" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-padding: 6 10 6 10; -fx-border-color: rgba(37,105,115,0.18); -fx-background-color: white;">
+                     <font>
+                        <Font size="12.0" />
+                     </font></PasswordField>
+                        <Button fx:id="loginButton" alignment="CENTER" mnemonicParsing="false" onAction="#onLogin" prefHeight="30.0" prefWidth="62.0" style="-fx-background-color: #266973; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-border-radius: 8; -fx-cursor: hand;" text="Login" textAlignment="CENTER">
+                            <font>
+                                <Font name="Times New Roman Bold" size="14.0" />
+                            </font>
+                     <VBox.margin>
+                        <Insets left="72.0" />
+                     </VBox.margin>
+                        </Button>
+                    </children>
+                    <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                    </padding>
+                </VBox>
+                <!-- Sign-up prompt placed outside the form VBox -->
+                <HBox alignment="CENTER_LEFT" layoutX="80.0" layoutY="290.0" spacing="6.0" />
+                  <Label layoutX="31.0" layoutY="359.0" text="Don't have an account?" textFill="#455a64">
+               <font>
+                  <Font size="12.0" />
+               </font>
+            </Label>
+                  <Hyperlink layoutX="152.0" layoutY="356.0" onAction="#onSignUp" style="-fx-text-fill: #266973; -fx-font-weight: bold;" text="Sign up">
+               <font>
+                  <Font size="12.0" />
+               </font>
+            </Hyperlink>
+            </children>
+        </AnchorPane>
+    </center>
+</BorderPane>

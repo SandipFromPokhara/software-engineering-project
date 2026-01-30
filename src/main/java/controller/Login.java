@@ -7,38 +7,39 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 
-@SuppressWarnings("unused")
-public class Entry {
+public class Login {
 
     @FXML
-    private Button guestButton;
+    private TextField usernameField;
+
+    @FXML
+    private PasswordField passwordField;
 
     @FXML
     private Button loginButton;
 
     @FXML
-    private Button registerButton;
-
-    @FXML
     private void onLogin(ActionEvent event) {
-        System.out.println("Login button clicked - navigating to Login screen");
-        loadScreen("/FXML/login.fxml", "Login - Note Vault", event);
+        String user = usernameField.getText();
+        String pass = passwordField.getText();
+        System.out.println("Login attempted: " + user + " / " + (pass == null ? "" : "[hidden]"));
+        // TODO: validate credentials and navigate to main app screen
+        if (!user.isEmpty() && !pass.isEmpty()) {
+            System.out.println("Login would succeed - navigate to main app");
+            // loadScreen("/FXML/main_app.fxml", "Note Vault", event);
+        }
     }
 
     @FXML
-    private void onRegister(ActionEvent event) {
-        System.out.println("Register button clicked - navigating to Signup screen");
+    private void onSignUp(ActionEvent event) {
+        System.out.println("Sign-up link clicked - navigating to Signup screen");
         loadScreen("/FXML/signup.fxml", "Sign Up - Note Vault", event);
-    }
-
-    @FXML
-    private void onContinueAsGuest(ActionEvent event) {
-        System.out.println("Continue as guest clicked");
-        // TODO: proceed as guest - load main notes screen
     }
 
     private void loadScreen(String fxmlPath, String title, ActionEvent event) {
@@ -52,4 +53,5 @@ public class Entry {
             e.printStackTrace();
         }
     }
+
 }

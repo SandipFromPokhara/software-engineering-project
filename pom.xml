@@ -9,8 +9,8 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>24</maven.compiler.source>
-        <maven.compiler.target>24</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -56,6 +56,17 @@
                     </execution>
 
                 </executions>
+            </plugin>
+
+            <!-- JavaFX Maven plugin: enables `mvn javafx:run` and configures module-path -->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <!-- Main class (adjust if your main class is in a package) -->
+                    <mainClass>Main</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>

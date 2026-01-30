@@ -12,8 +12,9 @@ public class NoteStorage {
     }
 
     // Gam
-    public void createNote(Note note) {
-        //implement yourselves
+    public synchronized void createNote(Note note) {
+        if (note == null) throw new IllegalArgumentException("note cannot be null");
+        notes.add(note);
     }
 
     // Swostika

@@ -12,23 +12,62 @@ public class Note {
     private LocalDateTime updatedAt;
 
     public Note(String title, String content, int userId) {
-        id = idCounter++;
+        this.id = idCounter++;
         this.title = title;
         this.content = content;
         this.userId = userId;
         this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = this.createdAt;
     }
 
-    public int getId() { return id; }
+    public int getId() {
+        return id;
+    }
 
-    public String getTitle() { return title; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public void setTitle(String title) { this.title = title; }
+    public static int getIdCounter() {
+        return idCounter;
+    }
 
-    public String getContent() { return content; }
+    public static void setIdCounter(int idCounter) {
+        Note.idCounter = idCounter;
+    }
 
-    public void setContent(String content) { this.content = content; }
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
 
     /**
      * Updates new content and syncs last created or modified timestamp.
