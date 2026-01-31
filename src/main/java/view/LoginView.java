@@ -15,7 +15,12 @@ public class LoginView extends Application {
         Parent root = fxmlLoader.load();
 
         Scene loginScene = new Scene(root);
-        stage.getIcons().add(new Image("/Images/left_image.jpeg"));
+        stage.setMinWidth(440);
+        stage.setMinHeight(350);
+
+        stage.setMaxWidth(1600);
+        stage.setMaxHeight(1000);
+
         stage.getIcons().add(new Image("/Images/Logo_white.png"));
         stage.setTitle("NoteVault");
         stage.setScene(loginScene);
