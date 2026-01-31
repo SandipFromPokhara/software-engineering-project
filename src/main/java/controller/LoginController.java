@@ -4,15 +4,16 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.fxml.FXML;
 
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.paint.Color;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import model.User;
 import repository.UserRepository;
 
+
 public class LoginController {
-
-    public ImageView leftImage;
-
-    public ImageView logo;
 
     private UserRepository userRepository;
 
@@ -22,7 +23,7 @@ public class LoginController {
 
     @FXML private Button loginButton;
 
-    @FXML private Label errorLabel;
+    @FXML private Label statusLabel;
 
     @FXML private Hyperlink signupLink;
 
@@ -47,13 +48,15 @@ public class LoginController {
 
         boolean authenticated = userRepository.authenticateUser(username, password);
         if (authenticated) {
-            errorLabel.setVisible(true);
-            errorLabel.setText("Login successful");
+            statusLabel.setVisible(true);
+            statusLabel.setTextFill(Color.GREEN);
+            statusLabel.setText("Login successful");
 
             // navigate(dashboard);
         } else {
-            errorLabel.setVisible(true);
-            errorLabel.setText("Invalid username or password");
+            statusLabel.setVisible(true);
+            statusLabel.setTextFill(Color.RED);
+            statusLabel.setText("Invalid username or password");
         }
     }
 
@@ -61,7 +64,7 @@ public class LoginController {
     private void initialize() {
         userRepository = new UserRepository();
         loginButton.setDisable(true);
-        errorLabel.setVisible(false);
+        statusLabel.setVisible(false);
 
         usernameField.textProperty().addListener((observable, oldValue, newValue) -> checkFields());
 
