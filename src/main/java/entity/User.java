@@ -1,4 +1,94 @@
 package entity;
 
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Entity
+@Table(name="users")
 public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name="firstName", nullable = false)
+    private String firstName;
+
+    @Column(name="lastName", nullable = false)
+    private String lastName;
+
+    @Column(name="username", nullable = false, unique = true)
+    private String username;
+
+    @Column(name="email", nullable = false, unique = true)
+    private String email;
+
+    @Column(name="passwordHash")
+    private String passwordHash;
+
+    @Column(name="createdAt")
+    private LocalDateTime createdAt;
+
+    @Column(name="updatedAt")
+    private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NoteBook> notebooks;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    public User(String firstName,String lastName,String username, String email) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        this.email = email;
+    }
+
+    public User() {}
+
+    public Long getId() { return id; }
+
+    public String getFirstName() { return firstName; }
+
+    public String getLastName() { return lastName; }
+
+    public String getUsername() { return username; }
+
+    public String getEmail() { return email; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    public void setFirstName(String newFirstName) {
+        this.firstName = newFirstName;
+    }
+
+    public void setLastName(String newLastName) {
+        this.lastName = newLastName;
+    }
+
+    public void setEmail(String newEmail) {
+        this.email = newEmail;
+    }
+
+    public void setUsername(String newUsername) {
+        this.username = newUsername;
+    }
+
+    public void changePasswordHash(String newHashedPassword) {
+        if (newHashedPassword != null && !newHashedPassword.isEmpty()) {
+            this.passwordHash = newHashedPassword;
+        }
+    }
 }
