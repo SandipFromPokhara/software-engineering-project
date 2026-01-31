@@ -15,9 +15,18 @@ notevault_db
 | id            | INT (PK)     | Unique user ID         |
 | firstName     | VARCHAR(255) | User's first name      |
 | lastName      | VARCHAR(255) | User's last name       |
+| email         | VARCHAR(255) | User's email address   |
 | username      | VARCHAR(255) | Login name             |
 | password_hash | VARCHAR(255) | Hashed password        |
 | created_at    | TIMESTAMP    | User registration time |
+
+### users
+
+| Field     | Type         | Description                         |
+|-----------|--------------|-------------------------------------|
+| id        | INT (PK)     | Unique identifier for each Notebook |
+| title     | VARCHAR(255) | Title of the Notebook               |
+| user_id   | INT (FK)     | Relation to user                    |
 
 ### notes
 
