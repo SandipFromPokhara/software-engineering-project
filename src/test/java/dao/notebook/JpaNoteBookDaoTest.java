@@ -46,5 +46,31 @@ class JpaNoteBookDaoTest {
         assertEquals("Find By Title", retrievedNotebook.getTitle());
     }
 
+    @Test
+    void updateNotebookTest() {
+        NoteBookEntity notebook = new NoteBookEntity("Test update method", testUser);
+        notebookDao.save(notebook);
 
+        NoteBookEntity retrievedNotebook = notebookDao.findById(notebook.getId());
+        retrievedNotebook.setTitle("Test update method for NoteBook entity");
+        notebookDao.update(retrievedNotebook);
+
+        assertNotNull(retrievedNotebook);
+        assertEquals("Test update method for NoteBook entity", retrievedNotebook.getTitle());
+    }
+
+    @Test
+    void deleteNotebookTesT() {
+        NoteBookEntity notebook = new NoteBookEntity("Testing delete method", testUser);
+        notebookDao.save(notebook);
+
+        NoteBookEntity managedNotebook = notebookDao.findById(notebook.getId());
+        assertNotNull(managedNotebook);
+
+        notebookDao.delete(managedNotebook);
+
+        NoteBookEntity deletedNotebook = notebookDao.findById(notebook.getId());
+
+        assertNull(deletedNotebook);
+    }
 }
