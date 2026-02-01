@@ -2,6 +2,7 @@ package entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -34,7 +35,7 @@ public class UserEntity {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<NoteBookEntity> notebooks;
+    private List<NoteBookEntity> notebooks = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
@@ -90,5 +91,17 @@ public class UserEntity {
         if (newHashedPassword != null && !newHashedPassword.isEmpty()) {
             this.passwordHash = newHashedPassword;
         }
+    }
+
+    public List<NoteBookEntity> getNoteBooks() { return notebooks; }
+
+    public void removeNotebook(NoteBookEntity notebook) {
+        notebooks.remove(notebook);
+        notebook.setUser(null);
+    }
+
+    public void addNotebook(NoteBookEntity notebook) {
+        notebooks.add(notebook);
+        notebook.setUser(this);
     }
 }
