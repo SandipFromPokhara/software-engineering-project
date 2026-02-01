@@ -8,8 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.scene.control.TextField;
-import javafx.scene.image.ImageView;
-import model.User;
+import model.UserModel;
 import repository.UserRepository;
 
 
@@ -70,7 +69,7 @@ public class LoginController {
 
         passwordField.textProperty().addListener((observable, oldValue, newValue) -> checkFields());
 
-        User user = new User("test", "first", "testuser", "abcd");
+        UserModel user = new UserModel("test", "first", "testuser", "abcd");
         userRepository.addUser(user);
     }
 
