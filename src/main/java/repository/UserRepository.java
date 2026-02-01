@@ -1,24 +1,24 @@
 package repository;
 
-import model.User;
+import model.UserModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserRepository {
-    private List<User> users;
-    private User currentUser;
+    private List<UserModel> users;
+    private UserModel currentUser;
 
     public UserRepository() {
         users = new ArrayList<>();
     }
 
-    public void addUser(User user) {
+    public void addUser(UserModel user) {
         users.add(user);
     }
 
-    private User findUser(String username) {
-        for (User user : users) {
+    private UserModel findUser(String username) {
+        for (UserModel user : users) {
             if (user.getUsername().equalsIgnoreCase(username)) {
                 return user;
             }
@@ -30,7 +30,7 @@ public class UserRepository {
             return false;
         }
 
-        User user = findUser(username);
+        UserModel user = findUser(username);
         if (user == null) {
             return false;
         }
