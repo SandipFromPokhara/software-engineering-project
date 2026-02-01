@@ -4,18 +4,16 @@ import java.time.LocalDateTime;
 
 public class NoteModel {
     private int id;
-    private static int idCounter = 1;
     private String title;
     private String content;
-    private int userId;
+    private NoteBookModel notebook;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public NoteModel(String title, String content, int userId) {
-        id = idCounter++;
+    public NoteModel(String title, String content, NoteBookModel notebook) {
         this.title = title;
         this.content = content;
-        this.userId = userId;
+        this.notebook = notebook;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
@@ -24,7 +22,10 @@ public class NoteModel {
 
     public String getTitle() { return title; }
 
-    public void setTitle(String title) { this.title = title; }
+    public void setTitle(String title) {
+        this.title = title;
+        this.updatedAt = LocalDateTime.now();
+    }
 
     public String getContent() { return content; }
 
@@ -38,13 +39,15 @@ public class NoteModel {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public int getUserId() { return userId; }
+    public NoteBookModel getNotebook() { return notebook; }
+
+    public void setNotebook(NoteBookModel notebook) { this.notebook = notebook; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
 
     @Override
     public String toString() {
-        return "NoteModel {Id: " + id + ", Title: '" + title + "', UserId: '" + userId + "', Timestamp: " + createdAt + "}";
+        return "Note {Id: " + id + ", Title: '" + title + "', Notebook: '" + notebook + "', Timestamp: " + createdAt + "}";
     }
 }
 
