@@ -2,7 +2,7 @@ package model;
 
 import java.time.LocalDateTime;
 
-public class Note {
+public class NoteModel {
     private int id;
     private static int idCounter = 1;
     private String title;
@@ -11,7 +11,7 @@ public class Note {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Note(String title, String content, int userId) {
+    public NoteModel(String title, String content, int userId) {
         id = idCounter++;
         this.title = title;
         this.content = content;
@@ -44,7 +44,7 @@ public class Note {
 
     @Override
     public String toString() {
-        return "Note {Id: " + id + ", Title: '" + title + "', UserId: '" + userId + "', Timestamp: " + createdAt + "}";
+        return "NoteModel {Id: " + id + ", Title: '" + title + "', UserId: '" + userId + "', Timestamp: " + createdAt + "}";
     }
 }
 
