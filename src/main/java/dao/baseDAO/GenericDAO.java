@@ -7,4 +7,6 @@ public interface GenericDAO<T, ID> {
     T findById(ID id);
 
     void delete(T entity);
+
+    void update(T entity);
 }
