@@ -10,18 +10,23 @@ import java.util.List;
 public class JpaUserDao implements UserDAO{
 
     @Override
-    public void save(UserEntity user) {
+    public UserEntity save(UserEntity user) {
         if (user == null) throw new IllegalArgumentException("User cannot be null");
 
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
             em.getTransaction().begin();
+            UserEntity managedUser;
+
             if (user.getId() == null) {
                 em.persist(user);
+                managedUser = user;
             } else {
-                em.merge(user);
+                managedUser = em.merge(user);
             }
             em.getTransaction().commit();
+            return managedUser;
+
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();

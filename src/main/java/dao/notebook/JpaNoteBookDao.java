@@ -10,17 +10,21 @@ import java.util.List;
 public class JpaNoteBookDao implements NoteBookDAO{
 
     @Override
-    public void save(NoteBookEntity noteBook) {
+    public NoteBookEntity save(NoteBookEntity noteBook) {
         if (noteBook == null) throw new IllegalArgumentException("Notebook cannot be null");
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
             em.getTransaction().begin();
+            NoteBookEntity managedNoteBook;
             if (noteBook.getId() == null) {
                 em.persist(noteBook);
+                managedNoteBook = noteBook;
             } else {
-                em.merge(noteBook);
+                managedNoteBook = em.merge(noteBook);
             }
             em.getTransaction().commit();
+            return managedNoteBook;
+
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
             throw new RuntimeException("Failed to save notebook", e);

@@ -10,18 +10,23 @@ import java.util.List;
 public class JpaNoteDao implements NoteDAO{
 
     @Override
-    public void save(NoteEntity note) {
+    public NoteEntity save(NoteEntity note) {
         if (note == null) throw new IllegalArgumentException("Note cannot be null");
 
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
             em.getTransaction().begin();
+            NoteEntity managedNote;
+
             if (note.getId() == null) {
                 em.persist(note);
+                managedNote = note;
             } else {
-                em.merge(note);
+                managedNote = em.merge(note);
             }
             em.getTransaction().commit();
+            return managedNote;
+
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
             throw new RuntimeException("Failed to save note.", e);
