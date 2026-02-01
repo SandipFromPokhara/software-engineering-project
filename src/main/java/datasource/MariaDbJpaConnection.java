@@ -7,7 +7,6 @@ import jakarta.persistence.Persistence;
 public class MariaDbJpaConnection {
 
     private static EntityManagerFactory emf = null;
-    private static EntityManager em = null;
 
     private static synchronized void ensureFactory() {
         if (emf == null) {
@@ -21,10 +20,6 @@ public class MariaDbJpaConnection {
     }
 
     public static synchronized void shutdown() {
-        if (em != null && em.isOpen()) {
-            em.close();
-            em = null;
-        }
         if (emf != null && emf.isOpen()) {
             emf.close();
             emf = null;
