@@ -80,8 +80,13 @@ public class JpaNoteBookDao implements NoteBookDAO{
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
             em.getTransaction().begin();
-            NoteBookEntity managedNoteBook = em.merge(noteBook);
-            em.remove(managedNoteBook);
+            NoteBookEntity managedNoteBook = em.find(NoteBookEntity.class, noteBook.getId());
+
+            if (managedNoteBook != null) {
+                managedNoteBook.setUser(null);
+                em.remove(managedNoteBook);
+            }
+
             em.getTransaction().commit();
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
