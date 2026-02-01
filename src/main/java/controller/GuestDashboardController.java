@@ -77,7 +77,7 @@ public class GuestDashboardController {
     }
 
     @FXML
-    private void handleRegister() {
+    private void handleSignUp() {
         System.out.println("Go to Register page");
     }
 }
