@@ -9,12 +9,9 @@ import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.scene.control.TextField;
 import model.UserModel;
-import repository.UserRepository;
 
 
 public class LoginController {
-
-    private UserRepository userRepository;
 
     @FXML private TextField usernameField;
 
@@ -39,7 +36,7 @@ public class LoginController {
         String password = getPassword();
         loginButton.setDisable(username.isEmpty() || password.isEmpty());
     }
-
+/*
     @FXML
     private void handleLogin() {
         String username = getUsername();
@@ -77,5 +74,5 @@ public class LoginController {
     private void handleSignUp(ActionEvent event) {
 
     }
-
+*/
 }
