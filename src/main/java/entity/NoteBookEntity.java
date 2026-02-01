@@ -2,6 +2,7 @@ package entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,11 +23,11 @@ public class NoteBookEntity {
     private LocalDateTime updatedAt;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private UserEntity user;
 
     @OneToMany(mappedBy = "notebook", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<NoteEntity> notes;
+    private List<NoteEntity> notes = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
@@ -56,7 +57,19 @@ public class NoteBookEntity {
 
     public UserEntity getUser() { return user; }
 
+    public List<NoteEntity> getNotes() { return notes; }
+
     public void setTitle(String newTitle) {
         this.title = newTitle;
+    }
+
+    public void setUser(UserEntity user) {
+        if(this.user != null) {
+            this.user.getNoteBooks().remove(this);
+        }
+        this.user = user;
+        if (user != null) {
+            user.getNoteBooks().add(this);
+        }
     }
 }
