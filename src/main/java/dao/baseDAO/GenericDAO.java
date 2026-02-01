@@ -1,10 +1,10 @@
 package dao.baseDAO;
 
-public interface GenericDAO<T> {
+public interface GenericDAO<T, ID> {
 
     void save(T entity);
 
-    T findById(Long id);
+    T findById(ID id);
 
     void delete(T entity);
 }
