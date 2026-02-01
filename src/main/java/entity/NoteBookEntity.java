@@ -6,7 +6,7 @@ import java.util.List;
 
 @Entity
 @Table(name="notebooks")
-public class NoteBook {
+public class NoteBookEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,10 +23,10 @@ public class NoteBook {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private UserEntity user;
 
     @OneToMany(mappedBy = "notebook", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Note> notes;
+    private List<NoteEntity> notes;
 
     @PrePersist
     protected void onCreate() {
@@ -39,12 +39,12 @@ public class NoteBook {
         updatedAt = LocalDateTime.now();
     }
 
-    public NoteBook(String title, User user) {
+    public NoteBookEntity(String title, UserEntity user) {
         this.title = title;
         this.user = user;
     }
 
-    public NoteBook() {}
+    public NoteBookEntity() {}
 
     public Long getId() { return id; }
 
@@ -54,7 +54,7 @@ public class NoteBook {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 
-    public User getUser() { return user; }
+    public UserEntity getUser() { return user; }
 
     public void setTitle(String newTitle) {
         this.title = newTitle;

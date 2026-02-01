@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name="notes")
-public class Note {
+public class NoteEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +25,7 @@ public class Note {
 
     @ManyToOne
     @JoinColumn(name = "notebook_id", nullable = false)
-    private NoteBook notebook;
+    private NoteBookEntity notebook;
 
     @PrePersist
     protected void onCreate() {
@@ -38,12 +38,12 @@ public class Note {
         updatedAt = LocalDateTime.now();
     }
 
-    public Note(String title, String content) {
+    public NoteEntity(String title, String content) {
         this.title = title;
         this.content = content;
     }
 
-    public Note() {}
+    public NoteEntity() {}
 
     public Long getId() { return id; }
 
