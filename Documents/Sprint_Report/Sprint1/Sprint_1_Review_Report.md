@@ -19,15 +19,15 @@ This sprint ensured that the team had a clear direction, shared understanding an
 ---
 
 ### Sprint 1 Planning
-- Selected Scrum master for Sprint 1.
-- Team discussion and task division was done ensuring balanced workload.
-- Trello workspace and GitHub repository was set up.
-- Tool configuration and added necessary plugins.
-- Figma prototype
-- Initial database architecture documented.
-- Documented Project plan and product vision.
-- Created Use case diagram.
-- Created Product backlog and story points were assigned to user stories.
+- Select Scrum master for Sprint 1.
+- Team discussion and task division, ensuring balanced workload.
+- Set up Trello workspace and GitHub repository.
+- Tool configuration and add necessary plugins.
+- Design Figma prototype.
+- Document Initial database architecture.
+- Document Project plan and product vision.
+- Create Use case diagram.
+- Create Product backlog and assign story points to user stories.
 ---
 
 ### Daily Scrum
@@ -59,9 +59,9 @@ Communication - WhatsApp, GoogleMeet, Email
 | Team Members          | Tasks                                                                                                                                                                                                                                |
 |-----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Sandip Ranjit         | Sprint 1 Scrum master, project planning, GitHub and Trello workspace set up, project plan report, Figma desing v.2, Product Backlog, Sprint meetings, review reports, Use case diagram v.1, Presentation, Sprint 1 report and review |
-| Gam Twe He            | Write product vision, project planning, review reports, Sprint meetings, Presenatation                                                                                                                                               |
+| Gam Twe He            | Write product vision, project planning, review reports, Sprint meetings, Presentation                                                                                                                                                |
 | Dinal Maha Vidanelage | Sprint meetings, create user stories, review reports, project planning, Use case diagram v.2                                                                                                                                         |
-| Swostika Lama | Sprint meetings, project planning, create user stories, review reports, Figma design v.2, Use case diagram v.3 |
+| Swostika Lama         | Sprint meetings, project planning, create user stories, review reports, Figma design v.2, Use case diagram v.3                                                                                                                       |
 ---
 
 ### Sprint 1 Outcome
@@ -79,9 +79,9 @@ All the required technical environment and tools were set up. The project is now
 
 ### Sprint 2 Planning.
 - Select new Scrum master for Sprint 2 (Swostika Lama).
-- Reviewed Sprint 1.
+- Review Sprint 1.
 - Set goals for Sprint 2.
-- Selected Product Backlog for Sprint 2.
+- Select Product Backlog for Sprint 2.
 - Division of tasks among the members.
 
 
