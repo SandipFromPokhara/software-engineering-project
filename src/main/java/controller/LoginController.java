@@ -28,7 +28,7 @@ public class LoginController {
 
     @FXML
     private Hyperlink signupLink;
-
+/*
     @FXML
     private StackPane imagePane;
 
@@ -37,7 +37,7 @@ public class LoginController {
 
     @FXML
     private HBox rootHBox;
-
+*/
     private String getUsername() {
         return usernameField.getText().trim();
     }
@@ -51,7 +51,7 @@ public class LoginController {
         String password = getPassword();
         loginButton.setDisable(username.isEmpty() || password.isEmpty());
     }
-
+/*
     @FXML
     private void handleLogin() {
         String username = getUsername();
@@ -92,5 +92,5 @@ public class LoginController {
     private void handleSignUp(ActionEvent event) {
 
     }
-
+*/
 }
