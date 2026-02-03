@@ -1,6 +1,7 @@
 package dao.notebook;
 
 import dao.user.JpaUserDao;
+import datasource.MariaDbJpaConnection;
 import entity.NoteBookEntity;
 import entity.UserEntity;
 import org.junit.jupiter.api.*;
@@ -22,6 +23,14 @@ class JpaNoteBookDaoTest {
         testUser = new UserEntity("Test", "User", "testuser" + unique, "test" + unique + "@example.com");
         dao.save(testUser);
         notebookDao = new JpaNoteBookDao();
+    }
+
+    @AfterAll
+    static void tearDown() {
+        if (testUser != null) {
+            dao.delete(testUser);
+        }
+        MariaDbJpaConnection.shutdown();
     }
 
     @Test
