@@ -9,19 +9,34 @@ import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.scene.control.TextField;
 import model.UserModel;
+import services.UserService;
 
 
 public class LoginController {
 
-    @FXML private TextField usernameField;
+    @FXML
+    private TextField usernameField;
 
-    @FXML private PasswordField passwordField;
+    @FXML
+    private PasswordField passwordField;
 
-    @FXML private Button loginButton;
+    @FXML
+    private Button loginButton;
 
-    @FXML private Label statusLabel;
+    @FXML
+    private Label statusLabel;
 
-    @FXML private Hyperlink signupLink;
+    @FXML
+    private Hyperlink signupLink;
+
+    @FXML
+    private StackPane imagePane;
+
+    @FXML
+    private ImageView bgImage;
+
+    @FXML
+    private HBox rootHBox;
 
     private String getUsername() {
         return usernameField.getText().trim();
@@ -36,13 +51,13 @@ public class LoginController {
         String password = getPassword();
         loginButton.setDisable(username.isEmpty() || password.isEmpty());
     }
-/*
+
     @FXML
     private void handleLogin() {
         String username = getUsername();
         String password = getPassword();
 
-        boolean authenticated = userRepository.authenticateUser(username, password);
+        boolean authenticated = userService.authenticateUser(username, password);
         if (authenticated) {
             statusLabel.setVisible(true);
             statusLabel.setTextFill(Color.GREEN);
@@ -58,7 +73,10 @@ public class LoginController {
 
     @FXML
     private void initialize() {
-        userRepository = new UserRepository();
+        bgImage.fitWidthProperty().bind(imagePane.widthProperty());
+        bgImage.fitHeightProperty().bind(imagePane.heightProperty());
+
+        userService = new UserService();
         loginButton.setDisable(true);
         statusLabel.setVisible(false);
 
@@ -67,12 +85,12 @@ public class LoginController {
         passwordField.textProperty().addListener((observable, oldValue, newValue) -> checkFields());
 
         UserModel user = new UserModel("test", "first", "testuser", "abcd");
-        userRepository.addUser(user);
+        userService.addUser(user);
     }
 
     @FXML
     private void handleSignUp(ActionEvent event) {
 
     }
-*/
+
 }
