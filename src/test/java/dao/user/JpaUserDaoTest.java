@@ -1,5 +1,6 @@
 package dao.user;
 
+import datasource.MariaDbJpaConnection;
 import entity.UserEntity;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,6 +20,14 @@ class JpaUserDaoTest {
         String unique = String.valueOf(System.currentTimeMillis());
         testUser = new UserEntity("Test", "User", "testuser" + unique, "testuser" + unique + "@example.com");
         dao.save(testUser);
+    }
+
+    @AfterAll
+    static void tearDown() {
+        if (testUser != null) {
+            dao.delete(testUser);
+        }
+        MariaDbJpaConnection.shutdown();
     }
 
     @Test
