@@ -99,8 +99,11 @@ public class JpaUserDao implements UserDAO{
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
             em.getTransaction().begin();
-            UserEntity managedUser = em.merge(user);
-            em.remove(managedUser);
+            UserEntity managedUser = em.find(UserEntity.class, user.getId());
+
+            if (managedUser != null) {
+                em.remove(managedUser);
+            }
             em.getTransaction().commit();
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
