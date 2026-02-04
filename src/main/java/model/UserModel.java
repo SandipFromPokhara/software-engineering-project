@@ -1,6 +1,6 @@
 package model;
 
-public class User {
+public class UserModel {
     private int id;
     private static int idCounter = 1;
     private String firstName;
@@ -8,7 +8,7 @@ public class User {
     private String username;
     private String password;
 
-    public User(String firstName, String lastName, String username, String password) {
+    public UserModel(String firstName, String lastName, String username, String password) {
         id = idCounter++;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -36,6 +36,6 @@ public class User {
 
     @Override
     public String toString() {
-        return "User {ID: " + id + ", Full Name: '" + firstName + " " + lastName + "', Username: '" + username + "'}";
+        return "UserModel {ID: " + id + ", Full Name: '" + firstName + " " + lastName + "', Username: '" + username + "'}";
     }
 }
