@@ -56,12 +56,12 @@ Communication - WhatsApp, GoogleMeet, Email
 ---
 
 ### Team contributions
-| Team Members          | Tasks                                                                                                                                                                                                                                |
-|-----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Sandip Ranjit         | Sprint 1 Scrum master, project planning, GitHub and Trello workspace set up, project plan report, Figma desing v.2, Product Backlog, Sprint meetings, review reports, Use case diagram v.1, Presentation, Sprint 1 report and review |
-| Gam Twe He            | Write product vision, project planning, review reports, Sprint meetings, Presenatation                                                                                                                                               |
-| Dinal Maha Vidanelage | Sprint meetings, create user stories, review reports, project planning, Use case diagram v.2                                                                                                                                         |
-| Swostika Lama | Sprint meetings, project planning, create user stories, review reports, Figma design v.2, Use case diagram v.3 |
+| Team Members          | Tasks                                                                                                                                                                                                                                 |
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Sandip Ranjit         | Sprint 1 Scrum master, project planning, GitHub and Trello workspace set up, project plan report, Figma desing v.2, Product Backlog, Sprint meetings, review reports, Use case diagram v.1, Presentation, Sprint 1 report and review  |
+| Gam Twe He            | Write product vision, project planning, review reports, Sprint meetings, Presentation                                                                                                                                                 |
+| Dinal Maha Vidanelage | Sprint meetings, create user stories, review reports, project planning, Use case diagram v.2                                                                                                                                          |
+| Swostika Lama         | Sprint meetings, project planning, create user stories, review reports, Figma design v.2, Use case diagram v.3                                                                                                                        |
 ---
 
 ### Sprint 1 Outcome
