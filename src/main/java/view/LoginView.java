@@ -8,10 +8,7 @@ public class LoginView extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        NavigationUtil.navigateTo(stage, "/FXML/login_view.fxml", "Login window");
-
-        stage.setResizable(false);
-
+        NavigationUtil.navigateTo(stage, "/FXML/login_view.fxml", "Login window", false);
         stage.show();
     }
 }
