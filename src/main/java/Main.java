@@ -1,7 +1,9 @@
-import view.LoginView;
+import view.SignUpView;
+import javafx.application.Application;
 
 public class Main {
+
     public static void main(String[] args) {
-        LoginView.launch(LoginView.class);
+        Application.launch(SignUpView.class, args);
     }
 }
