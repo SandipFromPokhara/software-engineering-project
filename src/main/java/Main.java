@@ -1,7 +1,9 @@
+import javafx.application.Application;
 import view.GuestDashboardView;
 public class Main {
     public static void main(String[] args) {
-        GuestDashboardView.launch(GuestDashboardView.class);
+//        GuestDashboardView.launch(GuestDashboardView.class);
+        Application.launch(TestEditNote.class);
     }
 }
 
