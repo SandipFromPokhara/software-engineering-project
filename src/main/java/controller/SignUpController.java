@@ -3,7 +3,10 @@ package controller;
 import dao.user.UserDAO;
 import dao.user.JpaUserDao;
 import entity.UserEntity;
+import javafx.event.ActionEvent;
+import javafx.stage.Stage;
 import util.BcryptPasswordHasher;
+import util.NavigationUtil;
 import util.Validation;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -29,11 +32,12 @@ public class SignUpController {
     @FXML
     public void initialize() {
         signUpButton.setOnAction(event -> handleSignUp());
+        signUpButton.setDefaultButton(true);
     }
 
     @FXML
-    public void onLogin() {
-        navigateToLogin();
+    public void onLogin(ActionEvent event) {
+        navigateToLogin(event);
     }
 
     private void handleSignUp() {
@@ -82,11 +86,14 @@ public class SignUpController {
                 Validation.showMessage(messageLabel, "Account created successfully!", Validation.MessageType.SUCCESS);
                 clearFields();
 
+                // Get stage before entering the thread
+                Stage currentStage = (Stage) signUpButton.getScene().getWindow();
+
                 // Add a small delay before navigating to show success message
                 new Thread(() -> {
                     try {
-                        Thread.sleep(1500); // 1.5 second delay
-                        javafx.application.Platform.runLater(this::navigateToLogin);
+                        Thread.sleep(1500); // 1.5-second delay
+                        javafx.application.Platform.runLater(() -> NavigationUtil.navigateTo(currentStage, "/FXML/login_view.fxml", "Login"));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -105,9 +112,8 @@ public class SignUpController {
         }
     }
 
-    private void navigateToLogin() {
-        System.out.println("Navigating to login page...");
-        // TODO: Implement actual navigation to login page
+    private void navigateToLogin(ActionEvent event) {
+        NavigationUtil.navigateTo(event, "/FXML/login_view.fxml", "Login");
     }
 
     private void clearFields() {
