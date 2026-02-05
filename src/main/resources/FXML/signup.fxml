@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="420.0" prefWidth="650.0"
+            xmlns="http://javafx.com/javafx/21.0.2"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controller.SignUpController"
+            style="-fx-background-color: #EAF7F7;">
+
+    <left>
+        <StackPane prefWidth="260">
+            <children>
+                <ImageView fitWidth="260"
+                           fitHeight="420"
+                           preserveRatio="false">
+                    <image>
+                        <Image url="@../Images/Logo.jpeg"/>
+                    </image>
+                </ImageView>
+            </children>
+        </StackPane>
+    </left>
+
+    <center>
+        <StackPane style="-fx-background-color: #ebf4f5;">
+            <children>
+
+                <VBox spacing="10"
+                      alignment="TOP_CENTER">
+
+                    <padding>
+                        <Insets top="25" right="30" bottom="20" left="30"/>
+                    </padding>
+
+                    <Label text="Create Account" textFill="#297883">
+                        <font>
+                            <Font name="Brush Script MT Italic" size="28"/>
+                        </font>
+                    </Label>
+
+                    <Label text="Join NoteVault Today" textFill="#307494">
+                        <font>
+                            <Font size="16"/>
+                        </font>
+                    </Label>
+
+                    <TextField fx:id="firstNameField" promptText="First Name" maxWidth="240"/>
+                    <TextField fx:id="lastNameField" promptText="Last Name" maxWidth="240"/>
+                    <TextField fx:id="usernameField" promptText="Username" maxWidth="240"/>
+                    <TextField fx:id="emailField" promptText="Email" maxWidth="240"/>
+                    <PasswordField fx:id="passwordField" promptText="Password" maxWidth="240"/>
+                    <PasswordField fx:id="confirmPasswordField" promptText="Confirm Password" maxWidth="240"/>
+
+                    <Button fx:id="signUpButton"
+                            text="Sign Up"
+                            maxWidth="160"
+                            style="-fx-background-color: #2c5f77; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"/>
+
+                    <Label fx:id="messageLabel"
+                           wrapText="true"
+                           visible="false"
+                           maxWidth="240"
+                           alignment="CENTER"
+                           textAlignment="CENTER"
+                           textFill="#d32f2f">
+                        <font>
+                            <Font size="12"/>
+                        </font>
+                    </Label>
+
+                    <HBox alignment="CENTER" spacing="6">
+                        <children>
+                            <Label text="Already have an account?" textFill="#455A64"/>
+                            <Hyperlink text="Login"
+                                       onAction="#onLogin"
+                                       style="-fx-text-fill: #266973; -fx-font-weight: bold;"/>
+                        </children>
+                    </HBox>
+
+                </VBox>
+
+            </children>
+        </StackPane>
+    </center>
+
+</BorderPane>
