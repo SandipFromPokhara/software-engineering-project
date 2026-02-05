@@ -89,6 +89,6 @@ public class LoginController {
 
     @FXML
     private void handleSignUp(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "FXML/signup.fxml", "SignUp window");
+        NavigationUtil.navigateTo(event, "/FXML/signup.fxml", "SignUp window");
     }
 }
