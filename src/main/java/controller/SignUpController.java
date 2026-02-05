@@ -93,7 +93,7 @@ public class SignUpController {
                 new Thread(() -> {
                     try {
                         Thread.sleep(1500); // 1.5-second delay
-                        javafx.application.Platform.runLater(() -> NavigationUtil.navigateTo(currentStage, "/FXML/login_view.fxml", "Login"));
+                        javafx.application.Platform.runLater(() -> NavigationUtil.navigateTo(currentStage, "/FXML/login_view.fxml", "Login", false));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -113,7 +113,7 @@ public class SignUpController {
     }
 
     private void navigateToLogin(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/login_view.fxml", "Login");
+        NavigationUtil.navigateTo(event, "/FXML/login_view.fxml", "Login", false);
     }
 
     private void clearFields() {
