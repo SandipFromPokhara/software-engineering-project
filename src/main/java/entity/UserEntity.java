@@ -67,6 +67,8 @@ public class UserEntity {
 
     public String getEmail() { return email; }
 
+    public String getPasswordHash() { return passwordHash; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
