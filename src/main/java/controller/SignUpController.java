@@ -1,7 +1,8 @@
 package controller;
 
-import dao.UserDAO;
-import model.User;
+import dao.user.UserDAO;
+import dao.user.JpaUserDao;
+import entity.UserEntity;
 import util.BcryptPasswordHasher;
 import util.Validation;
 import javafx.fxml.FXML;
@@ -22,7 +23,7 @@ public class SignUpController {
     private UserDAO userDAO;
 
     public SignUpController() {
-        this.userDAO = new MockUserDAOImpl();
+        this.userDAO = new JpaUserDao();
     }
 
     @FXML
@@ -52,43 +53,61 @@ public class SignUpController {
             return;
         }
 
-        // Check if username already exists
-        if (userDAO.usernameExists(username)) {
-            Validation.showMessage(messageLabel, "The username is already taken.", Validation.MessageType.ERROR);
-            return;
-        }
-
-        // Check if email already exists
-        if (userDAO.emailExists(email)) {
-            Validation.showMessage(messageLabel, "The email already exists.", Validation.MessageType.ERROR);
-            return;
-        }
-
         try {
+            // Check if username already exists
+            UserEntity existingUserByUsername = userDAO.findByUsername(username);
+            if (existingUserByUsername != null) {
+                Validation.showMessage(messageLabel, "The username is already taken.", Validation.MessageType.ERROR);
+                return;
+            }
+
+            // Check if email already exists
+            UserEntity existingUserByEmail = userDAO.findByEmail(email);
+            if (existingUserByEmail != null) {
+                Validation.showMessage(messageLabel, "The email already exists.", Validation.MessageType.ERROR);
+                return;
+            }
+
             // Hash the password using BCrypt
             String hashedPassword = BcryptPasswordHasher.hashPassword(password);
 
-            // Create and save user
-            User user = new User(firstName, lastName, username, email, hashedPassword);
-            boolean success = userDAO.createUser(user);
+            // Create new user entity
+            UserEntity newUser = new UserEntity(firstName, lastName, username, email);
+            newUser.changePasswordHash(hashedPassword);
 
-            if (success) {
+            // Save user to database
+            UserEntity savedUser = userDAO.save(newUser);
+
+            if (savedUser != null && savedUser.getId() != null) {
                 Validation.showMessage(messageLabel, "Account created successfully!", Validation.MessageType.SUCCESS);
                 clearFields();
-                navigateToLogin();
+
+                // Add a small delay before navigating to show success message
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(1500); // 1.5 second delay
+                        javafx.application.Platform.runLater(this::navigateToLogin);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
             } else {
                 Validation.showMessage(messageLabel, "Failed to create account!", Validation.MessageType.ERROR);
             }
         } catch (IllegalArgumentException e) {
-            Validation.showMessage(messageLabel, "Password validation failed: " + e.getMessage(), Validation.MessageType.ERROR);
+            Validation.showMessage(messageLabel, "Validation error: " + e.getMessage(), Validation.MessageType.ERROR);
+        } catch (RuntimeException e) {
+            Validation.showMessage(messageLabel, "Database error occurred. Please try again.", Validation.MessageType.ERROR);
+            e.printStackTrace();
         } catch (Exception e) {
-            Validation.showMessage(messageLabel, "An unexpected error occurred during registration. Please try again.", Validation.MessageType.ERROR);
+            Validation.showMessage(messageLabel, "An unexpected error occurred. Please try again.", Validation.MessageType.ERROR);
             e.printStackTrace();
         }
     }
 
     private void navigateToLogin() {
         System.out.println("Navigating to login page...");
+        // TODO: Implement actual navigation to login page
     }
 
     private void clearFields() {
