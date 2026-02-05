@@ -13,6 +13,7 @@ public class UserModel {
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;
+        this.email = email;
         this.password = password;
     }
 
