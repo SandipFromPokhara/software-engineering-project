@@ -62,4 +62,12 @@ public class NoteEntity {
     public void setContent(String newContent) {
         this.content = newContent;
     }
+
+    public NoteBookEntity getNotebook() {
+        return notebook;
+    }
+
+    public void setNotebook(NoteBookEntity notebook) {
+        this.notebook = notebook;
+    }
 }
