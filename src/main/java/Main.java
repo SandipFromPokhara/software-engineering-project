@@ -1,5 +1,5 @@
-import view.EntryView;
 import javafx.application.Application;
+import view.EntryView;
 
 public class Main {
 

@@ -37,14 +37,14 @@
                         <Insets left="25.0" right="25.0" top="10.0" />
                      </VBox.margin>
                   </VBox>
-                  <VBox prefWidth="700.0" spacing="5.0">
+                  <VBox prefWidth="700.0" spacing="5.0" VBox.vgrow="ALWAYS">
                      <children>
-                        <Label text="Annotations">
+                        <Label text="Note Content">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextArea fx:id="annotationArea" prefHeight="80.0" promptText="Add annotations here" wrapText="true">
+                        <TextArea fx:id="contentArea" prefHeight="300.0" promptText="Write here" wrapText="true" VBox.vgrow="ALWAYS">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -54,14 +54,14 @@
                         <Insets left="25.0" right="25.0" />
                      </VBox.margin>
                   </VBox>
-                  <VBox prefWidth="700.0" spacing="5.0" VBox.vgrow="ALWAYS">
+                  <VBox prefWidth="700.0" spacing="5.0">
                      <children>
-                        <Label text="Note Content">
+                        <Label text="Annotations">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextArea fx:id="contentArea" prefHeight="300.0" promptText="Write here" wrapText="true" VBox.vgrow="ALWAYS">
+                        <TextArea fx:id="annotationArea" prefHeight="80.0" promptText="Add annotations here" wrapText="true">
                            <font>
                               <Font size="14.0" />
                            </font>
