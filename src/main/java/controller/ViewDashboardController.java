@@ -13,6 +13,12 @@ import util.NavigationUtil;
 public class ViewDashboardController {
 
     @FXML
+    private Button viewNotesBtn, createNoteBtn, settingsBtn, logoutBtn;
+
+    @FXML
+    private Label viewNotesLabel, createNoteLabel, settingsLabel, logoutLabel;
+
+    @FXML
     private Button deleteButton;
 
     @FXML
@@ -32,9 +38,6 @@ public class ViewDashboardController {
 
     @FXML
     private TextArea noteViewArea;
-
-    @FXML
-    private Button logoutButton;
 
     @FXML
     public void initialize() {
@@ -61,6 +64,23 @@ public class ViewDashboardController {
             }
         });
         notesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        setupHover(viewNotesBtn, viewNotesLabel);
+        setupHover(createNoteBtn, createNoteLabel);
+        setupHover(settingsBtn, settingsLabel);
+        setupHover(logoutBtn, logoutLabel);
+    }
+
+    private void setupHover(Button button, Label label) {
+        button.setOnMouseEntered(e -> {
+            label.setVisible(true);
+            button.setStyle("-fx-background-color: #4a4a4a; -fx-cursor: hand;");
+        });
+
+        button.setOnMouseExited(e -> {
+            label.setVisible(false);
+            button.setStyle("-fx-background-color: transparent");
+        });
     }
 
     @FXML
@@ -81,5 +101,6 @@ public class ViewDashboardController {
         editStage.initModality(Modality.APPLICATION_MODAL);
 
         NavigationUtil.navigateTo(editStage, "/FXML/EditPage.fxml", "Edit Note", true);
+        editStage.showAndWait();
     }
 }
