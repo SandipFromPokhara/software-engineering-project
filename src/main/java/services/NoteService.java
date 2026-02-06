@@ -14,33 +14,32 @@ public class NoteService {
     private final JpaNoteDao noteDao;
     private final JpaNoteBookDao notebookDao;
     private Long cachedNotebookId = null;
-    private UserEntity currentUser = null;
+    private static UserEntity currentUser = null;
 
     public NoteService() {
         this.noteDao = new JpaNoteDao();
         this.notebookDao = new JpaNoteBookDao();
     }
 
-    public NoteService(UserEntity currentUser) {
+    public NoteService(UserEntity user) {
         this.noteDao = new JpaNoteDao();
         this.notebookDao = new JpaNoteBookDao();
-        this.currentUser = currentUser;
+        currentUser = user;
         this.cachedNotebookId = null;
     }
 
     /**
      * Sets the current logged-in user
      */
-    public void setCurrentUser(UserEntity user) {
-        this.currentUser = user;
-        this.cachedNotebookId = null; // Reset cached notebook when user changes
+    public static void setCurrentUser(UserEntity user) {
+        currentUser = user;
     }
 
     /**
      * Gets the current logged-in user
      */
-    public UserEntity getCurrentUser() {
-        return this.currentUser;
+    public static UserEntity getCurrentUser() {
+        return currentUser;
     }
 
     /**
