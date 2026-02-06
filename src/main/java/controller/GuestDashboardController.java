@@ -9,7 +9,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-
+import util.NavigationUtil;
+import javafx.event.ActionEvent;
 
 
 public class GuestDashboardController {
@@ -39,8 +40,13 @@ public class GuestDashboardController {
     private VBox centerPane;
 
     @FXML
-    private void handleHome() {
-        System.out.println("Go to Home page");
+    private void handleHome(ActionEvent event) {
+        NavigationUtil.navigateTo(
+                event,
+                "/FXML/entry.fxml",
+                "Entry Page",
+                false
+        );
     }
 
     private void loadContent(String fxmlFile) {
@@ -72,12 +78,25 @@ public class GuestDashboardController {
     }
 
     @FXML
-    private void handleLogin() {
-        System.out.println("Go to Login page");
+    private void handleLogin(ActionEvent event) {
+        NavigationUtil.navigateTo(
+                event,
+                "/FXML/login_view.fxml",
+                "login",
+                false
+        );
+
+
     }
 
     @FXML
-    private void handleSignUp() {
-        System.out.println("Go to Register page");
+    private void handleSignUp(ActionEvent event) {
+        NavigationUtil.navigateTo(
+                event,
+                "/FXML/signup.fxml",
+                "Sign Up",
+                false
+        );
+
     }
 }

@@ -1,9 +1,11 @@
 package controller;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import util.NavigationUtil;
 
-@SuppressWarnings("unused")
+//@SuppressWarnings("unused")
 public class Entry {
 
     @FXML
@@ -16,21 +18,34 @@ public class Entry {
     private Button registerButton;
 
     @FXML
-    private void onLogin() {
-        System.out.println("Login button clicked");
+    private void onLogin(ActionEvent event) {
+        NavigationUtil.navigateTo(
+                event,
+                "/FXML/login_view.fxml",
+                "login",
+                false
+        );
         // TODO: navigate to login screen
     }
 
     @FXML
-    private void onRegister() {
-        System.out.println("Register button clicked");
-        // TODO: navigate to register screen
+    private void onRegister(ActionEvent event) {
+        NavigationUtil.navigateTo(
+                event,
+                "/FXML/signup.fxml",
+                "Sign Up",
+                false
+        );
     }
 
     @FXML
-    private void onContinueAsGuest() {
-        System.out.println("Continue as guest clicked");
-        // TODO: proceed as guest
+    private void onContinueAsGuest(ActionEvent event) {
+        NavigationUtil.navigateTo(
+                event,
+                "/FXML/GuestDashboard.fxml",
+                " Guest Dashboard",
+                false
+        );
     }
 
 }
