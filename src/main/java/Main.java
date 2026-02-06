@@ -1,9 +1,9 @@
 import javafx.application.Application;
-import view.EntryView;
+import view.StartView;
 
 public class Main {
 
     public static void main(String[] args) {
-        Application.launch(EntryView.class, args);
+        Application.launch(StartView.class, args);
     }
 }

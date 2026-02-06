@@ -18,18 +18,17 @@ public class EntryController {
 
     @FXML
     private void onLogin(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/login_view.fxml", "Login - NoteVault");
+        NavigationUtil.navigateTo(event, "/FXML/login_view.fxml", "Login - NoteVault", false);
     }
 
     @FXML
     private void onRegister(ActionEvent event) {
-       // System.out.println("Register button clicked - navigating to Signup screen");
-        NavigationUtil.navigateTo(event, "/FXML/signup.fxml", "Sign Up - Note Vault");
+        NavigationUtil.navigateTo(event, "/FXML/signup.fxml", "Sign Up - Note Vault",false);
     }
 
     @FXML
     private void onContinueAsGuest(ActionEvent event) {
         //System.out.println("Continue as guest clicked - navigating to Create Note");
-        NavigationUtil.navigateTo(event, "/FXML/create_note.fxml", "NoteVault - Create Note");
+        NavigationUtil.navigateTo(event, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
     }
 }
