@@ -8,6 +8,6 @@ public class StartView extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        NavigationUtil.navigateTo(stage, "/FXML/entry.fxml", "Welcome", false);
+        NavigationUtil.navigateTo(stage, "/FXML/entry.fxml", "Welcome to NoteVault", false);
     }
 }
