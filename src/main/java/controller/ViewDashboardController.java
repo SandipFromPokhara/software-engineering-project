@@ -74,7 +74,7 @@ public class ViewDashboardController {
     private void setupHover(Button button, Label label) {
         button.setOnMouseEntered(e -> {
             label.setVisible(true);
-            button.setStyle("-fx-background-color: #4a4a4a; -fx-cursor: hand;");
+            button.setStyle("-fx-background-color: #93ad9b; -fx-cursor: hand;");
         });
 
         button.setOnMouseExited(e -> {
@@ -100,7 +100,7 @@ public class ViewDashboardController {
         Stage editStage = new Stage();
         editStage.initModality(Modality.APPLICATION_MODAL);
 
-        NavigationUtil.navigateTo(editStage, "/FXML/EditPage.fxml", "Edit Note", true);
+        NavigationUtil.navigateTo(editStage, "/FXML/EditPage.fxml", "NoteVault - Edit Note", true);
         editStage.showAndWait();
     }
 }
