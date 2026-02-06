@@ -69,7 +69,7 @@ class JpaNoteBookDaoTest {
     }
 
     @Test
-    void deleteNotebookTesT() {
+    void deleteNotebookTest() {
         NoteBookEntity notebook = new NoteBookEntity("Testing delete method", testUser);
         notebookDao.save(notebook);
 
