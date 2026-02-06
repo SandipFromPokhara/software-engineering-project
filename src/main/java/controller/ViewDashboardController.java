@@ -3,10 +3,8 @@ package controller;
 import entity.NoteEntity;
 import javafx.fxml.FXML;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import util.NavigationUtil;
@@ -24,6 +22,12 @@ public class ViewDashboardController {
     private TableView<NoteEntity> notesTable;
 
     @FXML
+    private TableColumn<NoteEntity, String> titleColumn;
+
+    @FXML
+    private TableColumn<NoteEntity, String> dateColumn;
+
+    @FXML
     private Label noteTitleLabel;
 
     @FXML
@@ -38,6 +42,9 @@ public class ViewDashboardController {
         deleteButton.setDisable(true);
         noteTitleLabel.setText("Select a note to view details");
         noteViewArea.setText("");
+
+        titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
 
         notesTable.getSelectionModel().selectedItemProperty().addListener((observable, oldSelection, newSelection) -> {
             if (newSelection != null) {
@@ -67,9 +74,12 @@ public class ViewDashboardController {
 
     @FXML
     public void handleOpenEditWindow(ActionEvent event) {
+        NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
+        if (selectedNote == null) return;
+
         Stage editStage = new Stage();
         editStage.initModality(Modality.APPLICATION_MODAL);
 
-        NavigationUtil.navigateTo(event, "/FXML/EditPage.fxml", "Edit", true);
+        NavigationUtil.navigateTo(editStage, "/FXML/EditPage.fxml", "Edit Note", true);
     }
 }
