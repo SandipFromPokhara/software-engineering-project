@@ -29,14 +29,6 @@
     <top>
       <HBox prefHeight="27.0" prefWidth="800.0" spacing="5.0" BorderPane.alignment="CENTER_LEFT">
          <children>
-            <ImageView fitHeight="26.0" fitWidth="44.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
-               <image>
-                  <Image url="@/Images/NV.png" />
-               </image>
-               <HBox.margin>
-                  <Insets left="2.0" top="1.0" />
-               </HBox.margin>
-            </ImageView>
             <MenuBar prefHeight="26.0" prefWidth="592.0" HBox.hgrow="ALWAYS">
               <menus>
                 <Menu mnemonicParsing="false" text="File">
@@ -68,7 +60,7 @@
       </HBox>
    </top>
    <left>
-      <VBox alignment="TOP_CENTER" prefHeight="364.0" prefWidth="98.0" spacing="10.0" style="-fx-background-color: #80c49f;">
+      <VBox alignment="TOP_CENTER" prefHeight="364.0" prefWidth="98.0" spacing="10.0" style="-fx-background-color: #9bbab0;">
          <children>
             <Button fx:id="viewNotesBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="105.0" prefWidth="108.0" style="-fx-content-display: LEFT; -fx-background-color: transparent; -fx-cursor: hand; -fx-background-insets: 0; -fx-padding: 8 12; -fx-background-radius: 6;">
                <graphic>
