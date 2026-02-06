@@ -44,7 +44,7 @@ public class Entry {
                 event,
                 "/FXML/GuestDashboard.fxml",
                 " Guest Dashboard",
-                false
+                true
         );
     }
 
