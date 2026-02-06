@@ -16,17 +16,25 @@ public class SignUpView extends Application {
             Parent root = loader.load();
 
             // Create the scene
-            Scene scene = new Scene(root);
+            Scene scene = new Scene(root, 600, 400);
 
-            // Set up the stage
+            // Set up the stage with fixed dimensions
             primaryStage.setTitle("NoteVault - Sign Up");
             primaryStage.setScene(scene);
             primaryStage.setResizable(false);
+            primaryStage.setMinWidth(600);
+            primaryStage.setMinHeight(400);
+            primaryStage.setMaxWidth(600);
+            primaryStage.setMaxHeight(400);
             primaryStage.show();
 
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Error loading Sign Up view: " + e.getMessage());
         }
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 }

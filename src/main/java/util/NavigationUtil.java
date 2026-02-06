@@ -1,7 +1,6 @@
 package util;
 
 import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -15,30 +14,59 @@ import java.io.IOException;
 public class NavigationUtil {
     private static final Logger logger = LoggerFactory.getLogger(NavigationUtil.class);
 
-    public static void navigateTo(ActionEvent event, String fxmlPath, String title, boolean resizable) {
+    // Fixed size pages (entry, login, signup)
+    private static final String[] FIXED_SIZE_PAGES = {
+        "entry.fxml", "login_view.fxml", "signup.fxml"
+    };
 
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            navigateTo(stage, fxmlPath, title, resizable);
+    public static void navigateTo(ActionEvent event, String fxmlPath, String title) {
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        navigateTo(stage, fxmlPath, title);
     }
 
-    public static void navigateTo(Stage stage, String fxmlPath, String title, boolean resizable) {
+    public static void navigateTo(Stage stage, String fxmlPath, String title) {
         try {
             Parent root = FXMLLoader.load(NavigationUtil.class.getResource(fxmlPath));
-            stage.setTitle(title);
-            stage.setScene(new Scene(root));
-            stage.setResizable(resizable);
 
-            if (resizable) {
-                stage.setWidth(1024);
-                stage.setHeight(768);
+            stage.setTitle(title);
+
+            // Check if this is a fixed size page
+            boolean isFixedSize = isFixedSizePage(fxmlPath);
+
+            if (isFixedSize) {
+                // Fixed size for entry, login, signup (600x400)
+                stage.setScene(new Scene(root, 600, 400));
+                stage.setResizable(false);
+                stage.setMinWidth(600);
+                stage.setMinHeight(400);
+                stage.setMaxWidth(600);
+                stage.setMaxHeight(400);
             } else {
-                stage.sizeToScene();
+                // Expandable pages - use size from FXML (Scene Builder)
+                stage.setScene(new Scene(root));
+                stage.setResizable(true);
+                stage.setMinWidth(600);
+                stage.setMinHeight(400);
+                stage.setMaxWidth(Double.MAX_VALUE);
+                stage.setMaxHeight(Double.MAX_VALUE);
+                stage.sizeToScene(); // Use FXML-defined size
             }
+
             stage.centerOnScreen();
             stage.show();
+
         } catch (IOException e) {
             logger.error("Failed to navigate to " + fxmlPath);
             e.printStackTrace();
         }
+    }
+
+    private static boolean isFixedSizePage(String fxmlPath) {
+        for (String fixedPage : FIXED_SIZE_PAGES) {
+            if (fxmlPath.contains(fixedPage)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

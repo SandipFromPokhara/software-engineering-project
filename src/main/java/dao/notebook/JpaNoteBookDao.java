@@ -95,4 +95,22 @@ public class JpaNoteBookDao implements NoteBookDAO{
             em.close();
         }
     }
+
+
+    /**
+     * Finds notebook by user ID (efficient query)
+     */
+    public NoteBookEntity findByUserId(Long userId) {
+        if (userId == null) return null;
+        EntityManager em = MariaDbJpaConnection.createEntityManager();
+        try {
+            TypedQuery<NoteBookEntity> query = em.createQuery(
+                    "SELECT n FROM NoteBookEntity n WHERE n.user.id = :userId", NoteBookEntity.class);
+            query.setParameter("userId", userId);
+            List<NoteBookEntity> results = query.getResultList();
+            return results.isEmpty() ? null : results.get(0);
+        } finally {
+            em.close();
+        }
+    }
 }

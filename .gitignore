@@ -47,4 +47,7 @@ build/
 *.env
 .env.local
 
+### Personal notes ###
+MyNotes.md
+
 Documents/SQL_helpers/

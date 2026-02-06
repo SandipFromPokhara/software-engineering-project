@@ -66,7 +66,7 @@ public class LoginController {
             if (authenticated) {
                 statusLabel.setTextFill(Color.GREEN);
                 statusLabel.setText("Login successful");
-                NavigationUtil.navigateTo(event, "/FXML/view_dashboard.fxml", "User Dashboard", true);
+                NavigationUtil.navigateTo(event, "/FXML/create_note.fxml", "NoteVault - Create Note");
             } else {
                 statusLabel.setTextFill(Color.RED);
                 statusLabel.setText("Invalid username or password");
@@ -89,6 +89,6 @@ public class LoginController {
 
     @FXML
     private void handleSignUp(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/signup.fxml", "SignUp window", false);
+        NavigationUtil.navigateTo(event, "/FXML/signup.fxml", "SignUp window");
     }
 }

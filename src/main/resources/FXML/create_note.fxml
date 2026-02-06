@@ -1,101 +1,125 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-            prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #f5f5f5;"
-            xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="controller.CreateNoteController">
-
-   <!-- Header -->
-   <top>
-      <HBox alignment="CENTER" style="-fx-background-color: #266973; -fx-padding: 20;">
-         <Label text="NoteVault - Create New Note" textFill="WHITE">
-            <font>
-               <Font name="Times New Roman Bold" size="24.0" />
-            </font>
-         </Label>
-      </HBox>
-   </top>
-
-   <!-- Main Content Area -->
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateNoteController">
    <center>
-      <VBox spacing="15.0" style="-fx-padding: 30;">
-
-         <!-- Note Title Input -->
-         <VBox spacing="8.0">
-            <Label text="Note Title *" textFill="#455a64">
-               <font>
-                  <Font name="Times New Roman Bold" size="14.0" />
-               </font>
-            </Label>
-            <TextField fx:id="titleField" promptText="Enter note title..." style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-pref-height: 40;">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </TextField>
-         </VBox>
-
-         <!-- Note Content Area -->
-         <VBox spacing="8.0" VBox.vgrow="ALWAYS">
-            <Label text="Note Content" textFill="#455a64">
-               <font>
-                  <Font name="Times New Roman Bold" size="14.0" />
-               </font>
-            </Label>
-            <TextArea fx:id="contentArea" prefHeight="200.0" promptText="Start writing your note here..." style="-fx-background-radius: 6; -fx-border-radius: 6;" wrapText="true" VBox.vgrow="ALWAYS">
-               <font>
-                  <Font size="13.0" />
-               </font>
-            </TextArea>
-         </VBox>
-
-         <!-- Annotation Area -->
-         <VBox spacing="8.0">
-            <Label text="Annotations" textFill="#455a64">
-               <font>
-                  <Font name="Times New Roman Bold" size="14.0" />
-               </font>
-            </Label>
-            <TextArea fx:id="annotationArea" prefHeight="120.0" promptText="Add your annotations here..." style="-fx-background-radius: 6; -fx-border-radius: 6;" wrapText="true">
-               <font>
-                  <Font size="13.0" />
-               </font>
-            </TextArea>
-         </VBox>
-
-         <!-- Status Label -->
-         <Label fx:id="statusLabel" text="" textFill="#d32f2f" visible="false">
-            <font>
-               <Font name="Times New Roman" size="12.0" />
-            </font>
-         </Label>
-
-         <!-- Action Buttons -->
-         <HBox alignment="CENTER" spacing="20.0" style="-fx-padding: 10 0 0 0;">
-
-            <Button fx:id="saveButton" onAction="#handleSave" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #266973; -fx-background-radius: 6; -fx-border-radius: 6;" text="Save Note" textFill="WHITE">
-               <font>
-                  <Font name="Times New Roman Bold" size="14.0" />
-               </font>
-            </Button>
-
-            <Button fx:id="clearButton" onAction="#handleClear" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #757575; -fx-background-radius: 6; -fx-border-radius: 6;" text="Clear" textFill="WHITE">
-               <font>
-                  <Font name="Times New Roman Bold" size="14.0" />
-               </font>
-            </Button>
-
-         </HBox>
-
-      </VBox>
+      <AnchorPane BorderPane.alignment="CENTER">
+         <children>
+            <VBox prefHeight="573.0" prefWidth="700.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <VBox prefWidth="700.0" spacing="5.0">
+                     <children>
+                        <Label text="Note Title">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="titleField" promptText="Enter note title">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </TextField>
+                     </children>
+                     <VBox.margin>
+                        <Insets left="25.0" right="25.0" top="10.0" />
+                     </VBox.margin>
+                  </VBox>
+                  <VBox prefWidth="700.0" spacing="5.0">
+                     <children>
+                        <Label text="Annotations">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <TextArea fx:id="annotationArea" prefHeight="80.0" promptText="Add annotations here" wrapText="true">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </TextArea>
+                     </children>
+                     <VBox.margin>
+                        <Insets left="25.0" right="25.0" />
+                     </VBox.margin>
+                  </VBox>
+                  <VBox prefWidth="700.0" spacing="5.0" VBox.vgrow="ALWAYS">
+                     <children>
+                        <Label text="Note Content">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <TextArea fx:id="contentArea" prefHeight="300.0" promptText="Write here" wrapText="true" VBox.vgrow="ALWAYS">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </TextArea>
+                     </children>
+                     <VBox.margin>
+                        <Insets left="25.0" right="25.0" />
+                     </VBox.margin>
+                  </VBox>
+                  <Label fx:id="statusLabel" text="" visible="false">
+                     <font>
+                        <Font size="12.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets left="25.0" right="25.0" />
+                     </VBox.margin>
+                  </Label>
+                  <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                     <children>
+                        <Button fx:id="clearButton" onAction="#handleClear" mnemonicParsing="false" prefWidth="100.0" text="Clear">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="saveButton" onAction="#handleSave" mnemonicParsing="false" prefWidth="100.0" text="Save Note">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Button>
+                     </children>
+                     <VBox.margin>
+                        <Insets bottom="15.0" left="25.0" right="25.0" />
+                     </VBox.margin>
+                  </HBox>
+               </children>
+            </VBox>
+         </children>
+      </AnchorPane>
    </center>
-
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+         <menus>
+            <Menu mnemonicParsing="false" text="File">
+               <items>
+                  <MenuItem mnemonicParsing="false" text="Close" />
+               </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Edit">
+               <items>
+                  <MenuItem mnemonicParsing="false" text="Delete" />
+               </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Help">
+               <items>
+                  <MenuItem mnemonicParsing="false" text="About" />
+               </items>
+            </Menu>
+         </menus>
+      </MenuBar>
+   </top>
 </BorderPane>

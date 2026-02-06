@@ -6,6 +6,7 @@ import util.BcryptPasswordHasher;
 
 public class UserService {
     private JpaUserDao userDao;
+    private static UserEntity loggedInUser = null;
 
     public UserService(JpaUserDao userDao) {
         this.userDao = userDao;
@@ -19,6 +20,22 @@ public class UserService {
         if (user == null) return false;
 
         String hashedPassword = user.getPasswordHash();
-        return BcryptPasswordHasher.verifyPassword(password, hashedPassword);
+        boolean authenticated = BcryptPasswordHasher.verifyPassword(password, hashedPassword);
+
+        if (authenticated) {
+            loggedInUser = user;
+            NoteService.setCurrentUser(user); // Set user for NoteService
+        }
+
+        return authenticated;
+    }
+
+    public static UserEntity getLoggedInUser() {
+        return loggedInUser;
+    }
+
+    public static void logout() {
+        loggedInUser = null;
+        NoteService.setCurrentUser(null);
     }
 }
