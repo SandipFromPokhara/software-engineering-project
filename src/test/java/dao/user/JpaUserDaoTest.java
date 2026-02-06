@@ -22,8 +22,8 @@ class JpaUserDaoTest {
         dao.save(testUser);
     }
 
-    @AfterAll
-    static void tearDown() {
+    @AfterEach
+    void tearDown() {
         if (testUser != null) {
             dao.delete(testUser);
         }
