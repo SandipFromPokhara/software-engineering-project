@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +24,12 @@ public class NavigationUtil {
     public static void navigateTo(Stage stage, String fxmlPath, String title, boolean resizable) {
         try {
             Parent root = FXMLLoader.load(NavigationUtil.class.getResource(fxmlPath));
+
             Scene scene = new Scene(root);
             scene.getStylesheets().add("/css/row_color.css");
+
+            Image icon = new Image("/Images/NV.png");
+            stage.getIcons().add(icon);
             stage.setTitle(title);
             stage.setScene(scene);
             stage.setResizable(resizable);
@@ -38,8 +43,7 @@ public class NavigationUtil {
             stage.centerOnScreen();
             stage.show();
         } catch (IOException e) {
-            logger.error("Failed to navigate to " + fxmlPath);
-            e.printStackTrace();
+            logger.error("Failed to navigate to {}", fxmlPath);
         }
     }
 }
