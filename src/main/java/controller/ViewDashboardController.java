@@ -61,9 +61,11 @@ public class ViewDashboardController {
         NavigationUtil.navigateTo(event, "/FXML/entry.fxml", "Welcome", false);
     }
 
+    @FXML
     public void handleDelete(ActionEvent event) {
     }
 
+    @FXML
     public void handleOpenEditWindow(ActionEvent event) {
         Stage editStage = new Stage();
         editStage.initModality(Modality.APPLICATION_MODAL);
