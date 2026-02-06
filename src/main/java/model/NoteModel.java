@@ -42,10 +42,6 @@ public class NoteModel {
     /**
      * Updates new content and syncs last created or modified timestamp.
      */
-//    public void updateContent(String newContent) {
-//        this.content = newContent;
-//        this.updatedAt = LocalDateTime.now();
-//    }
 
     public void updateNote(String title, String content, String annotation){
         this.title = title;

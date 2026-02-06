@@ -17,6 +17,9 @@ public class NoteEntity {
     @Column(name="content")
     private String content;
 
+    @Column(name="annotation")
+    private String annotation;
+
     @Column(name="createdAt")
     private LocalDateTime createdAt;
 
@@ -38,9 +41,10 @@ public class NoteEntity {
         updatedAt = LocalDateTime.now();
     }
 
-    public NoteEntity(String title, String content) {
+    public NoteEntity(String title, String content, String annotation) {
         this.title = title;
         this.content = content;
+        this.annotation = annotation;
     }
 
     public NoteEntity() {}
@@ -62,4 +66,9 @@ public class NoteEntity {
     public void setContent(String newContent) {
         this.content = newContent;
     }
+
+    public void setAnnotation(String newAnnotation){this.annotation = newAnnotation ;}
+
+    public String getAnnotation() { return annotation;}
+
 }
