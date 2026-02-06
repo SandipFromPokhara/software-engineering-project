@@ -1,7 +1,6 @@
 package util;
 
 import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -24,8 +23,10 @@ public class NavigationUtil {
     public static void navigateTo(Stage stage, String fxmlPath, String title, boolean resizable) {
         try {
             Parent root = FXMLLoader.load(NavigationUtil.class.getResource(fxmlPath));
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add("/css/row_color.css");
             stage.setTitle(title);
-            stage.setScene(new Scene(root));
+            stage.setScene(scene);
             stage.setResizable(resizable);
 
             if (resizable) {
