@@ -88,7 +88,7 @@ public class JpaNoteDao implements NoteDAO{
             em.getTransaction().commit();
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
-            throw new RuntimeException("Failed to delete note", e);
+            throw new RuntimeException("Failed to update note", e);
         } finally {
             em.close();
         }
