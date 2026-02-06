@@ -100,7 +100,7 @@ public class ViewDashboardController {
         Stage editStage = new Stage();
         editStage.initModality(Modality.APPLICATION_MODAL);
 
-        NavigationUtil.navigateTo(editStage, "/FXML/EditPage.fxml", "NoteVault - Edit Note", true);
+        NavigationUtil.navigateTo(editStage, "/FXML/edit.fxml", "NoteVault - Edit Note", true);
         editStage.showAndWait();
     }
 }
