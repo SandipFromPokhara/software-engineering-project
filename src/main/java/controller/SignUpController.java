@@ -106,8 +106,7 @@ public class SignUpController {
     }
 
     private void navigateToLogin() {
-        System.out.println("Navigating to login page...");
-        // TODO: Implement actual navigation to login page
+
     }
 
     private void clearFields() {
