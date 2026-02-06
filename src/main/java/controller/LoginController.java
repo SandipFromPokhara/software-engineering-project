@@ -64,8 +64,6 @@ public class LoginController {
         loginTask.setOnSucceeded(e -> {
             boolean authenticated = loginTask.getValue();
             if (authenticated) {
-                statusLabel.setTextFill(Color.GREEN);
-                statusLabel.setText("Login successful");
                 NavigationUtil.navigateTo(event, "/FXML/view_dashboard.fxml", "User Dashboard", true);
             } else {
                 statusLabel.setTextFill(Color.RED);

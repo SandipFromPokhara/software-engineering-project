@@ -1,5 +1,6 @@
 package dao.user;
 
+import datasource.MariaDbJpaConnection;
 import entity.UserEntity;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,6 +22,13 @@ class JpaUserDaoTest {
         dao.save(testUser);
     }
 
+    @AfterEach
+    void tearDown() {
+        if (testUser != null) {
+            dao.delete(testUser);
+        }
+        MariaDbJpaConnection.shutdown();
+    }
 
     @Test
     void saveUserTest() {

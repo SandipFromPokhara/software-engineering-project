@@ -3,16 +3,20 @@ package controller;
 import entity.NoteEntity;
 import javafx.fxml.FXML;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import util.NavigationUtil;
 
 
 public class ViewDashboardController {
+
+    @FXML
+    private Button viewNotesBtn, createNoteBtn, settingsBtn, logoutBtn;
+
+    @FXML
+    private Label viewNotesLabel, createNoteLabel, settingsLabel, logoutLabel;
 
     @FXML
     private Button deleteButton;
@@ -24,13 +28,16 @@ public class ViewDashboardController {
     private TableView<NoteEntity> notesTable;
 
     @FXML
+    private TableColumn<NoteEntity, String> titleColumn;
+
+    @FXML
+    private TableColumn<NoteEntity, String> dateColumn;
+
+    @FXML
     private Label noteTitleLabel;
 
     @FXML
     private TextArea noteViewArea;
-
-    @FXML
-    private Button logoutButton;
 
     @FXML
     public void initialize() {
@@ -38,6 +45,9 @@ public class ViewDashboardController {
         deleteButton.setDisable(true);
         noteTitleLabel.setText("Select a note to view details");
         noteViewArea.setText("");
+
+        titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
 
         notesTable.getSelectionModel().selectedItemProperty().addListener((observable, oldSelection, newSelection) -> {
             if (newSelection != null) {
@@ -54,6 +64,23 @@ public class ViewDashboardController {
             }
         });
         notesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        setupHover(viewNotesBtn, viewNotesLabel);
+        setupHover(createNoteBtn, createNoteLabel);
+        setupHover(settingsBtn, settingsLabel);
+        setupHover(logoutBtn, logoutLabel);
+    }
+
+    private void setupHover(Button button, Label label) {
+        button.setOnMouseEntered(e -> {
+            label.setVisible(true);
+            button.setStyle("-fx-background-color: #93ad9b; -fx-cursor: hand;");
+        });
+
+        button.setOnMouseExited(e -> {
+            label.setVisible(false);
+            button.setStyle("-fx-background-color: transparent");
+        });
     }
 
     @FXML
@@ -67,9 +94,13 @@ public class ViewDashboardController {
 
     @FXML
     public void handleOpenEditWindow(ActionEvent event) {
+        NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
+        if (selectedNote == null) return;
+
         Stage editStage = new Stage();
         editStage.initModality(Modality.APPLICATION_MODAL);
 
-        NavigationUtil.navigateTo(event, "/FXML/EditPage.fxml", "Edit", true);
+        NavigationUtil.navigateTo(editStage, "/FXML/edit.fxml", "NoteVault - Edit Note", true);
+        editStage.showAndWait();
     }
 }
