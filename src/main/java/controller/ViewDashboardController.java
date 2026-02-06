@@ -93,6 +93,11 @@ public class ViewDashboardController {
     }
 
     @FXML
+    public void handleCreate(ActionEvent event) {
+        NavigationUtil.navigateTo(event, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
+    }
+
+    @FXML
     public void handleOpenEditWindow(ActionEvent event) {
         NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
         if (selectedNote == null) return;
