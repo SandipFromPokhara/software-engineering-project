@@ -19,7 +19,7 @@ public class EntryController {
     @FXML
     private void onLogin(ActionEvent event) {
         System.out.println("Login button clicked - navigating to Login screen");
-        NavigationUtil.navigateTo(event, "/FXML/login_view.fxml", "Login - Note Vault");
+        NavigationUtil.navigateTo(event, "/FXML/login_view.fxml", "Login - NoteVault");
     }
 
     @FXML
