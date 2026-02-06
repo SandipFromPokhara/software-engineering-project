@@ -12,7 +12,7 @@ public class TestEditNote extends Application {
     public void start(Stage stage) throws Exception {
 
         FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/FXML/Edit.fxml")
+                getClass().getResource("/FXML/edit.fxml")
         );
         Parent root = loader.load();
 

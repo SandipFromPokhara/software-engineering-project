@@ -74,7 +74,7 @@ public class GuestDashboardController {
 
     @FXML
     private void handleNewFiles() {
-        loadContent("CreateFilesGuest.fxml");
+        loadContent("createFilesGuest.fxml");
     }
 
     @FXML

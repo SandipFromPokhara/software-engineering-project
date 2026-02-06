@@ -25,7 +25,6 @@ public class Entry {
                 "login",
                 false
         );
-        // TODO: navigate to login screen
     }
 
     @FXML
@@ -42,7 +41,7 @@ public class Entry {
     private void onContinueAsGuest(ActionEvent event) {
         NavigationUtil.navigateTo(
                 event,
-                "/FXML/GuestDashboard.fxml",
+                "/FXML/guestDashboard.fxml",
                 " Guest Dashboard",
                 true
         );
