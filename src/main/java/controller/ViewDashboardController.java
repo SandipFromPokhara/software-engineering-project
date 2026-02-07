@@ -18,6 +18,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ViewDashboardController {
 
@@ -140,6 +141,25 @@ public class ViewDashboardController {
         });
 
         new Thread(loadNotesTask).start();
+    }
+
+    @FXML
+    private void handleOpen() {
+        UserEntity currentUser = UserSession.getUserInstance().getUser();
+        List<NoteBookEntity> notebooksList = notebookDao.findByUser(currentUser);
+        if (notebooksList.isEmpty()) return;
+
+        ChoiceDialog<NoteBookEntity> dialog = new ChoiceDialog<>(activeNotebook, notebooksList);
+        dialog.setTitle("Open Notebook");
+        dialog.setHeaderText("Select a notebook to open");
+        dialog.setContentText("Available notebooks:");
+        dialog.initOwner(welcomeLabel.getScene().getWindow());
+
+        Optional<NoteBookEntity> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            activeNotebook = result.get();
+            loadNotes();
+        }
     }
 
     private void setupHover(Button button, Label label) {
