@@ -1,16 +1,29 @@
 package controller;
 
+import dao.note.JpaNoteDao;
+import dao.notebook.JpaNoteBookDao;
+import entity.NoteBookEntity;
 import entity.NoteEntity;
+import entity.UserEntity;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import util.NavigationUtil;
+import util.UserSession;
+
 import javafx.fxml.FXML;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import util.NavigationUtil;
 
+import java.util.List;
 
 public class ViewDashboardController {
+
+    private NoteBookEntity activeNotebook;
+    private JpaNoteBookDao notebookDao;
+    private JpaNoteDao noteDao;
 
     @FXML
     private Button viewNotesBtn, createNoteBtn, settingsBtn, logoutBtn;
@@ -40,7 +53,40 @@ public class ViewDashboardController {
     private TextArea noteViewArea;
 
     @FXML
+    private Label welcomeLabel;
+
+    @FXML
     public void initialize() {
+        this.notebookDao = new JpaNoteBookDao();
+        this.noteDao = new JpaNoteDao();
+
+        UserEntity user = UserSession.getUserInstance().getUser();
+        if (user != null) {
+            welcomeLabel.setText("Welcome, " + user.getUsername());
+        }
+
+        Task<List<NoteBookEntity>> loadNotebooksTask = new Task<>() {
+            @Override
+            protected List<NoteBookEntity> call() {
+                return notebookDao.findByUser(user);
+            }
+        };
+
+        loadNotebooksTask.setOnSucceeded(e -> {
+            List<NoteBookEntity> notebooks = loadNotebooksTask.getValue();
+            if (welcomeLabel != null && welcomeLabel.getScene() != null && welcomeLabel.getScene().getWindow() != null) {
+                Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+                if (notebooks.isEmpty()) {
+                    NavigationUtil.navigateTo(stage, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
+                } else {
+                    activeNotebook = notebooks.get(0);
+                    loadNotes();
+                }
+            }
+        });
+
+        new Thread(loadNotebooksTask).start();
+
         editButton.setDisable(true);
         deleteButton.setDisable(true);
         noteTitleLabel.setText("Select a note to view details");
@@ -69,6 +115,31 @@ public class ViewDashboardController {
         setupHover(createNoteBtn, createNoteLabel);
         setupHover(settingsBtn, settingsLabel);
         setupHover(logoutBtn, logoutLabel);
+    }
+
+    private void loadNotes() {
+        if (activeNotebook == null) return;
+
+        Task<List<NoteEntity>> loadNotesTask = new Task<>() {
+            @Override
+            protected List<NoteEntity> call() {
+                return noteDao.findByNotebook(activeNotebook);
+            }
+        };
+
+        loadNotesTask.setOnSucceeded(e -> {
+            List<NoteEntity> notes = loadNotesTask.getValue();
+
+            if (notesTable != null) {
+                notesTable.getItems().setAll(notes);
+                noteTitleLabel.setText("Select a note to view details");
+                noteViewArea.clear();
+                editButton.setDisable(true);
+                deleteButton.setDisable(true);
+            }
+        });
+
+        new Thread(loadNotesTask).start();
     }
 
     private void setupHover(Button button, Label label) {
