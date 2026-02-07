@@ -85,8 +85,6 @@ public class ViewDashboardController {
 
     @FXML
     private void handleOpen(ActionEvent event) {
-        // Refresh/reload notes list - placeholder for now
-        System.out.println("Open/View notes clicked");
     }
 
     @FXML
