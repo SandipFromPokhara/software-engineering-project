@@ -6,7 +6,6 @@ import entity.*;
 import util.UserSession;
 
 import java.util.List;
-
 /**
  * Service layer for Note operations
  */
@@ -14,7 +13,6 @@ public class NoteService {
 
     private final JpaNoteDao noteDao;
     private final JpaNoteBookDao notebookDao;
-    private Long cachedNotebookId = null;
 
     public NoteService() {
         this.noteDao = new JpaNoteDao();
@@ -48,26 +46,16 @@ public class NoteService {
      * Gets or creates a notebook for the logged-in user
      */
     private NoteBookEntity getOrCreatePersonalNotebook(UserEntity user) {
-        // Use cached notebook if available
-        if (cachedNotebookId != null) {
-            NoteBookEntity cachedNotebook = notebookDao.findById(cachedNotebookId);
-            if (cachedNotebook != null) return cachedNotebook;
-        }
 
         // Find existing notebook for this user
         List<NoteBookEntity> notebooks = notebookDao.findByUser(user);
         if (!notebooks.isEmpty()) {
-            NoteBookEntity existingNotebook = notebooks.get(0);
-            cachedNotebookId = existingNotebook.getId();
-            return existingNotebook;
+            return notebooks.get(0);
         }
 
         // Create personal notebook for user (e.g., "John's Notebook")
         String notebookName = user.getFirstName() + "'s Notebook";
         NoteBookEntity unsavedNotebook  = new NoteBookEntity(notebookName, user);
-        NoteBookEntity savedNotebook = notebookDao.save(unsavedNotebook);
-        cachedNotebookId = savedNotebook.getId();
-
-        return savedNotebook;
+        return notebookDao.save(unsavedNotebook);
     }
 }
