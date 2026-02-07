@@ -44,24 +44,6 @@ public class JpaNoteBookDao implements NoteBookDAO{
         }
     }
 
-    /**
-     * Finds a notebook by user ID
-     */
-    public NoteBookEntity findByUserId(Long userId) {
-        if (userId == null) throw new IllegalArgumentException("User ID cannot be null");
-
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        try {
-            TypedQuery<NoteBookEntity> query = em.createQuery(
-                "SELECT n FROM NoteBookEntity n WHERE n.user.id = :userId", NoteBookEntity.class);
-            query.setParameter("userId", userId);
-            List<NoteBookEntity> results = query.getResultList();
-            return results.isEmpty() ? null : results.get(0);
-        } finally {
-            em.close();
-        }
-    }
-
     @Override
     public List<NoteBookEntity> findByUser(UserEntity user) {
         if (user == null) throw new IllegalArgumentException("User cannot be null");
