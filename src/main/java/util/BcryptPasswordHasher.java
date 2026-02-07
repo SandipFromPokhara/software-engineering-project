@@ -9,8 +9,7 @@ public class BcryptPasswordHasher {
     private static final Logger logger = LoggerFactory.getLogger(BcryptPasswordHasher.class);
     private static final int BCRYPT_COST = getCost();
 
-    private BcryptPasswordHasher() {
-    }
+    private BcryptPasswordHasher() {}
 
     private static int getCost() {
         String envCost = System.getenv("BCRYPT_COST");
