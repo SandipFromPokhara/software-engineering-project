@@ -1,14 +1,6 @@
 package controller;
 
 import entity.NoteEntity;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.fxml.FXML;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
@@ -16,8 +8,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import util.NavigationUtil;
-
-import java.io.IOException;
 
 
 public class ViewDashboardController {
@@ -48,11 +38,6 @@ public class ViewDashboardController {
 
     @FXML
     private TextArea noteViewArea;
-
-    // for creating fake files and to store
-    private ObservableList<NoteEntity> notes =
-            FXCollections.observableArrayList();
-
 
     @FXML
     public void initialize() {
@@ -96,10 +81,6 @@ public class ViewDashboardController {
             label.setVisible(false);
             button.setStyle("-fx-background-color: transparent");
         });
-    }
-
-    @FXML
-    private void handleOpen(ActionEvent event) {
     }
 
     @FXML

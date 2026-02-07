@@ -20,7 +20,6 @@ public class BcryptPasswordHasher {
             return 12;
         }
     }
-
     public static String hashPassword(String plainPassword) {
         if (plainPassword == null || plainPassword.isBlank()) {
             throw new IllegalArgumentException("Password cannot be empty");
