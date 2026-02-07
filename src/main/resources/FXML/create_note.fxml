@@ -81,12 +81,12 @@
                   </Label>
                   <HBox alignment="CENTER_RIGHT" spacing="10.0">
                      <children>
-                        <Button fx:id="clearButton" onAction="#handleClear" mnemonicParsing="false" prefWidth="100.0" text="Clear">
+                        <Button fx:id="clearButton" mnemonicParsing="false" onAction="#handleClear" prefWidth="100.0" text="Clear">
                            <font>
                               <Font size="14.0" />
                            </font>
                         </Button>
-                        <Button fx:id="saveButton" onAction="#handleSave" mnemonicParsing="false" prefWidth="100.0" text="Save Note">
+                        <Button fx:id="saveButton" mnemonicParsing="false" onAction="#handleSave" prefWidth="100.0" text="Save Note">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -106,7 +106,8 @@
          <menus>
             <Menu mnemonicParsing="false" text="File">
                <items>
-                  <MenuItem mnemonicParsing="false" text="Close" />
+                  <MenuItem mnemonicParsing="false" onAction="#handleBackToHome" text="Back to Home" />
+                  <MenuItem mnemonicParsing="false" onAction="#handleClose" text="Close" />
                </items>
             </Menu>
             <Menu mnemonicParsing="false" text="Edit">

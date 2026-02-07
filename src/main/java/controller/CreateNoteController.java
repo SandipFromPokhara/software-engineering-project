@@ -5,8 +5,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import services.NoteService;
 import entity.NoteEntity;
+import util.NavigationUtil;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -76,5 +78,17 @@ public class CreateNoteController implements Initializable {
         statusLabel.setText(message);
         statusLabel.setTextFill(isError ? Color.RED : Color.GREEN);
         statusLabel.setVisible(true);
+    }
+
+    @FXML
+    private void handleBackToHome(ActionEvent event) {
+        Stage stage = (Stage) titleField.getScene().getWindow();
+        NavigationUtil.navigateTo(stage, "/FXML/view_dashboard.fxml", "NoteVault - Dashboard", true);
+    }
+
+    @FXML
+    private void handleClose(ActionEvent event) {
+        Stage stage = (Stage) titleField.getScene().getWindow();
+        stage.close();
     }
 }
