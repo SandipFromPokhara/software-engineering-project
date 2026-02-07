@@ -80,7 +80,8 @@ public class Validation {
 
     // Validates the username format
     public static boolean validateUsername(String username, Label messageLabel) {
-        String usernameRegex = "^[a-zA-Z0-9_]{3,20}$";
+        // Allow letters (including Nordic chars), numbers, and underscores
+        String usernameRegex = "^[\\p{L}0-9_]{3,20}$";
         if (!username.matches(usernameRegex)) {
             showMessage(messageLabel, "Username must be 3-20 characters", MessageType.ERROR);
             return false;
