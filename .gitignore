@@ -4,6 +4,9 @@ target/
 !**/src/test/**/target/
 .kotlin
 
+# Environment variables
+.env
+
 ### IntelliJ IDEA ###
 .idea/
 .idea/modules.xml
@@ -38,3 +41,13 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Environment variables ###
+.env
+*.env
+.env.local
+
+### Personal notes ###
+MyNotes.md
+
+Documents/SQL_helpers/

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #EAF7F7;" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.EntryController">
+   <left>
+      <AnchorPane prefHeight="400.0" prefWidth="241.0" BorderPane.alignment="CENTER">
+         <children>
+            <ImageView fitHeight="400.0" fitWidth="283.0" layoutX="-1.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../Images/left-image.png" />
+               </image>
+            </ImageView>
+         </children>
+      </AnchorPane>
+   </left>
+   <center>
+      <AnchorPane prefHeight="400.0" prefWidth="300.0" style="-fx-background-color: #ebf4f5;" BorderPane.alignment="CENTER">
+         <children>
+            <Label layoutX="120.0" layoutY="70.0" prefHeight="42.0" prefWidth="88.0" text="Hello!" textFill="#297883" textOverrun="CLIP">
+               <font>
+                  <Font name="Brush Script MT Italic" size="39.0" />
+               </font>
+            </Label>
+            <Label layoutX="75.0" layoutY="112.0" prefHeight="35.0" prefWidth="170.0" text="Welcome to Note Vault" textFill="#307494">
+               <font>
+                  <Font name="Songti TC Bold" size="17.0" />
+               </font>
+            </Label>
+            <VBox layoutX="95.0" layoutY="162.0" prefHeight="120.0" prefWidth="129.0" spacing="12.0">
+               <children>
+                  <Button fx:id="loginButton" mnemonicParsing="false" onAction="#onLogin" prefHeight="26.0" prefWidth="118.0" style="-fx-background-color: #266973; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-border-radius: 6;" text="Login">
+                     <font>
+                        <Font name="Times New Roman Bold" size="13.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="registerButton" mnemonicParsing="false" onAction="#onRegister" prefHeight="26.0" prefWidth="117.0" style="-fx-background-color: #266973; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-border-radius: 6;" text="Register">
+                     <font>
+                        <Font name="Times New Roman Bold" size="13.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="guestButton" mnemonicParsing="false" onAction="#onContinueAsGuest" prefHeight="26.0" prefWidth="117.0" style="-fx-background-color: #266973; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-border-radius: 6;" text="Continue as guest">
+                     <font>
+                        <Font name="Times New Roman Bold" size="13.0" />
+                     </font>
+                  </Button>
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </VBox>
+         </children>
+      </AnchorPane>
+   </center>
+</BorderPane>
