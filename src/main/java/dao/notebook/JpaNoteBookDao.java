@@ -64,7 +64,7 @@ public class JpaNoteBookDao implements NoteBookDAO{
 
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
-            TypedQuery<NoteBookEntity> query = em.createQuery("Select t from NoteBookEntity t where t.title = :title", NoteBookEntity.class);
+            TypedQuery<NoteBookEntity> query = em.createQuery("Select n from NoteBookEntity n where n.title = :title", NoteBookEntity.class);
             query.setParameter("title", title);
             return query.getResultList();
         } finally {
