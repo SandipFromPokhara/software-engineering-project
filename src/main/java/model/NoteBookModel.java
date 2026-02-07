@@ -17,33 +17,19 @@ public class NoteBookModel {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public int getId() {
-        return id;
-    }
+    public int getId() { return id; }
 
-    public String getTitle() {
-        return title;
-    }
+    public String getTitle() { return title; }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public void setTitle(String title) { this.title = title; }
 
-    public UserModel getUser() {
-        return user;
-    }
+    public UserModel getUser() { return user; }
 
-    public void setUser(UserModel user) {
-        this.user = user;
-    }
+    public void setUser(UserModel user) { this.user = user; }
 
     @Override
     public String toString() {

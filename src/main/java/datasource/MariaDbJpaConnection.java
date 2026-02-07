@@ -17,10 +17,6 @@ public class MariaDbJpaConnection {
     private static synchronized void ensureFactory() {
         if (emf == null) {
             try {
-
-                System.out.println("DB_USER: " + System.getenv("DB_USER"));
-                System.out.println("DB_PASSWORD: " + System.getenv("DB_PASSWORD"));
-
                 Map<String, String> properties = new HashMap<>();
                 properties.put("jakarta.persistence.jdbc.user", System.getenv("DB_USER"));
                 properties.put("jakarta.persistence.jdbc.password", System.getenv("DB_PASSWORD"));

@@ -33,14 +33,6 @@ public class LoginController {
     @FXML
     private Hyperlink signupLink;
 
-    @FXML
-    private Button backButton;
-
-    @FXML
-    private void handleBack(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/entry.fxml", "Welcome to NoteVault", false);
-    }
-
     private String getUsername() {
         return usernameField.getText().trim();
     }

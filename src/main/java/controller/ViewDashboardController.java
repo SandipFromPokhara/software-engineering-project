@@ -64,74 +64,6 @@ public class ViewDashboardController {
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
 
-//        notesTable.getSelectionModel().selectedItemProperty().addListener((observable, oldSelection, newSelection) -> {
-//            if (newSelection != null) {
-//                noteTitleLabel.setText(newSelection.getTitle());
-//                noteViewArea.setText(newSelection.getContent());
-//
-//                editButton.setDisable(false);
-//                deleteButton.setDisable(false);
-//            } else {
-//                noteTitleLabel.setText("Select a note to view details");
-//                noteViewArea.clear();
-//                editButton.setDisable(true);
-//                deleteButton.setDisable(true);
-//            }
-//        });
-//        notesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-//
-//        setupHover(viewNotesBtn, viewNotesLabel);
-//        setupHover(createNoteBtn, createNoteLabel);
-//        setupHover(settingsBtn, settingsLabel);
-//        setupHover(logoutBtn, logoutLabel);
-
-        // Use updatedTime as date column
-        dateColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(
-                        cellData.getValue().getUpdatedTime() == null
-                                ? ""
-                                : cellData.getValue().getUpdatedTime().toString()
-                )
-        );
-
-        // FAKE DATA (NO DATABASE)
-        notes.add(new NoteEntity(
-                "First Note",
-                "This is a test note",
-                "test annotation"
-        ));
-
-        notes.add(new NoteEntity(
-                "JavaFX + JPA",
-                "Works perfectly without DB",
-                "Test2 annotation"
-        ));
-
-        notesTable.setItems(notes);
-
-        notesTable.getSelectionModel()
-                .selectedItemProperty()
-                .addListener((obs, oldNote, newNote) -> {
-
-                    if (newNote != null) {
-                        noteTitleLabel.setText(newNote.getTitle());
-                        noteViewArea.setText(
-                                newNote.getContent()
-                                        + "\n\nAnnotation:\n"
-                                        + newNote.getAnnotation()
-                        );
-
-                        editButton.setDisable(false);
-                        deleteButton.setDisable(false);
-                    } else {
-                        noteTitleLabel.setText("Select a note");
-                        noteViewArea.clear();
-                        editButton.setDisable(true);
-                        deleteButton.setDisable(true);
-                    }
-                });
-    }
-
         notesTable.getSelectionModel().selectedItemProperty().addListener((observable, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 noteTitleLabel.setText(newSelection.getTitle());
@@ -189,31 +121,6 @@ public class ViewDashboardController {
         NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
         if (selectedNote == null) return;
 
-//        Stage editStage = new Stage();
-//        editStage.initModality(Modality.APPLICATION_MODAL);
-//
-//        NavigationUtil.navigateTo(editStage, "/FXML/edit.fxml", "NoteVault - Edit Note", true);
-//        editStage.showAndWait();
-        try {
-            FXMLLoader loader =
-                    new FXMLLoader(getClass().getResource("/FXML/edit.fxml"));
-            Parent root = loader.load();
-
-            EditNoteController controller = loader.getController();
-            controller.setNote(selectedNote); // SAME OBJECT
-
-            Stage stage = new Stage();
-            stage.setTitle("Edit Note");
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.initOwner(notesTable.getScene().getWindow()); //
-            stage.setScene(new Scene(root));
-            stage.showAndWait();
-
-            notesTable.refresh();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         Stage editStage = new Stage();
         editStage.initModality(Modality.APPLICATION_MODAL);
 
