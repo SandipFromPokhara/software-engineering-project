@@ -96,6 +96,6 @@ public class LoginController {
 
     @FXML
     private void handleSignUp(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/signup.fxml", "SignUp window", false);
+        NavigationUtil.navigateTo(event, "/FXML/signup.fxml", "NoteVault - Register", false);
     }
 }

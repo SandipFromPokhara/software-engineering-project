@@ -44,7 +44,7 @@ public class GuestDashboardController {
         NavigationUtil.navigateTo(
                 event,
                 "/FXML/entry.fxml",
-                "Entry Page",
+                "Welcome to NoteVault",
                 false
         );
     }
@@ -82,7 +82,7 @@ public class GuestDashboardController {
         NavigationUtil.navigateTo(
                 event,
                 "/FXML/login_view.fxml",
-                "login",
+                "NoteVault - LogIn",
                 false
         );
 
@@ -94,7 +94,7 @@ public class GuestDashboardController {
         NavigationUtil.navigateTo(
                 event,
                 "/FXML/signup.fxml",
-                "Sign Up",
+                "NoteVault - Register",
                 false
         );
 
