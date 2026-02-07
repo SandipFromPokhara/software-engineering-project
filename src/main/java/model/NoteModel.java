@@ -11,6 +11,7 @@ public class NoteModel {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+
     public NoteModel(String title, String content, String annotation, NoteBookModel notebook) {
         this.title = title;
         this.content = content;

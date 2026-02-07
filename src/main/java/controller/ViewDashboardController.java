@@ -9,6 +9,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.fxml.FXML;
+import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
@@ -130,6 +132,27 @@ public class ViewDashboardController {
                 });
     }
 
+        notesTable.getSelectionModel().selectedItemProperty().addListener((observable, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                noteTitleLabel.setText(newSelection.getTitle());
+                noteViewArea.setText(newSelection.getContent());
+
+                editButton.setDisable(false);
+                deleteButton.setDisable(false);
+            } else {
+                noteTitleLabel.setText("Select a note to view details");
+                noteViewArea.clear();
+                editButton.setDisable(true);
+                deleteButton.setDisable(true);
+            }
+        });
+        notesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        setupHover(viewNotesBtn, viewNotesLabel);
+        setupHover(createNoteBtn, createNoteLabel);
+        setupHover(settingsBtn, settingsLabel);
+        setupHover(logoutBtn, logoutLabel);
+    }
 
     private void setupHover(Button button, Label label) {
         button.setOnMouseEntered(e -> {
@@ -144,12 +167,21 @@ public class ViewDashboardController {
     }
 
     @FXML
+    private void handleOpen(ActionEvent event) {
+    }
+
+    @FXML
     private void handleLogout(ActionEvent event) {
         NavigationUtil.navigateTo(event, "/FXML/entry.fxml", "Welcome", false);
     }
 
     @FXML
     public void handleDelete(ActionEvent event) {
+    }
+
+    @FXML
+    public void handleCreate(ActionEvent event) {
+        NavigationUtil.navigateTo(event, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
     }
 
     @FXML
@@ -182,5 +214,10 @@ public class ViewDashboardController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Stage editStage = new Stage();
+        editStage.initModality(Modality.APPLICATION_MODAL);
+
+        NavigationUtil.navigateTo(editStage, "/FXML/edit.fxml", "NoteVault - Edit Note", true);
+        editStage.showAndWait();
     }
 }

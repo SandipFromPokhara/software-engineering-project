@@ -19,10 +19,10 @@ public class JpaUserDao implements UserDAO{
             UserEntity managedUser;
 
             if (user.getId() == null) {
-                em.persist(user); //insert and save
+                em.persist(user);
                 managedUser = user;
             } else {
-                managedUser = em.merge(user); // update
+                managedUser = em.merge(user);
             }
             em.getTransaction().commit();
             return managedUser;

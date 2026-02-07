@@ -17,10 +17,10 @@ public class JpaNoteBookDao implements NoteBookDAO{
             em.getTransaction().begin();
             NoteBookEntity managedNoteBook;
             if (noteBook.getId() == null) {
-                em.persist(noteBook); // insert and save
+                em.persist(noteBook);
                 managedNoteBook = noteBook;
             } else {
-                managedNoteBook = em.merge(noteBook); // update
+                managedNoteBook = em.merge(noteBook);
             }
             em.getTransaction().commit();
             return managedNoteBook;

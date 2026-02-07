@@ -22,7 +22,7 @@ public class JpaNoteDao implements NoteDAO{
                 em.persist(note);
                 managedNote = note;
             } else {
-                managedNote = em.merge(note); // this update
+                managedNote = em.merge(note);
             }
             em.getTransaction().commit();
             return managedNote;
@@ -51,7 +51,7 @@ public class JpaNoteDao implements NoteDAO{
 
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
-            TypedQuery<NoteEntity> query = em.createQuery("Select n from NoteEntity n where n.title= :title", NoteEntity.class);
+            TypedQuery<NoteEntity> query = em.createQuery("Select n from NoteEntity n where n.title = :title", NoteEntity.class);
             query.setParameter("title", title);
             return query.getResultList();
         } finally {
