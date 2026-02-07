@@ -29,6 +29,7 @@ public class NavigationUtil {
             scene.getStylesheets().add("/css/row_color.css");
 
             Image icon = new Image("/Images/NV.png");
+            stage.getIcons().clear();
             stage.getIcons().add(icon);
             stage.setTitle(title);
             stage.setScene(scene);

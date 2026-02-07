@@ -5,37 +5,24 @@ import entity.UserEntity;
 import util.BcryptPasswordHasher;
 
 public class UserService {
-    private final JpaUserDao userDao;
-    private static UserEntity loggedInUser = null;
+    private JpaUserDao userDao;
 
     public UserService(JpaUserDao userDao) {
         this.userDao = userDao;
     }
 
-    public boolean login(String username, String password) {
+    public UserEntity login(String username, String password) {
         if (username == null || username.isBlank() || password == null || password.isBlank()) {
-            return false;
+            return null;
         }
         UserEntity user = userDao.findByUsername(username);
-        if (user == null) return false;
+        if (user == null) return null;
 
         String hashedPassword = user.getPasswordHash();
-        boolean authenticated = BcryptPasswordHasher.verifyPassword(password, hashedPassword);
-
-        if (authenticated) {
-            loggedInUser = user;
-            NoteService.setCurrentUser(user); // Set user for NoteService
+        if (BcryptPasswordHasher.verifyPassword(password, hashedPassword)) {
+            return user;
+        } else {
+            return null;
         }
-
-        return authenticated;
-    }
-
-    public static UserEntity getLoggedInUser() {
-        return loggedInUser;
-    }
-
-    public static void logout() {
-        loggedInUser = null;
-        NoteService.setCurrentUser(null);
     }
 }

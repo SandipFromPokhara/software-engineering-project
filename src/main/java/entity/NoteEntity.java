@@ -55,6 +55,10 @@ public class NoteEntity {
 
     public String getContent() { return content; }
 
+    public String getAnnotation() { return annotation; }
+
+    public NoteBookEntity getNotebook() { return notebook; }
+
     public LocalDateTime getCreatedTime() { return createdAt; }
 
     public LocalDateTime getUpdatedTime() { return updatedAt; }
@@ -67,12 +71,12 @@ public class NoteEntity {
         this.content = newContent;
     }
 
-    public void setAnnotation(String newAnnotation){this.annotation = newAnnotation ;}
-
-    public String getAnnotation() { return annotation;}
-
-    public NoteBookEntity getNotebook() { return notebook; }
+    public void setAnnotation(String newAnnotation) { this.annotation = newAnnotation; }
 
     public void setNotebook(NoteBookEntity notebook) { this.notebook = notebook; }
 
+    @Override
+    public String toString() {
+        return title;
+    }
 }

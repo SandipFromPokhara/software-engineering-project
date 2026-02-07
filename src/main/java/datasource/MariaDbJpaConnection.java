@@ -22,7 +22,7 @@ public class MariaDbJpaConnection {
                 properties.put("jakarta.persistence.jdbc.password", System.getenv("DB_PASSWORD"));
 
                 emf = Persistence.createEntityManagerFactory("CompanyMariaDbUnit", properties);
-                logger.info("EntityManagerFactory created successfully using environment variables");
+                logger.info("EntityManagerFactory created successfully");
             } catch (Exception e) {
                 logger.error("Failed to initialize EntityManagerFactory. Confirm DB user and password", e);
                 throw new RuntimeException("Database connection failed", e);

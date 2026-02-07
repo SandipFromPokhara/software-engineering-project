@@ -24,12 +24,6 @@
                         <Image url="@../Images/left-image.png" />
                     </image>
                 </ImageView>
-                <!-- Back Button -->
-                <Button fx:id="backButton" layoutX="12.0" layoutY="361.0" mnemonicParsing="false" onAction="#handleBack" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-text-fill: #266973; -fx-font-weight: bold;" text="← Back">
-                    <font>
-                        <Font size="12.0" />
-                    </font>
-                </Button>
             </children>
         </AnchorPane>
     </left>
@@ -37,7 +31,7 @@
     <center>
         <AnchorPane prefHeight="400.0" prefWidth="300.0" style="-fx-background-color: #ebf4f5;" BorderPane.alignment="CENTER">
             <children>
-                <VBox alignment="TOP_CENTER" layoutX="55.0" layoutY="26.0" prefHeight="349.0" prefWidth="212.0" spacing="8.0">
+                <VBox alignment="TOP_CENTER" layoutX="55.0" layoutY="26.0" prefHeight="349.0" prefWidth="212.0" spacing="8.0" AnchorPane.topAnchor="20.0">
 
                     <padding>
                         <Insets bottom="5" left="15" right="15" top="5" />
@@ -51,7 +45,7 @@
 
                     <Label text="Join NoteVault Today" textFill="#307494">
                         <font>
-                            <Font size="12" />
+                            <Font name="System Italic" size="12.0" />
                         </font>
                     </Label>
 
@@ -103,6 +97,12 @@
                     </HBox>
 
                 </VBox>
+                <!-- Back Button -->
+                <Button fx:id="backButton" layoutX="134.0" layoutY="371.0" mnemonicParsing="false" onAction="#handleBack" style="-fx-background-color: transparent; -fx-cursor: hand;" text="← Back" textFill="#324326">
+                    <font>
+                        <Font name="System Bold" size="12.0" />
+                    </font>
+                </Button>
 
             </children>
         </AnchorPane>

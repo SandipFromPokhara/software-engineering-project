@@ -29,7 +29,7 @@
     <top>
       <HBox prefHeight="27.0" prefWidth="800.0" spacing="5.0" BorderPane.alignment="CENTER_LEFT">
          <children>
-            <MenuBar prefHeight="26.0" prefWidth="592.0" HBox.hgrow="ALWAYS">
+            <MenuBar prefHeight="26.0" prefWidth="490.0" HBox.hgrow="ALWAYS">
               <menus>
                 <Menu mnemonicParsing="false" text="File">
                   <items>
@@ -53,6 +53,14 @@
                 </Menu>
               </menus>
             </MenuBar>
+            <Label fx:id="welcomeLabel" contentDisplay="CENTER" prefHeight="17.0" prefWidth="126.0" HBox.hgrow="ALWAYS">
+               <font>
+                  <Font name="Arial Italic" size="10.0" />
+               </font>
+               <HBox.margin>
+                  <Insets top="5.0" />
+               </HBox.margin>
+            </Label>
          </children>
          <BorderPane.margin>
             <Insets />
@@ -89,7 +97,7 @@
                      <children>
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@/Images/create-folder.png" />
+                              <Image url="@/Images/create-file.png" />
                            </image>
                         </ImageView>
                         <Label fx:id="createNoteLabel" style="-fx-background-color: #00003b;" text="Create" textFill="WHITE" visible="false" StackPane.alignment="TOP_RIGHT">

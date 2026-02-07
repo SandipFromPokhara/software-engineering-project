@@ -73,4 +73,8 @@ public class NoteBookEntity {
         }
     }
 
+    @Override
+    public String toString() {
+        return title;
+    }
 }

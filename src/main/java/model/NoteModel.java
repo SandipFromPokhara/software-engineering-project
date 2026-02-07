@@ -11,7 +11,6 @@ public class NoteModel {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-
     public NoteModel(String title, String content, String annotation, NoteBookModel notebook) {
         this.title = title;
         this.content = content;
@@ -34,17 +33,10 @@ public class NoteModel {
 
     public void setContent(String content) { this.content = content; }
 
-    public String getAnnotation(){return annotation ;}
-
-    public void setAnnotation(String annotation) {
-        this.annotation = annotation;
-    }
-
     /**
      * Updates new content and syncs last created or modified timestamp.
      */
-
-    public void updateNote(String title, String content, String annotation){
+    public void updateContent(String title, String content, String annotation) {
         this.title = title;
         this.content = content;
         this.annotation = annotation;
@@ -57,11 +49,9 @@ public class NoteModel {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
 
-    public LocalDateTime getUpdatedAt(){return updatedAt ;}
-
     @Override
     public String toString() {
-        return "Note {Id: " + id + ", Title: '" + title + "', Annotation: '" + annotation + "' Notebook: '" + notebook + "', CreatedAt: '" + createdAt + "' UpdatedAt: " + updatedAt + "}";
+        return "Note {Id: " + id + ", Title: '" + title + "', Annotation: '" + annotation + "', Notebook: '" + notebook + "', Timestamp: " + createdAt + "}";
     }
 }
 
