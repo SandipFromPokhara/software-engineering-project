@@ -22,14 +22,14 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ViewDashboardController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ViewDashboardController">
     <stylesheets>
         <URL value="@/css/row_color.css" />
     </stylesheets>
     <top>
       <HBox prefHeight="27.0" prefWidth="800.0" spacing="5.0" BorderPane.alignment="CENTER_LEFT">
          <children>
-            <MenuBar prefHeight="26.0" prefWidth="592.0" HBox.hgrow="ALWAYS">
+            <MenuBar prefHeight="26.0" prefWidth="490.0" HBox.hgrow="ALWAYS">
               <menus>
                 <Menu mnemonicParsing="false" text="File">
                   <items>
@@ -53,9 +53,9 @@
                 </Menu>
               </menus>
             </MenuBar>
-            <Label fx:id="welcomeLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" prefWidth="80.0" HBox.hgrow="ALWAYS">
+            <Label fx:id="welcomeLabel" contentDisplay="CENTER" prefHeight="17.0" prefWidth="126.0" HBox.hgrow="ALWAYS">
                <font>
-                  <Font name="System Italic" size="12.0" />
+                  <Font name="Arial Italic" size="10.0" />
                </font>
                <HBox.margin>
                   <Insets top="5.0" />
@@ -97,7 +97,7 @@
                      <children>
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@/Images/create-folder.png" />
+                              <Image url="@/Images/create-file.png" />
                            </image>
                         </ImageView>
                         <Label fx:id="createNoteLabel" style="-fx-background-color: #00003b;" text="Create" textFill="WHITE" visible="false" StackPane.alignment="TOP_RIGHT">
