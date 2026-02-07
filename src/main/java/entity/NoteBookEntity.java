@@ -72,4 +72,5 @@ public class NoteBookEntity {
             user.getNoteBooks().add(this);
         }
     }
+
 }
