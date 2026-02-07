@@ -2,9 +2,10 @@ package services;
 
 import dao.note.JpaNoteDao;
 import dao.notebook.JpaNoteBookDao;
-import entity.NoteEntity;
-import entity.NoteBookEntity;
-import entity.UserEntity;
+import entity.*;
+import util.UserSession;
+
+import java.util.List;
 
 /**
  * Service layer for Note operations
@@ -14,54 +15,31 @@ public class NoteService {
     private final JpaNoteDao noteDao;
     private final JpaNoteBookDao notebookDao;
     private Long cachedNotebookId = null;
-    private static UserEntity currentUser = null;
 
     public NoteService() {
         this.noteDao = new JpaNoteDao();
         this.notebookDao = new JpaNoteBookDao();
     }
 
-    public NoteService(UserEntity user) {
-        this.noteDao = new JpaNoteDao();
-        this.notebookDao = new JpaNoteBookDao();
-        currentUser = user;
-        this.cachedNotebookId = null;
-    }
-
-    /**
-     * Sets the current logged-in user
-     */
-    public static void setCurrentUser(UserEntity user) {
-        currentUser = user;
-    }
-
-    /**
-     * Gets the current logged-in user
-     */
-    public static UserEntity getCurrentUser() {
-        return currentUser;
-    }
-
     /**
      * Creates a new note with title, content, and annotation
      */
-    public NoteEntity createNote(String title, String content, String annotation) {
+    public NoteEntity createNote(String title, String content, String annotation, NoteBookEntity notebookParameter) {
         if (title == null || title.trim().isEmpty()) {
             throw new IllegalArgumentException("Title cannot be empty");
         }
 
+        UserEntity currentUser = UserSession.getUserInstance().getUser();
         if (currentUser == null) {
             throw new IllegalStateException("No user logged in. Please login first.");
         }
 
         // Get or create notebook for current user
-        NoteBookEntity notebook = getNotebookForUser();
+        NoteBookEntity notebookToUse = (notebookParameter != null) ? notebookParameter : getOrCreatePersonalNotebook(currentUser);
 
         // Create and save note - separate content and annotation
-        String noteContent = (content != null ? content : "");
-        String noteAnnotation = (annotation != null ? annotation : "");
-        NoteEntity note = new NoteEntity(title.trim(), noteContent, noteAnnotation);
-        note.setNotebook(notebook);
+        NoteEntity note = new NoteEntity(title.trim(), content != null ? content : "", annotation != null ? annotation: "");
+        note.setNotebook(notebookToUse);
 
         return noteDao.save(note);
     }
@@ -69,26 +47,27 @@ public class NoteService {
     /**
      * Gets or creates a notebook for the logged-in user
      */
-    private NoteBookEntity getNotebookForUser() {
+    private NoteBookEntity getOrCreatePersonalNotebook(UserEntity user) {
         // Use cached notebook if available
         if (cachedNotebookId != null) {
-            NoteBookEntity notebook = notebookDao.findById(cachedNotebookId);
-            if (notebook != null) return notebook;
+            NoteBookEntity cachedNotebook = notebookDao.findById(cachedNotebookId);
+            if (cachedNotebook != null) return cachedNotebook;
         }
 
-        // Find existing notebook for this user (efficient query)
-        NoteBookEntity notebook = notebookDao.findByUserId(currentUser.getId());
-        if (notebook != null) {
-            cachedNotebookId = notebook.getId();
-            return notebook;
+        // Find existing notebook for this user
+        List<NoteBookEntity> notebooks = notebookDao.findByUser(user);
+        if (!notebooks.isEmpty()) {
+            NoteBookEntity existingNotebook = notebooks.get(0);
+            cachedNotebookId = existingNotebook.getId();
+            return existingNotebook;
         }
 
         // Create personal notebook for user (e.g., "John's Notebook")
-        String notebookName = currentUser.getFirstName() + "'s Notebook";
-        notebook = new NoteBookEntity(notebookName, currentUser);
-        notebook = notebookDao.save(notebook);
-        cachedNotebookId = notebook.getId();
+        String notebookName = user.getFirstName() + "'s Notebook";
+        NoteBookEntity unsavedNotebook  = new NoteBookEntity(notebookName, user);
+        NoteBookEntity savedNotebook = notebookDao.save(unsavedNotebook);
+        cachedNotebookId = savedNotebook.getId();
 
-        return notebook;
+        return savedNotebook;
     }
 }
