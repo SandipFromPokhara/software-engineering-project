@@ -2,12 +2,10 @@ package controller;
 
 import dao.note.JpaNoteDao;
 import dao.notebook.JpaNoteBookDao;
-import entity.NoteBookEntity;
-import entity.NoteEntity;
-import entity.UserEntity;
-import javafx.application.Platform;
+import entity.*;
 import javafx.concurrent.Task;
 import util.NavigationUtil;
+import util.NoteSession;
 import util.UserSession;
 
 import javafx.fxml.FXML;
@@ -94,7 +92,7 @@ public class ViewDashboardController {
         noteViewArea.setText("");
 
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+        dateColumn.setCellValueFactory(new PropertyValueFactory<>("createdTime"));
 
         notesTable.getSelectionModel().selectedItemProperty().addListener((observable, oldSelection, newSelection) -> {
             if (newSelection != null) {
@@ -110,7 +108,7 @@ public class ViewDashboardController {
                 deleteButton.setDisable(true);
             }
         });
-        notesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        notesTable.setColumnResizePolicy(table -> true);
 
         setupHover(viewNotesBtn, viewNotesLabel);
         setupHover(createNoteBtn, createNoteLabel);
@@ -131,10 +129,21 @@ public class ViewDashboardController {
         loadNotesTask.setOnSucceeded(e -> {
             List<NoteEntity> notes = loadNotesTask.getValue();
 
-            if (notesTable != null) {
-                notesTable.getItems().setAll(notes);
-                noteTitleLabel.setText("Select a note to view details");
-                noteViewArea.clear();
+            notesTable.getItems().setAll(notes);
+
+            NoteEntity lastCreated = NoteSession.getLastCreatedNote();
+
+            if (lastCreated != null) {
+                for (NoteEntity n : notes) {
+                    if (n.getId().equals(lastCreated.getId())) {
+                        notesTable.getSelectionModel().select(n);
+                        break;
+                    }
+                }
+                NoteSession.clear();
+            }
+
+            if (notesTable.getSelectionModel().getSelectedItem() == null) {
                 editButton.setDisable(true);
                 deleteButton.setDisable(true);
             }
@@ -185,7 +194,13 @@ public class ViewDashboardController {
 
     @FXML
     public void handleCreate(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
+
+        Stage createStage = new Stage();
+        createStage.initModality(Modality.APPLICATION_MODAL);
+
+        NavigationUtil.navigateTo(createStage, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
+
+        loadNotes();
     }
 
     @FXML
