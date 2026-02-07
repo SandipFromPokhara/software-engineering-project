@@ -173,7 +173,7 @@ public class ViewDashboardController {
             Stage stage = new Stage();
             stage.setTitle("Edit Note");
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.initOwner(notesTable.getScene().getWindow());
+            stage.initOwner(notesTable.getScene().getWindow()); //
             stage.setScene(new Scene(root));
             stage.showAndWait();
 

@@ -22,7 +22,7 @@ public class JpaNoteDao implements NoteDAO{
                 em.persist(note);
                 managedNote = note;
             } else {
-                managedNote = em.merge(note);
+                managedNote = em.merge(note); // this update
             }
             em.getTransaction().commit();
             return managedNote;
