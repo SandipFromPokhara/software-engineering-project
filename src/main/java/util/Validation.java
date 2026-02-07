@@ -33,7 +33,7 @@ public class Validation {
         }
 
         // Validate password length
-        if (!validatePasswordLength(password, messageLabel)) {
+        if (!validatePasswordStrength(password, messageLabel)) {
             return false;
         }
 

@@ -28,6 +28,6 @@ public class EntryController {
 
     @FXML
     private void onContinueAsGuest(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
+        NavigationUtil.navigateTo(event, "/FXML/guestDashboard.fxml", "NoteVault - Create Note", true);
     }
 }
