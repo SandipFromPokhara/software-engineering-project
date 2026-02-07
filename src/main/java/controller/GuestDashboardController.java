@@ -41,12 +41,12 @@ public class GuestDashboardController {
 
     @FXML
     private void handleHome(ActionEvent event) {
-//        NavigationUtil.navigateTo(
-//                event,
-//                "/FXML/entry.fxml",
-//                "Entry Page",
-//                false
-//        );
+        NavigationUtil.navigateTo(
+                event,
+                "/FXML/entry.fxml",
+                "Entry Page",
+                false
+        );
     }
 
     private void loadContent(String fxmlFile) {
@@ -79,24 +79,24 @@ public class GuestDashboardController {
 
     @FXML
     private void handleLogin(ActionEvent event) {
-//        NavigationUtil.navigateTo(
-//                event,
-//                "/FXML/login_view.fxml",
-//                "login",
-//                false
-//        );
+        NavigationUtil.navigateTo(
+                event,
+                "/FXML/login_view.fxml",
+                "login",
+                false
+        );
 
 
     }
 
     @FXML
     private void handleSignUp(ActionEvent event) {
-//        NavigationUtil.navigateTo(
-//                event,
-//                "/FXML/signup.fxml",
-//                "Sign Up",
-//                false
-//        );
+        NavigationUtil.navigateTo(
+                event,
+                "/FXML/signup.fxml",
+                "Sign Up",
+                false
+        );
 
     }
 }

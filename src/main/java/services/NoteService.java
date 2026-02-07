@@ -54,17 +54,13 @@ public class NoteService {
             throw new IllegalStateException("No user logged in. Please login first.");
         }
 
-        // Combine content and annotation
-        String fullContent = (content != null ? content : "");
-        if (annotation != null && !annotation.trim().isEmpty()) {
-            fullContent += "\n\n--- Annotations ---\n" + annotation;
-        }
-
         // Get or create notebook for current user
         NoteBookEntity notebook = getNotebookForUser();
 
-        // Create and save note
-        NoteEntity note = new NoteEntity(title.trim(), fullContent);
+        // Create and save note - separate content and annotation
+        String noteContent = (content != null ? content : "");
+        String noteAnnotation = (annotation != null ? annotation : "");
+        NoteEntity note = new NoteEntity(title.trim(), noteContent, noteAnnotation);
         note.setNotebook(notebook);
 
         return noteDao.save(note);

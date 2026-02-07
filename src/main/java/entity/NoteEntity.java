@@ -71,4 +71,8 @@ public class NoteEntity {
 
     public String getAnnotation() { return annotation;}
 
+    public NoteBookEntity getNotebook() { return notebook; }
+
+    public void setNotebook(NoteBookEntity notebook) { this.notebook = notebook; }
+
 }
