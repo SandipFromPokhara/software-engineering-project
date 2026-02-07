@@ -139,7 +139,7 @@ public class CreateNoteController implements Initializable {
                 }
             }
 
-            noteService.createNote(title, content, annotation, selectedNotebook);
+            NoteEntity createdNote = noteService.createNote(title, content, annotation, selectedNotebook);
             showStatus("Note saved successfully!", false);
             clearForm();
             notebookComboBox.getSelectionModel().select(selectedNotebook);
