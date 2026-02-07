@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import services.NoteService;
 import entity.NoteEntity;
 import util.NavigationUtil;
+import util.NoteSession;
 import util.UserSession;
 
 import java.net.URL;
@@ -140,21 +141,14 @@ public class CreateNoteController implements Initializable {
             }
 
             NoteEntity createdNote = noteService.createNote(title, content, annotation, selectedNotebook);
+            NoteSession.setLastCreatedNote(createdNote);
             showStatus("Note saved successfully!", false);
-            clearForm();
-            notebookComboBox.getSelectionModel().select(selectedNotebook);
 
-            // Refresh dashboard table
-            refreshDashboardTable();
-
+            Stage stage = (Stage) titleField.getScene().getWindow();
+            stage.close();
         } catch (Exception e) {
             showStatus("Error: " + e.getMessage(), true);
         }
-    }
-
-    private void refreshDashboardTable() {
-        Stage stage = (Stage) titleField.getScene().getWindow();
-        NavigationUtil.navigateTo(stage, "/FXML/view_dashboard.fxml", "NoteVault - Dashboard", true);
     }
 
     @FXML
