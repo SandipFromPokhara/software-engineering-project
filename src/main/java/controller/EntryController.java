@@ -28,7 +28,6 @@ public class EntryController {
 
     @FXML
     private void onContinueAsGuest(ActionEvent event) {
-        //System.out.println("Continue as guest clicked - navigating to Create Note");
         NavigationUtil.navigateTo(event, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
     }
 }
