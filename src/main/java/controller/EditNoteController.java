@@ -35,7 +35,7 @@ public class EditNoteController {
     @FXML
     private Button cancelButton;
 
-//    private NoteDAO noteDAO = new JpaNoteDao();
+    private NoteDAO noteDAO = new JpaNoteDao();
     private NoteEntity note;
 
 
@@ -52,7 +52,7 @@ public class EditNoteController {
         note.setTitle(titleBox.getText());
         note.setContent(contentBox.getText());
         note.setAnnotation(annotationBox.getText());
-//        noteDAO.save(note); //UPDATE
+        noteDAO.save(note); //UPDATE
         close();
     }
 

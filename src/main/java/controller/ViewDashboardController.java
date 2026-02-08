@@ -4,6 +4,9 @@ import dao.note.JpaNoteDao;
 import dao.notebook.JpaNoteBookDao;
 import entity.*;
 import javafx.concurrent.Task;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import util.NavigationUtil;
 import util.NoteSession;
 import util.UserSession;
@@ -15,6 +18,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -202,16 +206,34 @@ public class ViewDashboardController {
 
         loadNotes();
     }
-
     @FXML
     public void handleOpenEditWindow(ActionEvent event) {
         NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
         if (selectedNote == null) return;
 
-        Stage editStage = new Stage();
-        editStage.initModality(Modality.APPLICATION_MODAL);
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/FXML/edit.fxml")
+            );
 
-        NavigationUtil.navigateTo(editStage, "/FXML/edit.fxml", "NoteVault - Edit Note", true);
-        editStage.showAndWait();
+            Parent root = loader.load();
+
+            // Get controller and pass note
+            EditNoteController controller = loader.getController();
+            controller.setNote(selectedNote);
+
+            Stage editStage = new Stage();
+            editStage.initModality(Modality.APPLICATION_MODAL);
+            editStage.setTitle("NoteVault - Edit Note");
+            editStage.setScene(new Scene(root));
+            editStage.showAndWait();
+
+            // Refresh table after edit
+            loadNotes();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
 }

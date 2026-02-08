@@ -1,20 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.EditNoteController">
-   <children>
-      <Label fx:id="title" text="Title" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="10.0" />
-      <TextField fx:id="titleBox" layoutY="20.0" prefHeight="25.0" prefWidth="600.0" promptText="Enter your text title" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="30.0" />
-      <Label fx:id="content" layoutX="9.0" layoutY="51.0" text="Content" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="60.0" />
-      <TextArea fx:id="contentBox" layoutX="12.0" layoutY="72.0" prefHeight="208.0" prefWidth="579.0" promptText="Write your content here" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="80.0" />
-      <Label fx:id="annotation" layoutX="17.0" layoutY="296.0" text="Annotation" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="300.0" />
-      <TextField fx:id="annotationBox" layoutX="14.0" layoutY="313.0" prefHeight="33.0" prefWidth="560.0" promptText="Enter Annotation" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="320.0" />
-      <Button fx:id="updateButton" layoutX="20.0" layoutY="350.0" mnemonicParsing="false" onAction="#handleUpdate" text="Update" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="360.0" />
-      <Button fx:id="cancelButton" layoutX="535.0" layoutY="349.0" mnemonicParsing="false" onAction="#handleCancel" text="Cancel" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="360.0" />
-   </children>
-</AnchorPane>
+<BorderPane prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.EditNoteController">
+    <center>
+        <AnchorPane>
+            <children>
+                <VBox spacing="10" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+                    <VBox spacing="5">
+                        <Label fx:id="title" text="Title">
+                            <font>
+                                <Font name="System Bold" size="14" />
+                            </font>
+                        </Label>
+                        <TextField fx:id="titleBox" promptText="Enter your text title">
+                            <font>
+                                <Font size="14" />
+                            </font>
+                        </TextField>
+                    </VBox>
+                    <VBox spacing="5" VBox.vgrow="ALWAYS">
+                        <Label fx:id="content" text="Content">
+                            <font>
+                                <Font name="System Bold" size="14" />
+                            </font>
+                        </Label>
+                        <TextArea fx:id="contentBox" promptText="Write your content here" wrapText="true" VBox.vgrow="ALWAYS">
+                            <font>
+                                <Font size="14" />
+                            </font>
+                        </TextArea>
+                    </VBox>
+                    <VBox spacing="5">
+                        <Label fx:id="annotation" text="Annotation">
+                            <font>
+                                <Font name="System Bold" size="14" />
+                            </font>
+                        </Label>
+                        <TextField fx:id="annotationBox" promptText="Enter Annotation">
+                            <font>
+                                <Font size="14" />
+                            </font>
+                        </TextField>
+                    </VBox>
+                    <HBox alignment="BOTTOM_LEFT" spacing="50">
+                        <Button fx:id="updateButton" onAction="#handleUpdate" prefWidth="120" text="Update" />
+                        <Button fx:id="cancelButton" alignment="CENTER" contentDisplay="CENTER" onAction="#handleCancel" prefWidth="120.0" text="Cancel" />
+                    </HBox>
+                    <VBox.margin>
+                        <Insets bottom="20" left="25" right="25" top="15" />
+                    </VBox.margin>
+                </VBox>
+            </children>
+        </AnchorPane>
+    </center>
+
+</BorderPane>
