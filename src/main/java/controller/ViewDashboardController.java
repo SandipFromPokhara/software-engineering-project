@@ -205,6 +205,49 @@ public class ViewDashboardController {
 
     @FXML
     public void handleDelete(ActionEvent event) {
+        // Get the selected note
+        NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
+
+        if (selectedNote == null) {
+            return;
+        }
+
+        // Show confirmation dialog
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmDialog.setTitle("Delete Note");
+        confirmDialog.setHeaderText("Delete \"" + selectedNote.getTitle() + "\"?");
+        confirmDialog.setContentText("This action cannot be undone. Are you sure you want to delete this note?");
+        confirmDialog.initOwner(deleteButton.getScene().getWindow());
+
+        Optional<ButtonType> result = confirmDialog.showAndWait();
+
+        // If user confirms deletion
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                // Delete from database
+                noteDao.delete(selectedNote);
+
+                // Remove from table
+                notesTable.getItems().remove(selectedNote);
+
+                // Clear UI
+                noteTitleLabel.setText("Select a note to view");
+                noteViewArea.clear();
+                annotationViewArea.clear();
+                editButton.setDisable(true);
+                deleteButton.setDisable(true);
+
+            } catch (Exception e) {
+                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                errorAlert.setTitle("Error");
+                errorAlert.setHeaderText("Failed to delete note");
+                errorAlert.setContentText("An error occurred: " + e.getMessage());
+                errorAlert.initOwner(deleteButton.getScene().getWindow());
+                errorAlert.showAndWait();
+
+                e.printStackTrace();
+            }
+        }
     }
 
     @FXML
