@@ -106,4 +106,9 @@ public class UserEntity {
         notebooks.add(notebook);
         notebook.setUser(this);
     }
+
+    @Override
+    public String toString() {
+        return username;
+    }
 }

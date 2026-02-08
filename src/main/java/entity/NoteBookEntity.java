@@ -72,4 +72,9 @@ public class NoteBookEntity {
             user.getNoteBooks().add(this);
         }
     }
+
+    @Override
+    public String toString() {
+        return title;
+    }
 }

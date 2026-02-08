@@ -65,7 +65,7 @@ public class JpaUserDao implements UserDAO{
     public UserEntity findByEmail(String email) {
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
-            TypedQuery<UserEntity> query = em.createQuery("Select e from UserEntity e where e.email = :email", UserEntity.class);
+            TypedQuery<UserEntity> query = em.createQuery("Select u from UserEntity u where u.email = :email", UserEntity.class);
             query.setParameter("email", email);
             List<UserEntity> result = query.getResultList();
 

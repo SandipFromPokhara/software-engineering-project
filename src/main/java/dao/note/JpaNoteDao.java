@@ -1,6 +1,7 @@
 package dao.note;
 
 import datasource.MariaDbJpaConnection;
+import entity.NoteBookEntity;
 import entity.NoteEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -51,8 +52,22 @@ public class JpaNoteDao implements NoteDAO{
 
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
-            TypedQuery<NoteEntity> query = em.createQuery("Select n from NoteEntity n where n.title= :title", NoteEntity.class);
+            TypedQuery<NoteEntity> query = em.createQuery("Select n from NoteEntity n where n.title = :title", NoteEntity.class);
             query.setParameter("title", title);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<NoteEntity> findByNotebook(NoteBookEntity notebook) {
+
+        if (notebook == null) throw new IllegalArgumentException("Notebook cannot be null");
+        EntityManager em = MariaDbJpaConnection.createEntityManager();
+        try {
+            TypedQuery<NoteEntity> query = em.createQuery("Select n from NoteEntity n where n.notebook = :notebook", NoteEntity.class);
+            query.setParameter("notebook", notebook);
             return query.getResultList();
         } finally {
             em.close();

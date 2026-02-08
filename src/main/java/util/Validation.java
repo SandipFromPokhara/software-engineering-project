@@ -17,15 +17,6 @@ public class Validation {
             return false;
         }
 
-        // Validate name formats (allow Nordic chars, spaces, slashes)
-        if (!validateName(firstName, "First name", messageLabel)) {
-            return false;
-        }
-
-        if (!validateName(lastName, "Last name", messageLabel)) {
-            return false;
-        }
-
         // Validate username format
         if (!validateUsername(username, messageLabel)) {
             return false;
@@ -41,7 +32,7 @@ public class Validation {
             return false;
         }
 
-        // Validate password strength (length, number, special chars)
+        // Validate password length
         if (!validatePasswordStrength(password, messageLabel)) {
             return false;
         }
