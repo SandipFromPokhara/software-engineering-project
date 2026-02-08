@@ -24,6 +24,7 @@ public class CreateFilesGuestController {
 
     @FXML
     private void handleCancel(){
+
         // Clear all input fields
         if (titleBox != null) {
             titleBox.clear();

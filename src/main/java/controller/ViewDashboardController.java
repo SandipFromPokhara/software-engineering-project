@@ -213,7 +213,6 @@ public class ViewDashboardController {
         NavigationUtil.navigateTo(createStage, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
         loadNotes();
     }
-
     @FXML
     public void handleOpenEditWindow() {
         NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
@@ -265,4 +264,5 @@ public class ViewDashboardController {
         );
         about.showAndWait();
     }
+
 }

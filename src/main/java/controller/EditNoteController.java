@@ -16,10 +16,8 @@ public class EditNoteController {
 
     @FXML
     private Label title;
-
     @FXML
     private TextField titleBox;
-
     @FXML
     private Label content;
 
@@ -38,7 +36,7 @@ public class EditNoteController {
     @FXML
     private Button cancelButton;
 
-//    private NoteDAO noteDAO = new JpaNoteDao();
+    private NoteDAO noteDAO = new JpaNoteDao();
     private NoteEntity note;
 
 
@@ -47,7 +45,6 @@ public class EditNoteController {
         titleBox.setText(note.getTitle());
         contentBox.setText(note.getContent());
         annotationBox.setText(note.getAnnotation());
-
     }
 
     @FXML
