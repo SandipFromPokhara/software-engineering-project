@@ -265,4 +265,10 @@ public class ViewDashboardController {
         );
         about.showAndWait();
     }
+
+    @FXML
+    public void handleClose(ActionEvent actionEvent) {
+        Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+        stage.close();
+    }
 }
