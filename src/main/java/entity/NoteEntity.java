@@ -2,6 +2,7 @@ package entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name="notes")
@@ -78,5 +79,10 @@ public class NoteEntity {
     @Override
     public String toString() {
         return title;
+    }
+
+    public String getFormattedCreatedTime() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        return createdAt != null ? createdAt.format(formatter) : "";
     }
 }
