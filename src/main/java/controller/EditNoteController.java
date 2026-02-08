@@ -11,6 +11,9 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 public class EditNoteController {
+
+    private JpaNoteDao noteDao = new JpaNoteDao();
+
     @FXML
     private Label title;
 
@@ -52,7 +55,7 @@ public class EditNoteController {
         note.setTitle(titleBox.getText());
         note.setContent(contentBox.getText());
         note.setAnnotation(annotationBox.getText());
-//        noteDAO.save(note); //UPDATE
+        noteDao.save(note);
         close();
     }
 
