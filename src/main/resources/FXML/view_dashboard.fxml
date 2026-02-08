@@ -8,6 +8,7 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -36,6 +37,7 @@
                         <MenuItem mnemonicParsing="false" text="New Note" />
                         <MenuItem mnemonicParsing="false" text="Save" />
                         <MenuItem mnemonicParsing="false" text="Export" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
                     <MenuItem mnemonicParsing="false" text="Close" />
                   </items>
                 </Menu>
@@ -48,12 +50,12 @@
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="About" />
+                    <MenuItem mnemonicParsing="false" onAction="#showAbout" text="About" />
                   </items>
                 </Menu>
               </menus>
             </MenuBar>
-            <Label fx:id="welcomeLabel" contentDisplay="CENTER" prefHeight="17.0" prefWidth="126.0" HBox.hgrow="ALWAYS">
+            <Label fx:id="welcomeLabel" contentDisplay="CENTER" prefHeight="17.0" prefWidth="126.0" style="-fx-background-color: #f7f5f0;" HBox.hgrow="ALWAYS">
                <font>
                   <Font name="Arial Italic" size="10.0" />
                </font>
@@ -68,23 +70,23 @@
       </HBox>
    </top>
    <left>
-      <VBox alignment="TOP_CENTER" prefHeight="364.0" prefWidth="98.0" spacing="10.0" style="-fx-background-color: #9bbab0;">
+      <VBox alignment="TOP_CENTER" prefHeight="373.0" prefWidth="98.0" spacing="10.0" style="-fx-background-color: #9bbab0;">
          <children>
             <Button fx:id="viewNotesBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleOpen" prefHeight="105.0" prefWidth="108.0" style="-fx-content-display: LEFT; -fx-background-color: transparent; -fx-cursor: hand; -fx-background-insets: 0; -fx-padding: 8 12; -fx-background-radius: 6;">
                <graphic>
-                  <StackPane prefHeight="150.0" prefWidth="200.0">
+                  <StackPane prefHeight="60.0" prefWidth="85.0">
                      <children>
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@/Images/open-folder.png" />
                            </image>
                         </ImageView>
-                        <Label fx:id="viewNotesLabel" style="-fx-background-color: #00003b;" text="Open" textFill="WHITE" visible="false" StackPane.alignment="TOP_RIGHT">
+                        <Label fx:id="viewNotesLabel" alignment="TOP_LEFT" style="-fx-background-color: #00003b;" text="Open Notebook" textFill="WHITE" visible="false" StackPane.alignment="TOP_RIGHT">
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
                            <font>
-                              <Font name="System Bold" size="10.0" />
+                              <Font name="System Bold" size="9.0" />
                            </font>
                         </Label>
                      </children>
@@ -100,7 +102,7 @@
                               <Image url="@/Images/create-file.png" />
                            </image>
                         </ImageView>
-                        <Label fx:id="createNoteLabel" style="-fx-background-color: #00003b;" text="Create" textFill="WHITE" visible="false" StackPane.alignment="TOP_RIGHT">
+                        <Label fx:id="createNoteLabel" alignment="TOP_CENTER" style="-fx-background-color: #00003b;" text="Create Notes" textFill="WHITE" visible="false" StackPane.alignment="TOP_RIGHT">
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
@@ -115,14 +117,14 @@
             <Region prefHeight="34.0" prefWidth="108.0" VBox.vgrow="ALWAYS" />
             <Button fx:id="settingsBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="105.0" prefWidth="108.0" style="-fx-content-display: LEFT; -fx-background-color: transparent; -fx-cursor: hand;">
                <graphic>
-                  <StackPane prefHeight="150.0" prefWidth="200.0">
+                  <StackPane prefHeight="150.0" prefWidth="300.0">
                      <children>
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@/Images/settings.png" />
                            </image>
                         </ImageView>
-                        <Label fx:id="settingsLabel" style="-fx-background-color: #00003b;" text="Settings" textFill="WHITE" visible="false" StackPane.alignment="TOP_RIGHT">
+                        <Label fx:id="settingsLabel" alignment="TOP_LEFT" style="-fx-background-color: #00003b;" text="Settings" textFill="WHITE" visible="false" StackPane.alignment="TOP_RIGHT">
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
@@ -143,7 +145,7 @@
                               <Image url="@/Images/logout.png" />
                            </image>
                         </ImageView>
-                        <Label fx:id="logoutLabel" style="-fx-background-color: #00003b;" text="Logout" textFill="WHITE" visible="false" StackPane.alignment="TOP_RIGHT">
+                        <Label fx:id="logoutLabel" alignment="TOP_LEFT" style="-fx-background-color: #00003b;" text="Logout" textFill="WHITE" visible="false" StackPane.alignment="TOP_RIGHT">
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
@@ -162,17 +164,17 @@
       </VBox>
    </left>
    <center>
-      <SplitPane dividerPositions="0.4" style="-fx-box-border: transparent;">
+      <SplitPane dividerPositions="0.55" style="-fx-box-border: transparent;">
         <items>
-          <AnchorPane minWidth="250.0">
+          <AnchorPane>
                <children>
                    <TableView fx:id="notesTable" style="-fx-background-color: white;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                        <columnResizePolicy>
                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                        </columnResizePolicy>
                        <columns>
-                           <TableColumn fx:id="titleColumn" prefWidth="150" text="Title" />
-                           <TableColumn fx:id="dateColumn" prefWidth="100" text="Date" />
+                           <TableColumn fx:id="titleColumn" maxWidth="400.0" prefWidth="175.0" style="-fx-padding: 4;" text="Title" />
+                           <TableColumn fx:id="dateColumn" maxWidth="200.0" prefWidth="150.0" style="-fx-padding: 4;" text="Date" />
                       </columns>
                   </TableView>
                </children></AnchorPane>
@@ -187,11 +189,21 @@
                                 </children>
                             </HBox>
 
-                            <Label fx:id="noteTitleLabel" style="-fx-font-size: 24; -fx-font-weight: bold;" text="Note Title" />
+                            <Label fx:id="noteTitleLabel" style="-fx-font-size: 14; -fx-font-weight: bold;" text="Note Title" />
 
                             <Separator />
 
-                            <TextArea fx:id="noteViewArea" editable="false" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; -fx-font-size: 16;" wrapText="true" VBox.vgrow="ALWAYS" />
+                            <TextArea fx:id="noteViewArea" editable="false" prefHeight="511.0" prefWidth="204.0" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; -fx-font-size: 16;" wrapText="true" VBox.vgrow="ALWAYS" />
+                        <VBox prefHeight="200.0" prefWidth="100.0">
+                           <children>
+                              <Label text="Annotation:" />
+                              <TextArea fx:id="annotationViewArea" editable="false" prefHeight="22.0" prefWidth="204.0" style="-fx-background-color: transparent;" wrapText="true">
+                                 <VBox.margin>
+                                    <Insets top="5.0" />
+                                 </VBox.margin>
+                              </TextArea>
+                           </children>
+                        </VBox>
                         </children>
                     </VBox>
                 </children>

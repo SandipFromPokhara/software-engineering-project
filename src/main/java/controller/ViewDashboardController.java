@@ -7,6 +7,7 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Modality;
 import util.NavigationUtil;
 import util.NoteSession;
 import util.UserSession;
@@ -15,7 +16,6 @@ import javafx.fxml.FXML;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -27,6 +27,9 @@ public class ViewDashboardController {
     private NoteBookEntity activeNotebook;
     private JpaNoteBookDao notebookDao;
     private JpaNoteDao noteDao;
+
+    @FXML
+    private Label welcomeLabel;
 
     @FXML
     private Button viewNotesBtn, createNoteBtn, settingsBtn, logoutBtn;
@@ -56,7 +59,7 @@ public class ViewDashboardController {
     private TextArea noteViewArea;
 
     @FXML
-    private Label welcomeLabel;
+    private TextArea annotationViewArea;
 
     @FXML
     public void initialize() {
@@ -65,7 +68,7 @@ public class ViewDashboardController {
 
         UserEntity user = UserSession.getUserInstance().getUser();
         if (user != null) {
-            welcomeLabel.setText("Welcome, " + user.getUsername());
+            welcomeLabel.setText("Welcome, " + user.getFirstName());
         }
 
         Task<List<NoteBookEntity>> loadNotebooksTask = new Task<>() {
@@ -92,22 +95,25 @@ public class ViewDashboardController {
 
         editButton.setDisable(true);
         deleteButton.setDisable(true);
-        noteTitleLabel.setText("Select a note to view details");
+        noteTitleLabel.setText("Select a note to view");
         noteViewArea.setText("");
 
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("createdTime"));
+        dateColumn.setCellValueFactory(new PropertyValueFactory<>("formattedCreatedTime"));
 
         notesTable.getSelectionModel().selectedItemProperty().addListener((observable, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 noteTitleLabel.setText(newSelection.getTitle());
                 noteViewArea.setText(newSelection.getContent());
+                annotationViewArea.setText(newSelection.getAnnotation());
 
                 editButton.setDisable(false);
                 deleteButton.setDisable(false);
             } else {
                 noteTitleLabel.setText("Select a note to view details");
                 noteViewArea.clear();
+                annotationViewArea.clear();
                 editButton.setDisable(true);
                 deleteButton.setDisable(true);
             }
@@ -189,7 +195,12 @@ public class ViewDashboardController {
 
     @FXML
     private void handleLogout(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/entry.fxml", "Welcome", false);
+        Stage currentStage = (Stage) logoutBtn.getScene().getWindow();
+
+        Stage entryStage = new Stage();
+        NavigationUtil.navigateTo(entryStage, "/FXML/entry.fxml", "Welcome To NoteVault", false);
+
+        currentStage.close();
     }
 
     @FXML
@@ -198,16 +209,12 @@ public class ViewDashboardController {
 
     @FXML
     public void handleCreate(ActionEvent event) {
-
         Stage createStage = new Stage();
-        createStage.initModality(Modality.APPLICATION_MODAL);
-
         NavigationUtil.navigateTo(createStage, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
-
         loadNotes();
     }
     @FXML
-    public void handleOpenEditWindow(ActionEvent event) {
+    public void handleOpenEditWindow() {
         NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
         if (selectedNote == null) return;
 
@@ -234,6 +241,28 @@ public class ViewDashboardController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    public void showAbout() {
+        Alert about = new Alert(Alert.AlertType.INFORMATION);
+        about.setTitle("About");
+        about.setHeaderText("NoteVault - Notebook Manager\n" + "Version 0.1");
+
+        about.setContentText(
+                "A simple notebook and note management application.\n\n" +
+                        "Developed by:\n" +
+                        "  Dinal Maha Vidanelage\n" +
+                        "  Sandip Ranjit\n" +
+                        "  Swostika Lama\n" +
+                        "  Twe He Gam\n\n" +
+                        "Software Engineering DevOps Project 2026\n" +
+                        "Metropolia University of Applied Sciences\n\n" +
+                        "Technologies:\n" +
+                        "  Docker, Java, JavaFX, JPA (Hibernate), JUni5\n" +
+                        "  Jenkins, Kubernetes, MariaDB"
+        );
+        about.showAndWait();
     }
 
 }

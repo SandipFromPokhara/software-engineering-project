@@ -8,6 +8,7 @@ import javafx.concurrent.Task;
 
 import entity.UserEntity;
 import dao.user.JpaUserDao;
+import javafx.stage.Stage;
 import services.UserService;
 import util.NavigationUtil;
 import util.UserSession;
@@ -55,7 +56,7 @@ public class LoginController {
     }
 
     @FXML
-    private void handleLogin(ActionEvent event) {
+    private void handleLogin() {
         String username = getUsername();
         String password = getPassword();
 
@@ -72,7 +73,8 @@ public class LoginController {
             UserEntity authenticatedUser = loginTask.getValue();
             if (authenticatedUser != null) {
                 UserSession.getUserInstance().setUser(authenticatedUser);
-                NavigationUtil.navigateTo(event, "/FXML/view_dashboard.fxml", "User Dashboard", true);
+                Stage stage = (Stage) loginButton.getScene().getWindow();
+                NavigationUtil.navigateTo(stage, "/FXML/view_dashboard.fxml", "User Dashboard", true);
             } else {
                 loginButton.setDisable(false);
                 statusLabel.setTextFill(Color.RED);
@@ -92,6 +94,9 @@ public class LoginController {
         usernameField.textProperty().addListener((observable, oldValue, newValue) -> checkFields());
 
         passwordField.textProperty().addListener((observable, oldValue, newValue) -> checkFields());
+
+        usernameField.setOnAction(e -> handleLogin());
+        passwordField.setOnAction(e -> handleLogin());
     }
 
     @FXML
