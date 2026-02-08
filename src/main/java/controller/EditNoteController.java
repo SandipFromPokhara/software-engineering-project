@@ -13,10 +13,8 @@ import javafx.stage.Stage;
 public class EditNoteController {
     @FXML
     private Label title;
-
     @FXML
     private TextField titleBox;
-
     @FXML
     private Label content;
 
@@ -44,7 +42,6 @@ public class EditNoteController {
         titleBox.setText(note.getTitle());
         contentBox.setText(note.getContent());
         annotationBox.setText(note.getAnnotation());
-
     }
 
     @FXML
@@ -52,7 +49,7 @@ public class EditNoteController {
         note.setTitle(titleBox.getText());
         note.setContent(contentBox.getText());
         note.setAnnotation(annotationBox.getText());
-        noteDAO.save(note); //UPDATE
+        noteDAO.save(note);  //UPDATE
         close();
     }
 
