@@ -41,11 +41,7 @@ public class GuestDashboardController {
 
     @FXML
     private void handleHome(ActionEvent event) {
-        NavigationUtil.navigateTo(
-                event,
-                "/FXML/entry.fxml",
-                "Welcome to NoteVault",
-                false
+        NavigationUtil.navigateTo(event, "/FXML/entry.fxml", "Welcome to NoteVault", false
         );
     }
 
@@ -91,11 +87,7 @@ public class GuestDashboardController {
 
     @FXML
     private void handleSignUp(ActionEvent event) {
-        NavigationUtil.navigateTo(
-                event,
-                "/FXML/signup.fxml",
-                "NoteVault - Register",
-                false
+        NavigationUtil.navigateTo(event, "/FXML/signup.fxml", "NoteVault - Register", false
         );
 
     }

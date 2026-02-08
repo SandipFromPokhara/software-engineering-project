@@ -33,6 +33,9 @@ public class NoteModel {
 
     public void setContent(String content) { this.content = content; }
 
+    public String getAnnotation(){return annotation;}
+    public void setAnnotation(String annotation) {this.annotation = annotation ;}
+
     /**
      * Updates new content and syncs last created or modified timestamp.
      */
@@ -48,6 +51,8 @@ public class NoteModel {
     public void setNotebook(NoteBookModel notebook) { this.notebook = notebook; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
+
+    public LocalDateTime getUpdatedAt(){ return updatedAt ;}
 
     @Override
     public String toString() {
