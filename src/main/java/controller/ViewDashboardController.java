@@ -215,7 +215,7 @@ public class ViewDashboardController {
     }
 
     @FXML
-    public void handleOpenEditWindow(ActionEvent event) {
+    public void handleOpenEditWindow() {
         NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
         if (selectedNote == null) return;
 
