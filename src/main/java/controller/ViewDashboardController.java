@@ -190,7 +190,12 @@ public class ViewDashboardController {
 
     @FXML
     private void handleLogout(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/entry.fxml", "Welcome", false);
+        Stage currentStage = (Stage) logoutBtn.getScene().getWindow();
+
+        Stage entryStage = new Stage();
+        NavigationUtil.navigateTo(entryStage, "/FXML/entry.fxml", "Welcome To NoteVault", false);
+
+        currentStage.close();
     }
 
     @FXML
