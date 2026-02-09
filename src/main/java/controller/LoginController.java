@@ -11,7 +11,7 @@ import dao.user.JpaUserDao;
 import javafx.stage.Stage;
 import services.UserService;
 import util.NavigationUtil;
-import util.UserSession;
+import session.UserSession;
 
 public class LoginController {
 

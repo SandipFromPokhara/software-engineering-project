@@ -9,10 +9,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
+import session.NotebookSession;
 import util.DialogUtil;
 import util.NavigationUtil;
-import util.NoteSession;
-import util.UserSession;
+import session.NoteSession;
+import session.UserSession;
 
 import javafx.fxml.FXML;
 import javafx.event.ActionEvent;
@@ -73,32 +74,13 @@ public class ViewDashboardController {
             welcomeLabel.setText("Welcome, " + user.getFirstName());
         }
 
-        Task<List<NoteBookEntity>> loadNotebooksTask = new Task<>() {
-            @Override
-            protected List<NoteBookEntity> call() {
-                return notebookDao.findByUser(user);
-            }
-        };
-
-        loadNotebooksTask.setOnSucceeded(e -> {
-            List<NoteBookEntity> notebooks = loadNotebooksTask.getValue();
-            if (welcomeLabel != null && welcomeLabel.getScene() != null && welcomeLabel.getScene().getWindow() != null) {
-                Stage stage = (Stage) welcomeLabel.getScene().getWindow();
-                if (notebooks.isEmpty()) {
-                    NavigationUtil.navigateTo(stage, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
-                } else {
-                    activeNotebook = notebooks.get(0);
-                    loadNotes();
-                }
-            }
-        });
-
-        new Thread(loadNotebooksTask).start();
+        loadNotebooks();
 
         editButton.setDisable(true);
         deleteButton.setDisable(true);
         noteTitleLabel.setText("Select a note to view");
-        noteViewArea.setText("");
+        noteViewArea.clear();
+        annotationViewArea.clear();
 
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("formattedCreatedTime"));
@@ -127,6 +109,53 @@ public class ViewDashboardController {
         setupHover(logoutBtn, logoutLabel);
     }
 
+    private void loadNotebooks() {
+
+        UserEntity user = UserSession.getUserInstance().getUser();
+
+        Task<List<NoteBookEntity>> loadNotebooksTask = new Task<>() {
+            @Override
+            protected List<NoteBookEntity> call() {
+                return notebookDao.findByUser(user);
+            }
+        };
+
+        loadNotebooksTask.setOnSucceeded(e -> {
+            List<NoteBookEntity> notebooks = loadNotebooksTask.getValue();
+
+            if (notebooks.isEmpty()) {
+
+                Stage createStage = new Stage();
+                NavigationUtil.navigateTo(createStage, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
+
+                createStage.setOnHidden(ev -> {
+                    loadNotebooks();
+                });
+
+            } else {
+                NoteBookEntity lastCreated = NotebookSession.getLastCreatedNotebook();
+
+                if (lastCreated != null) {
+                    for (NoteBookEntity nb : notebooks) {
+                        if (nb.getId().equals(lastCreated.getId())) {
+                            activeNotebook = nb;
+                            break;
+                        }
+                    }
+                    NotebookSession.clear();
+                }
+
+                if (activeNotebook == null && !notebooks.isEmpty()) {
+                    activeNotebook = notebooks.get(0);
+                }
+
+                loadNotes();
+            }
+        });
+
+        new Thread(loadNotebooksTask).start();
+    }
+
     private void loadNotes() {
         if (activeNotebook == null) return;
 
@@ -141,8 +170,6 @@ public class ViewDashboardController {
             List<NoteEntity> notes = loadNotesTask.getValue();
 
             notesTable.getItems().setAll(notes);
-
-            // notesTable.setItems(FXCollections.observableArrayList(notes));
 
             if (!notes.isEmpty()) {
                 notesTable.getSelectionModel().selectFirst();
