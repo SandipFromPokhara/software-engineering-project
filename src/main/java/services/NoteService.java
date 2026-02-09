@@ -19,6 +19,11 @@ public class NoteService {
         this.notebookDao = new JpaNoteBookDao();
     }
 
+    public NoteService(JpaNoteDao noteDao, JpaNoteBookDao notebookDao) {
+        this.noteDao = noteDao;
+        this.notebookDao = notebookDao;
+    }
+
     /**
      * Creates a new note with title, content, and annotation
      */
