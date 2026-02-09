@@ -41,16 +41,9 @@ public class NoteModel {
         this.content = content;
     }
 
-    public String getAnnotation() {
-        return annotation;
-    }
+    public String getAnnotation() { return annotation; }
 
-    public void setAnnotation(String annotation) {
-        this.annotation = annotation;
-    }
-
-    public String getAnnotation(){return annotation;}
-    public void setAnnotation(String annotation) {this.annotation = annotation ;}
+    public void setAnnotation(String annotation) { this.annotation = annotation; }
 
     /**
      * Updates new content and syncs last created or modified timestamp.
