@@ -24,6 +24,14 @@ public class SignUpController {
     @FXML private Label messageLabel;
     @FXML private Button backButton;
 
+    @FXML
+    private Button backButton;
+
+    @FXML
+    private void handleBack(ActionEvent event) {
+        NavigationUtil.navigateTo(event, "/FXML/entry.fxml", "Welcome to NoteVault", false);
+    }
+
     private UserDAO userDAO;
 
     public SignUpController() {
@@ -119,7 +127,7 @@ public class SignUpController {
     }
 
     private void navigateToLogin(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/login_view.fxml", "Login", false);
+        NavigationUtil.navigateTo(event, "/FXML/login_view.fxml", "NoteVault - LogIn", false);
     }
 
     private void clearFields() {

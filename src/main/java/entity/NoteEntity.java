@@ -2,6 +2,7 @@ package entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name="notes")
@@ -16,6 +17,9 @@ public class NoteEntity {
 
     @Column(name="content")
     private String content;
+
+    @Column(name="annotation")
+    private String annotation;
 
     @Column(name="createdAt")
     private LocalDateTime createdAt;
@@ -38,9 +42,10 @@ public class NoteEntity {
         updatedAt = LocalDateTime.now();
     }
 
-    public NoteEntity(String title, String content) {
+    public NoteEntity(String title, String content, String annotation) {
         this.title = title;
         this.content = content;
+        this.annotation = annotation;
     }
 
     public NoteEntity() {}
@@ -50,6 +55,10 @@ public class NoteEntity {
     public String getTitle() { return title; }
 
     public String getContent() { return content; }
+
+    public String getAnnotation() { return annotation; }
+
+    public NoteBookEntity getNotebook() { return notebook; }
 
     public LocalDateTime getCreatedTime() { return createdAt; }
 
@@ -63,11 +72,17 @@ public class NoteEntity {
         this.content = newContent;
     }
 
-    public NoteBookEntity getNotebook() {
-        return notebook;
+    public void setAnnotation(String newAnnotation) { this.annotation = newAnnotation; }
+
+    public void setNotebook(NoteBookEntity notebook) { this.notebook = notebook; }
+
+    @Override
+    public String toString() {
+        return title;
     }
 
-    public void setNotebook(NoteBookEntity notebook) {
-        this.notebook = notebook;
+    public String getFormattedCreatedTime() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        return createdAt != null ? createdAt.format(formatter) : "";
     }
 }

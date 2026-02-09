@@ -1,17 +1,17 @@
 package controller;
 
-import dao.user.JpaUserDao;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.scene.control.*;
 import javafx.fxml.FXML;
-
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.paint.Color;
-import javafx.scene.control.TextField;
+import javafx.event.ActionEvent;
+import javafx.concurrent.Task;
+
+import entity.UserEntity;
+import dao.user.JpaUserDao;
+import javafx.stage.Stage;
 import services.UserService;
 import util.NavigationUtil;
+import util.UserSession;
 
 public class LoginController {
 
@@ -29,6 +29,14 @@ public class LoginController {
 
     @FXML
     private Label statusLabel;
+
+    @FXML
+    private Button backButton;
+
+    @FXML
+    private void handleBack(ActionEvent event) {
+        NavigationUtil.navigateTo(event, "/FXML/entry.fxml", "Welcome to NoteVault", false);
+    }
 
     @FXML
     private Hyperlink signupLink;
@@ -56,28 +64,31 @@ public class LoginController {
     }
 
     @FXML
-    private void handleLogin(ActionEvent event) {
+    private void handleLogin() {
         String username = getUsername();
         String password = getPassword();
 
         loginButton.setDisable(true);
 
-        Task<Boolean> loginTask = new Task<>() {
+        Task<UserEntity> loginTask = new Task<>() {
             @Override
-            protected Boolean call() throws Exception {
+            protected UserEntity call() throws Exception {
                 return userService.login(username, password);
             }
         };
 
         loginTask.setOnSucceeded(e -> {
-            boolean authenticated = loginTask.getValue();
-            if (authenticated) {
-                NavigationUtil.navigateTo(event, "/FXML/view_dashboard.fxml", "User Dashboard", true);
+            UserEntity authenticatedUser = loginTask.getValue();
+            if (authenticatedUser != null) {
+                UserSession.getUserInstance().setUser(authenticatedUser);
+                Stage stage = (Stage) loginButton.getScene().getWindow();
+                NavigationUtil.navigateTo(stage, "/FXML/view_dashboard.fxml", "User Dashboard", true);
             } else {
+                loginButton.setDisable(false);
                 statusLabel.setTextFill(Color.RED);
                 statusLabel.setText("Invalid username or password");
+                statusLabel.setVisible(true);
             }
-            statusLabel.setVisible(true);
         });
         new Thread(loginTask).start();
     }
@@ -91,10 +102,13 @@ public class LoginController {
         usernameField.textProperty().addListener((observable, oldValue, newValue) -> checkFields());
 
         passwordField.textProperty().addListener((observable, oldValue, newValue) -> checkFields());
+
+        usernameField.setOnAction(e -> handleLogin());
+        passwordField.setOnAction(e -> handleLogin());
     }
 
     @FXML
     private void handleSignUp(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/signup.fxml", "SignUp window", false);
+        NavigationUtil.navigateTo(event, "/FXML/signup.fxml", "NoteVault - Register", false);
     }
 }

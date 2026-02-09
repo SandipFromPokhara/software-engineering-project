@@ -25,17 +25,17 @@
    <center>
       <AnchorPane prefHeight="400.0" prefWidth="300.0" style="-fx-background-color: #ebf4f5;" BorderPane.alignment="CENTER">
          <children>
-            <Label layoutX="120.0" layoutY="70.0" prefHeight="42.0" prefWidth="88.0" text="Hello!" textFill="#297883" textOverrun="CLIP">
+            <Label layoutX="120.0" layoutY="57.0" prefHeight="42.0" prefWidth="88.0" text="Hello!" textFill="#297883" textOverrun="CLIP">
                <font>
                   <Font name="Brush Script MT Italic" size="39.0" />
                </font>
             </Label>
-            <Label layoutX="75.0" layoutY="112.0" prefHeight="35.0" prefWidth="170.0" text="Welcome to Note Vault" textFill="#307494">
+            <Label layoutX="75.0" layoutY="101.0" prefHeight="35.0" prefWidth="170.0" text="Welcome to Note Vault" textFill="#307494">
                <font>
-                  <Font name="Songti TC Bold" size="17.0" />
+                  <Font name="System Italic" size="16.0" />
                </font>
             </Label>
-            <VBox layoutX="95.0" layoutY="162.0" prefHeight="120.0" prefWidth="129.0" spacing="12.0">
+            <VBox layoutX="95.0" layoutY="162.0" prefHeight="120.0" prefWidth="129.0" spacing="18.0">
                <children>
                   <Button fx:id="loginButton" mnemonicParsing="false" onAction="#onLogin" prefHeight="26.0" prefWidth="118.0" style="-fx-background-color: #266973; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-border-radius: 6;" text="Login">
                      <font>

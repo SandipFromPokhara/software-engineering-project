@@ -18,7 +18,7 @@
     <left>
         <AnchorPane prefHeight="400.0" prefWidth="241.0" BorderPane.alignment="CENTER">
             <children>
-                <ImageView fitHeight="400.0" fitWidth="283.0" layoutX="-1.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-4.0" AnchorPane.topAnchor="0.0">
+                <ImageView fitHeight="400.0" fitWidth="283.0" layoutY="0.19999999999999996" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="-0.19999999999998863" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-2.761688232421875" AnchorPane.topAnchor="0.19999999999999996">
                     <image>
                         <Image url="@../Images/left-image.png" />
                     </image>
@@ -42,10 +42,10 @@
                 </Label>
                 <Label alignment="CENTER" layoutX="49.0" layoutY="74.0" prefHeight="35.0" prefWidth="237.0" text="Please Login to access your notes." textFill="#307494">
                     <font>
-                        <Font size="14.0" />
+                        <Font name="System Italic" size="14.0" />
                     </font>
                 </Label>
-                <VBox layoutX="54.0" layoutY="132.0" prefHeight="128.0" prefWidth="220.0" spacing="15.0">
+                <VBox layoutX="54.0" layoutY="132.0" prefHeight="128.0" prefWidth="220.0" spacing="20.0">
                     <children>
                         <TextField fx:id="usernameField" alignment="CENTER" prefHeight="30.0" prefWidth="150.0" promptText="Username" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-padding: 6 10 6 10; -fx-border-color: rgba(37,105,115,0.18); -fx-background-color: white;">
                             <font>
@@ -68,19 +68,22 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                     </padding>
                 </VBox>
-            <Label fx:id="statusLabel" layoutX="145.0" layoutY="313.0" AnchorPane.bottomAnchor="70.0" />
-                <!-- Sign-up prompt placed outside the form VBox -->
-                <HBox alignment="CENTER_LEFT" layoutX="80.0" layoutY="290.0" spacing="6.0" />
-                <Label layoutX="76.0" layoutY="318.0" prefHeight="17.0" prefWidth="129.0" text="Don't have an account?" textFill="#455a64">
+                <Label fx:id="statusLabel" layoutX="85.0" layoutY="313.0" prefHeight="18.0" prefWidth="174.0" AnchorPane.bottomAnchor="71.0" />
+                <Label layoutX="76.0" layoutY="343.0" prefHeight="17.0" prefWidth="129.0" text="Don't have an account?" textFill="#455a64">
                     <font>
                         <Font size="12.0" />
                     </font>
                 </Label>
-                <Hyperlink fx:id="signupLink" layoutX="203.0" layoutY="316.0" onAction="#handleSignUp" style="-fx-text-fill: #266973; -fx-font-weight: bold;" text="Sign up">
+                <Hyperlink fx:id="signupLink" layoutX="202.0" layoutY="340.0" onAction="#handleSignUp" style="-fx-text-fill: #266973; -fx-font-weight: bold;" text="Sign up">
                     <font>
                         <Font size="12.0" />
                     </font>
                 </Hyperlink>
+                <Button fx:id="backButton" layoutX="128.0" layoutY="364.0" mnemonicParsing="false" onAction="#handleBack" style="-fx-cursor: hand; -fx-background-color: transparent; -fx-font-weight: bold;" text="← Back" textFill="#324326">
+                    <font>
+                        <Font name="Bell MT" size="13.0" />
+                    </font>
+                </Button>
             </children>
         </AnchorPane>
     </center>
