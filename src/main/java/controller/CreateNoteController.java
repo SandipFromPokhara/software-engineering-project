@@ -11,9 +11,10 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import services.NoteService;
 import entity.NoteEntity;
+import session.NotebookSession;
 import util.NavigationUtil;
-import util.NoteSession;
-import util.UserSession;
+import session.NoteSession;
+import session.UserSession;
 
 import java.net.URL;
 import java.util.List;
@@ -117,6 +118,7 @@ public class CreateNoteController implements Initializable {
                         .map(name -> {
                             NoteBookEntity newNotebook = new NoteBookEntity(name, UserSession.getUserInstance().getUser());
                             newNotebook = new JpaNoteBookDao().save(newNotebook);
+                            NotebookSession.setLastCreatedNotebook(newNotebook);
                             // Add new notebook to ComboBox before "Create New"
                             notebookComboBox.getItems().removeIf(nb -> CREATE_NEW.equals(nb.getTitle()));
                             notebookComboBox.getItems().add(newNotebook);
