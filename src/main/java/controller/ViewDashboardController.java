@@ -3,6 +3,7 @@ package controller;
 import dao.note.JpaNoteDao;
 import dao.notebook.JpaNoteBookDao;
 import entity.*;
+import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
