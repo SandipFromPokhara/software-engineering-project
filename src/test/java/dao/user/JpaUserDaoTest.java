@@ -11,14 +11,14 @@ class JpaUserDaoTest {
     private static UserEntity testUser;
 
     @BeforeAll
-    static void setupBeforeClass() throws Exception {
+    static void setupBeforeClass() {
     dao = new JpaUserDao();
     }
 
     @BeforeEach
     void setUp() {
         String unique = String.valueOf(System.currentTimeMillis());
-        testUser = new UserEntity("Test", "User", "testuser" + unique, "testuser" + unique + "@example.com");
+        testUser = new UserEntity("Test", "User", "tester" + unique, "tester" + unique + "@example.com");
         dao.save(testUser);
     }
 
@@ -43,23 +43,37 @@ class JpaUserDaoTest {
     }
 
     @Test
-    void findUserByUsernameTest() {
+    void testFindById() {
         UserEntity retrievedUser = dao.findById(testUser.getId());
+
+        assertNotNull(retrievedUser);
+        assertEquals(testUser.getId(), retrievedUser.getId());
+    }
+
+    @Test
+    void testFindUserByUsername() {
+        UserEntity retrievedUser = dao.findByUsername(testUser.getUsername());
 
         assertNotNull(retrievedUser);
         assertEquals(testUser.getUsername(), retrievedUser.getUsername());
+
+        UserEntity notFound = dao.findByUsername("null_user");
+        assertNull(notFound);
     }
 
     @Test
-    void findUserByEmailTest() {
-        UserEntity retrievedUser = dao.findById(testUser.getId());
+    void testFindUserByEmail() {
+        UserEntity retrievedUser = dao.findByEmail(testUser.getEmail());
 
         assertNotNull(retrievedUser);
         assertEquals(testUser.getEmail(), retrievedUser.getEmail());
+
+        UserEntity notFound = dao.findByEmail("null@saveduser.com");
+        assertNull(notFound);
     }
 
     @Test
-    void updateUserInfoTest() {
+    void testUpdateUserInfo() {
         UserEntity retrievedUser = dao.findById(testUser.getId());
         retrievedUser.setFirstName("Test1");
         dao.update(retrievedUser);
@@ -68,7 +82,7 @@ class JpaUserDaoTest {
     }
 
     @Test
-    void deleteUserTest() {
+    void testDeleteUser() {
         UserEntity retrievedUser = dao.findById(testUser.getId());
         dao.delete(retrievedUser);
 
@@ -77,4 +91,17 @@ class JpaUserDaoTest {
         assertNull(deletedUser);
     }
 
+    @Test
+    void testSaveNullUser() {
+        assertThrows(IllegalArgumentException.class, () -> dao.save(null));
+    }
+
+    @Test
+    void testUpdateNullUser() {
+        assertThrows(IllegalArgumentException.class, () -> dao.update(null));
+    }
+    @Test
+    void testDeleteNullUser() {
+        assertThrows(IllegalArgumentException.class, () -> dao.delete(null));
+    }
 }
