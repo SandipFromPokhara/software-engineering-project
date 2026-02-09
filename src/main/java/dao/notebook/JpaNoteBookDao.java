@@ -88,7 +88,6 @@ public class JpaNoteBookDao implements NoteBookDAO{
         } finally {
             em.close();
         }
-
     }
 
     @Override
@@ -108,24 +107,6 @@ public class JpaNoteBookDao implements NoteBookDAO{
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
             throw new RuntimeException("Failed to delete notebook", e);
-        } finally {
-            em.close();
-        }
-    }
-
-
-    /**
-     * Finds notebook by user ID (efficient query)
-     */
-    public NoteBookEntity findByUserId(Long userId) {
-        if (userId == null) return null;
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        try {
-            TypedQuery<NoteBookEntity> query = em.createQuery(
-                    "SELECT n FROM NoteBookEntity n WHERE n.user.id = :userId", NoteBookEntity.class);
-            query.setParameter("userId", userId);
-            List<NoteBookEntity> results = query.getResultList();
-            return results.isEmpty() ? null : results.get(0);
         } finally {
             em.close();
         }
