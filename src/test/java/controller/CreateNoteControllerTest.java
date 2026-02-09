@@ -1,25 +1,31 @@
 package controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class CreateNoteControllerTest {
 
+    private CreateNoteController controller;
+
+    @BeforeEach
+    void setUp() {
+        controller = new CreateNoteController();
+    }
+
     @Test
-    void initialize() {
-        CreateNoteController controller = new CreateNoteController();
+    void createNoteControllerInstantiationTest() {
         assertNotNull(controller);
     }
 
     @Test
-    void handleSave() {
-        CreateNoteController controller = new CreateNoteController();
-        assertNotNull(controller);
-    }
+    void createNoteControllerMultipleInstancesTest() {
+        CreateNoteController controller1 = new CreateNoteController();
+        CreateNoteController controller2 = new CreateNoteController();
 
-    @Test
-    void handleClear() {
-        CreateNoteController controller = new CreateNoteController();
-        assertNotNull(controller);
+        assertNotNull(controller1);
+        assertNotNull(controller2);
+        assertNotSame(controller1, controller2);
     }
 }
