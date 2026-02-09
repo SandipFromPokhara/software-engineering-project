@@ -17,29 +17,53 @@ public class UserModel {
         this.passwordHash = passwordHash;
     }
 
-    public int getId() { return id; }
+    public int getId() {
+        return id;
+    }
 
-    public void setId(int id) { this.id = id; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public String getFirstName() { return this.firstName; }
+    public String getFirstName() {
+        return this.firstName;
+    }
 
-    public void setFirstName(String firstName) { this.firstName = firstName; }
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-    public String getLastName() { return this.lastName; }
+    public String getLastName() {
+        return this.lastName;
+    }
 
-    public void setLastName(String lastName) { this.lastName = lastName; }
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
-    public String getUsername() { return this.username; }
+    public String getUsername() {
+        return this.username;
+    }
 
-    public void setUsername(String username) { this.username = username; }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-    public String getEmail() { return this.email;}
+    public String getEmail() {
+        return this.email;
+    }
 
-    public void setEmail(String email) { this.email = email; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public String getPasswordHash() { return this.passwordHash; }
+    public String getPasswordHash() {
+        return this.passwordHash;
+    }
 
-    public void setPassword(String passwordHash) { this.passwordHash = passwordHash; }
+    public void setPassword(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
 
     @Override
     public String toString() {

@@ -8,9 +8,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
+import session.NotebookSession;
+import util.DialogUtil;
 import util.NavigationUtil;
-import util.NoteSession;
-import util.UserSession;
+import session.NoteSession;
+import session.UserSession;
 
 import javafx.fxml.FXML;
 import javafx.event.ActionEvent;
@@ -32,16 +34,20 @@ public class ViewDashboardController {
     private Label welcomeLabel;
 
     @FXML
-    private Button viewNotesBtn, createNoteBtn, settingsBtn, logoutBtn;
+    private Button viewNotesBtn,
+                   createNoteBtn,
+                   settingsBtn,
+                   logoutBtn;
 
     @FXML
-    private Label viewNotesLabel, createNoteLabel, settingsLabel, logoutLabel;
+    private Label viewNotesLabel,
+                  createNoteLabel,
+                  settingsLabel,
+                  logoutLabel;
 
     @FXML
-    private Button deleteButton;
-
-    @FXML
-    private Button editButton;
+    private Button deleteButton,
+                   editButton;
 
     @FXML
     private TableView<NoteEntity> notesTable;
@@ -56,10 +62,10 @@ public class ViewDashboardController {
     private Label noteTitleLabel;
 
     @FXML
-    private TextArea noteViewArea;
+    private TextArea noteViewArea,
+                     annotationViewArea;
 
-    @FXML
-    private TextArea annotationViewArea;
+    public ViewDashboardController() {}
 
     @FXML
     public void initialize() {
@@ -71,35 +77,15 @@ public class ViewDashboardController {
             welcomeLabel.setText("Welcome, " + user.getFirstName());
         }
 
-        Task<List<NoteBookEntity>> loadNotebooksTask = new Task<>() {
-            @Override
-            protected List<NoteBookEntity> call() {
-                return notebookDao.findByUser(user);
-            }
-        };
-
-        loadNotebooksTask.setOnSucceeded(e -> {
-            List<NoteBookEntity> notebooks = loadNotebooksTask.getValue();
-            if (welcomeLabel != null && welcomeLabel.getScene() != null && welcomeLabel.getScene().getWindow() != null) {
-                Stage stage = (Stage) welcomeLabel.getScene().getWindow();
-                if (notebooks.isEmpty()) {
-                    NavigationUtil.navigateTo(stage, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
-                } else {
-                    activeNotebook = notebooks.get(0);
-                    loadNotes();
-                }
-            }
-        });
-
-        new Thread(loadNotebooksTask).start();
+        loadNotebooks();
 
         editButton.setDisable(true);
         deleteButton.setDisable(true);
         noteTitleLabel.setText("Select a note to view");
-        noteViewArea.setText("");
+        noteViewArea.clear();
+        annotationViewArea.clear();
 
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("createdTime"));
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("formattedCreatedTime"));
 
         notesTable.getSelectionModel().selectedItemProperty().addListener((observable, oldSelection, newSelection) -> {
@@ -126,6 +112,53 @@ public class ViewDashboardController {
         setupHover(logoutBtn, logoutLabel);
     }
 
+    private void loadNotebooks() {
+
+        UserEntity user = UserSession.getUserInstance().getUser();
+
+        Task<List<NoteBookEntity>> loadNotebooksTask = new Task<>() {
+            @Override
+            protected List<NoteBookEntity> call() {
+                return notebookDao.findByUser(user);
+            }
+        };
+
+        loadNotebooksTask.setOnSucceeded(e -> {
+            List<NoteBookEntity> notebooks = loadNotebooksTask.getValue();
+
+            if (notebooks.isEmpty()) {
+
+                Stage createStage = new Stage();
+                NavigationUtil.navigateTo(createStage, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
+
+                createStage.setOnHidden(ev -> {
+                    loadNotebooks();
+                });
+
+            } else {
+                NoteBookEntity lastCreated = NotebookSession.getLastCreatedNotebook();
+
+                if (lastCreated != null) {
+                    for (NoteBookEntity nb : notebooks) {
+                        if (nb.getId().equals(lastCreated.getId())) {
+                            activeNotebook = nb;
+                            break;
+                        }
+                    }
+                    NotebookSession.clear();
+                }
+
+                if (activeNotebook == null && !notebooks.isEmpty()) {
+                    activeNotebook = notebooks.get(0);
+                }
+
+                loadNotes();
+            }
+        });
+
+        new Thread(loadNotebooksTask).start();
+    }
+
     private void loadNotes() {
         if (activeNotebook == null) return;
 
@@ -140,6 +173,10 @@ public class ViewDashboardController {
             List<NoteEntity> notes = loadNotesTask.getValue();
 
             notesTable.getItems().setAll(notes);
+
+            if (!notes.isEmpty()) {
+                notesTable.getSelectionModel().selectFirst();
+            }
 
             NoteEntity lastCreated = NoteSession.getLastCreatedNote();
 
@@ -194,7 +231,7 @@ public class ViewDashboardController {
     }
 
     @FXML
-    private void handleLogout(ActionEvent event) {
+    private void handleLogout() {
         Stage currentStage = (Stage) logoutBtn.getScene().getWindow();
 
         Stage entryStage = new Stage();
@@ -204,7 +241,7 @@ public class ViewDashboardController {
     }
 
     @FXML
-    public void handleDelete(ActionEvent event) {
+    public void handleDelete() {
         // Get the selected note
         NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
 
@@ -227,16 +264,19 @@ public class ViewDashboardController {
                 // Delete from database
                 noteDao.delete(selectedNote);
 
-                // Remove from table
+                // Remove from TableView
                 notesTable.getItems().remove(selectedNote);
 
-                // Clear UI
-                noteTitleLabel.setText("Select a note to view");
-                noteViewArea.clear();
-                annotationViewArea.clear();
-                editButton.setDisable(true);
-                deleteButton.setDisable(true);
-
+                // Select first note if any
+                if (!notesTable.getItems().isEmpty()) {
+                    notesTable.getSelectionModel().selectFirst();
+                } else {
+                    noteTitleLabel.setText("Select a note to view");
+                    noteViewArea.clear();
+                    annotationViewArea.clear();
+                    editButton.setDisable(true);
+                    deleteButton.setDisable(true);
+                }
             } catch (Exception e) {
                 Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                 errorAlert.setTitle("Error");
@@ -252,9 +292,19 @@ public class ViewDashboardController {
 
     @FXML
     public void handleCreate(ActionEvent event) {
-        Stage createStage = new Stage();
-        NavigationUtil.navigateTo(createStage, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
-        loadNotes();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/create_note.fxml"));
+            Parent root = loader.load();
+
+            Stage createStage = new Stage();
+            createStage.initModality(Modality.APPLICATION_MODAL);
+            createStage.setTitle("NoteVault - Create Note");
+            createStage.setScene(new Scene(root));
+            createStage.showAndWait();
+            loadNotes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -288,25 +338,8 @@ public class ViewDashboardController {
     }
 
     @FXML
-    public void showAbout() {
-        Alert about = new Alert(Alert.AlertType.INFORMATION);
-        about.setTitle("About");
-        about.setHeaderText("NoteVault - Notebook Manager\n" + "Version 0.1");
-
-        about.setContentText(
-                "A simple notebook and note management application.\n\n" +
-                        "Developed by:\n" +
-                        "  Dinal Maha Vidanelage\n" +
-                        "  Sandip Ranjit\n" +
-                        "  Swostika Lama\n" +
-                        "  Twe He Gam\n\n" +
-                        "Software Engineering DevOps Project 2026\n" +
-                        "Metropolia University of Applied Sciences\n\n" +
-                        "Technologies:\n" +
-                        "  Docker, Java, JavaFX, JPA (Hibernate), JUni5\n" +
-                        "  Jenkins, Kubernetes, MariaDB"
-        );
-        about.showAndWait();
+    private void handleAbout() {
+        DialogUtil.showAbout(welcomeLabel.getScene().getWindow());
     }
 
     @FXML

@@ -3,7 +3,7 @@ package services;
 import dao.note.JpaNoteDao;
 import dao.notebook.JpaNoteBookDao;
 import entity.*;
-import util.UserSession;
+import session.UserSession;
 
 import java.util.List;
 /**
@@ -19,11 +19,16 @@ public class NoteService {
         this.notebookDao = new JpaNoteBookDao();
     }
 
+    public NoteService(JpaNoteDao noteDao, JpaNoteBookDao notebookDao) {
+        this.noteDao = noteDao;
+        this.notebookDao = notebookDao;
+    }
+
     /**
      * Creates a new note with title, content, and annotation
      */
     public NoteEntity createNote(String title, String content, String annotation, NoteBookEntity notebookParameter) {
-        if (title == null || title.trim().isEmpty()) {
+        if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("Title cannot be empty");
         }
 

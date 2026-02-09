@@ -45,12 +45,12 @@
                   <items>
                     <MenuItem mnemonicParsing="false" text="Undo" />
                         <MenuItem mnemonicParsing="false" text="Redo" />
-                        <MenuItem mnemonicParsing="false" text="Delete" />
+                        <MenuItem mnemonicParsing="false" text="Delete" onAction="#handleDelete" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                   <items>
-                    <MenuItem mnemonicParsing="false" onAction="#showAbout" text="About" />
+                    <MenuItem mnemonicParsing="false" onAction="#handleAbout" text="About" />
                   </items>
                 </Menu>
               </menus>
@@ -191,7 +191,7 @@
 
                             <Label fx:id="noteTitleLabel" style="-fx-font-size: 14; -fx-font-weight: bold;" text="Note Title" />
 
-                            <Separator />
+                                <Separator />
 
                             <TextArea fx:id="noteViewArea" editable="false" prefHeight="511.0" prefWidth="204.0" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; -fx-font-size: 16;" wrapText="true" VBox.vgrow="ALWAYS" />
                         <VBox prefHeight="200.0" prefWidth="100.0">

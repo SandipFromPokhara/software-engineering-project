@@ -10,6 +10,8 @@ import java.util.List;
 
 public class JpaNoteDao implements NoteDAO{
 
+    public JpaNoteDao() {}
+
     @Override
     public NoteEntity save(NoteEntity note) {
         if (note == null) throw new IllegalArgumentException("Note cannot be null");
@@ -76,12 +78,10 @@ public class JpaNoteDao implements NoteDAO{
 
     @Override
     public void delete(NoteEntity note) {
-
         if (note == null || note.getId() == null)
             throw new IllegalArgumentException("Note or ID is null");
 
         EntityManager em = MariaDbJpaConnection.createEntityManager();
-
         try {
             em.getTransaction().begin();
 
@@ -91,16 +91,11 @@ public class JpaNoteDao implements NoteDAO{
             if (managed != null) {
                 em.remove(managed);
             }
-
             em.getTransaction().commit();
-
         } catch (Exception e) {
-
             if (em.getTransaction().isActive())
                 em.getTransaction().rollback();
-
             throw new RuntimeException("Failed to delete note", e);
-
         } finally {
             em.close();
         }

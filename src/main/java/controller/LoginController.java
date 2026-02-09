@@ -11,7 +11,7 @@ import dao.user.JpaUserDao;
 import javafx.stage.Stage;
 import services.UserService;
 import util.NavigationUtil;
-import util.UserSession;
+import session.UserSession;
 
 public class LoginController {
 
@@ -31,15 +31,15 @@ public class LoginController {
     private Label statusLabel;
 
     @FXML
+    private Hyperlink signupLink;
+
+    @FXML
     private Button backButton;
 
     @FXML
     private void handleBack(ActionEvent event) {
         NavigationUtil.navigateTo(event, "/FXML/entry.fxml", "Welcome to NoteVault", false);
     }
-
-    @FXML
-    private Hyperlink signupLink;
 
     private String getUsername() {
         return usernameField.getText().trim();

@@ -3,7 +3,6 @@ package controller;
 import dao.notebook.JpaNoteBookDao;
 import entity.NoteBookEntity;
 import entity.UserEntity;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -11,9 +10,10 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import services.NoteService;
 import entity.NoteEntity;
+import session.NotebookSession;
 import util.NavigationUtil;
-import util.NoteSession;
-import util.UserSession;
+import session.NoteSession;
+import session.UserSession;
 
 import java.net.URL;
 import java.util.List;
@@ -25,6 +25,7 @@ import java.util.ResourceBundle;
 public class CreateNoteController implements Initializable {
 
     private static final String CREATE_NEW = "Create New Notebook...";
+    private NoteService noteService;
 
     @FXML private TextField titleField;
     @FXML private TextArea contentArea;
@@ -34,7 +35,7 @@ public class CreateNoteController implements Initializable {
     @FXML private Label statusLabel;
     @FXML private ComboBox<NoteBookEntity> notebookComboBox;
 
-    private NoteService noteService;
+    public CreateNoteController() {};
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -55,7 +56,7 @@ public class CreateNoteController implements Initializable {
         notebookComboBox.setConverter(new javafx.util.StringConverter<>() {
             @Override
             public String toString(NoteBookEntity notebook) {
-                if (notebook == null) return "";
+                if (notebook == null) { return ""; }
                 return notebook.getTitle() == null ? "" : notebook.getTitle();
             }
 
@@ -81,12 +82,12 @@ public class CreateNoteController implements Initializable {
 
     private void updateSaveButton() {
         NoteBookEntity selected = notebookComboBox.getSelectionModel().getSelectedItem();
-        boolean disable = titleField.getText().trim().isEmpty() || selected == null;
+        boolean disable = titleField.getText() == null || titleField.getText().isBlank() || selected == null;
         saveButton.setDisable(disable);
     }
 
     @FXML
-    private void handleSave(ActionEvent event) {
+    private void handleSave() {
         NoteBookEntity selectedNotebook = notebookComboBox.getSelectionModel().getSelectedItem();
 
         if (selectedNotebook == null) {
@@ -117,6 +118,7 @@ public class CreateNoteController implements Initializable {
                         .map(name -> {
                             NoteBookEntity newNotebook = new NoteBookEntity(name, UserSession.getUserInstance().getUser());
                             newNotebook = new JpaNoteBookDao().save(newNotebook);
+                            NotebookSession.setLastCreatedNotebook(newNotebook);
                             // Add new notebook to ComboBox before "Create New"
                             notebookComboBox.getItems().removeIf(nb -> CREATE_NEW.equals(nb.getTitle()));
                             notebookComboBox.getItems().add(newNotebook);
@@ -152,7 +154,7 @@ public class CreateNoteController implements Initializable {
     }
 
     @FXML
-    private void handleClear(ActionEvent event) {
+    private void handleClear() {
         clearForm();
         statusLabel.setVisible(false);
     }
@@ -171,13 +173,13 @@ public class CreateNoteController implements Initializable {
     }
 
     @FXML
-    private void handleBackToHome(ActionEvent event) {
+    private void handleBackToHome() {
         Stage stage = (Stage) titleField.getScene().getWindow();
         NavigationUtil.navigateTo(stage, "/FXML/view_dashboard.fxml", "NoteVault - Dashboard", true);
     }
 
     @FXML
-    private void handleClose(ActionEvent event) {
+    private void handleClose() {
         Stage stage = (Stage) titleField.getScene().getWindow();
         stage.close();
     }
