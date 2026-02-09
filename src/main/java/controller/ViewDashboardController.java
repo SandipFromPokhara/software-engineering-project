@@ -228,6 +228,10 @@ public class ViewDashboardController {
     }
 
     @FXML
+    private void handleOpen(ActionEvent event) {
+    }
+
+    @FXML
     private void handleLogout(ActionEvent event) {
         Stage currentStage = (Stage) logoutBtn.getScene().getWindow();
 

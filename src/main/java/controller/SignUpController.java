@@ -22,6 +22,7 @@ public class SignUpController {
     @FXML private Button signUpButton;
     @FXML private Hyperlink loginLink;
     @FXML private Label messageLabel;
+    @FXML private Button backButton;
 
     @FXML
     private Button backButton;
@@ -46,6 +47,11 @@ public class SignUpController {
     @FXML
     public void onLogin(ActionEvent event) {
         navigateToLogin(event);
+    }
+
+    @FXML
+    private void handleBack(ActionEvent event) {
+        NavigationUtil.navigateTo(event, "/FXML/entry.fxml", "Welcome to NoteVault", false);
     }
 
     private void handleSignUp() {

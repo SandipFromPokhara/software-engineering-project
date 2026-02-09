@@ -5,7 +5,8 @@ import entity.UserEntity;
 import util.BcryptPasswordHasher;
 
 public class UserService {
-    private JpaUserDao userDao;
+    private final JpaUserDao userDao;
+    private static UserEntity loggedInUser = null;
 
     public UserService(JpaUserDao userDao) {
         this.userDao = userDao;

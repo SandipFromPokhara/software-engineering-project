@@ -20,18 +20,34 @@ public class NoteModel {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public int getId() { return id; }
+    public int getId() {
+        return id;
+    }
 
-    public String getTitle() { return title; }
+    public String getTitle() {
+        return title;
+    }
 
     public void setTitle(String title) {
         this.title = title;
         this.updatedAt = LocalDateTime.now();
     }
 
-    public String getContent() { return content; }
+    public String getContent() {
+        return content;
+    }
 
-    public void setContent(String content) { this.content = content; }
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getAnnotation() {
+        return annotation;
+    }
+
+    public void setAnnotation(String annotation) {
+        this.annotation = annotation;
+    }
 
     public String getAnnotation(){return annotation;}
     public void setAnnotation(String annotation) {this.annotation = annotation ;}
@@ -46,11 +62,17 @@ public class NoteModel {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public NoteBookModel getNotebook() { return notebook; }
+    public NoteBookModel getNotebook() {
+        return notebook;
+    }
 
-    public void setNotebook(NoteBookModel notebook) { this.notebook = notebook; }
+    public void setNotebook(NoteBookModel notebook) {
+        this.notebook = notebook;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 
     public LocalDateTime getUpdatedAt(){ return updatedAt ;}
 
