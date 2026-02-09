@@ -1,4 +1,4 @@
-package dao.baseDAO;
+package dao.basedao;
 
 public interface GenericDAO<T, ID> {
 

@@ -23,7 +23,7 @@ public class NoteService {
      * Creates a new note with title, content, and annotation
      */
     public NoteEntity createNote(String title, String content, String annotation, NoteBookEntity notebookParameter) {
-        if (title == null || title.trim().isEmpty()) {
+        if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("Title cannot be empty");
         }
 

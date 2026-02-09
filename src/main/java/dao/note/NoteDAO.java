@@ -1,6 +1,6 @@
 package dao.note;
 
-import dao.baseDAO.GenericDAO;
+import dao.basedao.GenericDAO;
 import entity.NoteBookEntity;
 import entity.NoteEntity;
 import java.util.List;

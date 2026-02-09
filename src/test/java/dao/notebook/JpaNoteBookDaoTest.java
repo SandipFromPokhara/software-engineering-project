@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class JpaNoteBookDaoTest {
 
     private static  JpaNoteBookDao notebookDao;
-    private static NoteBookEntity notebook;
 
     private static JpaUserDao dao;
     private static UserEntity testUser;

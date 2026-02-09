@@ -1,6 +1,6 @@
 package dao.notebook;
 
-import dao.baseDAO.GenericDAO;
+import dao.basedao.GenericDAO;
 import entity.NoteBookEntity;
 import entity.UserEntity;
 

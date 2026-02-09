@@ -3,7 +3,6 @@ package controller;
 import dao.note.JpaNoteDao;
 import dao.notebook.JpaNoteBookDao;
 import entity.*;
-import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -35,16 +34,20 @@ public class ViewDashboardController {
     private Label welcomeLabel;
 
     @FXML
-    private Button viewNotesBtn, createNoteBtn, settingsBtn, logoutBtn;
+    private Button viewNotesBtn,
+                   createNoteBtn,
+                   settingsBtn,
+                   logoutBtn;
 
     @FXML
-    private Label viewNotesLabel, createNoteLabel, settingsLabel, logoutLabel;
+    private Label viewNotesLabel,
+                  createNoteLabel,
+                  settingsLabel,
+                  logoutLabel;
 
     @FXML
-    private Button deleteButton;
-
-    @FXML
-    private Button editButton;
+    private Button deleteButton,
+                   editButton;
 
     @FXML
     private TableView<NoteEntity> notesTable;
@@ -59,10 +62,10 @@ public class ViewDashboardController {
     private Label noteTitleLabel;
 
     @FXML
-    private TextArea noteViewArea;
+    private TextArea noteViewArea,
+                     annotationViewArea;
 
-    @FXML
-    private TextArea annotationViewArea;
+    public ViewDashboardController() {}
 
     @FXML
     public void initialize() {
@@ -228,11 +231,7 @@ public class ViewDashboardController {
     }
 
     @FXML
-    private void handleOpen(ActionEvent event) {
-    }
-
-    @FXML
-    private void handleLogout(ActionEvent event) {
+    private void handleLogout() {
         Stage currentStage = (Stage) logoutBtn.getScene().getWindow();
 
         Stage entryStage = new Stage();
@@ -270,8 +269,8 @@ public class ViewDashboardController {
 
                 // Select first note if any
                 if (!notesTable.getItems().isEmpty()) {
-                    notesTable.getSelectionModel().selectFirst()
-;                } else {
+                    notesTable.getSelectionModel().selectFirst();
+                } else {
                     noteTitleLabel.setText("Select a note to view");
                     noteViewArea.clear();
                     annotationViewArea.clear();

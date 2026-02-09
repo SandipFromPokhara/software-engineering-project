@@ -10,6 +10,8 @@ import java.util.List;
 
 public class JpaNoteBookDao implements NoteBookDAO{
 
+    public JpaNoteBookDao() {}
+
     @Override
     public NoteBookEntity save(NoteBookEntity noteBook) {
         if (noteBook == null) throw new IllegalArgumentException("Notebook cannot be null");
