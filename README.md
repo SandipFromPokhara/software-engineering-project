@@ -4,20 +4,6 @@ NoteVault is a Java-based digital note-taking and annotation desktop application
 
 The project focuses on applying DevOps practices, Agile development, automated testing, and CI/CD pipelines.
 
-## Running the Application
-
-### Prerequisites
-- JDK 21 (required)
-- Maven 3.6+
-The app will launch using Maven's JavaFX plugin, which handles all JavaFX module configuration automatically.
-
-### From Terminal/Command Line
-```bash
-mvn javafx:run
-```
-
-
-
 ## Technology Stack
 The selected technology stack fully satisfies the course requirements and supports all the planned functionalities of the application.
 
