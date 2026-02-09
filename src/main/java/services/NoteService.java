@@ -3,7 +3,7 @@ package services;
 import dao.note.JpaNoteDao;
 import dao.notebook.JpaNoteBookDao;
 import entity.*;
-import util.UserSession;
+import session.UserSession;
 
 import java.util.List;
 /**
