@@ -3,11 +3,13 @@ package controller;
 import dao.note.JpaNoteDao;
 import dao.notebook.JpaNoteBookDao;
 import entity.*;
+import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
+import util.DialogUtil;
 import util.NavigationUtil;
 import util.NoteSession;
 import util.UserSession;
@@ -99,7 +101,6 @@ public class ViewDashboardController {
         noteViewArea.setText("");
 
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("createdTime"));
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("formattedCreatedTime"));
 
         notesTable.getSelectionModel().selectedItemProperty().addListener((observable, oldSelection, newSelection) -> {
@@ -140,6 +141,12 @@ public class ViewDashboardController {
             List<NoteEntity> notes = loadNotesTask.getValue();
 
             notesTable.getItems().setAll(notes);
+
+            // notesTable.setItems(FXCollections.observableArrayList(notes));
+
+            if (!notes.isEmpty()) {
+                notesTable.getSelectionModel().selectFirst();
+            }
 
             NoteEntity lastCreated = NoteSession.getLastCreatedNote();
 
@@ -204,14 +211,70 @@ public class ViewDashboardController {
     }
 
     @FXML
-    public void handleDelete(ActionEvent event) {
+    public void handleDelete() {
+        // Get the selected note
+        NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
+
+        if (selectedNote == null) {
+            return;
+        }
+
+        // Show confirmation dialog
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmDialog.setTitle("Delete Note");
+        confirmDialog.setHeaderText("Delete \"" + selectedNote.getTitle() + "\"?");
+        confirmDialog.setContentText("This action cannot be undone. Are you sure you want to delete this note?");
+        confirmDialog.initOwner(deleteButton.getScene().getWindow());
+
+        Optional<ButtonType> result = confirmDialog.showAndWait();
+
+        // If user confirms deletion
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                // Delete from database
+                noteDao.delete(selectedNote);
+
+                // Remove from TableView
+                notesTable.getItems().remove(selectedNote);
+
+                // Select first note if any
+                if (!notesTable.getItems().isEmpty()) {
+                    notesTable.getSelectionModel().selectFirst()
+;                } else {
+                    noteTitleLabel.setText("Select a note to view");
+                    noteViewArea.clear();
+                    annotationViewArea.clear();
+                    editButton.setDisable(true);
+                    deleteButton.setDisable(true);
+                }
+            } catch (Exception e) {
+                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                errorAlert.setTitle("Error");
+                errorAlert.setHeaderText("Failed to delete note");
+                errorAlert.setContentText("An error occurred: " + e.getMessage());
+                errorAlert.initOwner(deleteButton.getScene().getWindow());
+                errorAlert.showAndWait();
+
+                e.printStackTrace();
+            }
+        }
     }
 
     @FXML
     public void handleCreate(ActionEvent event) {
-        Stage createStage = new Stage();
-        NavigationUtil.navigateTo(createStage, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
-        loadNotes();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/create_note.fxml"));
+            Parent root = loader.load();
+
+            Stage createStage = new Stage();
+            createStage.initModality(Modality.APPLICATION_MODAL);
+            createStage.setTitle("NoteVault - Create Note");
+            createStage.setScene(new Scene(root));
+            createStage.showAndWait();
+            loadNotes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -245,25 +308,8 @@ public class ViewDashboardController {
     }
 
     @FXML
-    public void showAbout() {
-        Alert about = new Alert(Alert.AlertType.INFORMATION);
-        about.setTitle("About");
-        about.setHeaderText("NoteVault - Notebook Manager\n" + "Version 0.1");
-
-        about.setContentText(
-                "A simple notebook and note management application.\n\n" +
-                        "Developed by:\n" +
-                        "  Dinal Maha Vidanelage\n" +
-                        "  Sandip Ranjit\n" +
-                        "  Swostika Lama\n" +
-                        "  Twe He Gam\n\n" +
-                        "Software Engineering DevOps Project 2026\n" +
-                        "Metropolia University of Applied Sciences\n\n" +
-                        "Technologies:\n" +
-                        "  Docker, Java, JavaFX, JPA (Hibernate), JUni5\n" +
-                        "  Jenkins, Kubernetes, MariaDB"
-        );
-        about.showAndWait();
+    private void handleAbout() {
+        DialogUtil.showAbout(welcomeLabel.getScene().getWindow());
     }
 
     @FXML
