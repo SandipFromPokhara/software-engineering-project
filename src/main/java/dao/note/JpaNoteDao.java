@@ -10,6 +10,8 @@ import java.util.List;
 
 public class JpaNoteDao implements NoteDAO{
 
+    public JpaNoteDao() {}
+
     @Override
     public NoteEntity save(NoteEntity note) {
         if (note == null) throw new IllegalArgumentException("Note cannot be null");
