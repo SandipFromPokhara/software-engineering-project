@@ -14,21 +14,21 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 public class NavigationUtil {
-    private static final Logger logger = LoggerFactory.getLogger(NavigationUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NavigationUtil.class);
 
     private static final String DASHBOARD_FXML = "/FXML/view_dashboard.fxml";
     private static final String CREATE_FXML = "/FXML/create_note.fxml";
 
     public static void navigateTo(ActionEvent event, String fxmlPath, String title, boolean resizable) {
         if (event == null) {
-            logger.error("ActionEvent is null. Cannot navigate to {}", fxmlPath);
+            LOGGER.error("ActionEvent is null. Cannot navigate to {}", fxmlPath);
             return;
         }
 
         try {
             Node source = (Node) event.getSource();
             if (source == null || source.getScene() == null) {
-                logger.error("Event source or scene is null. Cannot navigate to {}", fxmlPath);
+                LOGGER.error("Event source or scene is null. Cannot navigate to {}", fxmlPath);
                 return;
             }
 
@@ -39,9 +39,9 @@ public class NavigationUtil {
             }
             navigateTo(stage, fxmlPath, title, resizable);
         } catch (ClassCastException e) {
-            logger.error("Event source is not a Node. Cannot navigate to {}", fxmlPath, e);
+            LOGGER.error("Event source is not a Node. Cannot navigate to {}", fxmlPath, e);
         } catch (Exception e) {
-            logger.error("Unexpected error navigating to {}", fxmlPath, e);
+            LOGGER.error("Unexpected error navigating to {}", fxmlPath, e);
         }
     }
 
@@ -56,7 +56,7 @@ public class NavigationUtil {
             Parent root = loader.load();
 
             if (root == null) {
-                logger.error("FXML root is null for {}", fxmlPath);
+                LOGGER.error("FXML root is null for {}", fxmlPath);
                 return;
             }
 
@@ -90,13 +90,13 @@ public class NavigationUtil {
                 stage.showAndWait();
             }
         } catch (IOException e) {
-            logger.error("Failed to load FXML: {}", fxmlPath, e);
+            LOGGER.error("Failed to load FXML: {}", fxmlPath, e);
         } catch (Exception e) {
-            logger.error("Unexpected error navigating to {}", fxmlPath, e);
+            LOGGER.error("Unexpected error navigating to {}", fxmlPath, e);
         }
     }
 
     private static void logError(String fxmlPath) {
-        logger.error("Stage is null. Cannot navigate to {}", fxmlPath);
+        LOGGER.error("Stage is null. Cannot navigate to {}", fxmlPath);
     }
 }

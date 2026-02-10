@@ -6,25 +6,36 @@ import jakarta.persistence.Persistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MariaDbJpaConnection {
 
-    private static final Logger logger = LoggerFactory.getLogger(MariaDbJpaConnection.class);
-    private static EntityManagerFactory emf = null;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MariaDbJpaConnection.class);
+    private static EntityManagerFactory emf;
 
     private static synchronized void ensureFactory() {
         if (emf == null) {
             try {
-                Map<String, String> properties = new HashMap<>();
-                properties.put("jakarta.persistence.jdbc.user", System.getenv("DB_USER"));
-                properties.put("jakarta.persistence.jdbc.password", System.getenv("DB_PASSWORD"));
+                Map<String, String> properties = new ConcurrentHashMap<>();
+
+                String dbUser = System.getProperty("DB_USER");
+                if (dbUser == null) {
+                    dbUser = System.getenv("DB_USER");
+                }
+
+                String dbPassword = System.getProperty("DB_PASSWORD");
+                if (dbPassword == null) {
+                    dbPassword = System.getenv("DB_PASSWORD");
+                }
+
+                properties.put("jakarta.persistence.jdbc.user", dbUser);
+                properties.put("jakarta.persistence.jdbc.password", dbPassword);
 
                 emf = Persistence.createEntityManagerFactory("CompanyMariaDbUnit", properties);
-                logger.info("EntityManagerFactory created successfully");
+                LOGGER.info("EntityManagerFactory created successfully");
             } catch (Exception e) {
-                logger.error("Failed to initialize EntityManagerFactory. Confirm DB user and password", e);
+                LOGGER.error("Failed to initialize EntityManagerFactory. Confirm DB user and password", e);
                 throw new RuntimeException("Database connection failed", e);
             }
         }
