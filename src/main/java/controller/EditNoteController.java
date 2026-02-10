@@ -12,26 +12,26 @@ import javafx.stage.Stage;
 
 public class EditNoteController {
 
-    private JpaNoteDao noteDao = new JpaNoteDao();
+    private NoteDAO noteDao;
 
     @FXML
     private Label title;
     @FXML
-    private TextField titleBox;
+    TextField titleBox;
     @FXML
     private Label content;
 
     @FXML
-    private TextArea contentBox;
+    TextArea contentBox;
 
     @FXML
     private Label annotation;
 
     @FXML
-    private TextField annotationBox;
+    TextField annotationBox;
 
     @FXML
-    private Button updateButton;
+    Button updateButton;
 
     @FXML
     private Button cancelButton;
@@ -39,6 +39,9 @@ public class EditNoteController {
     private NoteDAO noteDAO = new JpaNoteDao();
     private NoteEntity note;
 
+    public void setNoteDao(NoteDAO noteDao) {
+        this.noteDao = noteDao;
+    }
 
     public void setNote(NoteEntity note){
         this.note = note;
@@ -48,7 +51,7 @@ public class EditNoteController {
     }
 
     @FXML
-    private void handleUpdate(){
+    void handleUpdate(){
         note.setTitle(titleBox.getText());
         note.setContent(contentBox.getText());
         note.setAnnotation(annotationBox.getText());
