@@ -322,6 +322,7 @@ public class ViewDashboardController {
             // Get controller and pass note
             EditNoteController controller = loader.getController();
             controller.setNote(selectedNote);
+            controller.setNoteDao(new JpaNoteDao()); // inject DAO
 
             Stage editStage = new Stage();
             editStage.initModality(Modality.APPLICATION_MODAL);
