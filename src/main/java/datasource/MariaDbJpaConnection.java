@@ -18,8 +18,19 @@ public class MariaDbJpaConnection {
         if (emf == null) {
             try {
                 Map<String, String> properties = new ConcurrentHashMap<>();
-                properties.put("jakarta.persistence.jdbc.user", System.getenv("DB_USER"));
-                properties.put("jakarta.persistence.jdbc.password", System.getenv("DB_PASSWORD"));
+
+                String dbUser = System.getProperty("DB_USER");
+                if (dbUser == null) {
+                    dbUser = System.getenv("DB_USER");
+                }
+
+                String dbPassword = System.getProperty("DB_PASSWORD");
+                if (dbPassword == null) {
+                    dbPassword = System.getenv("DB_PASSWORD");
+                }
+
+                properties.put("jakarta.persistence.jdbc.user", dbUser);
+                properties.put("jakarta.persistence.jdbc.password", dbPassword);
 
                 emf = Persistence.createEntityManagerFactory("CompanyMariaDbUnit", properties);
                 LOGGER.info("EntityManagerFactory created successfully");

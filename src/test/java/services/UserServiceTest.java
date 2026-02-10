@@ -23,41 +23,41 @@ class UserServiceTest {
     }
 
     @Test
-    void login_nullUsername_returnsNull() {
+    void test_login_nullUsername_returnsNull() {
         assertNull(userService.login(null, "password"));
     }
 
     @Test
-    void login_blankUsername_returnsNull() {
+    void test_login_blankUsername_returnsNull() {
         assertNull(userService.login("   ", "password"));
     }
 
     @Test
-    void login_nullPassword_returnsNull() {
+    void test_login_nullPassword_returnsNull() {
         assertNull(userService.login("username", null));
     }
 
     @Test
-    void login_blankPassword_returnsNull() {
+    void test_login_blankPassword_returnsNull() {
         assertNull(userService.login("username", "   "));
     }
 
     @Test
-    void login_userNotFound_returnsNull() {
+    void test_login_userNotFound_returnsNull() {
         when(userDao.findByUsername("user")).thenReturn(null);
         assertNull(userService.login("user", "password"));
     }
 
     @Test
-    void login_wrongPassword_returnsNull() {
+    void test_login_wrongPassword_returnsNull() {
         UserEntity user = new UserEntity();
         user.setUsername("user");
-        user.changePasswordHash("$2a$10$somehashedpassword"); // example hash
+        user.changePasswordHash("$2a$10$randomHashpassword");
         when(userDao.findByUsername("user")).thenReturn(user);
 
         // Mock static method verifyPassword to return false
         try (MockedStatic<BcryptPasswordHasher> mockedHasher = Mockito.mockStatic(BcryptPasswordHasher.class)) {
-            mockedHasher.when(() -> BcryptPasswordHasher.verifyPassword("wrongpassword", "$2a$10$somehashedpassword"))
+            mockedHasher.when(() -> BcryptPasswordHasher.verifyPassword("wrongpassword", "$2a$10$randomHashpassword"))
                     .thenReturn(false);
 
             assertNull(userService.login("user", "wrongpassword"));
@@ -65,15 +65,15 @@ class UserServiceTest {
     }
 
     @Test
-    void login_correctPassword_returnsUser() {
+    void test_login_correctPassword_returnsUser() {
         UserEntity user = new UserEntity();
         user.setUsername("user");
-        user.changePasswordHash("$2a$10$somehashedpassword"); // example hash
+        user.changePasswordHash("$2a$10$correcthashedpassword"); // example hash
         when(userDao.findByUsername("user")).thenReturn(user);
 
         // Mock static method verifyPassword to return true
         try (MockedStatic<BcryptPasswordHasher> mockedHasher = Mockito.mockStatic(BcryptPasswordHasher.class)) {
-            mockedHasher.when(() -> BcryptPasswordHasher.verifyPassword("correctpassword", "$2a$10$somehashedpassword"))
+            mockedHasher.when(() -> BcryptPasswordHasher.verifyPassword("correctpassword", "$2a$10$correcthashedpassword"))
                     .thenReturn(true);
 
             UserEntity result = userService.login("user", "correctpassword");
