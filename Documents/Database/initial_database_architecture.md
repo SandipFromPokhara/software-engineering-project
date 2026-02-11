@@ -38,12 +38,13 @@ notevault_db
 | id          | INT (PK)          | NO       | Unique identifier for each note                                                                          |
 | title       | VARCHAR(255)      | NO       | Title of the note                                                                                        |
 | content     | TEXT              | NO       | Contents of the note                                                                                     |
+| annotation  | TEXT              | YES      | Annotations for note                                                                                     |
 | notebook_id | INT (FK)          | NO       | Notebook containing this note; references notebooks.id. Deleting the notebook cascades deletion of notes |
 | createdAt   | CURRENT_TIMESTAMP | NO       | Note creation time                                                                                       |
 | updatedAt   | CURRENT_TIMESTAMP | YES      | Last modification time                                                                                   |
 
 ## Notes
-This schema represents the initial design and will be refined in later sprints as new requirements are identified.
+This schema represents the design of NoteVault.
 
 ## Future Extensions
 
