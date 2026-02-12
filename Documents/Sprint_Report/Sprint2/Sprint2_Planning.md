@@ -18,7 +18,7 @@ The goals of the Sprint 2 are to establish core foundation of the NoteVault appl
 - Preparing the system for more advanced testing and CI/CD activities in sprint 3
 - Deliver the first working version of the application with basic functionality and testing support.
 
-- By the Sprint 2, the team aims to deliver the first working version of the application with basic CRUD operation, initial UI screens and automated testing infrastructure
+- By the Sprint 2, the team aims to deliver the application with basic CRUD operation, initial UI screens and automated testing infrastructure
 
 ---
 
@@ -49,12 +49,12 @@ The following Product Backlog were selected for Sprint 2:
 ---
 
 ## Roles and Responsibilities
-| Member                       |	Responsibilities for Sprint 2|
-|------------------------------|-------------------------------|
-| Swostika Lama (Scrum Master) |Facilitate meetings, update backlog, ensure progress, backend for edit notes and UI for guest mode dashboard and edit notes UI|
-|Dinal Maha Vidanelage	|Registration UI and backend, Delete Notes backend and UI for delete page|
-|Sandip Ranjit	|Login UI and backend, View notes UI|
-|Twe He Gam Aung|	Entry Page UI and create notes backend and Ui for create page|
+| Member                       | 	Responsibilities for Sprint 2                                                                                                 |
+|------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| Swostika Lama (Scrum Master) | Facilitate meetings, update backlog, ensure progress, backend for edit notes and UI for guest mode dashboard and edit notes UI |
+|Dinal Maha Vidanelage	| Develop registration UI and backend, Delete Notes backend and UI for delete page                                               |
+|Sandip Ranjit	| Create database, develop Login UI and backend, implement view notes UI                                                         |
+|Twe He Gam Aung| 	Develop entry Page UI and create notes backend and Ui for create page                                                         |
 
 ---
 
