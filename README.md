@@ -155,42 +155,21 @@ Notebook (0..N) ── (1) Note
 
 ## DevOps Pipeline
 
-The project emphasizes CI/CD automation and deployment reproducibility.
+The project implements a fully automated CI/CD workflow using Jenkins, Maven, Docker, and Kubernetes.
 
-** CI/CD
-```
-                                Developer Commit
-                                        │
-                                        ▼
-                                GitHub (feature-dev branch)
-                                        │
-                                        ▼
-                                Jenkins Pipeline Trigger
-                                        │
-                                        ▼
-                                Maven Build
-                                  - Compile
-                                  - Dependency resolution
-                                        │
-                                        ▼
-                                 JUnit Test Execution
-                                        │
-                                        ▼
-                                 JaCoCo Coverage Report
-                                        │
-                                        ▼
-                                Build Validation
-                                  - Fail on test failure
-                                        │
-                                        ▼
-                                Docker Image Build
-                                        │
-                                        ▼
-                                Docker Container Runtime
-                                        │
-                                        ▼
-                                Kubernetes Deployment (Minikube)
-```
+
+![NoteVault DevOps Pipeline](Documents/assets/notevault-devops-pipeline.gif)
+
+**Pipeline Stages:**
+- Feature branch commit (`feature-dev`)
+- Jenkins automated build trigger
+- Maven compilation & dependency resolution
+- JUnit test execution
+- JaCoCo coverage reporting
+- Docker image build
+- Kubernetes deployment (Minikube)
+- MariaDB runtime connection
+
 
 ---
 
