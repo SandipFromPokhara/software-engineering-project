@@ -30,6 +30,8 @@ public class TagEntity {
 
     public Long getId() { return id; }
 
+    public String getTagName() { return tagName; }
+
     public void setTagName(String newTagName) { this.tagName = newTagName; }
 
     public Set<NoteEntity> getNotes() { return notes; }
