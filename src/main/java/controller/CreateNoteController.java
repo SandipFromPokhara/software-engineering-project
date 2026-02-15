@@ -3,6 +3,7 @@ package controller;
 import dao.notebook.JpaNoteBookDao;
 import entity.NoteBookEntity;
 import entity.UserEntity;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -34,6 +35,19 @@ public class CreateNoteController implements Initializable {
     @FXML private Button clearButton;
     @FXML private Label statusLabel;
     @FXML private ComboBox<NoteBookEntity> notebookComboBox;
+
+    // Toolbar buttons
+    @FXML private Button boldButton;
+    @FXML private Button italicButton;
+    @FXML private Button underlineButton;
+    @FXML private Button textColorButton;
+    @FXML private Button bulletListButton;
+    @FXML private Button numberedListButton;
+    @FXML private Button alignLeftButton;
+    @FXML private Button alignCenterButton;
+    @FXML private Button alignRightButton;
+    @FXML private Button headingUpButton;
+    @FXML private Button headingDownButton;
 
     public CreateNoteController() {};
 
@@ -157,6 +171,51 @@ public class CreateNoteController implements Initializable {
     private void handleClear() {
         clearForm();
         statusLabel.setVisible(false);
+    }
+
+    @FXML
+    private void handleToolbarClick(ActionEvent event) {
+        Button clickedButton = (Button) event.getSource();
+        String buttonId = clickedButton.getId();
+
+        System.out.println("Button clicked: " + buttonId);
+
+        // Each team member implements their buttons here
+        switch (buttonId) {
+            case "boldButton":
+                System.out.println("Bold button");
+                break;
+            case "italicButton":
+                System.out.println("Italic button ");
+                break;
+            case "underlineButton":
+                System.out.println("Underline button");
+                break;
+            case "textColorButton":
+                System.out.println("Text Color");
+                break;
+            case "bulletListButton":
+                System.out.println("Bullet List");
+                break;
+            case "numberedListButton":
+                System.out.println("Numbered List");
+                break;
+            case "alignLeftButton":
+                System.out.println("Align Left");
+                break;
+            case "alignCenterButton":
+                System.out.println("Align Center");
+                break;
+            case "alignRightButton":
+                System.out.println("Align Right");
+                break;
+            case "headingUpButton":
+                System.out.println("Heading Up");
+                break;
+            case "headingDownButton":
+                System.out.println("Heading Down");
+                break;
+        }
     }
 
     private void clearForm() {
