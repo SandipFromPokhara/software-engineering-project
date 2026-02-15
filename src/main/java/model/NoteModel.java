@@ -1,12 +1,16 @@
 package model;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class NoteModel {
     private int id;
     private String title;
     private String content;
     private String annotation;
+    private Set<TagModel> tags;
     private NoteBookModel notebook;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -18,6 +22,7 @@ public class NoteModel {
         this.annotation = annotation;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        this.tags = new HashSet<>();
     }
 
     public int getId() {
@@ -44,6 +49,20 @@ public class NoteModel {
     public String getAnnotation() { return annotation; }
 
     public void setAnnotation(String annotation) { this.annotation = annotation; }
+
+    public void addTag(TagModel tag) {
+        if (tag != null) {
+            tags.add(tag);
+        }
+    }
+
+    public void removeTag(TagModel tag) {
+        tags.remove(tag);
+    }
+
+    public Set<TagModel> getTags() {
+        return Collections.unmodifiableSet(tags);
+    }
 
     /**
      * Updates new content and syncs last created or modified timestamp.
