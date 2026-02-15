@@ -3,6 +3,9 @@ package entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name="notes")
@@ -31,6 +34,14 @@ public class NoteEntity {
     @JoinColumn(name = "notebook_id", nullable = false)
     private NoteBookEntity notebook;
 
+    @ManyToMany
+    @JoinTable(
+            name = "note_tags",
+            joinColumns = @JoinColumn(name = "note_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+
+    private Set<TagEntity> tags = new HashSet<>();
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -63,6 +74,20 @@ public class NoteEntity {
     public LocalDateTime getCreatedTime() { return createdAt; }
 
     public LocalDateTime getUpdatedTime() { return updatedAt; }
+
+    public void addTag(TagEntity tag) {
+        tags.add(tag);
+        tag.getNotes().add(this);
+    }
+
+    public void removeTag(TagEntity tag) {
+        tags.remove(tag);
+        tag.getNotes().remove(this);
+    }
+
+    public Set<TagEntity> getTags() {
+        return Collections.unmodifiableSet(tags);
+    }
 
     public void setTitle(String newTitle) {
         this.title = newTitle;
