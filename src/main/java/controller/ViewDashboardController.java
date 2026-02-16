@@ -41,18 +41,16 @@ public class ViewDashboardController {
     private JpaNoteDao noteDao;
 
     @FXML
-    private Label welcomeLabel;
+    private MenuButton userMenuButton;
 
     @FXML
     private Button viewNotesBtn,
                    createNoteBtn,
-                   settingsBtn,
                    logoutBtn;
 
     @FXML
     private Label viewNotesLabel,
                   createNoteLabel,
-                  settingsLabel,
                   logoutLabel;
 
     @FXML
@@ -84,7 +82,7 @@ public class ViewDashboardController {
 
         UserEntity user = UserSession.getUserInstance().getUser();
         if (user != null) {
-            welcomeLabel.setText("Welcome, " + user.getFirstName());
+            userMenuButton.setText("Welcome, " + user.getFirstName() + " " + user.getLastName());
         }
 
         loadNotebooks();
@@ -118,7 +116,6 @@ public class ViewDashboardController {
 
         setupHover(viewNotesBtn, viewNotesLabel);
         setupHover(createNoteBtn, createNoteLabel);
-        setupHover(settingsBtn, settingsLabel);
         setupHover(logoutBtn, logoutLabel);
     }
 
@@ -219,7 +216,7 @@ public class ViewDashboardController {
         dialog.setTitle("Open Notebook");
         dialog.setHeaderText("Select a notebook to open");
         dialog.setContentText("Available notebooks:");
-        dialog.initOwner(welcomeLabel.getScene().getWindow());
+        dialog.initOwner(userMenuButton.getScene().getWindow());
 
         Optional<NoteBookEntity> result = dialog.showAndWait();
         if (result.isPresent()) {
@@ -362,13 +359,17 @@ public class ViewDashboardController {
 
     @FXML
     private void handleAbout() {
-        DialogUtil.showAbout(welcomeLabel.getScene().getWindow());
+        DialogUtil.showAbout(userMenuButton.getScene().getWindow());
     }
 
     @FXML
     public void handleClose(ActionEvent actionEvent) {
-        Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+        Stage stage = (Stage) userMenuButton.getScene().getWindow();
         stage.close();
+    }
+    @FXML
+    private void handleManageAccount(){
+
     }
 
 
@@ -429,7 +430,7 @@ public class ViewDashboardController {
         fileChooser.setInitialFileName(fileName + ".pdf");
 
         File file = fileChooser.showSaveDialog(
-                welcomeLabel.getScene().getWindow());
+                userMenuButton.getScene().getWindow());
 
         if (file == null) return;
 
@@ -474,7 +475,7 @@ public class ViewDashboardController {
         alert.setTitle("Warning");
         alert.setHeaderText(null);
         alert.setContentText(message);
-        alert.initOwner(welcomeLabel.getScene().getWindow());
+        alert.initOwner(userMenuButton.getScene().getWindow());
         alert.showAndWait();
     }
 
@@ -483,7 +484,7 @@ public class ViewDashboardController {
         alert.setTitle("Information");
         alert.setHeaderText(null);
         alert.setContentText(message);
-        alert.initOwner(welcomeLabel.getScene().getWindow());
+        alert.initOwner(userMenuButton.getScene().getWindow());
         alert.showAndWait();
     }
 
@@ -492,7 +493,7 @@ public class ViewDashboardController {
         alert.setTitle("Error");
         alert.setHeaderText(null);
         alert.setContentText(message);
-        alert.initOwner(welcomeLabel.getScene().getWindow());
+        alert.initOwner(userMenuButton.getScene().getWindow());
         alert.showAndWait();
     }
 }
