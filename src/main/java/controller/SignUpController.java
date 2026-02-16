@@ -3,7 +3,6 @@ package controller;
 import dao.user.UserDAO;
 import dao.user.JpaUserDao;
 import entity.UserEntity;
-import javafx.event.ActionEvent;
 import javafx.stage.Stage;
 import util.BcryptPasswordHasher;
 import util.NavigationUtil;
@@ -37,13 +36,14 @@ public class SignUpController {
     }
 
     @FXML
-    public void onLogin(ActionEvent event) {
-        navigateToLogin(event);
+    public void onLogin() {
+        navigateToLogin();
     }
 
     @FXML
-    private void handleBack(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/entry.fxml", "Welcome to NoteVault", false);
+    private void handleBack() {
+        Stage stage = (Stage) backButton.getScene().getWindow();
+        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "Welcome to NoteVault", false);
     }
 
     private void handleSignUp() {
@@ -99,7 +99,7 @@ public class SignUpController {
                 new Thread(() -> {
                     try {
                         Thread.sleep(1500); // 1.5-second delay
-                        javafx.application.Platform.runLater(() -> NavigationUtil.navigateTo(currentStage, "/FXML/login_view.fxml", "Login", false));
+                        javafx.application.Platform.runLater(() -> NavigationUtil.replaceScene(currentStage, "/FXML/login_view.fxml", "NoteVault - Login", false));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -118,8 +118,9 @@ public class SignUpController {
         }
     }
 
-    private void navigateToLogin(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/login_view.fxml", "NoteVault - LogIn", false);
+    private void navigateToLogin() {
+        Stage stage = (Stage) loginLink.getScene().getWindow();
+        NavigationUtil.replaceScene(stage, "/FXML/login_view.fxml", "NoteVault - LogIn", false);
     }
 
     private void clearFields() {
