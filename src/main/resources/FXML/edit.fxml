@@ -2,16 +2,37 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 
 <BorderPane prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.EditNoteController">
+        <top>
+            <MenuBar BorderPane.alignment="CENTER">
+                <menus>
+                    <Menu mnemonicParsing="false" text="Edit">
+                        <items>
+                            <MenuItem fx:id="undoMenuItem" mnemonicParsing="false" onAction="#handleUndo" text="Undo" accelerator="Ctrl+Z" />
+                            <MenuItem fx:id="redoMenuItem" mnemonicParsing="false" onAction="#handleRedo" text="Redo" accelerator="Ctrl+Y" />
+                        </items>
+                    </Menu>
+                </menus>
+            </MenuBar>
+        </top>
     <center>
         <AnchorPane>
             <children>
@@ -40,21 +61,64 @@
                             </font>
                         </TextArea>
                     </VBox>
-                    <VBox spacing="5">
+                    <VBox spacing="5.0">
                         <Label fx:id="annotation" text="Annotation">
                             <font>
                                 <Font name="System Bold" size="14" />
                             </font>
                         </Label>
-                        <TextField fx:id="annotationBox" promptText="Enter Annotation">
+                        <TextField fx:id="annotationBox" promptText="Add annotations...">
                             <font>
                                 <Font size="14" />
                             </font>
                         </TextField>
                     </VBox>
-                    <HBox alignment="BOTTOM_LEFT" spacing="50">
-                        <Button fx:id="updateButton" onAction="#handleUpdate" prefWidth="120" text="Update" />
-                        <Button fx:id="cancelButton" alignment="CENTER" contentDisplay="CENTER" onAction="#handleCancel" prefWidth="120.0" text="Cancel" />
+               <HBox spacing="4.0">
+                  <children>
+                     <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                        <image>
+                           <Image url="@/Images/tags.png" />
+                        </image>
+                     </ImageView>
+                     <Label text="Tags">
+                        <font>
+                           <Font name="System Bold" size="14.0" />
+                        </font>
+                     </Label>
+                      <Label alignment="CENTER" opacity="0.64" style="-fx-background-color: lightgray; -fx-background-radius: 50%; -fx-min-height: 16px; -fx-min-width: 16px; -fx-cursor: hand;" text="?">
+                          <tooltip>
+                              <Tooltip fx:id="tagTooltip" text="Tags are kewords to organize your notes">
+                                  <font>
+                                      <Font name="System Italic" size="10.0" />
+                                  </font>
+                              </Tooltip>
+                          </tooltip>
+                          <HBox.margin>
+                              <Insets top="1.0" />
+                          </HBox.margin>
+                      </Label>
+                  </children>
+                  <VBox.margin>
+                     <Insets bottom="4.0" top="4.0" />
+                  </VBox.margin>
+               </HBox>
+               <FlowPane fx:id="tagFlowpane" hgap="8.0" vgap="6.0">
+                  <VBox.margin>
+                     <Insets bottom="2.0" top="4.0" />
+                  </VBox.margin>
+               </FlowPane>
+               <HBox spacing="10.0">
+                  <children>
+                     <ComboBox fx:id="tagComboBox" editable="true" prefWidth="160.0" promptText="Add/Select a tag..." />
+                     <Button fx:id="addTagBtn" mnemonicParsing="false" onAction="#handleAddTag" text="Add tags" />
+                  </children>
+                  <VBox.margin>
+                     <Insets bottom="4.0" top="4.0" />
+                  </VBox.margin>
+               </HBox>
+                    <HBox alignment="BOTTOM_LEFT" spacing="35.0">
+                        <Button fx:id="updateButton" onAction="#handleUpdate" prefWidth="100.0" text="Update" />
+                        <Button fx:id="cancelButton" alignment="CENTER" contentDisplay="CENTER" onAction="#handleCancel" prefWidth="100.0" text="Cancel" />
                     </HBox>
                     <VBox.margin>
                         <Insets bottom="20" left="25" right="25" top="15" />

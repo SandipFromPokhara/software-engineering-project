@@ -37,8 +37,9 @@ public class LoginController {
     private Button backButton;
 
     @FXML
-    private void handleBack(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/entry.fxml", "Welcome to NoteVault", false);
+    private void handleBack() {
+        Stage stage = (Stage) backButton.getScene().getWindow();
+        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "Welcome to NoteVault", false);
     }
 
     private String getUsername() {
@@ -56,7 +57,7 @@ public class LoginController {
     }
 
     @FXML
-    private void handleLogin() {
+    private void handleLogin(ActionEvent event) {
         String username = getUsername();
         String password = getPassword();
 
@@ -74,7 +75,7 @@ public class LoginController {
             if (authenticatedUser != null) {
                 UserSession.getUserInstance().setUser(authenticatedUser);
                 Stage stage = (Stage) loginButton.getScene().getWindow();
-                NavigationUtil.navigateTo(stage, "/FXML/view_dashboard.fxml", "User Dashboard", true);
+                NavigationUtil.replaceScene(stage, "/FXML/view_dashboard.fxml", "User Dashboard", true);
             } else {
                 loginButton.setDisable(false);
                 statusLabel.setTextFill(Color.RED);
@@ -95,12 +96,13 @@ public class LoginController {
 
         passwordField.textProperty().addListener((observable, oldValue, newValue) -> checkFields());
 
-        usernameField.setOnAction(e -> handleLogin());
-        passwordField.setOnAction(e -> handleLogin());
+        usernameField.setOnAction(this::handleLogin);
+        passwordField.setOnAction(this::handleLogin);
     }
 
     @FXML
-    private void handleSignUp(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/signup.fxml", "NoteVault - Register", false);
+    private void handleSignUp() {
+        Stage stage = (Stage) signupLink.getScene().getWindow();
+        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml", "NoteVault - Register", false);
     }
 }

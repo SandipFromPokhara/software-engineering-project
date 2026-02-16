@@ -18,6 +18,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -35,15 +36,9 @@
                 <Menu mnemonicParsing="false" text="File">
                   <items>
                         <MenuItem mnemonicParsing="false" onAction="#handleCreate" text="New Note" />
-                        <MenuItem mnemonicParsing="false" text="Export to PDF" />
+                        <MenuItem mnemonicParsing="false" text="Export as PDF"  onAction="#handleExport"/>
                         <SeparatorMenuItem mnemonicParsing="false" />
                     <MenuItem mnemonicParsing="false" onAction="#handleClose" text="Close" />
-                  </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
-                  <items>
-                    <MenuItem mnemonicParsing="false" text="Undo" />
-                        <MenuItem mnemonicParsing="false" text="Redo" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
@@ -55,7 +50,7 @@
             </MenuBar>
             <MenuButton fx:id="userMenuButton" mnemonicParsing="false" text="Welcome, user">
               <items>
-                <MenuItem fx:id="manageAccount" mnemonicParsing="false" onAction="#handleManageAccount" text="Manage Account" />
+                <MenuItem mnemonicParsing="false" onAction="#handleManageAccount" text="Manage Account" />
                   <SeparatorMenuItem mnemonicParsing="false" />
                 <MenuItem mnemonicParsing="false" onAction="#handleLogout" text="Logout" />
               </items>
@@ -69,7 +64,7 @@
    <left>
       <VBox alignment="TOP_CENTER" prefHeight="373.0" prefWidth="98.0" spacing="10.0" style="-fx-background-color: #9bbab0;">
          <children>
-            <Button fx:id="viewNotesBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleOpen" prefHeight="105.0" prefWidth="108.0" style="-fx-content-display: LEFT; -fx-background-color: transparent; -fx-cursor: hand; -fx-background-insets: 0; -fx-padding: 8 12; -fx-background-radius: 6;">
+            <Button fx:id="viewNotesBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false"  prefHeight="105.0" prefWidth="108.0" style="-fx-content-display: LEFT; -fx-background-color: transparent; -fx-cursor: hand; -fx-background-insets: 0; -fx-padding: 8 12; -fx-background-radius: 6;">
                <graphic>
                   <StackPane prefHeight="60.0" prefWidth="85.0">
                      <children>
@@ -169,9 +164,9 @@
                                 <Separator />
 
                             <TextArea fx:id="noteViewArea" editable="false" prefHeight="511.0" prefWidth="204.0" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; -fx-font-size: 16;" wrapText="true" VBox.vgrow="ALWAYS" />
-                        <VBox prefHeight="200.0" prefWidth="100.0">
+                        <VBox>
                            <children>
-                              <Label text="Annotation:" />
+                              <Label text="Annotations:" />
                               <TextArea fx:id="annotationViewArea" editable="false" prefHeight="22.0" prefWidth="204.0" style="-fx-background-color: transparent;" wrapText="true">
                                  <VBox.margin>
                                     <Insets top="5.0" />
@@ -179,6 +174,16 @@
                               </TextArea>
                            </children>
                         </VBox>
+                        <Separator prefWidth="200.0" />
+                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@/Images/tags.png" />
+                           </image>
+                        </ImageView>
+                        <FlowPane fx:id="tagFlowpane" hgap="4.0" prefWrapLength="200.0" vgap="4.0">
+                           <VBox.margin>
+                              <Insets bottom="10.0" />
+                           </VBox.margin></FlowPane>
                         </children>
                     </VBox>
                 </children>
