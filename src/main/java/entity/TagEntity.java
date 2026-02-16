@@ -26,7 +26,11 @@ public class TagEntity {
     @ManyToMany(mappedBy = "tags")
     private Set<NoteEntity> notes = new HashSet<>();
 
-    public TagEntity() {};
+    public TagEntity() {}
+
+    public TagEntity(String tagName) {
+        this.tagName = tagName;
+    }
 
     public Long getId() { return id; }
 
