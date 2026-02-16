@@ -34,7 +34,7 @@ public class NoteEntity {
     @JoinColumn(name = "notebook_id", nullable = false)
     private NoteBookEntity notebook;
 
-    @ManyToMany
+    @ManyToMany(fetch=FetchType.EAGER)
     @JoinTable(
             name = "note_tags",
             joinColumns = @JoinColumn(name = "note_id"),
@@ -42,6 +42,7 @@ public class NoteEntity {
     )
 
     private Set<TagEntity> tags = new HashSet<>();
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -77,12 +78,10 @@ public class NoteEntity {
 
     public void addTag(TagEntity tag) {
         tags.add(tag);
-        tag.getNotes().add(this);
     }
 
     public void removeTag(TagEntity tag) {
         tags.remove(tag);
-        tag.getNotes().remove(this);
     }
 
     public Set<TagEntity> getTags() {
