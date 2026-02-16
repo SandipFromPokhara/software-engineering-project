@@ -15,6 +15,7 @@ import entity.*;
 import javafx.concurrent.Task;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import session.NotebookSession;
 import util.DialogUtil;
@@ -29,7 +30,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -44,21 +44,24 @@ public class ViewDashboardController {
     private TagDAO tagDao;
 
     @FXML
+    private BorderPane rootPane;
+
+    @FXML
     private MenuButton userMenuButton;
 
     @FXML
     private Button viewNotesBtn,
-                   createNoteBtn,
-                   logoutBtn;
+            createNoteBtn,
+            logoutBtn;
 
     @FXML
     private Label viewNotesLabel,
-                  createNoteLabel,
-                  logoutLabel;
+            createNoteLabel,
+            logoutLabel;
 
     @FXML
     private Button deleteButton,
-                   editButton;
+            editButton;
 
     @FXML
     private TableView<NoteEntity> notesTable;
@@ -74,7 +77,7 @@ public class ViewDashboardController {
 
     @FXML
     private TextArea noteViewArea,
-                     annotationViewArea;
+            annotationViewArea;
 
     @FXML
     private FlowPane tagFlowpane;
@@ -215,12 +218,12 @@ public class ViewDashboardController {
         tagFlowpane.getChildren().clear();
 
         note.getTags().stream()
-                    .sorted((t1, t2) -> t1.getTagName().compareToIgnoreCase(t2.getTagName()))
-                    .forEach(tag -> {
-                        Label tagLabel = new Label("#" + tag.getTagName());
-                        tagLabel.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 4 8; -fx-background-radius: 10;");
-                        tagFlowpane.getChildren().add(tagLabel);
-                    });
+                .sorted((t1, t2) -> t1.getTagName().compareToIgnoreCase(t2.getTagName()))
+                .forEach(tag -> {
+                    Label tagLabel = new Label("#" + tag.getTagName());
+                    tagLabel.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 4 8; -fx-background-radius: 10;");
+                    tagFlowpane.getChildren().add(tagLabel);
+                });
     }
 
     @FXML
@@ -255,8 +258,21 @@ public class ViewDashboardController {
     }
 
     @FXML
-    private void handleLogout() {
-        Stage currentStage = (Stage) logoutBtn.getScene().getWindow();
+    private void handleLogout(ActionEvent event) {
+        Window window = rootPane.getScene().getWindow();
+
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmDialog.setTitle("Logout");
+        confirmDialog.setHeaderText("Are your sure you want to logout?");
+        confirmDialog.setContentText("Any unsaved changes may be lost!");
+        confirmDialog.initOwner(window);
+
+        ButtonType logout = new ButtonType("Logout");
+        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        confirmDialog.getButtonTypes().setAll(logout, cancel);
+
+        Optional<ButtonType> result = confirmDialog.showAndWait();
 
         if (result.isPresent() && result.get() == logout) {
             Stage stage = (Stage) window;
@@ -333,8 +349,8 @@ public class ViewDashboardController {
                 }
         );
 
-            // Refresh table after edit
-            loadNotes();
+        // Refresh table after edit
+        loadNotes();
     }
 
     @FXML
@@ -343,17 +359,16 @@ public class ViewDashboardController {
     }
 
     @FXML
-    public void handleClose(ActionEvent actionEvent) {
+    public void handleClose() {
         Stage stage = (Stage) userMenuButton.getScene().getWindow();
         stage.close();
     }
+
     @FXML
-    private void handleManageAccount(){
-
+    public void handleManageAccount() {
+        // Stage stage = (Stage) userMenuButton.getScene().getWindow();
+        // NavigationUtil.openWindow(stage, "/FXML/user_dashboard.fxml", "NoteVault - User Dashboard", true, true, null);
     }
-
-
-
 
     @FXML
     private void handleExport() {
@@ -399,7 +414,6 @@ public class ViewDashboardController {
         }
         exportNotesToPdf(notes, activeNotebook.getTitle());
     }
-
 
     private void exportNotesToPdf(List<NoteEntity> notes, String fileName) {
         FileChooser fileChooser = new FileChooser();
@@ -448,7 +462,6 @@ public class ViewDashboardController {
             showError("Export failed.");
         }
     }
-
 
     private void showWarning(String message) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
