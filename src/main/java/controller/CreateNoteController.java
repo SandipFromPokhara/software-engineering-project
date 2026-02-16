@@ -1,13 +1,19 @@
 package controller;
 
 import dao.notebook.JpaNoteBookDao;
+import dao.tag.JpaTagDao;
 import entity.NoteBookEntity;
+import entity.TagEntity;
 import entity.UserEntity;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import services.NoteService;
 import entity.NoteEntity;
 import session.NotebookSession;
@@ -18,6 +24,8 @@ import session.UserSession;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Controller for Create Note - handles save and clear operations
@@ -26,6 +34,7 @@ public class CreateNoteController implements Initializable {
 
     private static final String CREATE_NEW = "Create New Notebook...";
     private NoteService noteService;
+    private Set<String> selectedTags = new HashSet<>();
 
     @FXML private TextField titleField;
     @FXML private TextArea contentArea;
@@ -34,11 +43,29 @@ public class CreateNoteController implements Initializable {
     @FXML private Button clearButton;
     @FXML private Label statusLabel;
     @FXML private ComboBox<NoteBookEntity> notebookComboBox;
+    @FXML private FlowPane tagFlowpane;
+    @FXML private ComboBox<String> tagComboBox;
+    @FXML private Button addTagBtn;
 
-    public CreateNoteController() {};
+    // Toolbar buttons
+    @FXML private Button boldButton;
+    @FXML private Button italicButton;
+    @FXML private Button underlineButton;
+    @FXML private Button textColorButton;
+    @FXML private Button bulletListButton;
+    @FXML private Button numberedListButton;
+    @FXML private Button alignLeftButton;
+    @FXML private Button alignCenterButton;
+    @FXML private Button alignRightButton;
+    @FXML private Button headingUpButton;
+    @FXML private Button headingDownButton;
+    @FXML private Tooltip tagTooltip;
+
+    public CreateNoteController() {}
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        tagTooltip.setShowDelay(Duration.millis(100));
         UserEntity currentUser = UserSession.getUserInstance().getUser();
         List<NoteBookEntity> notebooks = new JpaNoteBookDao().findByUser(currentUser);
 
@@ -78,6 +105,15 @@ public class CreateNoteController implements Initializable {
         // Disable save button if title is empty or ComboBox has no selection
         titleField.textProperty().addListener((obs, old, newVal) ->  updateSaveButton());
         notebookComboBox.getSelectionModel().selectedItemProperty().addListener((obs, old, newVal) -> updateSaveButton());
+
+        // Load existing tags from database
+        List<TagEntity> allTags = new JpaTagDao().findAll();
+        List<String> tagNames = allTags.stream()
+                                        .map(TagEntity::getTagName)
+                                        .sorted(String::compareToIgnoreCase)
+                                        .toList();
+
+        tagComboBox.getItems().setAll(tagNames);
     }
 
     private void updateSaveButton() {
@@ -142,7 +178,22 @@ public class CreateNoteController implements Initializable {
                 }
             }
 
-            NoteEntity createdNote = noteService.createNote(title, content, annotation, selectedNotebook);
+            NoteEntity note = new NoteEntity(title.trim(), content, annotation);
+            note.setNotebook(selectedNotebook);
+
+            JpaTagDao tagDao = new JpaTagDao();
+
+            for (String tagName : selectedTags) {
+                TagEntity tag = tagDao.findByName(tagName);
+
+                if (tag == null) {
+                    tag = new TagEntity(tagName);
+                    tag = tagDao.save(tag);
+                }
+                note.addTag(tag);
+            }
+
+            NoteEntity createdNote = noteService.save(note);
             NoteSession.setLastCreatedNote(createdNote);
             showStatus("Note saved successfully!", false);
 
@@ -159,10 +210,57 @@ public class CreateNoteController implements Initializable {
         statusLabel.setVisible(false);
     }
 
+    @FXML
+    private void handleToolbarClick(ActionEvent event) {
+        Button clickedButton = (Button) event.getSource();
+        String buttonId = clickedButton.getId();
+
+        System.out.println("Button clicked: " + buttonId);
+
+        // Each team member implements their buttons here
+        switch (buttonId) {
+            case "boldButton":
+                System.out.println("Bold button");
+                break;
+            case "italicButton":
+                System.out.println("Italic button ");
+                break;
+            case "underlineButton":
+                System.out.println("Underline button");
+                break;
+            case "textColorButton":
+                System.out.println("Text Color");
+                break;
+            case "bulletListButton":
+                System.out.println("Bullet List");
+                break;
+            case "numberedListButton":
+                System.out.println("Numbered List");
+                break;
+            case "alignLeftButton":
+                System.out.println("Align Left");
+                break;
+            case "alignCenterButton":
+                System.out.println("Align Center");
+                break;
+            case "alignRightButton":
+                System.out.println("Align Right");
+                break;
+            case "headingUpButton":
+                System.out.println("Heading Up");
+                break;
+            case "headingDownButton":
+                System.out.println("Heading Down");
+                break;
+        }
+    }
+
     private void clearForm() {
         titleField.clear();
         contentArea.clear();
         annotationArea.clear();
+        selectedTags.clear();
+        tagFlowpane.getChildren().clear();
         titleField.requestFocus();
     }
 
@@ -172,15 +270,70 @@ public class CreateNoteController implements Initializable {
         statusLabel.setVisible(true);
     }
 
+    private void closeCurrentWindow() {
+        Stage stage = (Stage) titleField.getScene().getWindow();
+        stage.close();
+    }
+
     @FXML
     private void handleBackToHome() {
-        Stage stage = (Stage) titleField.getScene().getWindow();
-        NavigationUtil.navigateTo(stage, "/FXML/view_dashboard.fxml", "NoteVault - Dashboard", true);
+        closeCurrentWindow();
     }
 
     @FXML
     private void handleClose() {
-        Stage stage = (Stage) titleField.getScene().getWindow();
-        stage.close();
+        closeCurrentWindow();
+    }
+
+    @FXML
+    private void handleAddTag() {
+        String tagName = tagComboBox.getEditor().getText();
+
+        if (tagName == null || tagName.isBlank()) {
+            return;
+        }
+
+        tagName = tagName.trim();
+
+        int maxLength = 15;
+        if (tagName.length() > maxLength) {
+            showStatus("Tag too long! Max " + maxLength + " characters allowed", true);
+            return;
+        }
+
+        if (!tagName.matches("[a-zA-ZäöåÄÖÅ0-9_-]+")) {
+            showStatus("Invalid characters in tag", true);
+            return;
+        }
+
+        if (selectedTags.contains(tagName)) {
+            return;
+        }
+
+        selectedTags.add(tagName);
+        if (!tagComboBox.getItems().contains(tagName)) {
+            tagComboBox.getItems().add(tagName);
+        }
+        addTagToFlowPane(tagName);
+
+        tagComboBox.getEditor().clear();
+    }
+
+    private void addTagToFlowPane(String tagName) {
+        HBox tagBox = new HBox();
+        tagBox.setSpacing(5);
+        tagBox.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 4 8 4 8; -fx-background-radius: 10;");
+
+        Label label = new Label("#" + tagName);
+
+        Button removeBtn = new Button("x");
+        removeBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: red;");
+        removeBtn.setOnAction(e -> {
+            selectedTags.remove(tagName);
+            tagFlowpane.getChildren().remove(tagBox);
+        });
+
+        tagBox.getChildren().addAll(label, removeBtn);
+        tagFlowpane.getChildren().add(tagBox);
     }
 }

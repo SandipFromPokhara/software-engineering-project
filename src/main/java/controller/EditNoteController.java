@@ -1,57 +1,125 @@
 package controller;
 
-import dao.note.JpaNoteDao;
 import dao.note.NoteDAO;
+import dao.tag.TagDAO;
 import entity.NoteEntity;
+import entity.TagEntity;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class EditNoteController {
 
-    private JpaNoteDao noteDao = new JpaNoteDao();
+    private NoteDAO noteDao;
+    private TagDAO tagDao;
+    private NoteEntity note;
+    private Set<String> selectedTags = new HashSet<>();
 
     @FXML
     private Label title;
     @FXML
-    private TextField titleBox;
+    TextField titleBox;
     @FXML
     private Label content;
 
     @FXML
-    private TextArea contentBox;
+    TextArea contentBox;
 
     @FXML
     private Label annotation;
 
     @FXML
-    private TextField annotationBox;
+    TextField annotationBox;
 
     @FXML
-    private Button updateButton;
+    Button updateButton;
 
     @FXML
     private Button cancelButton;
 
-    private NoteDAO noteDAO = new JpaNoteDao();
-    private NoteEntity note;
+    @FXML
+    private Label statusLabel;
 
+    @FXML
+    private FlowPane tagFlowpane;
+
+    @FXML
+    private ComboBox<String> tagComboBox;
+
+    @FXML
+    private Button addTagBtn;
+
+    @FXML
+    private Tooltip tagTooltip;
+
+    public void setNoteDao(NoteDAO noteDao) {
+        this.noteDao = noteDao;
+    }
+
+    public void setTagDao(TagDAO tagDao) {
+        this.tagDao = tagDao;
+        loadTags();
+    }
+
+    public void initialize() {
+        tagTooltip.setShowDelay(Duration.millis(100));
+        tagComboBox.setEditable(true);
+    }
+
+    private void loadTags() {
+        tagComboBox.getItems().clear();
+
+        tagComboBox.getItems().addAll(tagDao.findAll()
+                                            .stream()
+                                            .map(TagEntity::getTagName)
+                                            .sorted(String::compareToIgnoreCase).toList()
+                                    );
+    }
 
     public void setNote(NoteEntity note){
         this.note = note;
         titleBox.setText(note.getTitle());
         contentBox.setText(note.getContent());
         annotationBox.setText(note.getAnnotation());
+
+        selectedTags.clear();
+        note.getTags().forEach(tag -> selectedTags.add(tag.getTagName()));
+        refreshTagFlowPane();
     }
 
     @FXML
-    private void handleUpdate(){
+    void handleUpdate(){
+        if (noteDao == null || tagDao == null || note == null) {
+            showStatus("Internal error. Please reopen edit window", true);
+            return;
+        }
+
         note.setTitle(titleBox.getText());
         note.setContent(contentBox.getText());
         note.setAnnotation(annotationBox.getText());
+
+        // Clear old tags first
+        for (TagEntity tag: new HashSet<>(note.getTags())) {
+            note.removeTag(tag);
+        }
+
+        // Add current selected tags
+        for (String tagName : selectedTags) {
+            TagEntity tag = tagDao.findByName(tagName);
+            if (tag == null) {
+                tag = new TagEntity(tagName);
+                tag = tagDao.save(tag);
+            }
+            note.addTag(tag);
+        }
+
         noteDao.save(note);
         close();
     }
@@ -66,4 +134,65 @@ public class EditNoteController {
         stage.close();
     }
 
+    private void showStatus(String msg, boolean isError) {
+        statusLabel.setText(msg);
+        statusLabel.setTextFill(isError ? Color.RED : Color.GREEN);
+        statusLabel.setVisible(true);
+    }
+
+    private void refreshTagFlowPane() {
+        tagFlowpane.getChildren().clear();
+        selectedTags.stream()
+                .sorted(String::compareToIgnoreCase)
+                .forEach(tagName -> {
+                    HBox tagBox = new HBox();
+                    tagBox.setSpacing(5);
+                    tagBox.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 4 8 4 8; -fx-background-radius: 10;");
+
+                    Label label = new Label("#" + tagName);
+
+                    Button removeBtn = new Button("x");
+                    removeBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: red;");
+                    removeBtn.setOnAction(e -> {
+                        selectedTags.remove(tagName);
+                        refreshTagFlowPane();
+                    });
+
+                    tagBox.getChildren().addAll(label, removeBtn);
+                    tagFlowpane.getChildren().add(tagBox);
+                });
+    }
+
+    @FXML
+    private void handleAddTag() {
+        String tagName = tagComboBox.getEditor().getText();
+
+        if (tagName == null || tagName.isBlank()) {
+            return;
+        }
+
+        tagName = tagName.trim();
+
+        int maxLength = 15;
+        if (tagName.length() > maxLength) {
+            showStatus("Tag too long! Max " + maxLength + " characters allowed", true);
+            return;
+        }
+
+        if (!tagName.matches("[a-zA-ZäöåÄÖÅ0-9_-]+")) {
+            showStatus("Invalid characters in tag.", true);
+            return;
+        }
+
+        if (selectedTags.contains(tagName)) {
+            return;
+        }
+
+        selectedTags.add(tagName);
+        if (!tagComboBox.getItems().contains(tagName)) {
+            tagComboBox.getItems().add(tagName);
+        }
+        refreshTagFlowPane();
+        tagComboBox.getEditor().clear();
+    }
 }

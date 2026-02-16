@@ -1,8 +1,6 @@
 package util;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -18,85 +16,100 @@ public class NavigationUtil {
 
     private static final String DASHBOARD_FXML = "/FXML/view_dashboard.fxml";
     private static final String CREATE_FXML = "/FXML/create_note.fxml";
+    private static final String EDIT_FXML = "/FXML/edit.fxml";
 
-    public static void navigateTo(ActionEvent event, String fxmlPath, String title, boolean resizable) {
-        if (event == null) {
-            LOGGER.error("ActionEvent is null. Cannot navigate to {}", fxmlPath);
-            return;
-        }
-
-        try {
-            Node source = (Node) event.getSource();
-            if (source == null || source.getScene() == null) {
-                LOGGER.error("Event source or scene is null. Cannot navigate to {}", fxmlPath);
-                return;
-            }
-
-            Stage stage = (Stage) source.getScene().getWindow();
-            if (stage == null) {
-                logError(fxmlPath);
-                return;
-            }
-            navigateTo(stage, fxmlPath, title, resizable);
-        } catch (ClassCastException e) {
-            LOGGER.error("Event source is not a Node. Cannot navigate to {}", fxmlPath, e);
-        } catch (Exception e) {
-            LOGGER.error("Unexpected error navigating to {}", fxmlPath, e);
-        }
+    /**
+     * Functional interface to configure controllers after loading FXML.
+     */
+    @FunctionalInterface
+    public interface ControllerConsumer<T> {
+        void prepare(T controller);
     }
 
-    public static void navigateTo(Stage stage, String fxmlPath, String title, boolean resizable) {
-        if (stage == null) {
-            logError(fxmlPath);
-            return;
-        }
-
+    /**
+     * Open a new window or modal, optionally passing data to the controller.
+     *
+     * @param owner       The owner stage; can be null for new window
+     * @param fxmlPath    FXML resource path
+     * @param title       Window title
+     * @param resizable   Whether window is resizable
+     * @param modal       If true, window is modal
+     * @param consumer    Optional callback to configure the controller
+     */
+    public static <T> void openWindow(Stage owner, String fxmlPath, String title,
+                                      boolean resizable, boolean modal,
+                                      ControllerConsumer<T> consumer) {
         try {
             FXMLLoader loader = new FXMLLoader(NavigationUtil.class.getResource(fxmlPath));
             Parent root = loader.load();
 
-            if (root == null) {
-                LOGGER.error("FXML root is null for {}", fxmlPath);
-                return;
+            Stage stage = new Stage();
+            if (owner != null && modal) {
+                stage.initOwner(owner);
+                stage.initModality(Modality.WINDOW_MODAL);
             }
 
             Scene scene = new Scene(root);
             scene.getStylesheets().add("/css/row_color.css");
-
-            Image icon = new Image("/Images/NV.png");
-            stage.getIcons().clear();
-            stage.getIcons().add(icon);
-            stage.setTitle(title);
             stage.setScene(scene);
+            stage.setTitle(title);
+            stage.getIcons().add(new Image("/Images/NV.png"));
             stage.setResizable(resizable);
             stage.centerOnScreen();
 
-            if (DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath)) {
+            // Set minimum size for key windows
+            if (DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath)) {
                 stage.setMinWidth(700);
                 stage.setMinHeight(550);
             }
 
-            if (stage.getOwner() != null && !stage.isShowing()) {
-                stage.initModality(Modality.APPLICATION_MODAL);
+            // Configure controller if needed
+            if (consumer != null) {
+                consumer.prepare(loader.getController());
             }
 
-            if (!resizable) {
-                stage.sizeToScene();
-            }
-
-            if (stage.getModality() == Modality.NONE) {
-                stage.show();
-            } else {
+            if (modal) {
                 stage.showAndWait();
+            } else {
+                stage.show();
             }
+
         } catch (IOException e) {
             LOGGER.error("Failed to load FXML: {}", fxmlPath, e);
-        } catch (Exception e) {
-            LOGGER.error("Unexpected error navigating to {}", fxmlPath, e);
         }
     }
 
-    private static void logError(String fxmlPath) {
-        LOGGER.error("Stage is null. Cannot navigate to {}", fxmlPath);
+    /**
+     * Replace the scene on an existing stage (like SignUp navigation).
+     */
+    public static void replaceScene(Stage stage, String fxmlPath, String title, boolean resizable) {
+        try {
+            FXMLLoader loader = new FXMLLoader(NavigationUtil.class.getResource(fxmlPath));
+            Parent root = loader.load();
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add("/css/row_color.css");
+
+            stage.setScene(scene);
+            stage.setTitle(title);
+            stage.getIcons().add(new Image("/Images/NV.png"));
+            stage.setResizable(resizable);
+            stage.centerOnScreen();
+
+            // Min size for main windows
+            if (!(DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath))) {
+                stage.setMinWidth(0);
+                stage.setMinHeight(0);
+                stage.setWidth(scene.getWidth());
+                stage.setHeight(scene.getHeight());
+            } else {
+                stage.setMinWidth(700);
+                stage.setMinHeight(550);
+            }
+
+            stage.sizeToScene();
+            stage.show();
+        } catch (IOException e) {
+            LOGGER.error("Failed to load FXML: {}", fxmlPath, e);
+        }
     }
 }

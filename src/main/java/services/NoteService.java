@@ -63,4 +63,8 @@ public class NoteService {
         NoteBookEntity unsavedNotebook  = new NoteBookEntity(notebookName, user);
         return notebookDao.save(unsavedNotebook);
     }
+
+    public NoteEntity save(NoteEntity note) {
+        return noteDao.save(note);
+    }
 }
