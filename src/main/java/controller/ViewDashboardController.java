@@ -24,7 +24,6 @@ import session.NoteSession;
 import session.UserSession;
 
 import javafx.fxml.FXML;
-import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
@@ -258,7 +257,7 @@ public class ViewDashboardController {
     }
 
     @FXML
-    private void handleLogout(ActionEvent event) {
+    private void handleLogout() {
         Window window = rootPane.getScene().getWindow();
 
         Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
