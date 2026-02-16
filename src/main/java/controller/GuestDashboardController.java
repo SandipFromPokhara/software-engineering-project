@@ -9,6 +9,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import util.NavigationUtil;
 import javafx.event.ActionEvent;
 
@@ -40,8 +41,9 @@ public class GuestDashboardController {
     private VBox centerPane;
 
     @FXML
-    private void handleHome(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/entry.fxml", "Welcome to NoteVault", false
+    private void handleHome() {
+        Stage stage = (Stage) home.getScene().getWindow();
+        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "Welcome to NoteVault", false
         );
     }
 
@@ -74,9 +76,10 @@ public class GuestDashboardController {
     }
 
     @FXML
-    private void handleLogin(ActionEvent event) {
-        NavigationUtil.navigateTo(
-                event,
+    private void handleLogin() {
+        Stage stage = (Stage) login.getScene().getWindow();
+        NavigationUtil.replaceScene(
+                stage,
                 "/FXML/login_view.fxml",
                 "NoteVault - LogIn",
                 false
@@ -86,8 +89,9 @@ public class GuestDashboardController {
     }
 
     @FXML
-    private void handleSignUp(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/signup.fxml", "NoteVault - Register", false
+    private void handleSignUp() {
+        Stage stage = (Stage) register.getScene().getWindow();
+        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml", "NoteVault - Register", false
         );
 
     }

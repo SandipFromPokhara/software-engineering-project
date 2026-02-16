@@ -92,7 +92,7 @@
                                     <Font size="11" />
                                 </font>
                             </Label>
-                            <Hyperlink onAction="#onLogin" style="-fx-text-fill: #266973; -fx-font-weight: bold; -fx-font-size: 11;" text="Login" />
+                            <Hyperlink fx:id="loginLink" onAction="#onLogin" style="-fx-text-fill: #266973; -fx-font-weight: bold; -fx-font-size: 11;" text="Login" />
                         </children>
                     </HBox>
 

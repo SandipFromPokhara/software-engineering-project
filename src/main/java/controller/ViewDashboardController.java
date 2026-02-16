@@ -1,14 +1,15 @@
 package controller;
 
 import dao.note.JpaNoteDao;
+import dao.note.NoteDAO;
 import dao.notebook.JpaNoteBookDao;
+import dao.notebook.NoteBookDAO;
+import dao.tag.JpaTagDao;
+import dao.tag.TagDAO;
 import entity.*;
 import javafx.concurrent.Task;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Modality;
+import javafx.scene.layout.FlowPane;
 import javafx.stage.Window;
 import session.NotebookSession;
 import util.DialogUtil;
@@ -22,15 +23,15 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 public class ViewDashboardController {
 
     private NoteBookEntity activeNotebook;
-    private JpaNoteBookDao notebookDao;
-    private JpaNoteDao noteDao;
+    private NoteBookDAO notebookDao;
+    private NoteDAO noteDao;
+    private TagDAO tagDao;
 
     @FXML
     private BorderPane rootPane;
@@ -68,12 +69,16 @@ public class ViewDashboardController {
     private TextArea noteViewArea,
                      annotationViewArea;
 
+    @FXML
+    private FlowPane tagFlowpane;
+
     public ViewDashboardController() {}
 
     @FXML
     public void initialize() {
         this.notebookDao = new JpaNoteBookDao();
         this.noteDao = new JpaNoteDao();
+        this.tagDao = new JpaTagDao();
 
         UserEntity user = UserSession.getUserInstance().getUser();
         if (user != null) {
@@ -97,12 +102,15 @@ public class ViewDashboardController {
                 noteViewArea.setText(newSelection.getContent());
                 annotationViewArea.setText(newSelection.getAnnotation());
 
+                refreshTagView(newSelection);
+
                 editButton.setDisable(false);
                 deleteButton.setDisable(false);
             } else {
                 noteTitleLabel.setText("Select a note to view details");
                 noteViewArea.clear();
                 annotationViewArea.clear();
+                tagFlowpane.getChildren().clear();
                 editButton.setDisable(true);
                 deleteButton.setDisable(true);
             }
@@ -129,35 +137,30 @@ public class ViewDashboardController {
             List<NoteBookEntity> notebooks = loadNotebooksTask.getValue();
 
             if (notebooks.isEmpty()) {
-
-                Stage createStage = new Stage();
-                NavigationUtil.navigateTo(createStage, "/FXML/create_note.fxml", "NoteVault - Create Note", true);
-
-                createStage.setOnHidden(ev -> {
-                    loadNotebooks();
-                });
-
-            } else {
-                NoteBookEntity lastCreated = NotebookSession.getLastCreatedNotebook();
-
-                if (lastCreated != null) {
-                    for (NoteBookEntity nb : notebooks) {
-                        if (nb.getId().equals(lastCreated.getId())) {
-                            activeNotebook = nb;
-                            break;
-                        }
-                    }
-                    NotebookSession.clear();
-                }
-
-                if (activeNotebook == null && !notebooks.isEmpty()) {
-                    activeNotebook = notebooks.get(0);
-                }
+                Stage owner = (Stage) rootPane.getScene().getWindow();
+                NavigationUtil.openWindow(owner, "/FXML/create_note.fxml", "NoteVault - Create Note", true, true, null);
 
                 loadNotes();
+                return;
             }
-        });
+            NoteBookEntity lastCreated = NotebookSession.getLastCreatedNotebook();
 
+            if (lastCreated != null) {
+                for (NoteBookEntity nb : notebooks) {
+                    if (nb.getId().equals(lastCreated.getId())) {
+                        activeNotebook = nb;
+                        break;
+                    }
+                }
+                NotebookSession.clear();
+            }
+
+            if (activeNotebook == null && !notebooks.isEmpty()) {
+                activeNotebook = notebooks.get(0);
+            }
+
+            loadNotes();
+        });
         new Thread(loadNotebooksTask).start();
     }
 
@@ -199,6 +202,18 @@ public class ViewDashboardController {
         });
 
         new Thread(loadNotesTask).start();
+    }
+
+    private void refreshTagView(NoteEntity note) {
+        tagFlowpane.getChildren().clear();
+
+        note.getTags().stream()
+                    .sorted((t1, t2) -> t1.getTagName().compareToIgnoreCase(t2.getTagName()))
+                    .forEach(tag -> {
+                        Label tagLabel = new Label("#" + tag.getTagName());
+                        tagLabel.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 4 8; -fx-background-radius: 10;");
+                        tagFlowpane.getChildren().add(tagLabel);
+                    });
     }
 
     @FXML
@@ -250,12 +265,8 @@ public class ViewDashboardController {
         Optional<ButtonType> result = confirmDialog.showAndWait();
 
         if (result.isPresent() && result.get() == logout) {
-            Stage currentStage = (Stage) window;
-
-            Stage entryStage = new Stage();
-            NavigationUtil.navigateTo(entryStage, "/FXML/entry.fxml", "Welcome To NoteVault", false);
-
-            currentStage.close();
+            Stage stage = (Stage) window;
+            NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "Welcome To NoteVault", false);
         }
     }
 
@@ -311,19 +322,7 @@ public class ViewDashboardController {
 
     @FXML
     public void handleCreate() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/create_note.fxml"));
-            Parent root = loader.load();
-
-            Stage createStage = new Stage();
-            createStage.initModality(Modality.APPLICATION_MODAL);
-            createStage.setTitle("NoteVault - Create Note");
-            createStage.setScene(new Scene(root));
-            createStage.showAndWait();
-            loadNotes();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        NavigationUtil.openWindow(null, "/FXML/create_note.fxml", "NoteVault - Create Note", true, false, null);
     }
 
     @FXML
@@ -331,30 +330,17 @@ public class ViewDashboardController {
         NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
         if (selectedNote == null) return;
 
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/FXML/edit.fxml")
-            );
-
-            Parent root = loader.load();
-
-            // Get controller and pass note
-            EditNoteController controller = loader.getController();
-            controller.setNote(selectedNote);
-            controller.setNoteDao(new JpaNoteDao()); // inject DAO
-
-            Stage editStage = new Stage();
-            editStage.initModality(Modality.APPLICATION_MODAL);
-            editStage.setTitle("NoteVault - Edit Note");
-            editStage.setScene(new Scene(root));
-            editStage.showAndWait();
+        Stage stage = (Stage) editButton.getScene().getWindow();
+        NavigationUtil.openWindow(stage, "/FXML/edit.fxml", "NoteVault - Edit Note", true, true,
+                (EditNoteController controller) -> {
+                    controller.setNoteDao(noteDao);
+                    controller.setTagDao(tagDao);
+                    controller.setNote(selectedNote);
+                }
+        );
 
             // Refresh table after edit
             loadNotes();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @FXML
@@ -369,8 +355,8 @@ public class ViewDashboardController {
     }
 
     @FXML
-    public void handleManageAccount(ActionEvent event) {
-        System.out.println("Opening User Dashboard");
-        // NavigationUtil.navigateTo(event, "/FXML/user_dashboard.fxml", "NoteVault - User Dashboard", true);
+    public void handleManageAccount() {
+        // Stage stage = (Stage) userMenuButton.getScene().getWindow();
+        // NavigationUtil.openWindow(stage, "/FXML/user_dashboard.fxml", "NoteVault - User Dashboard", true, true, null);
     }
 }
