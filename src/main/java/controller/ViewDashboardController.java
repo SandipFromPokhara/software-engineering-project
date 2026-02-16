@@ -1,5 +1,10 @@
 package controller;
 
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.AreaBreak;
+import com.itextpdf.layout.element.Paragraph;
 import dao.note.JpaNoteDao;
 import dao.notebook.JpaNoteBookDao;
 import entity.*;
@@ -7,6 +12,7 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import session.NotebookSession;
 import util.DialogUtil;
@@ -20,12 +26,16 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ViewDashboardController {
 
+    private static final Logger logger = Logger.getLogger(ViewDashboardController.class.getName());
     private NoteBookEntity activeNotebook;
     private JpaNoteBookDao notebookDao;
     private JpaNoteDao noteDao;
@@ -334,8 +344,20 @@ public class ViewDashboardController {
             loadNotes();
 
         } catch (IOException e) {
-            e.printStackTrace();
+
+            logger.log(Level.SEVERE,
+                    "Failed to open Edit Note window for note: "
+                            + (selectedNote != null ? selectedNote.getTitle() : "Unknown"),
+                    e);
+
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("Unable to open Edit Window");
+            errorAlert.setContentText("An unexpected error occurred.");
+            errorAlert.initOwner(notesTable.getScene().getWindow());
+            errorAlert.showAndWait();
         }
+
     }
 
     @FXML
@@ -347,5 +369,130 @@ public class ViewDashboardController {
     public void handleClose(ActionEvent actionEvent) {
         Stage stage = (Stage) welcomeLabel.getScene().getWindow();
         stage.close();
+    }
+
+
+
+
+    @FXML
+    private void handleExport() {
+        if (activeNotebook == null) {
+            showWarning("No notebook selected.");
+            return;
+        }
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(
+                "Selected Note",
+                "Selected Note",
+                "Entire Notebook"
+        );
+        dialog.setTitle("Export Options");
+        dialog.setHeaderText("Choose what to export:");
+        dialog.setContentText("Export:");
+
+        Optional<String> result = dialog.showAndWait();
+
+        if (result.isEmpty()) return;
+
+        if (result.get().equals("Selected Note")) {
+            exportSelectedNote();
+        } else {
+            exportEntireNotebook();
+        }
+    }
+
+    private void exportSelectedNote() {
+        NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
+        if (selectedNote == null) {
+            showWarning("Please select a note to export.");
+            return;
+        }
+        List<NoteEntity> singleNoteList = List.of(selectedNote);
+        exportNotesToPdf(singleNoteList, selectedNote.getTitle());
+    }
+
+    private void exportEntireNotebook() {
+        List<NoteEntity> notes = noteDao.findByNotebook(activeNotebook); // active one not
+        if (notes.isEmpty()) {
+            showWarning("Notebook is empty.");
+            return;
+        }
+        exportNotesToPdf(notes, activeNotebook.getTitle());
+    }
+
+
+    private void exportNotesToPdf(List<NoteEntity> notes, String fileName) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export as PDF");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("PDF Files", "*.pdf")
+        );
+        fileChooser.setInitialFileName(fileName + ".pdf");
+
+        File file = fileChooser.showSaveDialog(
+                welcomeLabel.getScene().getWindow());
+
+        if (file == null) return;
+
+        try {
+            PdfWriter writer = new PdfWriter(file.getAbsolutePath());
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf);
+
+            for (int i = 0; i < notes.size(); i++) {
+                NoteEntity note = notes.get(i);
+                document.add(new Paragraph(note.getTitle())
+                        .setBold()
+                        .setFontSize(18));
+                document.add(new Paragraph(note.getContent()));
+
+                if (note.getAnnotation() != null &&
+                        !note.getAnnotation().isEmpty()) {
+
+                    document.add(new Paragraph("\nAnnotation:")
+                            .setBold());
+
+                    document.add(new Paragraph(note.getAnnotation()));
+                }
+
+                if (i < notes.size() - 1) {
+                    document.add(new AreaBreak());
+                }
+            }
+
+            document.close();
+            showInfo("Export successful!");
+
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Export failed", e);
+            showError("Export failed.");
+        }
+    }
+
+
+    private void showWarning(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Warning");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.initOwner(welcomeLabel.getScene().getWindow());
+        alert.showAndWait();
+    }
+
+    private void showInfo(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.initOwner(welcomeLabel.getScene().getWindow());
+        alert.showAndWait();
+    }
+
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.initOwner(welcomeLabel.getScene().getWindow());
+        alert.showAndWait();
     }
 }

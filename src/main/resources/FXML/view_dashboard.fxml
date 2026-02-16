@@ -36,7 +36,7 @@
                   <items>
                         <MenuItem mnemonicParsing="false" text="New Note" onAction="#handleCreate" />
                         <MenuItem mnemonicParsing="false" text="Save" />
-                        <MenuItem mnemonicParsing="false" text="Export" />
+                        <MenuItem mnemonicParsing="false" text="Export" onAction="#handleExport"/>
                         <SeparatorMenuItem mnemonicParsing="false" />
                     <MenuItem mnemonicParsing="false" text="Close" onAction="#handleClose" />
                   </items>
