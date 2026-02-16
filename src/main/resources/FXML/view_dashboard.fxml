@@ -56,7 +56,7 @@
             </MenuBar>
             <MenuButton fx:id="userMenuButton" mnemonicParsing="false" text="Welcome, user">
               <items>
-                <MenuItem fx:id="manageAccount" mnemonicParsing="false" onAction="#handleManageAccount" text="Manage Account" />
+                <MenuItem mnemonicParsing="false" onAction="#handleManageAccount" text="Manage Account" />
                   <SeparatorMenuItem mnemonicParsing="false" />
                 <MenuItem mnemonicParsing="false" onAction="#handleLogout" text="Logout" />
               </items>
