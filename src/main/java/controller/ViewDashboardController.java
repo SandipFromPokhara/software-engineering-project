@@ -332,7 +332,13 @@ public class ViewDashboardController {
 
     @FXML
     public void handleCreate() {
-        NavigationUtil.openWindow(null, "/FXML/create_note.fxml", "NoteVault - Create Note", true, false, null);
+        Stage owner = (Stage) createNoteBtn.getScene().getWindow();
+
+        // Open create note window as modal and wait for it to close
+        NavigationUtil.openWindow(owner, "/FXML/create_note.fxml", "NoteVault - Create Note", true, true, null);
+
+        // After window closes, reload notes
+        loadNotes();
     }
 
     @FXML

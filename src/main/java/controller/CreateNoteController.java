@@ -19,6 +19,7 @@ import entity.NoteEntity;
 import session.NotebookSession;
 import session.NoteSession;
 import session.UserSession;
+import util.UndoRedoManager;
 
 import java.net.URL;
 import java.util.List;
@@ -59,6 +60,12 @@ public class CreateNoteController implements Initializable {
     @FXML private Button headingUpButton;
     @FXML private Button headingDownButton;
     @FXML private Tooltip tagTooltip;
+
+    // Undo/Redo components
+    @FXML private MenuItem undoMenuItem;
+    @FXML private MenuItem redoMenuItem;
+
+    private UndoRedoManager undoRedoManager = new UndoRedoManager();
 
     public CreateNoteController() {}
 
@@ -108,11 +115,27 @@ public class CreateNoteController implements Initializable {
         // Load existing tags from database
         List<TagEntity> allTags = new JpaTagDao().findAll();
         List<String> tagNames = allTags.stream()
-                                        .map(TagEntity::getTagName)
-                                        .sorted(String::compareToIgnoreCase)
-                                        .toList();
+                .map(TagEntity::getTagName)
+                .sorted(String::compareToIgnoreCase)
+                .toList();
 
         tagComboBox.getItems().setAll(tagNames);
+
+        // Initialize undo/redo manager
+        undoRedoManager.initialize(undoMenuItem, redoMenuItem);
+        undoRedoManager.registerField("title", titleField);
+        undoRedoManager.registerField("content", contentArea);
+        undoRedoManager.registerField("annotation", annotationArea);
+    }
+
+    @FXML
+    private void handleUndo() {
+        undoRedoManager.undo();
+    }
+
+    @FXML
+    private void handleRedo() {
+        undoRedoManager.redo();
     }
 
     private void updateSaveButton() {
@@ -261,6 +284,9 @@ public class CreateNoteController implements Initializable {
         selectedTags.clear();
         tagFlowpane.getChildren().clear();
         titleField.requestFocus();
+
+        // Clear undo/redo history
+        undoRedoManager.clear();
     }
 
     private void showStatus(String message, boolean isError) {
