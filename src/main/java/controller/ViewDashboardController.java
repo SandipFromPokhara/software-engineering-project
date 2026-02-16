@@ -330,8 +330,8 @@ public class ViewDashboardController {
         NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
         if (selectedNote == null) return;
 
-        NavigationUtil.openWindow(
-                (Stage) notesTable.getScene().getWindow(), "/FXML/edit.fxml", "NoteVault - Edit Note", true, true,
+        Stage stage = (Stage) editButton.getScene().getWindow();
+        NavigationUtil.openWindow(stage, "/FXML/edit.fxml", "NoteVault - Edit Note", true, true,
                 (EditNoteController controller) -> {
                     controller.setNoteDao(noteDao);
                     controller.setTagDao(tagDao);
@@ -355,8 +355,9 @@ public class ViewDashboardController {
     }
 
     @FXML
-    public void handleManageAccount(ActionEvent event) {
+    public void handleManageAccount() {
         System.out.println("Opening User Dashboard");
-        // NavigationUtil.navigateTo(event, "/FXML/user_dashboard.fxml", "NoteVault - User Dashboard", true);
+        // Stage stage = (Stage) userMenuButton.getScene().getWindow();
+        // NavigationUtil.openWindow(stage, "/FXML/user_dashboard.fxml", "NoteVault - User Dashboard", true, true, null);
     }
 }
