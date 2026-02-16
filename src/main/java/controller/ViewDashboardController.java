@@ -1,5 +1,10 @@
 package controller;
 
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.AreaBreak;
+import com.itextpdf.layout.element.Paragraph;
 import dao.note.JpaNoteDao;
 import dao.note.NoteDAO;
 import dao.notebook.JpaNoteBookDao;
@@ -10,6 +15,7 @@ import entity.*;
 import javafx.concurrent.Task;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import session.NotebookSession;
 import util.DialogUtil;
@@ -23,11 +29,15 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ViewDashboardController {
 
+    private static final Logger logger = Logger.getLogger(ViewDashboardController.class.getName());
     private NoteBookEntity activeNotebook;
     private NoteBookDAO notebookDao;
     private NoteDAO noteDao;
@@ -41,17 +51,17 @@ public class ViewDashboardController {
 
     @FXML
     private Button viewNotesBtn,
-                   createNoteBtn,
-                   logoutBtn;
+            createNoteBtn,
+            logoutBtn;
 
     @FXML
     private Label viewNotesLabel,
-                  createNoteLabel,
-                  logoutLabel;
+            createNoteLabel,
+            logoutLabel;
 
     @FXML
     private Button deleteButton,
-                   editButton;
+            editButton;
 
     @FXML
     private TableView<NoteEntity> notesTable;
@@ -67,7 +77,7 @@ public class ViewDashboardController {
 
     @FXML
     private TextArea noteViewArea,
-                     annotationViewArea;
+            annotationViewArea;
 
     @FXML
     private FlowPane tagFlowpane;
@@ -322,7 +332,9 @@ public class ViewDashboardController {
 
     @FXML
     public void handleCreate() {
-        NavigationUtil.openWindow(null, "/FXML/create_note.fxml", "NoteVault - Create Note", true, false, null);
+        Stage owner = (Stage) createNoteBtn.getScene().getWindow();
+        NavigationUtil.openWindow(owner, "/FXML/create_note.fxml", "NoteVault - Create Note", true, true, null);
+        loadNotes();
     }
 
     @FXML
@@ -339,8 +351,8 @@ public class ViewDashboardController {
                 }
         );
 
-            // Refresh table after edit
-            loadNotes();
+        // Refresh table after edit
+        loadNotes();
     }
 
     @FXML
@@ -358,5 +370,125 @@ public class ViewDashboardController {
     public void handleManageAccount() {
         // Stage stage = (Stage) userMenuButton.getScene().getWindow();
         // NavigationUtil.openWindow(stage, "/FXML/user_dashboard.fxml", "NoteVault - User Dashboard", true, true, null);
+    }
+
+    @FXML
+    private void handleExport() {
+        if (activeNotebook == null) {
+            showWarning("No notebook selected.");
+            return;
+        }
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(
+                "Selected Note",
+                "Selected Note",
+                "Entire Notebook"
+        );
+        dialog.setTitle("Export Options");
+        dialog.setHeaderText("Choose what to export:");
+        dialog.setContentText("Export:");
+
+        Optional<String> result = dialog.showAndWait();
+
+        if (result.isEmpty()) return;
+
+        if (result.get().equals("Selected Note")) {
+            exportSelectedNote();
+        } else {
+            exportEntireNotebook();
+        }
+    }
+
+    private void exportSelectedNote() {
+        NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
+        if (selectedNote == null) {
+            showWarning("Please select a note to export.");
+            return;
+        }
+        List<NoteEntity> singleNoteList = List.of(selectedNote);
+        exportNotesToPdf(singleNoteList, selectedNote.getTitle());
+    }
+
+    private void exportEntireNotebook() {
+        List<NoteEntity> notes = noteDao.findByNotebook(activeNotebook); // active one not
+        if (notes.isEmpty()) {
+            showWarning("Notebook is empty.");
+            return;
+        }
+        exportNotesToPdf(notes, activeNotebook.getTitle());
+    }
+
+    private void exportNotesToPdf(List<NoteEntity> notes, String fileName) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export as PDF");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("PDF Files", "*.pdf")
+        );
+        fileChooser.setInitialFileName(fileName + ".pdf");
+
+        File file = fileChooser.showSaveDialog(
+                userMenuButton.getScene().getWindow());
+
+        if (file == null) return;
+
+        try {
+            PdfWriter writer = new PdfWriter(file.getAbsolutePath());
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf);
+
+            for (int i = 0; i < notes.size(); i++) {
+                NoteEntity note = notes.get(i);
+                document.add(new Paragraph(note.getTitle())
+                        .setBold()
+                        .setFontSize(18));
+                document.add(new Paragraph(note.getContent()));
+
+                if (note.getAnnotation() != null &&
+                        !note.getAnnotation().isEmpty()) {
+
+                    document.add(new Paragraph("\nAnnotation:")
+                            .setBold());
+
+                    document.add(new Paragraph(note.getAnnotation()));
+                }
+
+                if (i < notes.size() - 1) {
+                    document.add(new AreaBreak());
+                }
+            }
+
+            document.close();
+            showInfo("Export successful!");
+
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Export failed", e);
+            showError("Export failed.");
+        }
+    }
+
+    private void showWarning(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Warning");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.initOwner(userMenuButton.getScene().getWindow());
+        alert.showAndWait();
+    }
+
+    private void showInfo(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.initOwner(userMenuButton.getScene().getWindow());
+        alert.showAndWait();
+    }
+
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.initOwner(userMenuButton.getScene().getWindow());
+        alert.showAndWait();
     }
 }

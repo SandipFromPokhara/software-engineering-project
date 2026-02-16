@@ -36,15 +36,9 @@
                 <Menu mnemonicParsing="false" text="File">
                   <items>
                         <MenuItem mnemonicParsing="false" onAction="#handleCreate" text="New Note" />
-                        <MenuItem mnemonicParsing="false" text="Export to PDF" />
+                        <MenuItem mnemonicParsing="false" text="Export as PDF"  onAction="#handleExport"/>
                         <SeparatorMenuItem mnemonicParsing="false" />
                     <MenuItem mnemonicParsing="false" onAction="#handleClose" text="Close" />
-                  </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
-                  <items>
-                    <MenuItem mnemonicParsing="false" text="Undo" />
-                        <MenuItem mnemonicParsing="false" text="Redo" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
@@ -70,7 +64,7 @@
    <left>
       <VBox alignment="TOP_CENTER" prefHeight="373.0" prefWidth="98.0" spacing="10.0" style="-fx-background-color: #9bbab0;">
          <children>
-            <Button fx:id="viewNotesBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleOpen" prefHeight="105.0" prefWidth="108.0" style="-fx-content-display: LEFT; -fx-background-color: transparent; -fx-cursor: hand; -fx-background-insets: 0; -fx-padding: 8 12; -fx-background-radius: 6;">
+            <Button fx:id="viewNotesBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false"  prefHeight="105.0" prefWidth="108.0" style="-fx-content-display: LEFT; -fx-background-color: transparent; -fx-cursor: hand; -fx-background-insets: 0; -fx-padding: 8 12; -fx-background-radius: 6;">
                <graphic>
                   <StackPane prefHeight="60.0" prefWidth="85.0">
                      <children>
