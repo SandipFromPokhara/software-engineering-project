@@ -15,6 +15,7 @@ import entity.*;
 import javafx.concurrent.Task;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import session.NotebookSession;
 import util.DialogUtil;
@@ -42,6 +43,9 @@ public class ViewDashboardController {
     private NoteBookDAO notebookDao;
     private NoteDAO noteDao;
     private TagDAO tagDao;
+
+    @FXML
+    private BorderPane rootPane;
 
     @FXML
     private MenuButton userMenuButton;
@@ -255,8 +259,21 @@ public class ViewDashboardController {
     }
 
     @FXML
-    private void handleLogout() {
-        Stage currentStage = (Stage) logoutBtn.getScene().getWindow();
+    private void handleLogout(ActionEvent event) {
+        Window window = rootPane.getScene().getWindow();
+
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmDialog.setTitle("Logout");
+        confirmDialog.setHeaderText("Are your sure you want to logout?");
+        confirmDialog.setContentText("Any unsaved changes may be lost!");
+        confirmDialog.initOwner(window);
+
+        ButtonType logout = new ButtonType("Logout");
+        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        confirmDialog.getButtonTypes().setAll(logout, cancel);
+
+        Optional<ButtonType> result = confirmDialog.showAndWait();
 
         if (result.isPresent() && result.get() == logout) {
             Stage stage = (Stage) window;
