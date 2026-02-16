@@ -17,7 +17,6 @@ import javafx.util.Duration;
 import services.NoteService;
 import entity.NoteEntity;
 import session.NotebookSession;
-import util.NavigationUtil;
 import session.NoteSession;
 import session.UserSession;
 import util.UndoRedoManager;
