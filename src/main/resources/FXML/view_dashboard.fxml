@@ -36,7 +36,7 @@
                 <Menu mnemonicParsing="false" text="File">
                   <items>
                         <MenuItem mnemonicParsing="false" onAction="#handleCreate" text="New Note" />
-                        <MenuItem mnemonicParsing="false" text="Export to PDF" />
+                        <MenuItem mnemonicParsing="false" text="Export as PDF"  onAction="#handleExport"/>
                         <SeparatorMenuItem mnemonicParsing="false" />
                     <MenuItem mnemonicParsing="false" onAction="#handleClose" text="Close" />
                   </items>
