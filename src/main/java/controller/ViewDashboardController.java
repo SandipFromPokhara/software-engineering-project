@@ -218,12 +218,12 @@ public class ViewDashboardController {
         tagFlowpane.getChildren().clear();
 
         note.getTags().stream()
-                .sorted((t1, t2) -> t1.getTagName().compareToIgnoreCase(t2.getTagName()))
-                .forEach(tag -> {
-                    Label tagLabel = new Label("#" + tag.getTagName());
-                    tagLabel.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 4 8; -fx-background-radius: 10;");
-                    tagFlowpane.getChildren().add(tagLabel);
-                });
+                    .sorted((t1, t2) -> t1.getTagName().compareToIgnoreCase(t2.getTagName()))
+                    .forEach(tag -> {
+                        Label tagLabel = new Label("#" + tag.getTagName());
+                        tagLabel.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 4 8; -fx-background-radius: 10;");
+                        tagFlowpane.getChildren().add(tagLabel);
+                    });
     }
 
     @FXML
@@ -333,11 +333,7 @@ public class ViewDashboardController {
     @FXML
     public void handleCreate() {
         Stage owner = (Stage) createNoteBtn.getScene().getWindow();
-
-        // Open create note window as modal and wait for it to close
         NavigationUtil.openWindow(owner, "/FXML/create_note.fxml", "NoteVault - Create Note", true, true, null);
-
-        // After window closes, reload notes
         loadNotes();
     }
 
