@@ -7,7 +7,9 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
+import javafx.stage.Window;
 import session.NotebookSession;
 import util.DialogUtil;
 import util.NavigationUtil;
@@ -31,18 +33,19 @@ public class ViewDashboardController {
     private JpaNoteDao noteDao;
 
     @FXML
-    private Label welcomeLabel;
+    private BorderPane rootPane;
+
+    @FXML
+    private MenuButton userMenuButton;
 
     @FXML
     private Button viewNotesBtn,
                    createNoteBtn,
-                   settingsBtn,
                    logoutBtn;
 
     @FXML
     private Label viewNotesLabel,
                   createNoteLabel,
-                  settingsLabel,
                   logoutLabel;
 
     @FXML
@@ -74,7 +77,7 @@ public class ViewDashboardController {
 
         UserEntity user = UserSession.getUserInstance().getUser();
         if (user != null) {
-            welcomeLabel.setText("Welcome, " + user.getFirstName());
+            userMenuButton.setText("Welcome, " + user.getFirstName() + " " + user.getLastName());
         }
 
         loadNotebooks();
@@ -108,7 +111,6 @@ public class ViewDashboardController {
 
         setupHover(viewNotesBtn, viewNotesLabel);
         setupHover(createNoteBtn, createNoteLabel);
-        setupHover(settingsBtn, settingsLabel);
         setupHover(logoutBtn, logoutLabel);
     }
 
@@ -209,7 +211,7 @@ public class ViewDashboardController {
         dialog.setTitle("Open Notebook");
         dialog.setHeaderText("Select a notebook to open");
         dialog.setContentText("Available notebooks:");
-        dialog.initOwner(welcomeLabel.getScene().getWindow());
+        dialog.initOwner(userMenuButton.getScene().getWindow());
 
         Optional<NoteBookEntity> result = dialog.showAndWait();
         if (result.isPresent()) {
@@ -231,13 +233,30 @@ public class ViewDashboardController {
     }
 
     @FXML
-    private void handleLogout() {
-        Stage currentStage = (Stage) logoutBtn.getScene().getWindow();
+    private void handleLogout(ActionEvent event) {
+        Window window = rootPane.getScene().getWindow();
 
-        Stage entryStage = new Stage();
-        NavigationUtil.navigateTo(entryStage, "/FXML/entry.fxml", "Welcome To NoteVault", false);
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmDialog.setTitle("Logout");
+        confirmDialog.setHeaderText("Are your sure you want to logout?");
+        confirmDialog.setContentText("Any unsaved changes may be lost!");
+        confirmDialog.initOwner(window);
 
-        currentStage.close();
+        ButtonType logout = new ButtonType("Logout");
+        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        confirmDialog.getButtonTypes().setAll(logout, cancel);
+
+        Optional<ButtonType> result = confirmDialog.showAndWait();
+
+        if (result.isPresent() && result.get() == logout) {
+            Stage currentStage = (Stage) window;
+
+            Stage entryStage = new Stage();
+            NavigationUtil.navigateTo(entryStage, "/FXML/entry.fxml", "Welcome To NoteVault", false);
+
+            currentStage.close();
+        }
     }
 
     @FXML
@@ -291,7 +310,7 @@ public class ViewDashboardController {
     }
 
     @FXML
-    public void handleCreate(ActionEvent event) {
+    public void handleCreate() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FXML/create_note.fxml"));
             Parent root = loader.load();
@@ -340,12 +359,18 @@ public class ViewDashboardController {
 
     @FXML
     private void handleAbout() {
-        DialogUtil.showAbout(welcomeLabel.getScene().getWindow());
+        DialogUtil.showAbout(userMenuButton.getScene().getWindow());
     }
 
     @FXML
-    public void handleClose(ActionEvent actionEvent) {
-        Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+    public void handleClose() {
+        Stage stage = (Stage) userMenuButton.getScene().getWindow();
         stage.close();
+    }
+
+    @FXML
+    public void handleManageAccount(ActionEvent event) {
+        System.out.println("Opening User Dashboard");
+        // NavigationUtil.navigateTo(event, "/FXML/user_dashboard.fxml", "NoteVault - User Dashboard", true);
     }
 }
