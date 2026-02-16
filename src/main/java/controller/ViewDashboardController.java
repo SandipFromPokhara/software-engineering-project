@@ -356,7 +356,6 @@ public class ViewDashboardController {
 
     @FXML
     public void handleManageAccount() {
-        System.out.println("Opening User Dashboard");
         // Stage stage = (Stage) userMenuButton.getScene().getWindow();
         // NavigationUtil.openWindow(stage, "/FXML/user_dashboard.fxml", "NoteVault - User Dashboard", true, true, null);
     }
