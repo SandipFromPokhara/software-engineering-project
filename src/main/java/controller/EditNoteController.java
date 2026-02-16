@@ -11,6 +11,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import util.UndoRedoManager;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -59,6 +60,12 @@ public class EditNoteController {
     @FXML
     private Tooltip tagTooltip;
 
+    // Undo/Redo components
+    @FXML private MenuItem undoMenuItem;
+    @FXML private MenuItem redoMenuItem;
+
+    private UndoRedoManager undoRedoManager = new UndoRedoManager();
+
     public void setNoteDao(NoteDAO noteDao) {
         this.noteDao = noteDao;
     }
@@ -71,16 +78,32 @@ public class EditNoteController {
     public void initialize() {
         tagTooltip.setShowDelay(Duration.millis(100));
         tagComboBox.setEditable(true);
+
+        // Initialize undo/redo manager
+        undoRedoManager.initialize(undoMenuItem, redoMenuItem);
+        undoRedoManager.registerField("title", titleBox);
+        undoRedoManager.registerField("content", contentBox);
+        undoRedoManager.registerField("annotation", annotationBox);
+    }
+
+    @FXML
+    private void handleUndo() {
+        undoRedoManager.undo();
+    }
+
+    @FXML
+    private void handleRedo() {
+        undoRedoManager.redo();
     }
 
     private void loadTags() {
         tagComboBox.getItems().clear();
 
         tagComboBox.getItems().addAll(tagDao.findAll()
-                                            .stream()
-                                            .map(TagEntity::getTagName)
-                                            .sorted(String::compareToIgnoreCase).toList()
-                                    );
+                .stream()
+                .map(TagEntity::getTagName)
+                .sorted(String::compareToIgnoreCase).toList()
+        );
     }
 
     public void setNote(NoteEntity note){
