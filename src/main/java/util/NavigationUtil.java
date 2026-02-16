@@ -60,7 +60,7 @@ public class NavigationUtil {
             // Set minimum size for key windows
             if (DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath)) {
                 stage.setMinWidth(700);
-                stage.setMinHeight(550);
+                stage.setMinHeight(650);
             }
 
             // Configure controller if needed
