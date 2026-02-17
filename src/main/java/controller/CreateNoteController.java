@@ -20,6 +20,7 @@ import session.NotebookSession;
 import session.NoteSession;
 import session.UserSession;
 import util.UndoRedoManager;
+import util.TextFormattingUtil;
 
 import java.net.URL;
 import java.util.List;
@@ -126,6 +127,9 @@ public class CreateNoteController implements Initializable {
         undoRedoManager.registerField("title", titleField);
         undoRedoManager.registerField("content", contentArea);
         undoRedoManager.registerField("annotation", annotationArea);
+
+        // Enable list auto-continuation for content area
+        TextFormattingUtil.enableListAutoContinuation(contentArea);
     }
 
     @FXML
@@ -238,8 +242,6 @@ public class CreateNoteController implements Initializable {
         String buttonId = clickedButton.getId();
 
         System.out.println("Button clicked: " + buttonId);
-
-        // Each team member implements their buttons here
         switch (buttonId) {
             case "boldButton":
                 System.out.println("Bold button");
@@ -254,10 +256,10 @@ public class CreateNoteController implements Initializable {
                 System.out.println("Text Color");
                 break;
             case "bulletListButton":
-                System.out.println("Bullet List");
+                TextFormattingUtil.toggleBulletList(contentArea, bulletListButton);
                 break;
             case "numberedListButton":
-                System.out.println("Numbered List");
+                TextFormattingUtil.toggleNumberedList(contentArea, numberedListButton);
                 break;
             case "alignLeftButton":
                 System.out.println("Align Left");

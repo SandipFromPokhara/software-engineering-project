@@ -93,20 +93,15 @@ public class NavigationUtil {
             stage.setTitle(title);
             stage.getIcons().add(new Image("/Images/NV.png"));
             stage.setResizable(resizable);
-            stage.centerOnScreen();
 
             // Min size for main windows
-            if (!(DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath))) {
-                stage.setMinWidth(0);
-                stage.setMinHeight(0);
-                stage.setWidth(scene.getWidth());
-                stage.setHeight(scene.getHeight());
-            } else {
+            if (DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath)) {
                 stage.setMinWidth(700);
                 stage.setMinHeight(550);
             }
 
             stage.sizeToScene();
+            stage.centerOnScreen();
             stage.show();
         } catch (IOException e) {
             LOGGER.error("Failed to load FXML: {}", fxmlPath, e);
