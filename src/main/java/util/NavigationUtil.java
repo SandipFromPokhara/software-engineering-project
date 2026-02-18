@@ -53,6 +53,7 @@ public class NavigationUtil {
             scene.getStylesheets().add("/css/row_color.css");
             stage.setScene(scene);
             stage.setTitle(title);
+
             stage.getIcons().add(new Image("/Images/NV.png"));
             stage.setResizable(resizable);
             stage.centerOnScreen();
@@ -80,7 +81,7 @@ public class NavigationUtil {
     }
 
     /**
-     * Replace the scene on an existing stage (like SignUp navigation).
+     * Replace the scene on an existing stage
      */
     public static void replaceScene(Stage stage, String fxmlPath, String title, boolean resizable) {
         try {

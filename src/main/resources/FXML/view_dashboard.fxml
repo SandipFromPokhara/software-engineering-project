@@ -52,6 +52,7 @@
             <MenuButton fx:id="userMenuButton" mnemonicParsing="false" style="-fx-background-radius: 0;" text="Welcome, user">
               <items>
                 <MenuItem mnemonicParsing="false" onAction="#handleManageAccount" text="Manage Account" />
+                <MenuItem mnemonicParsing="false" onAction="#handleDeleteAccount" text="Delete Account" />
                   <SeparatorMenuItem mnemonicParsing="false" />
                 <MenuItem mnemonicParsing="false" onAction="#handleLogout" text="Logout" />
               </items>
