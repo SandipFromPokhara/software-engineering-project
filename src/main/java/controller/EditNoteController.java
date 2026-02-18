@@ -4,6 +4,7 @@ import dao.note.NoteDAO;
 import dao.tag.TagDAO;
 import entity.NoteEntity;
 import entity.TagEntity;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -17,6 +18,7 @@ import javafx.util.Duration;
 import util.ToggleUtil;
 import util.UndoRedoManager;
 import util.WordCountUtil;
+import util.TextFormattingUtil;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -42,7 +44,7 @@ public class EditNoteController {
     private Label annotation;
 
     @FXML
-    TextField annotationBox;
+    TextArea annotationBox;
 
     @FXML
     Button updateButton;
@@ -75,6 +77,19 @@ public class EditNoteController {
     @FXML private MenuItem undoMenuItem;
     @FXML private MenuItem redoMenuItem;
 
+    // Toolbar buttons
+    @FXML private Button boldButton;
+    @FXML private Button italicButton;
+    @FXML private Button underlineButton;
+    @FXML private Button textColorButton;
+    @FXML private Button bulletListButton;
+    @FXML private Button numberedListButton;
+    @FXML private Button alignLeftButton;
+    @FXML private Button alignCenterButton;
+    @FXML private Button alignRightButton;
+    @FXML private Button headingUpButton;
+    @FXML private Button headingDownButton;
+
     private UndoRedoManager undoRedoManager = new UndoRedoManager();
 
     public void setNoteDao(NoteDAO noteDao) {
@@ -104,6 +119,8 @@ public class EditNoteController {
             ToggleUtil.applyTheme(scene);
             updateTagIcon();
         });
+        // Enable list auto-continuation for content box
+        TextFormattingUtil.enableListAutoContinuation(contentBox);
     }
 
     @FXML
@@ -114,6 +131,50 @@ public class EditNoteController {
     @FXML
     private void handleRedo() {
         undoRedoManager.redo();
+    }
+
+    @FXML
+    private void handleToolbarClick(ActionEvent event) {
+        Button clickedButton = (Button) event.getSource();
+        String buttonId = clickedButton.getId();
+
+        System.out.println("Button clicked: " + buttonId);
+
+        switch (buttonId) {
+            case "boldButton":
+                System.out.println("Bold button clicked ");
+                break;
+            case "italicButton":
+                System.out.println("Italic button clicked ");
+                break;
+            case "underlineButton":
+                System.out.println("Underline button clicked ");
+                break;
+            case "textColorButton":
+                System.out.println("Text Color button clicked ");
+                break;
+            case "bulletListButton":
+                TextFormattingUtil.toggleBulletList(contentBox, bulletListButton);
+                break;
+            case "numberedListButton":
+                TextFormattingUtil.toggleNumberedList(contentBox, numberedListButton);
+                break;
+            case "alignLeftButton":
+                System.out.println("Align Left button clicked ");
+                break;
+            case "alignCenterButton":
+                System.out.println("Align Center button clicked ");
+                break;
+            case "alignRightButton":
+                System.out.println("Align Right button clicked ");
+                break;
+            case "headingUpButton":
+                System.out.println("Heading Up button clicked ");
+                break;
+            case "headingDownButton":
+                System.out.println("Heading Down button clicked ");
+                break;
+        }
     }
 
     private void loadTags() {
