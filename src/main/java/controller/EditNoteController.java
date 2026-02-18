@@ -5,12 +5,16 @@ import dao.tag.TagDAO;
 import entity.NoteEntity;
 import entity.TagEntity;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import util.ToggleUtil;
 import util.UndoRedoManager;
 
 import java.util.HashSet;
@@ -26,7 +30,7 @@ public class EditNoteController {
     @FXML
     private Label title;
     @FXML
-    TextField titleBox;
+    private TextField titleField;;
     @FXML
     private Label content;
 
@@ -60,6 +64,9 @@ public class EditNoteController {
     @FXML
     private Tooltip tagTooltip;
 
+    @FXML
+    private ImageView tagIcon;
+
     // Undo/Redo components
     @FXML private MenuItem undoMenuItem;
     @FXML private MenuItem redoMenuItem;
@@ -81,9 +88,16 @@ public class EditNoteController {
 
         // Initialize undo/redo manager
         undoRedoManager.initialize(undoMenuItem, redoMenuItem);
-        undoRedoManager.registerField("title", titleBox);
+        undoRedoManager.registerField("title", titleField);
         undoRedoManager.registerField("content", contentBox);
         undoRedoManager.registerField("annotation", annotationBox);
+
+        // Apply theme once scene is ready
+        javafx.application.Platform.runLater(() -> {
+            Scene scene = titleField.getScene();
+            ToggleUtil.applyTheme(scene);
+            updateTagIcon();
+        });
     }
 
     @FXML
@@ -108,7 +122,7 @@ public class EditNoteController {
 
     public void setNote(NoteEntity note){
         this.note = note;
-        titleBox.setText(note.getTitle());
+        titleField.setText(note.getTitle());
         contentBox.setText(note.getContent());
         annotationBox.setText(note.getAnnotation());
 
@@ -124,7 +138,7 @@ public class EditNoteController {
             return;
         }
 
-        note.setTitle(titleBox.getText());
+        note.setTitle(titleField.getText());
         note.setContent(contentBox.getText());
         note.setAnnotation(annotationBox.getText());
 
@@ -170,12 +184,13 @@ public class EditNoteController {
                 .forEach(tagName -> {
                     HBox tagBox = new HBox();
                     tagBox.setSpacing(5);
-                    tagBox.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 4 8 4 8; -fx-background-radius: 10;");
+                    tagBox.getStyleClass().addAll("note-tag", "tag-box");
 
                     Label label = new Label("#" + tagName);
+                    label.getStyleClass().add("tag-label");
 
                     Button removeBtn = new Button("x");
-                    removeBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: red;");
+                    removeBtn.getStyleClass().add("tag-remove-btn");
                     removeBtn.setOnAction(e -> {
                         selectedTags.remove(tagName);
                         refreshTagFlowPane();
@@ -217,5 +232,14 @@ public class EditNoteController {
         }
         refreshTagFlowPane();
         tagComboBox.getEditor().clear();
+    }
+
+    // Update tag button
+    private void updateTagIcon() {
+        String path = ToggleUtil.isDarkMode()
+                ? "/Images/tag-white.png"
+                : "/Images/tag-black.png";
+
+        tagIcon.setImage(new Image(path));
     }
 }
