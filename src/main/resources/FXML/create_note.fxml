@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="700.0" styleClass="root" stylesheets="@../css/createNote.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateNoteController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="700.0" styleClass="root" stylesheets="@../css/createNote.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateNoteController">
    <center>
       <AnchorPane BorderPane.alignment="CENTER">
          <children>
@@ -164,12 +164,12 @@
                         <Insets left="100.0" />
                      </VBox.margin>
                      <children>
-                        <Label fx:id="wordCountLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" prefWidth="96.0" text="Words: 0" HBox.hgrow="ALWAYS">
+                        <Label fx:id="wordCountLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="15.0" prefWidth="180.0" text="Words: 0 | Chars: 0" HBox.hgrow="ALWAYS">
                            <HBox.margin>
                               <Insets bottom="2.0" right="26.0" top="2.0" />
                            </HBox.margin>
                            <font>
-                              <Font name="Arial" size="12.0" />
+                              <Font name="Arial Italic" size="12.0" />
                            </font>
                         </Label>
                      </children>
