@@ -22,9 +22,9 @@ import entity.NoteEntity;
 import session.NotebookSession;
 import session.NoteSession;
 import session.UserSession;
+import util.WordCountUtil;
 import util.ToggleUtil;
 import util.UndoRedoManager;
-import util.WordCountUtil;
 
 import java.net.URL;
 import java.util.List;
@@ -40,6 +40,7 @@ public class CreateNoteController implements Initializable {
     private static final String CREATE_NEW = "Create New Notebook...";
     private NoteService noteService;
     private Set<String> selectedTags = new HashSet<>();
+    private WordCountUtil editorFeatures;
 
     @FXML private TextField titleField;
     @FXML private TextArea contentArea;
