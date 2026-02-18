@@ -36,7 +36,7 @@
 }
 
 .root.light .side-panel-btn:hover {
-    -fx-background-color: #111111;
+    -fx-background-color: #afc7bf;
     -fx-text-fill: white;
 }
 
@@ -162,7 +162,7 @@
 }
 
 .root.dark .side-panel-btn:hover {
-    -fx-background-color: #111111;
+    -fx-background-color: #575757;
     -fx-text-fill: white;
 }
 
