@@ -18,6 +18,21 @@ public class NavigationUtil {
     private static final String CREATE_FXML = "/FXML/create_note.fxml";
     private static final String EDIT_FXML = "/FXML/edit.fxml";
 
+    private static boolean usesLargeMinimumSize(String fxmlPath) {
+        return DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath);
+    }
+
+    private static void applyStageMinSize(Stage stage, String fxmlPath) {
+        if (usesLargeMinimumSize(fxmlPath)) {
+            stage.setMinWidth(700);
+            stage.setMinHeight(550);
+        } else {
+            // Reset min size so entry/login/signup can return to their original compact ratio.
+            stage.setMinWidth(0);
+            stage.setMinHeight(0);
+        }
+    }
+
     /**
      * Functional interface to configure controllers after loading FXML.
      */
@@ -57,11 +72,7 @@ public class NavigationUtil {
             stage.setResizable(resizable);
             stage.centerOnScreen();
 
-            // Set minimum size for key windows
-            if (DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath)) {
-                stage.setMinWidth(700);
-                stage.setMinHeight(650);
-            }
+            applyStageMinSize(stage, fxmlPath);
 
             // Configure controller if needed
             if (consumer != null) {
@@ -94,11 +105,7 @@ public class NavigationUtil {
             stage.getIcons().add(new Image("/Images/NV.png"));
             stage.setResizable(resizable);
 
-            // Min size for main windows
-            if (DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath)) {
-                stage.setMinWidth(700);
-                stage.setMinHeight(550);
-            }
+            applyStageMinSize(stage, fxmlPath);
 
             stage.sizeToScene();
             stage.centerOnScreen();
