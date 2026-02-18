@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="700.0" stylesheets="@../css/createNote.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateNoteController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="700.0" stylesheets="@../css/createNote.css" styleClass="root" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateNoteController">
    <center>
       <AnchorPane BorderPane.alignment="CENTER">
          <children>
@@ -34,7 +34,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField fx:id="titleField" promptText="Enter note title">
+                        <TextField fx:id="titleField" promptText="Enter note title" styleClass="editor-textfield text-field">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -51,7 +51,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <ComboBox fx:id="notebookComboBox" prefWidth="215.0" promptText="Choose notebook or create new" />
+                        <ComboBox fx:id="notebookComboBox" prefWidth="215.0" promptText="Choose notebook or create new" styleClass="editor-combo combo-box" />
                      </children>
                      <VBox.margin>
                         <Insets left="25.0" right="25.0" top="10.0" />
@@ -171,7 +171,7 @@
                               </HBox>
 
                               <!-- Text Area -->
-                              <TextArea fx:id="contentArea" prefHeight="300.0" promptText="Write here" styleClass="editor-textarea" wrapText="true" VBox.vgrow="ALWAYS">
+                              <TextArea fx:id="contentArea" prefHeight="300.0" promptText="Write your contents..." styleClass="editor-textarea text-area" wrapText="true" VBox.vgrow="ALWAYS">
                                  <font>
                                     <Font size="14.0" />
                                  </font>
@@ -190,7 +190,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextArea fx:id="annotationArea" prefHeight="80.0" promptText="Add annotations here..." wrapText="true">
+                        <TextArea fx:id="annotationArea" prefHeight="80.0" promptText="Add annotations..." styleClass="editor-textarea text-area" wrapText="true">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -200,7 +200,7 @@
                         <Insets left="25.0" right="25.0" />
                      </VBox.margin>
                   </VBox>
-                  <Label fx:id="statusLabel" prefHeight="17.0" prefWidth="448.0" text="" visible="false">
+                  <Label fx:id="statusLabel" prefHeight="17.0" prefWidth="448.0" text="" visible="false" styleClass="status-label">
                      <font>
                         <Font size="12.0" />
                      </font>
@@ -210,26 +210,26 @@
                   </Label>
                   <HBox prefHeight="100.0" prefWidth="200.0" spacing="5.0">
                      <children>
-                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="tagIcon" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@/Images/tags.png" />
+                              <Image url="@/Images/tag-black.png" />
                            </image>
                         </ImageView>
-                        <Label text="Tags">
+                        <Label styleClass="tag-label" text="Tags">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <Label alignment="CENTER" opacity="0.64" style="-fx-background-color: lightgray; -fx-background-radius: 50%; -fx-min-height: 16px; -fx-min-width: 16px; -fx-cursor: hand;" text="?">
+                        <Label alignment="CENTER" styleClass="help-label" text="?">
                            <tooltip>
-                              <Tooltip fx:id="tagTooltip" text="Tags are kewords to organize your notes">
+                              <Tooltip fx:id="tagTooltip" styleClass="tooltip" text="Tags are keywords to organize your notes">
                                  <font>
                                     <Font name="System Italic" size="10.0" />
                                  </font>
                               </Tooltip>
                            </tooltip>
                            <HBox.margin>
-                              <Insets top="1.0" />
+                              <Insets top="2.0" right="6.0" bottom="2.0" left="6.0" />
                            </HBox.margin>
                         </Label>
                      </children>
@@ -244,7 +244,7 @@
                   </FlowPane>
                   <HBox prefHeight="100.0" prefWidth="200.0" spacing="5.0">
                      <children>
-                        <ComboBox fx:id="tagComboBox" editable="true" prefWidth="150.0" />
+                        <ComboBox fx:id="tagComboBox" editable="true" prefWidth="160.0" promptText="Add/Select a tag..." styleClass="editor-combo combo-box" />
                         <Button fx:id="addTagBtn" mnemonicParsing="false" onAction="#handleAddTag" text="Add tags" />
                      </children>
                      <VBox.margin>
@@ -274,21 +274,34 @@
       </AnchorPane>
    </center>
     <top>
-        <MenuBar BorderPane.alignment="CENTER">
-            <menus>
-                <Menu mnemonicParsing="false" text="File">
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#handleBackToHome" text="Back to Dashboard" />
-                        <MenuItem mnemonicParsing="false" onAction="#handleClose" text="Close" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
-                    <items>
-                        <MenuItem fx:id="undoMenuItem" mnemonicParsing="false" onAction="#handleUndo" text="Undo" accelerator="Ctrl+Z" />
-                        <MenuItem fx:id="redoMenuItem" mnemonicParsing="false" onAction="#handleRedo" text="Redo" accelerator="Ctrl+Y" />
-                    </items>
-                </Menu>
-            </menus>
-        </MenuBar>
+      <HBox prefHeight="27.0" prefWidth="800.0" BorderPane.alignment="CENTER_LEFT">
+         <children>
+              <MenuBar HBox.hgrow="ALWAYS">
+                  <menus>
+                      <Menu mnemonicParsing="false" text="File">
+                          <items>
+                              <MenuItem mnemonicParsing="false" onAction="#handleBackToHome" text="Back to Dashboard" />
+                              <MenuItem mnemonicParsing="false" onAction="#handleClose" text="Close" />
+                          </items>
+                      </Menu>
+                      <Menu mnemonicParsing="false" text="Edit">
+                          <items>
+                              <MenuItem fx:id="undoMenuItem" accelerator="Ctrl+Z" mnemonicParsing="false" onAction="#handleUndo" text="Undo" />
+                              <MenuItem fx:id="redoMenuItem" accelerator="Ctrl+Y" mnemonicParsing="false" onAction="#handleRedo" text="Redo" />
+                          </items>
+                      </Menu>
+                  </menus>
+              </MenuBar>
+             <Button fx:id="toggleBtn" mnemonicParsing="false" onAction="#handleThemeToggle" style="-fx-background-color: transparent; -fx-cursor: hand">
+                 <graphic>
+                     <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                         <image>
+                             <Image url="@/Images/dark-theme.png" />
+                         </image>
+                     </ImageView>
+                 </graphic>
+             </Button>
+         </children>
+      </HBox>
     </top>
 </BorderPane>

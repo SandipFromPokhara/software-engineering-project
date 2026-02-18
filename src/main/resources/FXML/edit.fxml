@@ -4,6 +4,9 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
@@ -13,21 +16,17 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
 
-<BorderPane prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.EditNoteController">
+<BorderPane prefHeight="600.0" prefWidth="700.0" styleClass="root" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.EditNoteController">
         <top>
             <MenuBar BorderPane.alignment="CENTER">
                 <menus>
                     <Menu mnemonicParsing="false" text="Edit">
                         <items>
-                            <MenuItem fx:id="undoMenuItem" mnemonicParsing="false" onAction="#handleUndo" text="Undo" accelerator="Ctrl+Z" />
-                            <MenuItem fx:id="redoMenuItem" mnemonicParsing="false" onAction="#handleRedo" text="Redo" accelerator="Ctrl+Y" />
+                            <MenuItem fx:id="undoMenuItem" accelerator="Ctrl+Z" mnemonicParsing="false" onAction="#handleUndo" text="Undo" />
+                            <MenuItem fx:id="redoMenuItem" accelerator="Ctrl+Y" mnemonicParsing="false" onAction="#handleRedo" text="Redo" />
                         </items>
                     </Menu>
                 </menus>
@@ -43,7 +42,7 @@
                                 <Font name="System Bold" size="14" />
                             </font>
                         </Label>
-                        <TextField fx:id="titleBox" promptText="Enter your text title">
+                        <TextField fx:id="titleField" promptText="Enter note title" styleClass="editor-textfield text-field">
                             <font>
                                 <Font size="14" />
                             </font>
@@ -55,7 +54,7 @@
                                 <Font name="System Bold" size="14" />
                             </font>
                         </Label>
-                        <TextArea fx:id="contentBox" promptText="Write your content here" wrapText="true" VBox.vgrow="ALWAYS">
+                        <TextArea fx:id="contentBox" promptText="Write your contents..." styleClass="editor-textarea" wrapText="true" VBox.vgrow="ALWAYS">
                             <font>
                                 <Font size="14" />
                             </font>
@@ -67,7 +66,7 @@
                                 <Font name="System Bold" size="14" />
                             </font>
                         </Label>
-                        <TextField fx:id="annotationBox" promptText="Add annotations...">
+                        <TextField fx:id="annotationBox" promptText="Add annotations..." styleClass="editor-textarea text-area">
                             <font>
                                 <Font size="14" />
                             </font>
@@ -75,19 +74,19 @@
                     </VBox>
                <HBox spacing="4.0">
                   <children>
-                     <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <ImageView fx:id="tagIcon" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                         <image>
-                           <Image url="@/Images/tags.png" />
+                           <Image url="@/Images/tag-black.png" />
                         </image>
                      </ImageView>
-                     <Label text="Tags">
+                     <Label styleClass="tag-label" text="Tags">
                         <font>
                            <Font name="System Bold" size="14.0" />
                         </font>
                      </Label>
-                      <Label alignment="CENTER" opacity="0.64" style="-fx-background-color: lightgray; -fx-background-radius: 50%; -fx-min-height: 16px; -fx-min-width: 16px; -fx-cursor: hand;" text="?">
+                      <Label alignment="CENTER" opacity="0.64" styleClass="help-label" text="?">
                           <tooltip>
-                              <Tooltip fx:id="tagTooltip" text="Tags are kewords to organize your notes">
+                              <Tooltip fx:id="tagTooltip" styleClass="tooltip" text="Tags are keywords to organize your notes">
                                   <font>
                                       <Font name="System Italic" size="10.0" />
                                   </font>
@@ -109,7 +108,7 @@
                </FlowPane>
                <HBox spacing="10.0">
                   <children>
-                     <ComboBox fx:id="tagComboBox" editable="true" prefWidth="160.0" promptText="Add/Select a tag..." />
+                     <ComboBox fx:id="tagComboBox" editable="true" prefWidth="160.0" promptText="Add/Select a tag..." styleClass="editor-combo combo-box" />
                      <Button fx:id="addTagBtn" mnemonicParsing="false" onAction="#handleAddTag" text="Add tags" />
                   </children>
                   <VBox.margin>
