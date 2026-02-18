@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import util.ToggleUtil;
 import util.UndoRedoManager;
+import util.WordCountUtil;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -67,6 +68,9 @@ public class EditNoteController {
     @FXML
     private ImageView tagIcon;
 
+    @FXML
+    private Label wordCountLabel;
+
     // Undo/Redo components
     @FXML private MenuItem undoMenuItem;
     @FXML private MenuItem redoMenuItem;
@@ -83,6 +87,8 @@ public class EditNoteController {
     }
 
     public void initialize() {
+        WordCountUtil.bind(contentBox, wordCountLabel);
+
         tagTooltip.setShowDelay(Duration.millis(100));
         tagComboBox.setEditable(true);
 
