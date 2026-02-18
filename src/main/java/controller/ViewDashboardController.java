@@ -21,6 +21,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import javafx.util.Duration;
 import session.NotebookSession;
 import util.DialogUtil;
 import util.NavigationUtil;
@@ -32,6 +33,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import util.ToggleUtil;
+import util.WordCountUtil;
 
 import java.io.File;
 import java.util.List;
@@ -77,7 +79,8 @@ public class ViewDashboardController {
     private TableColumn<NoteEntity, String> dateColumn;
 
     @FXML
-    private Label noteTitleLabel;
+    private Label noteTitleLabel,
+                  wordCountLabel;
 
     @FXML
     private TextArea noteViewArea,
@@ -90,15 +93,25 @@ public class ViewDashboardController {
     private Button toggleBtn;
 
     @FXML
-    private ImageView tagIcon;
+    private Tooltip toggleTooltip;
+
+    @FXML
+    private ImageView tagIcon,
+                    sideBtn1,
+                    sideBtn2,
+                    sideBtn3;
 
     public ViewDashboardController() {}
 
     @FXML
     public void initialize() {
+        toggleTooltip.setShowDelay(Duration.millis(100));
+
         this.notebookDao = new JpaNoteBookDao();
         this.noteDao = new JpaNoteDao();
         this.tagDao = new JpaTagDao();
+
+        WordCountUtil.bind(noteViewArea, wordCountLabel);
 
         UserEntity user = UserSession.getUserInstance().getUser();
         if (user != null) {
@@ -531,15 +544,16 @@ public class ViewDashboardController {
         icon.setPreserveRatio(true);
 
         toggleBtn.setGraphic(icon);
-        updateTagIcon();
+        updateIcons();
     }
 
-    // Update tag button
-    private void updateTagIcon() {
-        String path = ToggleUtil.isDarkMode()
-                ? "/Images/tag-white.png"
-                : "/Images/tag-black.png";
+    // Update side-panel buttons
+    private void updateIcons() {
+        boolean dark = ToggleUtil.isDarkMode();
 
-        tagIcon.setImage(new Image(path));
+        tagIcon.setImage(new Image(dark ? "/Images/tag-white.png" : "/Images/tag-black.png"));
+        sideBtn1.setImage(new Image(dark ? "/Images/open-folder-dark.png" : "/Images/open-folder.png"));
+        sideBtn2.setImage(new Image(dark ? "/Images/create-file-dark.png" : "/Images/create-file.png"));
+        sideBtn3.setImage(new Image(dark ? "/Images/logout-dark.png" : "/Images/logout.png"));
     }
 }

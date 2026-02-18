@@ -24,6 +24,7 @@ import session.NoteSession;
 import session.UserSession;
 import util.ToggleUtil;
 import util.UndoRedoManager;
+import util.WordCountUtil;
 
 import java.net.URL;
 import java.util.List;
@@ -52,10 +53,6 @@ public class CreateNoteController implements Initializable {
     @FXML private Button addTagBtn;
 
     // Toolbar buttons
-    @FXML private Button boldButton;
-    @FXML private Button italicButton;
-    @FXML private Button underlineButton;
-    @FXML private Button textColorButton;
     @FXML private Button bulletListButton;
     @FXML private Button numberedListButton;
     @FXML private Button alignLeftButton;
@@ -63,9 +60,10 @@ public class CreateNoteController implements Initializable {
     @FXML private Button alignRightButton;
     @FXML private Button headingUpButton;
     @FXML private Button headingDownButton;
-    @FXML private Tooltip tagTooltip;
+    @FXML private Tooltip tagTooltip, toggleTooltip;
     @FXML private Button toggleBtn;
     @FXML private ImageView tagIcon;
+    @FXML private Label wordCountLabel;
 
     // Undo/Redo components
     @FXML private MenuItem undoMenuItem;
@@ -79,6 +77,7 @@ public class CreateNoteController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         // Tooltip delay
         tagTooltip.setShowDelay(Duration.millis(100));
+        toggleTooltip.setShowDelay(Duration.millis(100));
 
         // Load current user and notebooks
         UserEntity currentUser = UserSession.getUserInstance().getUser();
@@ -142,6 +141,7 @@ public class CreateNoteController implements Initializable {
             ToggleUtil.applyTheme(scene);
             updateToggleIcon();
             updateTagIcon();
+            WordCountUtil.bind(contentArea, wordCountLabel);
         });
     }
 
@@ -258,18 +258,6 @@ public class CreateNoteController implements Initializable {
 
         // Each team member implements their buttons here
         switch (buttonId) {
-            case "boldButton":
-                System.out.println("Bold button");
-                break;
-            case "italicButton":
-                System.out.println("Italic button ");
-                break;
-            case "underlineButton":
-                System.out.println("Underline button");
-                break;
-            case "textColorButton":
-                System.out.println("Text Color");
-                break;
             case "bulletListButton":
                 System.out.println("Bullet List");
                 break;
