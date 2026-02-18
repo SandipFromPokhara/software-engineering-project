@@ -13,6 +13,10 @@ import dao.tag.JpaTagDao;
 import dao.tag.TagDAO;
 import entity.*;
 import javafx.concurrent.Task;
+import javafx.scene.Scene;
+import javafx.scene.control.TableView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.FileChooser;
@@ -27,6 +31,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import util.ToggleUtil;
 
 import java.io.File;
 import java.util.List;
@@ -81,6 +86,12 @@ public class ViewDashboardController {
     @FXML
     private FlowPane tagFlowpane;
 
+    @FXML
+    private Button toggleBtn;
+
+    @FXML
+    private ImageView tagIcon;
+
     public ViewDashboardController() {}
 
     @FXML
@@ -93,6 +104,22 @@ public class ViewDashboardController {
         if (user != null) {
             userMenuButton.setText("Welcome, " + user.getFirstName() + " " + user.getLastName());
         }
+
+        rootPane.getStyleClass().add("root");
+
+        // Apply initial theme once scene is available
+        javafx.application.Platform.runLater(() -> {
+            ToggleUtil.applyTheme(rootPane.getScene());
+
+            // Set toggle button icon correctly on load
+            ImageView icon = new ImageView(
+                    new Image(ToggleUtil.isDarkMode() ? "/Images/light-theme.png" : "/Images/dark-theme.png")
+            );
+            icon.setFitWidth(20);
+            icon.setFitHeight(20);
+            icon.setPreserveRatio(true);
+            toggleBtn.setGraphic(icon);
+        });
 
         loadNotebooks();
 
@@ -124,7 +151,7 @@ public class ViewDashboardController {
                 deleteButton.setDisable(true);
             }
         });
-        notesTable.setColumnResizePolicy(table -> true);
+        notesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
         setupHover(viewNotesBtn, viewNotesLabel);
         setupHover(createNoteBtn, createNoteLabel);
@@ -220,7 +247,7 @@ public class ViewDashboardController {
                     .sorted((t1, t2) -> t1.getTagName().compareToIgnoreCase(t2.getTagName()))
                     .forEach(tag -> {
                         Label tagLabel = new Label("#" + tag.getTagName());
-                        tagLabel.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 4 8; -fx-background-radius: 10;");
+                        tagLabel.getStyleClass().addAll("note-tag", "tag-box");
                         tagFlowpane.getChildren().add(tagLabel);
                     });
     }
@@ -245,15 +272,11 @@ public class ViewDashboardController {
     }
 
     private void setupHover(Button button, Label label) {
-        button.setOnMouseEntered(e -> {
-            label.setVisible(true);
-            button.setStyle("-fx-background-color: #93ad9b; -fx-cursor: hand;");
-        });
+        button.setOnMouseEntered(e ->
+            label.setVisible(true));
 
-        button.setOnMouseExited(e -> {
-            label.setVisible(false);
-            button.setStyle("-fx-background-color: transparent");
-        });
+        button.setOnMouseExited(e ->
+            label.setVisible(false));
     }
 
     @FXML
@@ -274,6 +297,11 @@ public class ViewDashboardController {
         Optional<ButtonType> result = confirmDialog.showAndWait();
 
         if (result.isPresent() && result.get() == logout) {
+            Scene scene = rootPane.getScene();
+            scene.getStylesheets().removeIf(s -> s.endsWith("theme.css"));
+            scene.getRoot().getStyleClass().removeAll("dark", "light");
+            ToggleUtil.setDarkMode(false);
+
             Stage stage = (Stage) window;
             NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "Welcome To NoteVault", false);
         }
@@ -331,7 +359,7 @@ public class ViewDashboardController {
 
     @FXML
     public void handleCreate() {
-        Stage owner = (Stage) createNoteBtn.getScene().getWindow();
+        Stage owner = (Stage) rootPane.getScene().getWindow();
         NavigationUtil.openWindow(owner, "/FXML/create_note.fxml", "NoteVault - Create Note", true, true, null);
         loadNotes();
     }
@@ -341,7 +369,7 @@ public class ViewDashboardController {
         NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
         if (selectedNote == null) return;
 
-        Stage stage = (Stage) editButton.getScene().getWindow();
+        Stage stage = (Stage) rootPane.getScene().getWindow();
         NavigationUtil.openWindow(stage, "/FXML/edit.fxml", "NoteVault - Edit Note", true, true,
                 (EditNoteController controller) -> {
                     controller.setNoteDao(noteDao);
@@ -367,7 +395,7 @@ public class ViewDashboardController {
 
     @FXML
     public void handleManageAccount() {
-        // Stage stage = (Stage) userMenuButton.getScene().getWindow();
+        // Stage stage = (Stage) rootPane.getScene().getWindow();
         // NavigationUtil.openWindow(stage, "/FXML/user_dashboard.fxml", "NoteVault - User Dashboard", true, true, null);
     }
 
@@ -489,5 +517,29 @@ public class ViewDashboardController {
         alert.setContentText(message);
         alert.initOwner(userMenuButton.getScene().getWindow());
         alert.showAndWait();
+    }
+
+    @FXML
+    private void handleThemeToggle() {
+        Scene scene = rootPane.getScene();
+        ToggleUtil.toggleTheme(scene);
+
+        ImageView icon = new ImageView(new Image(ToggleUtil.isDarkMode() ? "/Images/light-theme.png" : "/Images/dark-theme.png"));
+
+        icon.setFitWidth(20);
+        icon.setFitHeight(20);
+        icon.setPreserveRatio(true);
+
+        toggleBtn.setGraphic(icon);
+        updateTagIcon();
+    }
+
+    // Update tag button
+    private void updateTagIcon() {
+        String path = ToggleUtil.isDarkMode()
+                ? "/Images/tag-white.png"
+                : "/Images/tag-black.png";
+
+        tagIcon.setImage(new Image(path));
     }
 }
