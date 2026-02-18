@@ -91,10 +91,7 @@ Defines relational structure for:
   - `User`
   - `Notebook`
   - `Note`
-
-Notebook
-
-Note
+  - `Tags`
 
 5️⃣ Session Management
 
@@ -143,6 +140,7 @@ Database: `notevault_db`
 ```
 User (0..N) ────── (1) Notebook
 Notebook (0..N) ── (1) Note
+Note (0..N) ────── (0..N) Tag
 ```
 
 **Cascading Rules**
@@ -169,7 +167,6 @@ The project implements a fully automated CI/CD workflow using Jenkins, Maven, Do
 - Docker image build
 - Kubernetes deployment (Minikube)
 - MariaDB runtime connection
-
 
 ---
 
@@ -345,4 +342,3 @@ mvn javafx:run
 ```
 
 ---
-
