@@ -14,6 +14,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -24,19 +25,19 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ViewDashboardController">
+<BorderPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" styleClass="root" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ViewDashboardController">
     <stylesheets>
         <URL value="@/css/row_color.css" />
     </stylesheets>
     <top>
-      <HBox prefHeight="27.0" prefWidth="800.0" spacing="5.0" BorderPane.alignment="CENTER_LEFT">
+      <HBox prefHeight="27.0" prefWidth="800.0" BorderPane.alignment="CENTER_LEFT">
          <children>
-            <MenuBar prefHeight="26.0" prefWidth="481.0" HBox.hgrow="ALWAYS">
+            <MenuBar HBox.hgrow="ALWAYS">
               <menus>
                 <Menu mnemonicParsing="false" text="File">
                   <items>
                         <MenuItem mnemonicParsing="false" onAction="#handleCreate" text="New Note" />
-                        <MenuItem mnemonicParsing="false" text="Export as PDF"  onAction="#handleExport"/>
+                        <MenuItem mnemonicParsing="false" onAction="#handleExport" text="Export as PDF" />
                         <SeparatorMenuItem mnemonicParsing="false" />
                     <MenuItem mnemonicParsing="false" onAction="#handleClose" text="Close" />
                   </items>
@@ -48,7 +49,7 @@
                 </Menu>
               </menus>
             </MenuBar>
-            <MenuButton fx:id="userMenuButton" mnemonicParsing="false" text="Welcome, user">
+            <MenuButton fx:id="userMenuButton" mnemonicParsing="false" style="-fx-background-radius: 0;" text="Welcome, user">
               <items>
                 <MenuItem mnemonicParsing="false" onAction="#handleManageAccount" text="Manage Account" />
                 <MenuItem mnemonicParsing="false" onAction="#handleDeleteAccount" text="Delete Account" />
@@ -56,6 +57,22 @@
                 <MenuItem mnemonicParsing="false" onAction="#handleLogout" text="Logout" />
               </items>
             </MenuButton>
+            <Button fx:id="toggleBtn" mnemonicParsing="false" onAction="#handleThemeToggle" style="-fx-background-color: transparent; -fx-cursor: hand">
+               <graphic>
+                  <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@/Images/dark-theme.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip fx:id="toggleTooltip" text="Toggle Dark/Light theme">
+                     <font>
+                        <Font name="System Italic" size="10.0" />
+                     </font>
+                  </Tooltip>
+               </tooltip>
+            </Button>
          </children>
          <BorderPane.margin>
             <Insets />
@@ -63,21 +80,18 @@
       </HBox>
    </top>
    <left>
-      <VBox alignment="TOP_CENTER" prefHeight="373.0" prefWidth="98.0" spacing="10.0" style="-fx-background-color: #9bbab0;">
+      <VBox alignment="TOP_CENTER" prefHeight="373.0" prefWidth="98.0" spacing="10.0" styleClass="side-panel">
          <children>
-            <Button fx:id="viewNotesBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false"  prefHeight="105.0" prefWidth="108.0" style="-fx-content-display: LEFT; -fx-background-color: transparent; -fx-cursor: hand; -fx-background-insets: 0; -fx-padding: 8 12; -fx-background-radius: 6;">
+            <Button fx:id="viewNotesBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleOpen" prefHeight="105.0" prefWidth="108.0" styleClass="side-panel-btn">
                <graphic>
                   <StackPane prefHeight="60.0" prefWidth="85.0">
                      <children>
-                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="sideBtn1" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@/Images/open-folder.png" />
                            </image>
                         </ImageView>
-                        <Label fx:id="viewNotesLabel" alignment="TOP_LEFT" style="-fx-background-color: #00003b;" text="Open Notebook" textFill="WHITE" visible="false" StackPane.alignment="TOP_RIGHT">
-                           <padding>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                           </padding>
+                        <Label fx:id="viewNotesLabel" alignment="TOP_LEFT" styleClass="side-label" text="Open Notebook" visible="false" StackPane.alignment="TOP_RIGHT">
                            <font>
                               <Font name="System Bold" size="9.0" />
                            </font>
@@ -86,19 +100,16 @@
                   </StackPane>
                </graphic>
             </Button>
-            <Button fx:id="createNoteBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleCreate" prefHeight="105.0" prefWidth="108.0" style="-fx-content-display: LEFT; -fx-background-color: transparent; -fx-cursor: hand;">
+            <Button fx:id="createNoteBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleCreate" prefHeight="105.0" prefWidth="108.0" styleClass="side-panel-btn">
                <graphic>
                   <StackPane prefHeight="150.0" prefWidth="200.0">
                      <children>
-                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="sideBtn2" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@/Images/create-file.png" />
                            </image>
                         </ImageView>
-                        <Label fx:id="createNoteLabel" alignment="TOP_CENTER" style="-fx-background-color: #00003b;" text="Create Notes" textFill="WHITE" visible="false" StackPane.alignment="TOP_RIGHT">
-                           <padding>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                           </padding>
+                        <Label fx:id="createNoteLabel" alignment="TOP_CENTER" styleClass="side-label" text="Create Notes" visible="false" StackPane.alignment="TOP_RIGHT">
                            <font>
                               <Font name="System Bold" size="10.0" />
                            </font>
@@ -107,19 +118,16 @@
                   </StackPane>
                </graphic>
             </Button>
-            <Button fx:id="logoutBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleLogout" prefHeight="105.0" prefWidth="108.0" style="-fx-content-display: LEFT; -fx-background-color: transparent; -fx-cursor: hand;">
+            <Button fx:id="logoutBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleLogout" prefHeight="105.0" prefWidth="108.0" styleClass="side-panel-btn">
                <graphic>
                   <StackPane prefHeight="150.0" prefWidth="200.0">
                      <children>
-                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="sideBtn3" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@/Images/logout.png" />
                            </image>
                         </ImageView>
-                        <Label fx:id="logoutLabel" alignment="TOP_LEFT" style="-fx-background-color: #00003b;" text="Logout" textFill="WHITE" visible="false" StackPane.alignment="TOP_RIGHT">
-                           <padding>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                           </padding>
+                        <Label fx:id="logoutLabel" alignment="TOP_LEFT" styleClass="side-label" text="Logout" visible="false" StackPane.alignment="TOP_RIGHT">
                            <font>
                               <Font name="System Bold" size="10.0" />
                            </font>
@@ -129,13 +137,10 @@
                </graphic>
             </Button>
          </children>
-         <padding>
-            <Insets top="20.0" />
-         </padding>
       </VBox>
    </left>
    <center>
-      <SplitPane dividerPositions="0.55" style="-fx-box-border: transparent;">
+      <SplitPane dividerPositions="0.6" style="-fx-box-border: transparent;">
         <items>
           <AnchorPane>
                <children>
@@ -164,11 +169,23 @@
 
                                 <Separator />
 
-                            <TextArea fx:id="noteViewArea" editable="false" prefHeight="511.0" prefWidth="204.0" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; -fx-font-size: 16;" wrapText="true" VBox.vgrow="ALWAYS" />
+                            <TextArea fx:id="noteViewArea" editable="false" prefHeight="511.0" prefWidth="204.0" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; -fx-font-size: 16;" styleClass="editor-textarea" wrapText="true" VBox.vgrow="ALWAYS" />
+                        <HBox alignment="CENTER_RIGHT">
+                           <children>
+                              <Label fx:id="wordCountLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="15.0" prefWidth="180.0" text="Words: 0 | Chars: 0" HBox.hgrow="ALWAYS">
+                                 <font>
+                                    <Font name="Arial Italic" size="12.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <VBox.margin>
+                              <Insets bottom="2.0" right="2.0" top="2.0" />
+                           </VBox.margin>
+                        </HBox>
                         <VBox>
                            <children>
                               <Label text="Annotations:" />
-                              <TextArea fx:id="annotationViewArea" editable="false" prefHeight="22.0" prefWidth="204.0" style="-fx-background-color: transparent;" wrapText="true">
+                              <TextArea fx:id="annotationViewArea" editable="false" prefHeight="22.0" prefWidth="204.0" style="-fx-background-color: transparent;" styleClass="editor-textarea" wrapText="true">
                                  <VBox.margin>
                                     <Insets top="5.0" />
                                  </VBox.margin>
@@ -176,9 +193,9 @@
                            </children>
                         </VBox>
                         <Separator prefWidth="200.0" />
-                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="tagIcon" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@/Images/tags.png" />
+                              <Image url="@/Images/tag-black.png" />
                            </image>
                         </ImageView>
                         <FlowPane fx:id="tagFlowpane" hgap="4.0" prefWrapLength="200.0" vgap="4.0">
