@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="TOP_LEFT" prefHeight="380.0" prefWidth="460.0" spacing="12.0" style="-fx-background-color: #f4f4f4; -fx-padding: 20;" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.UserDashboardController">
+    <children>
+        <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Manage Account" />
+        <Label style="-fx-text-fill: #6b6b6b;" text="You can update last name, username, and password only." />
+        <Separator />
+
+        <Label text="First Name (locked)" />
+        <TextField fx:id="firstNameField" editable="false" focusTraversable="false" />
+
+        <Label text="Last Name" />
+        <TextField fx:id="lastNameField" promptText="Enter your last name" />
+
+        <Label text="Username" />
+        <TextField fx:id="usernameField" promptText="Enter your username" />
+
+        <Label text="Email (locked)" />
+        <TextField fx:id="emailField" editable="false" focusTraversable="false" />
+
+        <Label text="New Password (optional)" />
+        <PasswordField fx:id="passwordField" promptText="Leave blank to keep current password" />
+
+        <Label text="Confirm New Password" />
+        <PasswordField fx:id="confirmPasswordField" promptText="Repeat new password" />
+
+        <Label fx:id="messageLabel" textFill="#d32f2f" visible="false" wrapText="true" />
+
+        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+            <children>
+                <Button mnemonicParsing="false" onAction="#handleCancel" text="Cancel">
+                    <HBox.margin>
+                        <Insets top="8.0" />
+                    </HBox.margin>
+                </Button>
+                <Button mnemonicParsing="false" onAction="#handleUpdate" style="-fx-background-color: #2e7d32; -fx-text-fill: white;" text="Update">
+                    <HBox.margin>
+                        <Insets top="8.0" />
+                    </HBox.margin>
+                </Button>
+            </children>
+        </HBox>
+    </children>
+</VBox>

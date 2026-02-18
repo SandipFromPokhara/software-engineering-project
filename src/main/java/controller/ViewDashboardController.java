@@ -408,8 +408,23 @@ public class ViewDashboardController {
 
     @FXML
     public void handleManageAccount() {
-        // Stage stage = (Stage) rootPane.getScene().getWindow();
-        // NavigationUtil.openWindow(stage, "/FXML/user_dashboard.fxml", "NoteVault - User Dashboard", true, true, null);
+        Stage stage = (Stage) userMenuButton.getScene().getWindow();
+        NavigationUtil.openWindow(stage, "/FXML/user_dashboard.fxml", "NoteVault - Manage Account", false, true, null);
+
+        UserEntity user = UserSession.getUserInstance().getUser();
+        if (user != null) {
+            userMenuButton.setText("Welcome, " + user.getFirstName() + " " + user.getLastName());
+        }
+    }
+
+    @FXML
+    public void handleDeleteAccount() {
+        Stage stage = (Stage) userMenuButton.getScene().getWindow();
+        NavigationUtil.openWindow(stage, "/FXML/delete_user.fxml", "NoteVault - Delete Account", false, true, null);
+
+        if (UserSession.getUserInstance().getUser() == null) {
+            NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "Welcome To NoteVault", false);
+        }
     }
 
     @FXML
