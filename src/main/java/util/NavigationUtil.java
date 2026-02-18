@@ -87,6 +87,7 @@ public class NavigationUtil {
             FXMLLoader loader = new FXMLLoader(NavigationUtil.class.getResource(fxmlPath));
             Parent root = loader.load();
             Scene scene = new Scene(root);
+
             scene.getStylesheets().add("/css/row_color.css");
 
             stage.setScene(scene);
@@ -99,8 +100,6 @@ public class NavigationUtil {
             if (!(DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath))) {
                 stage.setMinWidth(0);
                 stage.setMinHeight(0);
-                stage.setWidth(scene.getWidth());
-                stage.setHeight(scene.getHeight());
             } else {
                 stage.setMinWidth(700);
                 stage.setMinHeight(550);
