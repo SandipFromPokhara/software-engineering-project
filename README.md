@@ -149,6 +149,10 @@ Note (0..N) ────── (0..N) Tag
 
 - Deleting a Notebook → Deletes associated Notes
 
+- Deleting a Note → Deletes entries in note_tags, Tags remain
+
+- Deleting a Tag → Deletes entries in note_tags, Notes remain
+
 ---
 
 ## DevOps Pipeline
