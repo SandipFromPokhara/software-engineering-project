@@ -75,6 +75,7 @@ public class CreateNoteController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
         // Tooltip delay
         tagTooltip.setShowDelay(Duration.millis(100));
         toggleTooltip.setShowDelay(Duration.millis(100));
