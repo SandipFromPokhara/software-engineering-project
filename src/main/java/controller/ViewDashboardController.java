@@ -408,7 +408,7 @@ public class ViewDashboardController {
 
     @FXML
     public void handleManageAccount() {
-        Stage stage = (Stage) userMenuButton.getScene().getWindow();
+        Stage stage = (Stage) rootPane.getScene().getWindow();
         NavigationUtil.openWindow(stage, "/FXML/user_dashboard.fxml", "NoteVault - Manage Account", false, true, null);
 
         UserEntity user = UserSession.getUserInstance().getUser();
@@ -419,7 +419,7 @@ public class ViewDashboardController {
 
     @FXML
     public void handleDeleteAccount() {
-        Stage stage = (Stage) userMenuButton.getScene().getWindow();
+        Stage stage = (Stage) rootPane.getScene().getWindow();
         NavigationUtil.openWindow(stage, "/FXML/delete_user.fxml", "NoteVault - Delete Account", false, true, null);
 
         if (UserSession.getUserInstance().getUser() == null) {
