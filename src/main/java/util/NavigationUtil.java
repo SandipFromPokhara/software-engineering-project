@@ -94,7 +94,6 @@ public class NavigationUtil {
             stage.setTitle(title);
             stage.getIcons().add(new Image("/Images/NV.png"));
             stage.setResizable(resizable);
-            stage.centerOnScreen();
 
             // Min size for main windows
             if (!(DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath))) {
@@ -106,6 +105,7 @@ public class NavigationUtil {
             }
 
             stage.sizeToScene();
+            stage.centerOnScreen();
             stage.show();
         } catch (IOException e) {
             LOGGER.error("Failed to load FXML: {}", fxmlPath, e);

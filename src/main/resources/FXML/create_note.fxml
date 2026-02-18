@@ -25,9 +25,9 @@
    <center>
       <AnchorPane BorderPane.alignment="CENTER">
          <children>
-            <VBox prefHeight="573.0" prefWidth="700.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <VBox spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
-                  <VBox prefWidth="700.0" spacing="5.0">
+                  <VBox spacing="5.0">
                      <children>
                         <Label text="Note Title">
                            <font>
@@ -44,7 +44,7 @@
                         <Insets left="25.0" right="25.0" top="10.0" />
                      </VBox.margin>
                   </VBox>
-                  <VBox prefHeight="65.0" prefWidth="650.0" spacing="5.0">
+                  <VBox spacing="5.0">
                      <children>
                         <Label text="Select Notebook">
                            <font>
@@ -54,10 +54,10 @@
                         <ComboBox fx:id="notebookComboBox" prefWidth="215.0" promptText="Choose notebook or create new" styleClass="editor-combo combo-box" />
                      </children>
                      <VBox.margin>
-                        <Insets left="25.0" right="25.0" top="10.0" />
+                        <Insets left="25.0" right="25.0" top="5.0" />
                      </VBox.margin>
                   </VBox>
-                  <VBox prefWidth="700.0" spacing="5.0" VBox.vgrow="ALWAYS">
+                  <VBox spacing="5.0" VBox.vgrow="ALWAYS">
                      <children>
                         <Label text="Note Content">
                            <font>
@@ -66,7 +66,6 @@
                         </Label>
                         <VBox spacing="0.0" styleClass="editor-container" VBox.vgrow="ALWAYS">
                            <children>
-                              <!-- Professional Toolbar -->
                               <HBox alignment="CENTER_LEFT" spacing="2.0" styleClass="editor-toolbar">
                                  <children>
                                     <!-- Separator -->
@@ -82,8 +81,6 @@
                                           <Insets bottom="4.0" top="4.0" />
                                        </padding>
                                     </Separator>
-
-                                    <!-- Lists Group - Gam -->
                                     <Button fx:id="bulletListButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="•">
                                        <font>
                                           <Font size="18.0" />
@@ -94,15 +91,11 @@
                                           <Font size="12.0" />
                                        </font>
                                     </Button>
-
-                                    <!-- Separator -->
                                     <Separator orientation="VERTICAL" styleClass="toolbar-separator">
                                        <padding>
                                           <Insets bottom="4.0" top="4.0" />
                                        </padding>
                                     </Separator>
-
-                                    <!-- Alignment Group - Dinal -->
                                     <Button fx:id="alignLeftButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn, align-left" text="⚊">
                                        <font>
                                           <Font size="14.0" />
@@ -118,15 +111,11 @@
                                           <Font size="14.0" />
                                        </font>
                                     </Button>
-
-                                    <!-- Separator -->
                                     <Separator orientation="VERTICAL" styleClass="toolbar-separator">
                                        <padding>
                                           <Insets bottom="4.0" top="4.0" />
                                        </padding>
                                     </Separator>
-
-                                    <!-- Heading Group - Dinal -->
                                     <Button fx:id="headingUpButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="H+">
                                        <font>
                                           <Font name="System Bold" size="11.0" />
@@ -137,8 +126,6 @@
                                           <Font name="System Bold" size="11.0" />
                                        </font>
                                     </Button>
-
-                                    <!-- Spacer -->
                                     <Region HBox.hgrow="ALWAYS" />
                                  </children>
                                  <padding>
@@ -156,7 +143,7 @@
                         </VBox>
                      </children>
                      <VBox.margin>
-                        <Insets left="25.0" right="25.0" top="10.0" />
+                        <Insets left="25.0" right="25.0" top="5.0" />
                      </VBox.margin>
                   </VBox>
                   <HBox alignment="TOP_RIGHT">
@@ -199,7 +186,7 @@
                         <Insets left="25.0" right="25.0" />
                      </VBox.margin>
                   </Label>
-                  <HBox prefHeight="100.0" prefWidth="200.0" spacing="5.0">
+                  <HBox spacing="5.0">
                      <children>
                         <ImageView fx:id="tagIcon" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -230,16 +217,16 @@
                   </HBox>
                   <FlowPane fx:id="tagFlowpane" hgap="8.0" prefWrapLength="600.0" vgap="6.0">
                      <VBox.margin>
-                        <Insets bottom="3.0" left="25.0" top="4.0" />
+                        <Insets left="25.0" />
                      </VBox.margin>
                   </FlowPane>
-                  <HBox prefHeight="100.0" prefWidth="200.0" spacing="5.0">
+                  <HBox spacing="5.0">
                      <children>
                         <ComboBox fx:id="tagComboBox" editable="true" prefWidth="160.0" promptText="Add/Select a tag..." styleClass="editor-combo combo-box" />
                         <Button fx:id="addTagBtn" mnemonicParsing="false" onAction="#handleAddTag" text="Add tags" />
                      </children>
                      <VBox.margin>
-                        <Insets bottom="2.0" left="25.0" top="4.0" />
+                        <Insets left="25.0" />
                      </VBox.margin>
                   </HBox>
                   <HBox alignment="CENTER" spacing="50.0">
@@ -256,7 +243,7 @@
                         </Button>
                      </children>
                      <VBox.margin>
-                        <Insets bottom="15.0" left="25.0" right="25.0" />
+                        <Insets bottom="10.0" left="25.0" right="25.0" top="3.0" />
                      </VBox.margin>
                   </HBox>
                </children>

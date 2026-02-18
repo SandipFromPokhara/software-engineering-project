@@ -25,6 +25,7 @@ import session.UserSession;
 import util.WordCountUtil;
 import util.ToggleUtil;
 import util.UndoRedoManager;
+import util.TextFormattingUtil;
 
 import java.net.URL;
 import java.util.List;
@@ -145,6 +146,8 @@ public class CreateNoteController implements Initializable {
             updateTagIcon();
             WordCountUtil.bind(contentArea, wordCountLabel);
         });
+        // Enable list auto-continuation for content area
+        TextFormattingUtil.enableListAutoContinuation(contentArea);
     }
 
     @FXML
@@ -257,14 +260,12 @@ public class CreateNoteController implements Initializable {
         String buttonId = clickedButton.getId();
 
         System.out.println("Button clicked: " + buttonId);
-
-        // Each team member implements their buttons here
         switch (buttonId) {
             case "bulletListButton":
-                System.out.println("Bullet List");
+                TextFormattingUtil.toggleBulletList(contentArea, bulletListButton);
                 break;
             case "numberedListButton":
-                System.out.println("Numbered List");
+                TextFormattingUtil.toggleNumberedList(contentArea, numberedListButton);
                 break;
             case "alignLeftButton":
                 System.out.println("Align Left");
