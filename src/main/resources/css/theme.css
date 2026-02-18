@@ -106,7 +106,7 @@
 }
 
 .root.light .combo-box .list-cell:hover {
-    -fx-background-color: #ececec;
+    -fx-background-color: #6e6e6e;
 }
 
 /* Tags */
@@ -162,8 +162,7 @@
 }
 
 .root.dark .side-panel-btn:hover {
-    -fx-background-color: #575757;
-    -fx-text-fill: white;
+    -fx-background-color: #02b7ba;
 }
 
 .root.dark .side-label {
@@ -174,7 +173,7 @@
 }
 
 .root.dark .side-label:hover {
-    -fx-background-color: #111144;
+    -fx-background-color: #02b7ba;
 }
 
 /* Editor container & toolbar - only colors */
