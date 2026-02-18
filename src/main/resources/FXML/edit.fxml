@@ -60,6 +60,18 @@
                             </font>
                         </TextArea>
                     </VBox>
+               <HBox alignment="TOP_RIGHT">
+                  <children>
+                     <Label fx:id="wordCountLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" prefWidth="96.0" text="Words: 0" HBox.hgrow="ALWAYS">
+                        <font>
+                           <Font name="Arial" size="12.0" />
+                        </font>
+                        <HBox.margin>
+                           <Insets bottom="2.0" right="8.0" top="2.0" />
+                        </HBox.margin>
+                     </Label>
+                  </children>
+               </HBox>
                     <VBox spacing="5.0">
                         <Label fx:id="annotation" text="Annotation">
                             <font>
