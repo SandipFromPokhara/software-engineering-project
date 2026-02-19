@@ -7,6 +7,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
@@ -16,22 +17,23 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
 <BorderPane prefHeight="600.0" prefWidth="700.0" styleClass="root" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.EditNoteController">
-        <top>
-            <MenuBar BorderPane.alignment="CENTER">
-                <menus>
-                    <Menu mnemonicParsing="false" text="Edit">
-                        <items>
-                            <MenuItem fx:id="undoMenuItem" accelerator="Ctrl+Z" mnemonicParsing="false" onAction="#handleUndo" text="Undo" />
-                            <MenuItem fx:id="redoMenuItem" accelerator="Ctrl+Y" mnemonicParsing="false" onAction="#handleRedo" text="Redo" />
-                        </items>
-                    </Menu>
-                </menus>
-            </MenuBar>
-        </top>
+    <top>
+        <MenuBar BorderPane.alignment="CENTER">
+            <menus>
+                <Menu mnemonicParsing="false" text="Edit">
+                    <items>
+                        <MenuItem fx:id="undoMenuItem" accelerator="Ctrl+Z" mnemonicParsing="false" onAction="#handleUndo" text="Undo" />
+                        <MenuItem fx:id="redoMenuItem" accelerator="Ctrl+Y" mnemonicParsing="false" onAction="#handleRedo" text="Redo" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
     <center>
         <AnchorPane>
             <children>
@@ -57,48 +59,14 @@
                                 <Font name="System Bold" size="14" />
                             </font>
                         </Label>
-                        <TextArea fx:id="contentBox" promptText="Write your contents..." styleClass="editor-textarea" wrapText="true" VBox.vgrow="ALWAYS">
-                            <font>
-                                <Font size="14" />
-                            </font>
-                        </TextArea>
+
                         <!-- Content Editor with Toolbar -->
                         <VBox spacing="0.0" styleClass="editor-container" VBox.vgrow="ALWAYS">
                             <children>
                                 <!-- Professional Toolbar -->
                                 <HBox alignment="CENTER_LEFT" spacing="2.0" styleClass="editor-toolbar">
                                     <children>
-                                        <Button fx:id="boldButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="B">
-                                            <font>
-                                                <Font name="System Bold" size="14.0" />
-                                            </font>
-                                        </Button>
-                                        <Button fx:id="italicButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn, italic-btn" text="I">
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </Button>
-                                        <Button fx:id="underlineButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn, underline-btn" text="U">
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </Button>
-                                        <Separator orientation="VERTICAL" styleClass="toolbar-separator">
-                                            <padding>
-                                                <Insets bottom="4.0" top="4.0" />
-                                            </padding>
-                                        </Separator>
-                                        <Button fx:id="textColorButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn, color-btn" text="A">
-                                            <font>
-                                                <Font name="System Bold" size="14.0" />
-                                            </font>
-                                        </Button>
-                                        <Separator orientation="VERTICAL" styleClass="toolbar-separator">
-                                            <padding>
-                                                <Insets bottom="4.0" top="4.0" />
-                                            </padding>
-                                        </Separator>
-                                        <Button fx:id="bulletListButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="•">
+                                        <Button fx:id="bulletListButton" mnemonicParsing="false" onAction="#handleToolbarClick" prefHeight="23.0" prefWidth="21.0" styleClass="toolbar-btn" text="•">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -151,9 +119,9 @@
                                 </HBox>
 
                                 <!-- Text Area -->
-                                <TextArea fx:id="contentBox" prefHeight="480.0" promptText="Write your content here" styleClass="editor-textarea" wrapText="true" VBox.vgrow="ALWAYS">
+                                <TextArea fx:id="contentBox" promptText="Write your contents..." styleClass="editor-textarea" wrapText="true" VBox.vgrow="ALWAYS">
                                     <font>
-                                        <Font size="14.0" />
+                                        <Font size="14" />
                                     </font>
                                 </TextArea>
                             </children>
@@ -162,18 +130,21 @@
                             <Insets left="25.0" right="25.0" top="5.0" />
                         </VBox.margin>
                     </VBox>
-               <HBox alignment="TOP_RIGHT">
-                  <children>
-                     <Label fx:id="wordCountLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="18.0" prefWidth="180.0" text="Words: 0 | Chars: 0" HBox.hgrow="ALWAYS">
-                        <font>
-                           <Font name="Arial Italic" size="12.0" />
-                        </font>
-                        <HBox.margin>
-                           <Insets bottom="2.0" right="8.0" top="2.0" />
-                        </HBox.margin>
-                     </Label>
-                  </children>
-               </HBox>
+                    <HBox alignment="TOP_RIGHT">
+                        <children>
+                            <Label fx:id="wordCountLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="18.0" prefWidth="180.0" text="Words: 0 | Chars: 0" HBox.hgrow="ALWAYS">
+                                <font>
+                                    <Font name="Arial Italic" size="12.0" />
+                                </font>
+                                <HBox.margin>
+                                    <Insets bottom="2.0" right="8.0" top="2.0" />
+                                </HBox.margin>
+                            </Label>
+                        </children>
+                  <VBox.margin>
+                     <Insets bottom="2.0" top="2.0" />
+                  </VBox.margin>
+                    </HBox>
                     <VBox spacing="5.0">
                         <Label fx:id="annotation" text="Annotation">
                             <font>
@@ -184,57 +155,60 @@
                             <font>
                                 <Font size="14" />
                             </font>
-                        </TextArea>
+                        </TextField>
                         <VBox.margin>
-                            <Insets left="25.0" right="25.0" />
+                            <Insets bottom="2.0" left="25.0" right="25.0" />
                         </VBox.margin>
                     </VBox>
-               <HBox spacing="4.0">
-                  <children>
-                     <ImageView fx:id="tagIcon" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                        <image>
-                           <Image url="@/Images/tag-black.png" />
-                        </image>
-                     </ImageView>
-                     <Label styleClass="tag-label" text="Tags">
-                        <font>
-                           <Font name="System Bold" size="14.0" />
-                        </font>
-                     </Label>
-                      <Label alignment="CENTER" opacity="0.64" styleClass="help-label" text="?">
-                          <tooltip>
-                              <Tooltip fx:id="tagTooltip" styleClass="tooltip" text="Tags are keywords to organize your notes">
-                                  <font>
-                                      <Font name="System Italic" size="10.0" />
-                                  </font>
-                              </Tooltip>
-                          </tooltip>
-                          <HBox.margin>
-                              <Insets top="1.0" />
-                          </HBox.margin>
-                      </Label>
-                  </children>
-                  <VBox.margin>
-                     <Insets bottom="4.0" top="4.0" />
-                  </VBox.margin>
-               </HBox>
-               <FlowPane fx:id="tagFlowpane" hgap="8.0" vgap="6.0">
-                  <VBox.margin>
-                     <Insets bottom="2.0" top="4.0" />
-                  </VBox.margin>
-               </FlowPane>
-               <HBox spacing="10.0">
-                  <children>
-                     <ComboBox fx:id="tagComboBox" editable="true" prefWidth="160.0" promptText="Add/Select a tag..." styleClass="editor-combo combo-box" />
-                     <Button fx:id="addTagBtn" mnemonicParsing="false" onAction="#handleAddTag" text="Add tags" />
-                  </children>
-                  <VBox.margin>
-                     <Insets bottom="4.0" top="4.0" />
-                  </VBox.margin>
-               </HBox>
+                    <HBox spacing="4.0">
+                        <children>
+                            <ImageView fx:id="tagIcon" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                <image>
+                                    <Image url="@/Images/tag-black.png" />
+                                </image>
+                            </ImageView>
+                            <Label styleClass="tag-label" text="Tags">
+                                <font>
+                                    <Font name="System Bold" size="14.0" />
+                                </font>
+                            </Label>
+                            <Label alignment="CENTER" opacity="0.64" styleClass="help-label" text="?">
+                                <tooltip>
+                                    <Tooltip fx:id="tagTooltip" styleClass="tooltip" text="Tags are keywords to organize your notes">
+                                        <font>
+                                            <Font name="System Italic" size="10.0" />
+                                        </font>
+                                    </Tooltip>
+                                </tooltip>
+                                <HBox.margin>
+                                    <Insets bottom="2.0" left="6.0" right="6.0" top="2.0" />
+                                </HBox.margin>
+                            </Label>
+                        </children>
+                        <VBox.margin>
+                            <Insets bottom="2.0" left="25.0" top="4.0" />
+                        </VBox.margin>
+                    </HBox>
+                    <FlowPane fx:id="tagFlowpane" hgap="8.0" prefWrapLength="200.0" vgap="6.0">
+                        <VBox.margin>
+                            <Insets bottom="2.0" left="25.0" top="2.0" />
+                        </VBox.margin>
+                    </FlowPane>
+                    <HBox spacing="5.0">
+                        <children>
+                            <ComboBox fx:id="tagComboBox" editable="true" prefWidth="160.0" promptText="Add/Select a tag..." styleClass="editor-combo combo-box" />
+                            <Button fx:id="addTagBtn" mnemonicParsing="false" onAction="#handleAddTag" text="Add tags" />
+                        </children>
+                        <VBox.margin>
+                            <Insets bottom="4.0" left="25.0" top="2.0" />
+                        </VBox.margin>
+                    </HBox>
                     <HBox alignment="BOTTOM_LEFT" spacing="35.0">
-                        <Button fx:id="updateButton" onAction="#handleUpdate" prefWidth="100.0" text="Update" />
-                        <Button fx:id="cancelButton" alignment="CENTER" contentDisplay="CENTER" onAction="#handleCancel" prefWidth="100.0" text="Cancel" />
+                        <Button fx:id="updateButton" onAction="#handleUpdate" prefWidth="100.0" text="Update" HBox.hgrow="ALWAYS" />
+                        <Button fx:id="cancelButton" alignment="CENTER" contentDisplay="CENTER" onAction="#handleCancel" prefWidth="100.0" text="Cancel" HBox.hgrow="ALWAYS" />
+                  <VBox.margin>
+                     <Insets left="20.0" />
+                  </VBox.margin>
                     </HBox>
                 </VBox>
             </children>
