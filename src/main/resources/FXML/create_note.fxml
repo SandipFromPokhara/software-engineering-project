@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="700.0" styleClass="root" stylesheets="@../css/createNote.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateNoteController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="700.0" styleClass="root" stylesheets="@/css/createNote.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateNoteController">
    <center>
       <AnchorPane BorderPane.alignment="CENTER">
          <children>
@@ -212,12 +212,12 @@
                         </Label>
                      </children>
                      <VBox.margin>
-                        <Insets left="25.0" />
+                        <Insets bottom="2.0" left="25.0" top="2.0" />
                      </VBox.margin>
                   </HBox>
                   <FlowPane fx:id="tagFlowpane" hgap="8.0" prefWrapLength="600.0" vgap="6.0">
                      <VBox.margin>
-                        <Insets left="25.0" />
+                        <Insets bottom="4.0" left="25.0" top="2.0" />
                      </VBox.margin>
                   </FlowPane>
                   <HBox spacing="5.0">
