@@ -13,13 +13,23 @@ notevault_db
 | Field        | Type         | Nullable | Unique | Description                 |      
 |--------------|--------------|----------|--------|-----------------------------|
 | id           | INT (PK)     | NO       | YES    | Unique user ID              |
-| firstName    | VARCHAR(255) | NO       | NO     | User's first name           |
-| lastName     | VARCHAR(255) | NO       | NO     | User's last name            |
+| firstName    | VARCHAR(50)  | NO       | NO     | User's first name           |
+| lastName     | VARCHAR(50)  | NO       | NO     | User's last name            |
 | email        | VARCHAR(255) | NO       | YES    | User's email address        |
-| username     | VARCHAR(255) | NO       | YES    | Login name                  |
-| passwordHash | VARCHAR(255) | NO       | NO     | Hashed password             |
+| username     | VARCHAR(20)  | NO       | YES    | Login name                  |
+| passwordHash | TEXT         | NO       | NO     | Hashed password             |
 | createdAt    | TIMESTAMP    | NO       | NO     | DEFAULT CURRENT_TIMESTAMP   |
 | updatedAt    | TIMESTAMP    | YES      | NO     | ON UPDATE CURRENT_TIMESTAMP |
+
+**Indexes & Keys**
+
+- PRIMARY KEY: `id`
+
+- UNIQUE INDEX: `email`
+
+- UNIQUE INDEX: `username`
+
+---
 
 ### notebooks
 
@@ -30,6 +40,16 @@ notevault_db
 | user_id   | INT (FK)     | NO       | Owner of the notebook; FK references users.id. Deleting the user cascades deletion of notebooks |
 | createdAt | TIMESTAMP    | NO       | DEFAULT CURRENT_TIMESTAMP                                                                       |
 | updatedAt | TIMESTAMP    | YES      | ON UPDATE CURRENT_TIMESTAMP                                                                     |
+
+**Indexes & Keys**
+
+- PRIMARY KEY: `id`
+
+- INDEX: `user_id`
+
+- FOREIGN KEY: `user_id` -> `users.id` ON DELETE CASCADE
+
+---
 
 ### notes
 
@@ -43,12 +63,58 @@ notevault_db
 | createdAt   | TIMESTAMP    | NO       | DEFAULT CURRENT_TIMESTAMP                                                                                |
 | updatedAt   | TIMESTAMP    | YES      | ON UPDATE CURRENT_TIMESTAMP                                                                              |
 
+**Indexes & Keys**
+
+- PRIMARY KEY: `id`
+
+- INDEX: `notebook_id`
+
+- FOREIGN KEY: `notebook_id` -> `notebook.id` ON DELETE CASCADE
+
+---
+
+### tags
+
+| Field      | Type         | Nullable | Unique | Description                    |
+|------------|--------------|----------|--------|--------------------------------|
+| id         | INT (PK)     | NO       | YES    | Unique identifier for each tag |
+| tag_name   | VARCHAR(15)  | NO       | YES    | Name of the tag                |
+| createdAt  | TIMESTAMP    | NO       | NO     | DEFAULT CURRENT_TIMESTAMP      |
+| updatedAt  | TIMESTAMP    | YES      | NO     | ON UPDATE CURRENT_TIMESTAMP    |
+
+**Indexes & Keys**
+
+- PRIMARY KEY: `id`
+
+- UNIQUE INDEX: `tag_name`
+
+---
+
+### note_tags
+
+| Field    | Type       | Nullable | Description                                                       |
+|----------|------------|----------|-------------------------------------------------------------------|
+| note_id  | INT (FK)   | NO       | References notes.id. Identifies the note associated with the tag. |
+| tag_id   | INT (FK)   | NO       | References tags.id. Identifies the tag associated with the note.  |
+
+**Indexes & Keys**
+
+- COMPOSITE PRIMARY KEY: `(note_id, tag_id)` → prevents duplicates
+
+- INDEX: `tag_id` → reverse lookup (all notes with a given tag)
+
+- FOREIGN KEY: `note_id` → `notes.id` ON DELETE CASCADE
+
+- FOREIGN KEY: `tag_id` → `tags.id` ON DELETE CASCADE
+
+---
+
 ## Notes
 This schema represents the design of NoteVault.
 
 ## Future Extensions
 
 In future iterations of the project, the database design may be extended to support:
-- Note sharing and tagging
+- Note sharing
 
 These features are outside the scope of Software Engineering Project 1 and are not implemented in the current version.
