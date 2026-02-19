@@ -53,6 +53,7 @@ public class NavigationUtil {
             scene.getStylesheets().add("/css/row_color.css");
             stage.setScene(scene);
             stage.setTitle(title);
+
             stage.getIcons().add(new Image("/Images/NV.png"));
             stage.setResizable(resizable);
             stage.centerOnScreen();
@@ -80,33 +81,32 @@ public class NavigationUtil {
     }
 
     /**
-     * Replace the scene on an existing stage (like SignUp navigation).
+     * Replace the scene on an existing stage
      */
     public static void replaceScene(Stage stage, String fxmlPath, String title, boolean resizable) {
         try {
             FXMLLoader loader = new FXMLLoader(NavigationUtil.class.getResource(fxmlPath));
             Parent root = loader.load();
             Scene scene = new Scene(root);
+
             scene.getStylesheets().add("/css/row_color.css");
 
             stage.setScene(scene);
             stage.setTitle(title);
             stage.getIcons().add(new Image("/Images/NV.png"));
             stage.setResizable(resizable);
-            stage.centerOnScreen();
 
             // Min size for main windows
             if (!(DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath))) {
                 stage.setMinWidth(0);
                 stage.setMinHeight(0);
-                stage.setWidth(scene.getWidth());
-                stage.setHeight(scene.getHeight());
             } else {
                 stage.setMinWidth(700);
                 stage.setMinHeight(550);
             }
 
             stage.sizeToScene();
+            stage.centerOnScreen();
             stage.show();
         } catch (IOException e) {
             LOGGER.error("Failed to load FXML: {}", fxmlPath, e);
