@@ -33,7 +33,7 @@ public class EditNoteController {
     @FXML
     private Label title;
     @FXML
-    private TextField titleField;;
+    private TextField titleField;
     @FXML
     private Label content;
 
@@ -44,7 +44,7 @@ public class EditNoteController {
     private Label annotation;
 
     @FXML
-    TextArea annotationBox;
+    TextField annotationBox;
 
     @FXML
     Button updateButton;
@@ -78,10 +78,6 @@ public class EditNoteController {
     @FXML private MenuItem redoMenuItem;
 
     // Toolbar buttons
-    @FXML private Button boldButton;
-    @FXML private Button italicButton;
-    @FXML private Button underlineButton;
-    @FXML private Button textColorButton;
     @FXML private Button bulletListButton;
     @FXML private Button numberedListButton;
     @FXML private Button alignLeftButton;
@@ -141,18 +137,6 @@ public class EditNoteController {
         System.out.println("Button clicked: " + buttonId);
 
         switch (buttonId) {
-            case "boldButton":
-                System.out.println("Bold button clicked ");
-                break;
-            case "italicButton":
-                System.out.println("Italic button clicked ");
-                break;
-            case "underlineButton":
-                System.out.println("Underline button clicked ");
-                break;
-            case "textColorButton":
-                System.out.println("Text Color button clicked ");
-                break;
             case "bulletListButton":
                 TextFormattingUtil.toggleBulletList(contentBox, bulletListButton);
                 break;
