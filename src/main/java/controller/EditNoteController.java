@@ -80,9 +80,6 @@ public class EditNoteController {
     // Toolbar buttons
     @FXML private Button bulletListButton;
     @FXML private Button numberedListButton;
-    @FXML private Button alignLeftButton;
-    @FXML private Button alignCenterButton;
-    @FXML private Button alignRightButton;
     @FXML private Button headingUpButton;
     @FXML private Button headingDownButton;
 
@@ -142,15 +139,6 @@ public class EditNoteController {
                 break;
             case "numberedListButton":
                 TextFormattingUtil.toggleNumberedList(contentBox, numberedListButton);
-                break;
-            case "alignLeftButton":
-                System.out.println("Align Left button clicked ");
-                break;
-            case "alignCenterButton":
-                System.out.println("Align Center button clicked ");
-                break;
-            case "alignRightButton":
-                System.out.println("Align Right button clicked ");
                 break;
             case "headingUpButton":
                 System.out.println("Heading Up button clicked ");
