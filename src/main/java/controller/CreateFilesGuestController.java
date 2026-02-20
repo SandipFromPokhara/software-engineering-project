@@ -8,22 +8,21 @@ import javafx.scene.layout.AnchorPane;
 
 public class CreateFilesGuestController {
     @FXML
-    private TextField titleBox;
+    TextField titleBox;
 
     @FXML
-    private TextArea contentBox;
+    TextArea contentBox;
 
     @FXML
     private AnchorPane contentPane;
+    @FXML
+    TextField annotationBox;
 
     @FXML
-    private TextField annotationBox;
+    Button cancelButton;
 
     @FXML
-    private Button cancelButton;
-
-    @FXML
-    private void handleCancel(){
+    void handleCancel(){
 
         // Clear all input fields
         if (titleBox != null) {
