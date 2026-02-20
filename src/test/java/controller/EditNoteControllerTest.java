@@ -36,7 +36,7 @@ class EditNoteControllerTest {
         note = new NoteEntity();
 
         // Inject UI components
-        controller.titleBox = new TextField();
+        controller.titleField = new TextField();
         controller.contentBox = new TextArea();
         controller.annotationBox = new TextField();
         controller.updateButton = new Button();
@@ -66,7 +66,7 @@ class EditNoteControllerTest {
 
         controller.setNote(note);
 
-        assertEquals("Title", controller.titleBox.getText());
+        assertEquals("Title", controller.titleField.getText());
         assertEquals("Content", controller.contentBox.getText());
         assertEquals("Annotation", controller.annotationBox.getText());
     }
@@ -85,7 +85,7 @@ class EditNoteControllerTest {
     // handleUpdate Tests
     @Test
     void handleUpdate_shouldUpdateNoteAndSave() {
-        controller.titleBox.setText("New Title");
+        controller.titleField.setText("New Title");
         controller.contentBox.setText("New Content");
         controller.annotationBox.setText("New Annotation");
 

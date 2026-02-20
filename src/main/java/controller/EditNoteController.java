@@ -32,8 +32,9 @@ public class EditNoteController {
 
     @FXML
     private Label title;
+
     @FXML
-    private TextField titleField;
+    TextField titleField;
     @FXML
     private Label content;
 
