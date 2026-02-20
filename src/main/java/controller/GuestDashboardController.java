@@ -11,7 +11,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import util.NavigationUtil;
-import javafx.event.ActionEvent;
+import java.util.logging.Level;
+
+import static controller.ViewDashboardController.logger;
 
 
 public class GuestDashboardController {
@@ -38,7 +40,7 @@ public class GuestDashboardController {
     private Label content;
 
     @FXML
-    private VBox centerPane;
+    VBox centerPane;
 
     @FXML
     private void handleHome() {
@@ -62,16 +64,14 @@ public class GuestDashboardController {
 
             centerPane.getChildren().setAll(wrapper);
 
+        //logger
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Failed to load FXML file: " + fxmlFile, e);
         }
     }
 
-
-
-
     @FXML
-    private void handleNewFiles() {
+    void handleNewFiles() {
         loadContent("createFilesGuest.fxml");
     }
 
@@ -84,8 +84,6 @@ public class GuestDashboardController {
                 "NoteVault - LogIn",
                 false
         );
-
-
     }
 
     @FXML

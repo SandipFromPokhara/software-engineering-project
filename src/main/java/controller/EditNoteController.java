@@ -21,7 +21,7 @@ public class EditNoteController {
     private NoteDAO noteDao;
     private TagDAO tagDao;
     private NoteEntity note;
-    private Set<String> selectedTags = new HashSet<>();
+    Set<String> selectedTags = new HashSet<>();
 
     @FXML
     private Label title;
@@ -46,13 +46,13 @@ public class EditNoteController {
     private Button cancelButton;
 
     @FXML
-    private Label statusLabel;
+    Label statusLabel;
 
     @FXML
-    private FlowPane tagFlowpane;
+    FlowPane tagFlowpane;
 
     @FXML
-    private ComboBox<String> tagComboBox;
+    ComboBox<String> tagComboBox;
 
     @FXML
     private Button addTagBtn;
@@ -187,7 +187,7 @@ public class EditNoteController {
     }
 
     @FXML
-    private void handleAddTag() {
+    void handleAddTag() {
         String tagName = tagComboBox.getEditor().getText();
 
         if (tagName == null || tagName.isBlank()) {

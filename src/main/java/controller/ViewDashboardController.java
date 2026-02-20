@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 
 public class ViewDashboardController {
 
-    private static final Logger logger = Logger.getLogger(ViewDashboardController.class.getName());
+    protected static final Logger logger = Logger.getLogger(ViewDashboardController.class.getName());
     private NoteBookEntity activeNotebook;
     private NoteBookDAO notebookDao;
     private NoteDAO noteDao;
@@ -368,9 +368,6 @@ public class ViewDashboardController {
 
     }
 
-
-
-
     @FXML
     private void handleExport() {
         if (activeNotebook == null) {
@@ -408,14 +405,13 @@ public class ViewDashboardController {
     }
 
     private void exportEntireNotebook() {
-        List<NoteEntity> notes = noteDao.findByNotebook(activeNotebook); // active one not
+        List<NoteEntity> notes = noteDao.findByNotebook(activeNotebook); // active one 
         if (notes.isEmpty()) {
             showWarning("Notebook is empty.");
             return;
         }
         exportNotesToPdf(notes, activeNotebook.getTitle());
     }
-
 
     private void exportNotesToPdf(List<NoteEntity> notes, String fileName) {
         FileChooser fileChooser = new FileChooser();
