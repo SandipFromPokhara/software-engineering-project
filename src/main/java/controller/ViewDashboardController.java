@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 
 public class ViewDashboardController {
 
-    private static final Logger logger = Logger.getLogger(ViewDashboardController.class.getName());
+    static final Logger logger = Logger.getLogger(ViewDashboardController.class.getName());
     private NoteBookEntity activeNotebook;
     private NoteBookDAO notebookDao;
     private NoteDAO noteDao;

@@ -17,11 +17,10 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="700.0" styleClass="root" stylesheets="@../css/createNote.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateNoteController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="700.0" styleClass="root" stylesheets="@/css/createNote.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateNoteController">
    <center>
       <AnchorPane BorderPane.alignment="CENTER">
          <children>
@@ -68,24 +67,16 @@
                            <children>
                               <HBox alignment="CENTER_LEFT" spacing="2.0" styleClass="editor-toolbar">
                                  <children>
-                                    <!-- Separator -->
-                                    <Separator orientation="VERTICAL" styleClass="toolbar-separator">
-                                       <padding>
-                                          <Insets bottom="4.0" top="4.0" />
-                                       </padding>
-                                    </Separator>
-
-                                    <!-- Separator -->
-                                    <Separator orientation="VERTICAL" styleClass="toolbar-separator">
-                                       <padding>
-                                          <Insets bottom="4.0" top="4.0" />
-                                       </padding>
-                                    </Separator>
                                     <Button fx:id="bulletListButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="•">
                                        <font>
-                                          <Font size="18.0" />
+                                          <Font size="12.0" />
                                        </font>
                                     </Button>
+                                    <Separator orientation="VERTICAL" styleClass="toolbar-separator">
+                                       <padding>
+                                          <Insets bottom="4.0" top="4.0" />
+                                       </padding>
+                                    </Separator>
                                     <Button fx:id="numberedListButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="1.">
                                        <font>
                                           <Font size="12.0" />
@@ -98,15 +89,15 @@
                                     </Separator>
                                     <Button fx:id="headingUpButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="H+">
                                        <font>
-                                          <Font name="System Bold" size="11.0" />
+                                          <Font name="System Bold" size="12.0" />
                                        </font>
                                     </Button>
+                                    <Separator orientation="VERTICAL" styleClass="toolbar-separator" />
                                     <Button fx:id="headingDownButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="H-">
                                        <font>
-                                          <Font name="System Bold" size="11.0" />
+                                          <Font name="System Bold" size="12.0" />
                                        </font>
                                     </Button>
-                                    <Region HBox.hgrow="ALWAYS" />
                                  </children>
                                  <padding>
                                     <Insets bottom="4.0" left="8.0" right="8.0" top="4.0" />
@@ -192,12 +183,12 @@
                         </Label>
                      </children>
                      <VBox.margin>
-                        <Insets left="25.0" />
+                        <Insets bottom="2.0" left="25.0" top="2.0" />
                      </VBox.margin>
                   </HBox>
                   <FlowPane fx:id="tagFlowpane" hgap="8.0" prefWrapLength="600.0" vgap="6.0">
                      <VBox.margin>
-                        <Insets left="25.0" />
+                        <Insets bottom="4.0" left="25.0" top="2.0" />
                      </VBox.margin>
                   </FlowPane>
                   <HBox spacing="5.0">

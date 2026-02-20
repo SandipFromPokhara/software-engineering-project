@@ -28,12 +28,13 @@ public class EditNoteController {
     private NoteDAO noteDao;
     private TagDAO tagDao;
     private NoteEntity note;
-    private Set<String> selectedTags = new HashSet<>();
+    Set<String> selectedTags = new HashSet<>();
 
     @FXML
     private Label title;
+
     @FXML
-    private TextField titleField;
+    TextField titleField;
     @FXML
     private Label content;
 
@@ -53,13 +54,13 @@ public class EditNoteController {
     private Button cancelButton;
 
     @FXML
-    private Label statusLabel;
+    Label statusLabel;
 
     @FXML
-    private FlowPane tagFlowpane;
+    FlowPane tagFlowpane;
 
     @FXML
-    private ComboBox<String> tagComboBox;
+    ComboBox<String> tagComboBox;
 
     @FXML
     private Button addTagBtn;
@@ -131,6 +132,8 @@ public class EditNoteController {
         Button clickedButton = (Button) event.getSource();
         String buttonId = clickedButton.getId();
 
+        System.out.println("Button clicked: " + buttonId);
+
         switch (buttonId) {
             case "bulletListButton":
                 TextFormattingUtil.toggleBulletList(contentBox, bulletListButton);
@@ -139,10 +142,10 @@ public class EditNoteController {
                 TextFormattingUtil.toggleNumberedList(contentBox, numberedListButton);
                 break;
             case "headingUpButton":
-                TextFormattingUtil.increaseFontSize(contentBox);
+                System.out.println("Heading Up button clicked ");
                 break;
             case "headingDownButton":
-                TextFormattingUtil.decreaseFontSize(contentBox);
+                System.out.println("Heading Down button clicked ");
                 break;
         }
     }
@@ -239,7 +242,7 @@ public class EditNoteController {
     }
 
     @FXML
-    private void handleAddTag() {
+    void handleAddTag() {
         String tagName = tagComboBox.getEditor().getText();
 
         if (tagName == null || tagName.isBlank()) {
