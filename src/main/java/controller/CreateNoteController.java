@@ -56,9 +56,6 @@ public class CreateNoteController implements Initializable {
     // Toolbar buttons
     @FXML private Button bulletListButton;
     @FXML private Button numberedListButton;
-    @FXML private Button alignLeftButton;
-    @FXML private Button alignCenterButton;
-    @FXML private Button alignRightButton;
     @FXML private Button headingUpButton;
     @FXML private Button headingDownButton;
     @FXML private Tooltip tagTooltip, toggleTooltip;
@@ -258,7 +255,6 @@ public class CreateNoteController implements Initializable {
         Button clickedButton = (Button) event.getSource();
         String buttonId = clickedButton.getId();
 
-        System.out.println("Button clicked: " + buttonId);
         switch (buttonId) {
             case "bulletListButton":
                 TextFormattingUtil.toggleBulletList(contentArea, bulletListButton);
@@ -266,20 +262,11 @@ public class CreateNoteController implements Initializable {
             case "numberedListButton":
                 TextFormattingUtil.toggleNumberedList(contentArea, numberedListButton);
                 break;
-            case "alignLeftButton":
-                System.out.println("Align Left");
-                break;
-            case "alignCenterButton":
-                System.out.println("Align Center");
-                break;
-            case "alignRightButton":
-                System.out.println("Align Right");
-                break;
             case "headingUpButton":
-                System.out.println("Heading Up");
+                TextFormattingUtil.increaseFontSize(contentArea);
                 break;
             case "headingDownButton":
-                System.out.println("Heading Down");
+                TextFormattingUtil.decreaseFontSize(contentArea);
                 break;
         }
     }

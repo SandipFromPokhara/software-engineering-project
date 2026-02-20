@@ -96,26 +96,6 @@
                                           <Insets bottom="4.0" top="4.0" />
                                        </padding>
                                     </Separator>
-                                    <Button fx:id="alignLeftButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn, align-left" text="⚊">
-                                       <font>
-                                          <Font size="14.0" />
-                                       </font>
-                                    </Button>
-                                    <Button fx:id="alignCenterButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn, align-center" text="☰">
-                                       <font>
-                                          <Font size="14.0" />
-                                       </font>
-                                    </Button>
-                                    <Button fx:id="alignRightButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn, align-right" text="⚊">
-                                       <font>
-                                          <Font size="14.0" />
-                                       </font>
-                                    </Button>
-                                    <Separator orientation="VERTICAL" styleClass="toolbar-separator">
-                                       <padding>
-                                          <Insets bottom="4.0" top="4.0" />
-                                       </padding>
-                                    </Separator>
                                     <Button fx:id="headingUpButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="H+">
                                        <font>
                                           <Font name="System Bold" size="11.0" />

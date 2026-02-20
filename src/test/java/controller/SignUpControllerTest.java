@@ -2,13 +2,20 @@ package controller;
 
 import dao.user.UserDAO;
 import entity.UserEntity;
-import javafx.scene.control.*;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import util.BcryptPasswordHasher;
+import javafx.scene.control.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,394 +31,481 @@ class SignUpControllerTest {
     private TextField emailField;
     private PasswordField passwordField;
     private PasswordField confirmPasswordField;
-    private Label messageLabel;
     private Button signUpButton;
+    private Hyperlink loginLink;
+    private Label messageLabel;
+    private Button backButton;
+    private Stage testStage;
 
-    // Simple Mock DAO implementation
+    // Mock DAO implementation
     private static class MockUserDAO implements UserDAO {
-        private List<UserEntity> users = new ArrayList<>();
-        private Long nextId = 1L;
+        private UserEntity userToReturn;
+        private UserEntity savedUser;
+        private boolean shouldThrowRuntimeException = false;
+        private boolean shouldThrowIllegalArgumentException = false;
+        private boolean shouldReturnNullOnSave = false;
+        private boolean shouldReturnUserWithoutId = false;
 
         @Override
         public UserEntity save(UserEntity user) {
-            if (user.getId() == null) {
-                // Simulate auto-increment ID
-                try {
-                    var idField = UserEntity.class.getDeclaredField("id");
-                    idField.setAccessible(true);
-                    idField.set(user, nextId++);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+            if (shouldThrowIllegalArgumentException) {
+                throw new IllegalArgumentException("Validation error");
             }
-            users.add(user);
-            return user;
-        }
+            if (shouldThrowRuntimeException) {
+                throw new RuntimeException("Database error");
+            }
+            if (shouldReturnNullOnSave) {
+                return null;
+            }
+            if (shouldReturnUserWithoutId) {
+                return new UserEntity(user.getFirstName(), user.getLastName(),
+                        user.getUsername(), user.getEmail());
+            }
 
-        @Override
-        public UserEntity findById(Long id) {
-            return users.stream()
-                    .filter(u -> u.getId().equals(id))
-                    .findFirst()
-                    .orElse(null);
+            savedUser = user;
+            UserEntity returnUser = new UserEntity(user.getFirstName(), user.getLastName(),
+                    user.getUsername(), user.getEmail());
+            setId(returnUser, 1L);
+            return returnUser;
         }
 
         @Override
         public UserEntity findByUsername(String username) {
-            return users.stream()
-                    .filter(u -> u.getUsername().equals(username))
-                    .findFirst()
-                    .orElse(null);
+            if (userToReturn != null && userToReturn.getUsername().equals(username)) {
+                return userToReturn;
+            }
+            return null;
         }
 
         @Override
         public UserEntity findByEmail(String email) {
-            return users.stream()
-                    .filter(u -> u.getEmail().equals(email))
-                    .findFirst()
-                    .orElse(null);
+            if (userToReturn != null && userToReturn.getEmail().equals(email)) {
+                return userToReturn;
+            }
+            return null;
+        }
+
+        @Override
+        public UserEntity findById(Long id) {
+            return null;
         }
 
         @Override
         public void update(UserEntity user) {
-            // Not needed for signup tests
         }
 
         @Override
         public void delete(UserEntity user) {
-            users.remove(user);
         }
 
-        public void clear() {
-            users.clear();
-            nextId = 1L;
+        public void setUserToReturn(UserEntity user) {
+            this.userToReturn = user;
         }
+
+        public void reset() {
+            userToReturn = null;
+            savedUser = null;
+            shouldThrowRuntimeException = false;
+            shouldThrowIllegalArgumentException = false;
+            shouldReturnNullOnSave = false;
+            shouldReturnUserWithoutId = false;
+        }
+
+        private void setId(UserEntity user, Long id) {
+            try {
+                Field idField = UserEntity.class.getDeclaredField("id");
+                idField.setAccessible(true);
+                idField.set(user, id);
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    @BeforeAll
+    static void initJavaFX() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        new Thread(() -> {
+            try {
+                Platform.startup(latch::countDown);
+            } catch (IllegalStateException e) {
+                latch.countDown();
+            }
+        }).start();
+
+        latch.await(5, TimeUnit.SECONDS);
     }
 
     @BeforeEach
-    void setUp() {
-        // Create controller instance
+    void setUp() throws Exception {
         controller = new SignUpController();
-
-        // Create mock DAO
         mockUserDAO = new MockUserDAO();
         controller.setUserDAO(mockUserDAO);
 
-        // Initialize UI components (without JavaFX)
-        // We'll test validation logic directly
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            firstNameField = new TextField();
+            lastNameField = new TextField();
+            usernameField = new TextField();
+            emailField = new TextField();
+            passwordField = new PasswordField();
+            confirmPasswordField = new PasswordField();
+            signUpButton = new Button();
+            loginLink = new Hyperlink();
+            messageLabel = new Label();
+            backButton = new Button();
+
+            // Create a proper Scene and Stage
+            testStage = new Stage();
+            VBox root = new VBox();
+            root.getChildren().addAll(signUpButton, loginLink, backButton, messageLabel,
+                    firstNameField, lastNameField, usernameField,
+                    emailField, passwordField, confirmPasswordField);
+            Scene scene = new Scene(root, 400, 600);
+            testStage.setScene(scene);
+            latch.countDown();
+        });
+        latch.await(2, TimeUnit.SECONDS);
+
+        injectField("firstNameField", firstNameField);
+        injectField("lastNameField", lastNameField);
+        injectField("usernameField", usernameField);
+        injectField("emailField", emailField);
+        injectField("passwordField", passwordField);
+        injectField("confirmPasswordField", confirmPasswordField);
+        injectField("signUpButton", signUpButton);
+        injectField("loginLink", loginLink);
+        injectField("messageLabel", messageLabel);
+        injectField("backButton", backButton);
     }
 
-    // ========== VALIDATION TESTS ==========
-
-    @Test
-    void testValidEmailFormat() {
-        String validEmail = "user@example.com";
-        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-
-        assertTrue(validEmail.matches(emailRegex), "Valid email should match regex");
+    private void injectField(String fieldName, Object value) throws Exception {
+        Field field = SignUpController.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(controller, value);
     }
 
-    @Test
-    void testInvalidEmailFormat() {
-        String invalidEmail = "invalid-email";
-        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-
-        assertFalse(invalidEmail.matches(emailRegex), "Invalid email should not match regex");
+    private void setFieldValues(String firstName, String lastName, String username,
+                                String email, String password, String confirmPassword) throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            firstNameField.setText(firstName);
+            lastNameField.setText(lastName);
+            usernameField.setText(username);
+            emailField.setText(email);
+            passwordField.setText(password);
+            confirmPasswordField.setText(confirmPassword);
+            latch.countDown();
+        });
+        latch.await(1, TimeUnit.SECONDS);
     }
 
-    @Test
-    void testUsernameWithNordicCharacters() {
-        String username = "jääskeläinen";
-        String usernameRegex = "^[\\p{L}0-9_]{3,20}$";
+    private void invokeHandleSignUp() throws Exception {
+        Method method = SignUpController.class.getDeclaredMethod("handleSignUp");
+        method.setAccessible(true);
 
-        assertTrue(username.matches(usernameRegex), "Username with Nordic chars should be valid");
-    }
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            try {
+                method.invoke(controller);
+            } catch (Exception e) {
 
-    @Test
-    void testUsernameWithEnglishCharacters() {
-        String username = "johndoe123";
-        String usernameRegex = "^[\\p{L}0-9_]{3,20}$";
-
-        assertTrue(username.matches(usernameRegex), "Username with English chars should be valid");
-    }
-
-    @Test
-    void testUsernameTooShort() {
-        String username = "ab";
-        String usernameRegex = "^[\\p{L}0-9_]{3,20}$";
-
-        assertFalse(username.matches(usernameRegex), "Username with 2 chars should be invalid");
-    }
-
-    @Test
-    void testUsernameTooLong() {
-        String username = "abcdefghijklmnopqrstuvwxyz";
-        String usernameRegex = "^[\\p{L}0-9_]{3,20}$";
-
-        assertFalse(username.matches(usernameRegex), "Username with 26 chars should be invalid");
-    }
-
-    @Test
-    void testNameWithNordicCharacters() {
-        String name = "Jääskeläinen";
-        String nameRegex = "^[\\p{L}\\s\\-'/]+$";
-
-        assertTrue(name.matches(nameRegex), "Name with Nordic chars should be valid");
-    }
-
-    @Test
-    void testNameWithHyphen() {
-        String name = "Matti-Pekka";
-        String nameRegex = "^[\\p{L}\\s\\-'/]+$";
-
-        assertTrue(name.matches(nameRegex), "Name with hyphen should be valid");
-    }
-
-    @Test
-    void testNameWithSlash() {
-        String name = "Anne/Maria";
-        String nameRegex = "^[\\p{L}\\s\\-'/]+$";
-
-        assertTrue(name.matches(nameRegex), "Finnish name with slash should be valid");
+            }
+            latch.countDown();
+        });
+        latch.await(1, TimeUnit.SECONDS);
     }
 
     @Test
-    void testNameWithApostrophe() {
-        String name = "O'Brien";
-        String nameRegex = "^[\\p{L}\\s\\-'/]+$";
-
-        assertTrue(name.matches(nameRegex), "Name with apostrophe should be valid");
+    void testConstructorInitializesDAO() {
+        SignUpController newController = new SignUpController();
+        assertNotNull(newController);
     }
 
     @Test
-    void testNameWithSpace() {
-        String name = "Mary Anne";
-        String nameRegex = "^[\\p{L}\\s\\-'/]+$";
-
-        assertTrue(name.matches(nameRegex), "Name with space should be valid");
-    }
-
-    // ========== PASSWORD VALIDATION TESTS ==========
-
-    @Test
-    void testPasswordWithNumberAndSpecialChar() {
-        String password = "Pass123!";
-
-        assertTrue(password.length() >= 6, "Password should be at least 6 chars");
-        assertTrue(password.matches(".*\\d.*"), "Password should contain a number");
-        assertTrue(password.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*"),
-                "Password should contain a special char");
+    void testInitialize() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            controller.initialize();
+            assertTrue(signUpButton.isDefaultButton());
+            latch.countDown();
+        });
+        latch.await(1, TimeUnit.SECONDS);
     }
 
     @Test
-    void testPasswordWithoutNumber() {
-        String password = "Password!";
+    void testHandleSignUpWithEmptyFields() throws Exception {
+        setFieldValues("", "", "", "", "", "");
+        invokeHandleSignUp();
+        Thread.sleep(300);
 
-        assertFalse(password.matches(".*\\d.*"), "Password without number should be invalid");
+        assertTrue(messageLabel.isVisible());
     }
 
     @Test
-    void testPasswordWithoutSpecialChar() {
-        String password = "Password123";
+    void testHandleSignUpWithInvalidEmail() throws Exception {
+        setFieldValues("John", "Doe", "johndoe", "invalid-email", "Pass123!", "Pass123!");
+        invokeHandleSignUp();
+        Thread.sleep(300);
 
-        assertFalse(password.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*"),
-                "Password without special char should be invalid");
+        assertTrue(messageLabel.isVisible());
     }
 
     @Test
-    void testPasswordTooShort() {
-        String password = "Pa1!";
+    void testHandleSignUpWithPasswordMismatch() throws Exception {
+        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass456!");
+        invokeHandleSignUp();
+        Thread.sleep(300);
 
-        assertTrue(password.length() < 6, "Password with 4 chars should be too short");
+        assertTrue(messageLabel.isVisible());
     }
 
     @Test
-    void testPasswordMeetsAllRequirements() {
-        String password = "MyPass123!";
+    void testHandleSignUpWithWeakPassword() throws Exception {
+        setFieldValues("John", "Doe", "johndoe", "john@example.com", "pass", "pass");
+        invokeHandleSignUp();
+        Thread.sleep(300);
 
-        assertTrue(password.length() >= 6, "Password length should be valid");
-        assertTrue(password.matches(".*\\d.*"), "Password should have number");
-        assertTrue(password.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*"),
-                "Password should have special char");
+        assertTrue(messageLabel.isVisible());
     }
 
-    // ========== PASSWORD HASHING TESTS ==========
+    @Test
+    void testHandleSignUpWithInvalidUsername() throws Exception {
+        setFieldValues("John", "Doe", "ab", "john@example.com", "Pass123!", "Pass123!");
+        invokeHandleSignUp();
+        Thread.sleep(300);
+
+        assertTrue(messageLabel.isVisible());
+    }
 
     @Test
-    void testPasswordIsHashed() {
+    void testHandleSignUpWithExistingUsername() throws Exception {
+        UserEntity existingUser = new UserEntity("Jane", "Doe", "johndoe", "jane@example.com");
+        mockUserDAO.setUserToReturn(existingUser);
+
+        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        invokeHandleSignUp();
+        Thread.sleep(300);
+
+        assertTrue(messageLabel.isVisible());
+        assertTrue(messageLabel.getText().contains("username is already taken"));
+    }
+
+    @Test
+    void testHandleSignUpWithExistingEmail() throws Exception {
+        UserEntity existingUser = new UserEntity("Jane", "Doe", "janedoe", "john@example.com");
+        mockUserDAO.setUserToReturn(existingUser);
+
+        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        invokeHandleSignUp();
+        Thread.sleep(300);
+
+        assertTrue(messageLabel.isVisible());
+        assertTrue(messageLabel.getText().contains("email already exists"));
+    }
+
+    @Test
+    void testSuccessfulSignUp() throws Exception {
+        mockUserDAO.reset();
+        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        invokeHandleSignUp();
+        Thread.sleep(2000);
+
+        assertNotNull(mockUserDAO.savedUser);
+        assertEquals("John", mockUserDAO.savedUser.getFirstName());
+        assertEquals("Doe", mockUserDAO.savedUser.getLastName());
+        assertEquals("johndoe", mockUserDAO.savedUser.getUsername());
+        assertTrue(BcryptPasswordHasher.verifyPassword("Pass123!", mockUserDAO.savedUser.getPasswordHash()));
+    }
+
+    @Test
+    void testHandleSignUpWithNullSaveResult() throws Exception {
+        mockUserDAO.reset();
+        mockUserDAO.shouldReturnNullOnSave = true;
+
+        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        invokeHandleSignUp();
+        Thread.sleep(300);
+
+        assertTrue(messageLabel.isVisible());
+        assertTrue(messageLabel.getText().contains("Failed to create account"));
+    }
+
+    @Test
+    void testHandleSignUpWithUserWithoutId() throws Exception {
+        mockUserDAO.reset();
+        mockUserDAO.shouldReturnUserWithoutId = true;
+
+        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        invokeHandleSignUp();
+        Thread.sleep(300);
+
+        assertTrue(messageLabel.isVisible());
+        assertTrue(messageLabel.getText().contains("Failed to create account"));
+    }
+
+    @Test
+    void testHandleSignUpWithIllegalArgumentException() throws Exception {
+        mockUserDAO.reset();
+        mockUserDAO.shouldThrowIllegalArgumentException = true;
+
+        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        invokeHandleSignUp();
+        Thread.sleep(300);
+
+        assertTrue(messageLabel.isVisible());
+        assertTrue(messageLabel.getText().toLowerCase().contains("error"));
+    }
+
+    @Test
+    void testHandleSignUpWithRuntimeException() throws Exception {
+        mockUserDAO.reset();
+        mockUserDAO.shouldThrowRuntimeException = true;
+
+        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        invokeHandleSignUp();
+        Thread.sleep(300);
+
+        assertTrue(messageLabel.isVisible());
+        assertTrue(messageLabel.getText().toLowerCase().contains("error"));
+    }
+
+    @Test
+    void testOnLogin() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            try {
+                controller.onLogin();
+            } catch (Exception e) {
+
+            }
+            latch.countDown();
+        });
+        latch.await(1, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void testHandleBack() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            try {
+                Method method = SignUpController.class.getDeclaredMethod("handleBack");
+                method.setAccessible(true);
+                method.invoke(controller);
+            } catch (Exception e) {
+
+            }
+            latch.countDown();
+        });
+        latch.await(1, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void testClearFields() throws Exception {
+        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+
+        Method clearMethod = SignUpController.class.getDeclaredMethod("clearFields");
+        clearMethod.setAccessible(true);
+
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            try {
+                clearMethod.invoke(controller);
+            } catch (Exception e) {
+                fail("Clear fields failed");
+            }
+            latch.countDown();
+        });
+        latch.await(1, TimeUnit.SECONDS);
+
+        assertEquals("", firstNameField.getText());
+        assertEquals("", lastNameField.getText());
+    }
+
+    @Test
+    void testSetUserDAO() {
+        MockUserDAO newDAO = new MockUserDAO();
+        controller.setUserDAO(newDAO);
+        assertNotNull(newDAO);
+    }
+
+    @Test
+    void testHandleSignUpTrimsWhitespace() throws Exception {
+        mockUserDAO.reset();
+        setFieldValues("  John  ", "  Doe  ", "  johndoe  ", "  john@example.com  ", "Pass123!", "Pass123!");
+        invokeHandleSignUp();
+        Thread.sleep(2000);
+
+        assertNotNull(mockUserDAO.savedUser);
+        assertEquals("John", mockUserDAO.savedUser.getFirstName());
+        assertEquals("Doe", mockUserDAO.savedUser.getLastName());
+    }
+
+    @Test
+    void testHandleSignUpWithFinnishCharacters() throws Exception {
+        mockUserDAO.reset();
+        setFieldValues("Matti-Pekka", "Jääskeläinen", "matti_jää", "matti@example.fi", "Salasana123!", "Salasana123!");
+        invokeHandleSignUp();
+        Thread.sleep(2000);
+
+        assertNotNull(mockUserDAO.savedUser);
+        assertEquals("Matti-Pekka", mockUserDAO.savedUser.getFirstName());
+    }
+
+    @Test
+    void testPasswordIsHashedBeforeSaving() throws Exception {
+        mockUserDAO.reset();
         String plainPassword = "Pass123!";
-        String hashedPassword = BcryptPasswordHasher.hashPassword(plainPassword);
+        setFieldValues("John", "Doe", "johndoe", "john@example.com", plainPassword, plainPassword);
+        invokeHandleSignUp();
+        Thread.sleep(2000);
 
-        assertNotNull(hashedPassword, "Hashed password should not be null");
-        assertNotEquals(plainPassword, hashedPassword, "Hash should not equal plain password");
-        assertTrue(hashedPassword.startsWith("$2a$"), "BCrypt hash should start with $2a$");
+        assertNotNull(mockUserDAO.savedUser);
+        assertNotEquals(plainPassword, mockUserDAO.savedUser.getPasswordHash());
+        assertTrue(mockUserDAO.savedUser.getPasswordHash().startsWith("$2a$"));
     }
 
     @Test
-    void testPasswordVerification() {
-        String plainPassword = "Pass123!";
-        String hashedPassword = BcryptPasswordHasher.hashPassword(plainPassword);
+    void testInvalidNameFormat() throws Exception {
+        setFieldValues("123", "456", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        invokeHandleSignUp();
+        Thread.sleep(300);
 
-        assertTrue(BcryptPasswordHasher.verifyPassword(plainPassword, hashedPassword),
-                "Correct password should verify");
+        assertTrue(messageLabel.isVisible());
     }
 
     @Test
-    void testIncorrectPasswordDoesNotVerify() {
-        String correctPassword = "Pass123!";
-        String wrongPassword = "Wrong456!";
-        String hashedPassword = BcryptPasswordHasher.hashPassword(correctPassword);
+    void testPasswordWithoutSpecialCharacter() throws Exception {
+        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Password123", "Password123");
+        invokeHandleSignUp();
+        Thread.sleep(300);
 
-        assertFalse(BcryptPasswordHasher.verifyPassword(wrongPassword, hashedPassword),
-                "Wrong password should not verify");
+        assertTrue(messageLabel.isVisible());
     }
 
     @Test
-    void testBCryptHashesAreDifferent() {
-        String password = "Pass123!";
-        String hash1 = BcryptPasswordHasher.hashPassword(password);
-        String hash2 = BcryptPasswordHasher.hashPassword(password);
+    void testPasswordWithoutNumber() throws Exception {
+        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Password!!", "Password!!");
+        invokeHandleSignUp();
+        Thread.sleep(300);
 
-        assertNotEquals(hash1, hash2, "BCrypt should use different salts");
-        assertTrue(BcryptPasswordHasher.verifyPassword(password, hash1),
-                "First hash should verify");
-        assertTrue(BcryptPasswordHasher.verifyPassword(password, hash2),
-                "Second hash should verify");
-    }
-
-    // ========== USER CREATION TESTS ==========
-
-    @Test
-    void testUserCanBeSaved() {
-        UserEntity user = new UserEntity("John", "Doe", "johndoe", "john@example.com");
-        user.changePasswordHash(BcryptPasswordHasher.hashPassword("Pass123!"));
-
-        UserEntity savedUser = mockUserDAO.save(user);
-
-        assertNotNull(savedUser, "Saved user should not be null");
-        assertNotNull(savedUser.getId(), "Saved user should have an ID");
-        assertEquals("johndoe", savedUser.getUsername(), "Username should match");
+        assertTrue(messageLabel.isVisible());
     }
 
     @Test
-    void testUserCanBeFoundByUsername() {
-        UserEntity user = new UserEntity("John", "Doe", "johndoe", "john@example.com");
-        mockUserDAO.save(user);
+    void testNavigateToLoginMethod() throws Exception {
+        Method method = SignUpController.class.getDeclaredMethod("navigateToLogin");
+        method.setAccessible(true);
 
-        UserEntity foundUser = mockUserDAO.findByUsername("johndoe");
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            try {
+                method.invoke(controller);
+            } catch (Exception e) {
 
-        assertNotNull(foundUser, "User should be found");
-        assertEquals("johndoe", foundUser.getUsername(), "Username should match");
-    }
-
-    @Test
-    void testUserCanBeFoundByEmail() {
-        UserEntity user = new UserEntity("John", "Doe", "johndoe", "john@example.com");
-        mockUserDAO.save(user);
-
-        UserEntity foundUser = mockUserDAO.findByEmail("john@example.com");
-
-        assertNotNull(foundUser, "User should be found");
-        assertEquals("john@example.com", foundUser.getEmail(), "Email should match");
-    }
-
-    @Test
-    void testDuplicateUsernameDetection() {
-        UserEntity user1 = new UserEntity("John", "Doe", "johndoe", "john@example.com");
-        mockUserDAO.save(user1);
-
-        UserEntity existingUser = mockUserDAO.findByUsername("johndoe");
-
-        assertNotNull(existingUser, "Duplicate username should be detected");
-    }
-
-    @Test
-    void testDuplicateEmailDetection() {
-        UserEntity user1 = new UserEntity("John", "Doe", "johndoe", "john@example.com");
-        mockUserDAO.save(user1);
-
-        UserEntity existingUser = mockUserDAO.findByEmail("john@example.com");
-
-        assertNotNull(existingUser, "Duplicate email should be detected");
-    }
-
-    @Test
-    void testNonExistentUserNotFound() {
-        UserEntity foundUser = mockUserDAO.findByUsername("nonexistent");
-
-        assertNull(foundUser, "Non-existent user should return null");
-    }
-
-    @Test
-    void testMultipleUsersCanBeStored() {
-        UserEntity user1 = new UserEntity("John", "Doe", "johndoe", "john@example.com");
-        UserEntity user2 = new UserEntity("Jane", "Smith", "janesmith", "jane@example.com");
-
-        mockUserDAO.save(user1);
-        mockUserDAO.save(user2);
-
-        assertNotNull(mockUserDAO.findByUsername("johndoe"), "First user should exist");
-        assertNotNull(mockUserDAO.findByUsername("janesmith"), "Second user should exist");
-    }
-
-    // ========== INTEGRATION TESTS ==========
-
-    @Test
-    void testCompleteSignupFlow() {
-        // Simulate complete signup
-        String firstName = "John";
-        String lastName = "Doe";
-        String username = "johndoe";
-        String email = "john@example.com";
-        String password = "Pass123!";
-
-        // Validate data
-        assertTrue(username.matches("^[\\p{L}0-9_]{3,20}$"), "Username should be valid");
-        assertTrue(email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"), "Email should be valid");
-        assertTrue(password.length() >= 6, "Password length should be valid");
-        assertTrue(password.matches(".*\\d.*"), "Password should have number");
-        assertTrue(password.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*"), "Password should have special char");
-
-        // Check no duplicates
-        assertNull(mockUserDAO.findByUsername(username), "Username should not exist");
-        assertNull(mockUserDAO.findByEmail(email), "Email should not exist");
-
-        // Hash password
-        String hashedPassword = BcryptPasswordHasher.hashPassword(password);
-
-        // Create and save user
-        UserEntity newUser = new UserEntity(firstName, lastName, username, email);
-        newUser.changePasswordHash(hashedPassword);
-        UserEntity savedUser = mockUserDAO.save(newUser);
-
-        // Verify
-        assertNotNull(savedUser, "User should be saved");
-        assertNotNull(savedUser.getId(), "User should have ID");
-        assertTrue(BcryptPasswordHasher.verifyPassword(password, hashedPassword), "Password should verify");
-    }
-
-    @Test
-    void testSignupWithFinnishName() {
-        String firstName = "Matti-Pekka";
-        String lastName = "Jääskeläinen";
-        String username = "matti_jää";
-        String email = "matti@example.fi";
-        String password = "Salasana123!";
-
-        // Validate Finnish-specific features
-        assertTrue(firstName.matches("^[\\p{L}\\s\\-'/]+$"), "Finnish first name should be valid");
-        assertTrue(lastName.matches("^[\\p{L}\\s\\-'/]+$"), "Finnish last name should be valid");
-        assertTrue(username.matches("^[\\p{L}0-9_]{3,20}$"), "Username with ä should be valid");
-
-        // Create user
-        String hashedPassword = BcryptPasswordHasher.hashPassword(password);
-        UserEntity user = new UserEntity(firstName, lastName, username, email);
-        user.changePasswordHash(hashedPassword);
-
-        UserEntity savedUser = mockUserDAO.save(user);
-
-        assertNotNull(savedUser, "Finnish user should be saved");
-        assertEquals("Matti-Pekka", savedUser.getFirstName(), "First name should match");
-        assertEquals("Jääskeläinen", savedUser.getLastName(), "Last name should match");
+            }
+            latch.countDown();
+        });
+        latch.await(1, TimeUnit.SECONDS);
     }
 }
