@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import testutil.JavaFXInitializer;
 import util.BcryptPasswordHasher;
 import javafx.scene.control.*;
 
@@ -122,18 +123,8 @@ class SignUpControllerTest {
     }
 
     @BeforeAll
-    static void initJavaFX() throws InterruptedException {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        new Thread(() -> {
-            try {
-                Platform.startup(latch::countDown);
-            } catch (IllegalStateException e) {
-                latch.countDown();
-            }
-        }).start();
-
-        latch.await(5, TimeUnit.SECONDS);
+    static void initJavaFX() {
+        JavaFXInitializer.init();
     }
 
     @BeforeEach
