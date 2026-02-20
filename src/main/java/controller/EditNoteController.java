@@ -4,14 +4,21 @@ import dao.note.NoteDAO;
 import dao.tag.TagDAO;
 import entity.NoteEntity;
 import entity.TagEntity;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import util.ToggleUtil;
 import util.UndoRedoManager;
+import util.WordCountUtil;
+import util.TextFormattingUtil;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,7 +33,7 @@ public class EditNoteController {
     @FXML
     private Label title;
     @FXML
-    TextField titleBox;
+    private TextField titleField;
     @FXML
     private Label content;
 
@@ -60,9 +67,24 @@ public class EditNoteController {
     @FXML
     private Tooltip tagTooltip;
 
+    @FXML
+    private ImageView tagIcon;
+
+    @FXML
+    private Label wordCountLabel;
+
     // Undo/Redo components
     @FXML private MenuItem undoMenuItem;
     @FXML private MenuItem redoMenuItem;
+
+    // Toolbar buttons
+    @FXML private Button bulletListButton;
+    @FXML private Button numberedListButton;
+    @FXML private Button alignLeftButton;
+    @FXML private Button alignCenterButton;
+    @FXML private Button alignRightButton;
+    @FXML private Button headingUpButton;
+    @FXML private Button headingDownButton;
 
     private UndoRedoManager undoRedoManager = new UndoRedoManager();
 
@@ -76,14 +98,25 @@ public class EditNoteController {
     }
 
     public void initialize() {
+        WordCountUtil.bind(contentBox, wordCountLabel);
+
         tagTooltip.setShowDelay(Duration.millis(100));
         tagComboBox.setEditable(true);
 
         // Initialize undo/redo manager
         undoRedoManager.initialize(undoMenuItem, redoMenuItem);
-        undoRedoManager.registerField("title", titleBox);
+        undoRedoManager.registerField("title", titleField);
         undoRedoManager.registerField("content", contentBox);
         undoRedoManager.registerField("annotation", annotationBox);
+
+        // Apply theme once scene is ready
+        javafx.application.Platform.runLater(() -> {
+            Scene scene = titleField.getScene();
+            ToggleUtil.applyTheme(scene);
+            updateTagIcon();
+        });
+        // Enable list auto-continuation for content box
+        TextFormattingUtil.enableListAutoContinuation(contentBox);
     }
 
     @FXML
@@ -94,6 +127,38 @@ public class EditNoteController {
     @FXML
     private void handleRedo() {
         undoRedoManager.redo();
+    }
+
+    @FXML
+    private void handleToolbarClick(ActionEvent event) {
+        Button clickedButton = (Button) event.getSource();
+        String buttonId = clickedButton.getId();
+
+        System.out.println("Button clicked: " + buttonId);
+
+        switch (buttonId) {
+            case "bulletListButton":
+                TextFormattingUtil.toggleBulletList(contentBox, bulletListButton);
+                break;
+            case "numberedListButton":
+                TextFormattingUtil.toggleNumberedList(contentBox, numberedListButton);
+                break;
+            case "alignLeftButton":
+                System.out.println("Align Left button clicked ");
+                break;
+            case "alignCenterButton":
+                System.out.println("Align Center button clicked ");
+                break;
+            case "alignRightButton":
+                System.out.println("Align Right button clicked ");
+                break;
+            case "headingUpButton":
+                System.out.println("Heading Up button clicked ");
+                break;
+            case "headingDownButton":
+                System.out.println("Heading Down button clicked ");
+                break;
+        }
     }
 
     private void loadTags() {
@@ -108,7 +173,7 @@ public class EditNoteController {
 
     public void setNote(NoteEntity note){
         this.note = note;
-        titleBox.setText(note.getTitle());
+        titleField.setText(note.getTitle());
         contentBox.setText(note.getContent());
         annotationBox.setText(note.getAnnotation());
 
@@ -124,7 +189,7 @@ public class EditNoteController {
             return;
         }
 
-        note.setTitle(titleBox.getText());
+        note.setTitle(titleField.getText());
         note.setContent(contentBox.getText());
         note.setAnnotation(annotationBox.getText());
 
@@ -170,12 +235,13 @@ public class EditNoteController {
                 .forEach(tagName -> {
                     HBox tagBox = new HBox();
                     tagBox.setSpacing(5);
-                    tagBox.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 4 8 4 8; -fx-background-radius: 10;");
+                    tagBox.getStyleClass().addAll("note-tag", "tag-box");
 
                     Label label = new Label("#" + tagName);
+                    label.getStyleClass().add("tag-label");
 
                     Button removeBtn = new Button("x");
-                    removeBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: red;");
+                    removeBtn.getStyleClass().add("tag-remove-btn");
                     removeBtn.setOnAction(e -> {
                         selectedTags.remove(tagName);
                         refreshTagFlowPane();
@@ -217,5 +283,14 @@ public class EditNoteController {
         }
         refreshTagFlowPane();
         tagComboBox.getEditor().clear();
+    }
+
+    // Update tag button
+    private void updateTagIcon() {
+        String path = ToggleUtil.isDarkMode()
+                ? "/Images/tag-white.png"
+                : "/Images/tag-black.png";
+
+        tagIcon.setImage(new Image(path));
     }
 }

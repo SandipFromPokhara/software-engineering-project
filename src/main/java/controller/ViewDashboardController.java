@@ -13,10 +13,15 @@ import dao.tag.JpaTagDao;
 import dao.tag.TagDAO;
 import entity.*;
 import javafx.concurrent.Task;
+import javafx.scene.Scene;
+import javafx.scene.control.TableView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import javafx.util.Duration;
 import session.NotebookSession;
 import util.DialogUtil;
 import util.NavigationUtil;
@@ -24,10 +29,11 @@ import session.NoteSession;
 import session.UserSession;
 
 import javafx.fxml.FXML;
-import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import util.ToggleUtil;
+import util.WordCountUtil;
 
 import java.io.File;
 import java.util.List;
@@ -37,7 +43,7 @@ import java.util.logging.Logger;
 
 public class ViewDashboardController {
 
-    protected static final Logger logger = Logger.getLogger(ViewDashboardController.class.getName());
+    private static final Logger logger = Logger.getLogger(ViewDashboardController.class.getName());
     private NoteBookEntity activeNotebook;
     private NoteBookDAO notebookDao;
     private NoteDAO noteDao;
@@ -51,17 +57,17 @@ public class ViewDashboardController {
 
     @FXML
     private Button viewNotesBtn,
-                   createNoteBtn,
-                   logoutBtn;
+            createNoteBtn,
+            logoutBtn;
 
     @FXML
     private Label viewNotesLabel,
-                  createNoteLabel,
-                  logoutLabel;
+            createNoteLabel,
+            logoutLabel;
 
     @FXML
     private Button deleteButton,
-                   editButton;
+            editButton;
 
     @FXML
     private TableView<NoteEntity> notesTable;
@@ -73,27 +79,60 @@ public class ViewDashboardController {
     private TableColumn<NoteEntity, String> dateColumn;
 
     @FXML
-    private Label noteTitleLabel;
+    private Label noteTitleLabel,
+                  wordCountLabel;
 
     @FXML
     private TextArea noteViewArea,
-                     annotationViewArea;
+            annotationViewArea;
 
     @FXML
     private FlowPane tagFlowpane;
+
+    @FXML
+    private Button toggleBtn;
+
+    @FXML
+    private Tooltip toggleTooltip;
+
+    @FXML
+    private ImageView tagIcon,
+                    sideBtn1,
+                    sideBtn2,
+                    sideBtn3;
 
     public ViewDashboardController() {}
 
     @FXML
     public void initialize() {
+        toggleTooltip.setShowDelay(Duration.millis(100));
+
         this.notebookDao = new JpaNoteBookDao();
         this.noteDao = new JpaNoteDao();
         this.tagDao = new JpaTagDao();
+
+        WordCountUtil.bind(noteViewArea, wordCountLabel);
 
         UserEntity user = UserSession.getUserInstance().getUser();
         if (user != null) {
             userMenuButton.setText("Welcome, " + user.getFirstName() + " " + user.getLastName());
         }
+
+        rootPane.getStyleClass().add("root");
+
+        // Apply initial theme once scene is available
+        javafx.application.Platform.runLater(() -> {
+            ToggleUtil.applyTheme(rootPane.getScene());
+
+            // Set toggle button icon correctly on load
+            ImageView icon = new ImageView(
+                    new Image(ToggleUtil.isDarkMode() ? "/Images/light-theme.png" : "/Images/dark-theme.png")
+            );
+            icon.setFitWidth(20);
+            icon.setFitHeight(20);
+            icon.setPreserveRatio(true);
+            toggleBtn.setGraphic(icon);
+        });
 
         loadNotebooks();
 
@@ -125,7 +164,7 @@ public class ViewDashboardController {
                 deleteButton.setDisable(true);
             }
         });
-        notesTable.setColumnResizePolicy(table -> true);
+        notesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
         setupHover(viewNotesBtn, viewNotesLabel);
         setupHover(createNoteBtn, createNoteLabel);
@@ -221,7 +260,7 @@ public class ViewDashboardController {
                     .sorted((t1, t2) -> t1.getTagName().compareToIgnoreCase(t2.getTagName()))
                     .forEach(tag -> {
                         Label tagLabel = new Label("#" + tag.getTagName());
-                        tagLabel.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 4 8; -fx-background-radius: 10;");
+                        tagLabel.getStyleClass().addAll("note-tag", "tag-box");
                         tagFlowpane.getChildren().add(tagLabel);
                     });
     }
@@ -246,19 +285,15 @@ public class ViewDashboardController {
     }
 
     private void setupHover(Button button, Label label) {
-        button.setOnMouseEntered(e -> {
-            label.setVisible(true);
-            button.setStyle("-fx-background-color: #93ad9b; -fx-cursor: hand;");
-        });
+        button.setOnMouseEntered(e ->
+            label.setVisible(true));
 
-        button.setOnMouseExited(e -> {
-            label.setVisible(false);
-            button.setStyle("-fx-background-color: transparent");
-        });
+        button.setOnMouseExited(e ->
+            label.setVisible(false));
     }
 
     @FXML
-    private void handleLogout(ActionEvent event) {
+    private void handleLogout() {
         Window window = rootPane.getScene().getWindow();
 
         Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
@@ -275,6 +310,11 @@ public class ViewDashboardController {
         Optional<ButtonType> result = confirmDialog.showAndWait();
 
         if (result.isPresent() && result.get() == logout) {
+            Scene scene = rootPane.getScene();
+            scene.getStylesheets().removeIf(s -> s.endsWith("theme.css"));
+            scene.getRoot().getStyleClass().removeAll("dark", "light");
+            ToggleUtil.setDarkMode(false);
+
             Stage stage = (Stage) window;
             NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "Welcome To NoteVault", false);
         }
@@ -332,7 +372,9 @@ public class ViewDashboardController {
 
     @FXML
     public void handleCreate() {
-        NavigationUtil.openWindow(null, "/FXML/create_note.fxml", "NoteVault - Create Note", true, false, null);
+        Stage owner = (Stage) rootPane.getScene().getWindow();
+        NavigationUtil.openWindow(owner, "/FXML/create_note.fxml", "NoteVault - Create Note", true, true, null);
+        loadNotes();
     }
 
     @FXML
@@ -340,7 +382,7 @@ public class ViewDashboardController {
         NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
         if (selectedNote == null) return;
 
-        Stage stage = (Stage) editButton.getScene().getWindow();
+        Stage stage = (Stage) rootPane.getScene().getWindow();
         NavigationUtil.openWindow(stage, "/FXML/edit.fxml", "NoteVault - Edit Note", true, true,
                 (EditNoteController controller) -> {
                     controller.setNoteDao(noteDao);
@@ -349,8 +391,8 @@ public class ViewDashboardController {
                 }
         );
 
-            // Refresh table after edit
-            loadNotes();
+        // Refresh table after edit
+        loadNotes();
     }
 
     @FXML
@@ -359,13 +401,30 @@ public class ViewDashboardController {
     }
 
     @FXML
-    public void handleClose(ActionEvent actionEvent) {
+    public void handleClose() {
         Stage stage = (Stage) userMenuButton.getScene().getWindow();
         stage.close();
     }
-    @FXML
-    private void handleManageAccount(){
 
+    @FXML
+    public void handleManageAccount() {
+        Stage stage = (Stage) rootPane.getScene().getWindow();
+        NavigationUtil.openWindow(stage, "/FXML/user_dashboard.fxml", "NoteVault - Manage Account", false, true, null);
+
+        UserEntity user = UserSession.getUserInstance().getUser();
+        if (user != null) {
+            userMenuButton.setText("Welcome, " + user.getFirstName() + " " + user.getLastName());
+        }
+    }
+
+    @FXML
+    public void handleDeleteAccount() {
+        Stage stage = (Stage) rootPane.getScene().getWindow();
+        NavigationUtil.openWindow(stage, "/FXML/delete_user.fxml", "NoteVault - Delete Account", false, true, null);
+
+        if (UserSession.getUserInstance().getUser() == null) {
+            NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "Welcome To NoteVault", false);
+        }
     }
 
     @FXML
@@ -405,7 +464,7 @@ public class ViewDashboardController {
     }
 
     private void exportEntireNotebook() {
-        List<NoteEntity> notes = noteDao.findByNotebook(activeNotebook); // active one 
+        List<NoteEntity> notes = noteDao.findByNotebook(activeNotebook); // active one not
         if (notes.isEmpty()) {
             showWarning("Notebook is empty.");
             return;
@@ -461,7 +520,6 @@ public class ViewDashboardController {
         }
     }
 
-
     private void showWarning(String message) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Warning");
@@ -487,5 +545,30 @@ public class ViewDashboardController {
         alert.setContentText(message);
         alert.initOwner(userMenuButton.getScene().getWindow());
         alert.showAndWait();
+    }
+
+    @FXML
+    private void handleThemeToggle() {
+        Scene scene = rootPane.getScene();
+        ToggleUtil.toggleTheme(scene);
+
+        ImageView icon = new ImageView(new Image(ToggleUtil.isDarkMode() ? "/Images/light-theme.png" : "/Images/dark-theme.png"));
+
+        icon.setFitWidth(20);
+        icon.setFitHeight(20);
+        icon.setPreserveRatio(true);
+
+        toggleBtn.setGraphic(icon);
+        updateIcons();
+    }
+
+    // Update side-panel buttons
+    private void updateIcons() {
+        boolean dark = ToggleUtil.isDarkMode();
+
+        tagIcon.setImage(new Image(dark ? "/Images/tag-white.png" : "/Images/tag-black.png"));
+        sideBtn1.setImage(new Image(dark ? "/Images/open-folder-dark.png" : "/Images/open-folder.png"));
+        sideBtn2.setImage(new Image(dark ? "/Images/create-file-dark.png" : "/Images/create-file.png"));
+        sideBtn3.setImage(new Image(dark ? "/Images/logout-dark.png" : "/Images/logout.png"));
     }
 }
