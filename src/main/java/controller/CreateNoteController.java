@@ -264,10 +264,10 @@ public class CreateNoteController implements Initializable {
                 TextFormattingUtil.toggleNumberedList(contentArea, numberedListButton);
                 break;
             case "headingUpButton":
-                System.out.println("Heading Up");
+                TextFormattingUtil.increaseFontSize(contentArea);
                 break;
             case "headingDownButton":
-                System.out.println("Heading Down");
+                TextFormattingUtil.decreaseFontSize(contentArea);
                 break;
         }
     }

@@ -142,10 +142,10 @@ public class EditNoteController {
                 TextFormattingUtil.toggleNumberedList(contentBox, numberedListButton);
                 break;
             case "headingUpButton":
-                System.out.println("Heading Up button clicked ");
+                TextFormattingUtil.increaseFontSize(contentBox);
                 break;
             case "headingDownButton":
-                System.out.println("Heading Down button clicked ");
+                TextFormattingUtil.decreaseFontSize(contentBox);
                 break;
         }
     }
