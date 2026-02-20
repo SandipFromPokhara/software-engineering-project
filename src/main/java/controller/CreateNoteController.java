@@ -255,7 +255,6 @@ public class CreateNoteController implements Initializable {
         Button clickedButton = (Button) event.getSource();
         String buttonId = clickedButton.getId();
 
-        System.out.println("Button clicked: " + buttonId);
         switch (buttonId) {
             case "bulletListButton":
                 TextFormattingUtil.toggleBulletList(contentArea, bulletListButton);
@@ -264,10 +263,10 @@ public class CreateNoteController implements Initializable {
                 TextFormattingUtil.toggleNumberedList(contentArea, numberedListButton);
                 break;
             case "headingUpButton":
-                System.out.println("Heading Up");
+                TextFormattingUtil.increaseFontSize(contentArea);
                 break;
             case "headingDownButton":
-                System.out.println("Heading Down");
+                TextFormattingUtil.decreaseFontSize(contentArea);
                 break;
         }
     }
