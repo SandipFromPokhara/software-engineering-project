@@ -17,7 +17,6 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
@@ -68,9 +67,14 @@
                                     <children>
                                         <Button fx:id="bulletListButton" mnemonicParsing="false" onAction="#handleToolbarClick" prefHeight="23.0" prefWidth="21.0" styleClass="toolbar-btn" text="•">
                                             <font>
-                                                <Font size="18.0" />
+                                                <Font size="12.0" />
                                             </font>
                                         </Button>
+                                        <Separator orientation="VERTICAL" styleClass="toolbar-separator">
+                                            <padding>
+                                                <Insets bottom="4.0" top="4.0" />
+                                            </padding>
+                                        </Separator>
                                         <Button fx:id="numberedListButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="1.">
                                             <font>
                                                 <Font size="12.0" />
@@ -81,37 +85,21 @@
                                                 <Insets bottom="4.0" top="4.0" />
                                             </padding>
                                         </Separator>
-                                        <Button fx:id="alignLeftButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn, align-left" text="⚊">
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </Button>
-                                        <Button fx:id="alignCenterButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn, align-center" text="☰">
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </Button>
-                                        <Button fx:id="alignRightButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn, align-right" text="⚊">
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </Button>
-                                        <Separator orientation="VERTICAL" styleClass="toolbar-separator">
-                                            <padding>
-                                                <Insets bottom="4.0" top="4.0" />
-                                            </padding>
-                                        </Separator>
                                         <Button fx:id="headingUpButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="H+">
                                             <font>
-                                                <Font name="System Bold" size="11.0" />
+                                                <Font name="System Bold" size="12.0" />
                                             </font>
                                         </Button>
+                              <Separator orientation="VERTICAL" styleClass="toolbar-separator">
+                                 <padding>
+                                    <Insets bottom="4.0" top="4.0" />
+                                 </padding>
+                              </Separator>
                                         <Button fx:id="headingDownButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="H-">
                                             <font>
-                                                <Font name="System Bold" size="11.0" />
+                                                <Font name="System Bold" size="12.0" />
                                             </font>
                                         </Button>
-                                        <Region HBox.hgrow="ALWAYS" />
                                     </children>
                                     <padding>
                                         <Insets bottom="4.0" left="8.0" right="8.0" top="4.0" />
