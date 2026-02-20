@@ -5,9 +5,13 @@ import javafx.scene.control.IndexRange;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.text.Font;
 
-// Utility class for bullet and numbered list formatting
+// Utility class for bullet and numbered list formatting, font size, and alignment
 public class TextFormattingUtil {
+
+    private static final double[] FONT_SIZES = {12.0, 14.0, 16.0, 18.0, 20.0, 24.0};
+    private static int currentSizeIndex = 1; // Start at 14.0
 
     // Toggle bullet points for selected lines
     public static void toggleBulletList(TextArea textArea, Button bulletButton) {
@@ -176,19 +180,6 @@ public class TextFormattingUtil {
         }
     }
 
-    // Set button active state by adding/removing CSS class
-    private static void setButtonActive(Button button, boolean active) {
-        if (button == null) return;
-
-        if (active) {
-            if (!button.getStyleClass().contains("active")) {
-                button.getStyleClass().add("active");
-            }
-        } else {
-            button.getStyleClass().remove("active");
-        }
-    }
-
     // Enable automatic list continuation on Enter key press
     public static void enableListAutoContinuation(TextArea textArea) {
         textArea.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
@@ -294,5 +285,39 @@ public class TextFormattingUtil {
             return true;
         }
         return false;
+    }
+
+    // Increase font size for entire text area
+    public static void increaseFontSize(TextArea textArea) {
+        if (currentSizeIndex < FONT_SIZES.length - 1) {
+            currentSizeIndex++;
+            updateFont(textArea);
+        }
+    }
+
+    // Decrease font size for entire text area
+    public static void decreaseFontSize(TextArea textArea) {
+        if (currentSizeIndex > 0) {
+            currentSizeIndex--;
+            updateFont(textArea);
+        }
+    }
+
+    private static void updateFont(TextArea textArea) {
+        Font currentFont = textArea.getFont();
+        textArea.setFont(new Font(currentFont.getFamily(), FONT_SIZES[currentSizeIndex]));
+    }
+
+    // Set button active state
+    private static void setButtonActive(Button button, boolean active) {
+        if (button == null) return;
+
+        if (active) {
+            if (!button.getStyleClass().contains("active")) {
+                button.getStyleClass().add("active");
+            }
+        } else {
+            button.getStyleClass().remove("active");
+        }
     }
 }
