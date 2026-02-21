@@ -1,8 +1,10 @@
 package dao.tag;
 
 import datasource.MariaDbJpaConnection;
+import entity.NoteBookEntity;
 import entity.NoteEntity;
 import entity.TagEntity;
+import entity.UserEntity;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 
@@ -156,7 +158,19 @@ class JpaTagDaoTest {
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         em.getTransaction().begin();
 
+        UserEntity user = new UserEntity();
+        user.setFirstName("Test");
+        user.setLastName("User");
+        user.setUsername("testuser_" + System.currentTimeMillis());
+        user.setEmail("test_" + System.currentTimeMillis() + "@example.com");
+        user.changePasswordHash("Test@123");
+        em.persist(user);
+
+        NoteBookEntity notebook = new NoteBookEntity("Test Notebook", user);
+        em.persist(notebook);
+
         NoteEntity note = new NoteEntity("Title", "Content", "Annotation");
+        note.setNotebook(notebook);
         note.addTag(tag);
 
         em.persist(note);
