@@ -4,13 +4,15 @@ import dao.user.UserDAO;
 import dao.user.JpaUserDao;
 import entity.UserEntity;
 import javafx.stage.Stage;
-import util.BcryptPasswordHasher;
+import security.BcryptPasswordHasher;
+import security.PasswordHasher;
 import util.NavigationUtil;
-import util.Validation;
+import security.Validation;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
 public class SignUpController {
+    private PasswordHasher passwordHasher;
 
     @FXML private TextField firstNameField;
     @FXML private TextField lastNameField;
@@ -25,12 +27,10 @@ public class SignUpController {
 
     private UserDAO userDAO;
 
-    public SignUpController() {
-        this.userDAO = new JpaUserDao();
-    }
-
     @FXML
     public void initialize() {
+        userDAO = new JpaUserDao();
+        passwordHasher = new BcryptPasswordHasher();
         signUpButton.setOnAction(event -> handleSignUp());
         signUpButton.setDefaultButton(true);
     }
@@ -79,7 +79,7 @@ public class SignUpController {
             }
 
             // Hash the password using BCrypt
-            String hashedPassword = BcryptPasswordHasher.hashPassword(password);
+            String hashedPassword = passwordHasher.hash(password);
 
             // Create new user entity
             UserEntity newUser = new UserEntity(firstName, lastName, username, email);
@@ -135,4 +135,6 @@ public class SignUpController {
     public void setUserDAO(UserDAO userDAO) {
         this.userDAO = userDAO;
     }
+
+    public void setPasswordHasher(PasswordHasher hasher) { this.passwordHasher = hasher; }
 }

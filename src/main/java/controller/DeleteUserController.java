@@ -6,13 +6,15 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.stage.Stage;
+import security.PasswordHasher;
 import session.UserSession;
-import util.BcryptPasswordHasher;
-import util.Validation;
+import security.BcryptPasswordHasher;
+import security.Validation;
 
 public class DeleteUserController {
 
     private final JpaUserDao userDao = new JpaUserDao();
+    private PasswordHasher passwordHasher;
 
     @FXML
     private PasswordField passwordField;
@@ -22,7 +24,9 @@ public class DeleteUserController {
 
     @FXML
     public void initialize() {
+
         Validation.hideMessage(messageLabel);
+        passwordHasher = new BcryptPasswordHasher();
     }
 
     @FXML
@@ -39,7 +43,7 @@ public class DeleteUserController {
             return;
         }
 
-        if (!BcryptPasswordHasher.verifyPassword(password, currentUser.getPasswordHash())) {
+        if (!passwordHasher.verify(password, currentUser.getPasswordHash())) {
             Validation.showMessage(messageLabel, "Incorrect password", Validation.MessageType.ERROR);
             return;
         }
