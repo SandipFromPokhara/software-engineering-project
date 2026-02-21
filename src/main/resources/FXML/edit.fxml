@@ -164,7 +164,7 @@
                                 <tooltip>
                                     <Tooltip fx:id="tagTooltip" styleClass="tooltip" text="Tags are keywords to organize your notes">
                                         <font>
-                                            <Font name="System Italic" size="10.0" />
+                                            <Font name="System Italic" size="12.0" />
                                         </font>
                                     </Tooltip>
                                 </tooltip>
