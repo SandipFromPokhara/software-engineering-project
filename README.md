@@ -4,8 +4,6 @@
 
 While the application provides secure notebook and note management, the primary focus of this project is the DevOps lifecycle, including CI/CD automation, testing strategy, containerization, and structured team collaboration.
 
-Developed by a team of 4 students.
-
 ---
 
 ## Project Objectives
