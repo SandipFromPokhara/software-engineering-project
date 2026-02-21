@@ -9,8 +9,9 @@ import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import security.PasswordHasher;
 import testutil.JavaFXInitializer;
-import util.BcryptPasswordHasher;
+import security.BcryptPasswordHasher;
 import javafx.scene.control.*;
 
 import java.lang.reflect.Field;
@@ -24,6 +25,7 @@ class SignUpControllerTest {
 
     private SignUpController controller;
     private MockUserDAO mockUserDAO;
+    private PasswordHasher passwordHasher;
 
     // Mock UI components
     private TextField firstNameField;
@@ -131,7 +133,9 @@ class SignUpControllerTest {
     void setUp() throws Exception {
         controller = new SignUpController();
         mockUserDAO = new MockUserDAO();
+        passwordHasher = new BcryptPasswordHasher();
         controller.setUserDAO(mockUserDAO);
+        controller.setPasswordHasher(passwordHasher);
 
         CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {
@@ -306,7 +310,7 @@ class SignUpControllerTest {
         assertEquals("John", mockUserDAO.savedUser.getFirstName());
         assertEquals("Doe", mockUserDAO.savedUser.getLastName());
         assertEquals("johndoe", mockUserDAO.savedUser.getUsername());
-        assertTrue(BcryptPasswordHasher.verifyPassword("Pass123!", mockUserDAO.savedUser.getPasswordHash()));
+        assertTrue(passwordHasher.verify("Pass123!", mockUserDAO.savedUser.getPasswordHash()));
     }
 
     @Test
