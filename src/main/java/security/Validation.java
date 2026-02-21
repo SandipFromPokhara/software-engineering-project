@@ -1,4 +1,4 @@
-package util;
+package security;
 
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
@@ -33,11 +33,7 @@ public class Validation {
         }
 
         // Validate password length
-        if (!validatePasswordStrength(password, messageLabel)) {
-            return false;
-        }
-
-        return true;
+        return validatePasswordStrength(password, messageLabel);
     }
 
     // Validates that all required fields are filled
