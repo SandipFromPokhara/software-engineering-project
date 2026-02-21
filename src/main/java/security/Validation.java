@@ -61,7 +61,7 @@ public class Validation {
             showMessage(messageLabel, fieldName + " must be 2-50 characters long", MessageType.ERROR);
             return false;
         }
-
+        hideMessage(messageLabel);
         return true;
     }
 
