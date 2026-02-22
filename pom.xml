@@ -115,7 +115,6 @@
             <type>pom</type>
         </dependency>
 
-
         <!--dependencies end-->
     </dependencies>
 
@@ -147,6 +146,13 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.12</version>
+
+                <configuration>
+                    <excludes>
+                        <exclude>**/Main.class</exclude>
+                    </excludes>
+                </configuration>
+
                 <executions>
                     <execution>
                         <goals>
