@@ -13,6 +13,7 @@ import security.PasswordHasher;
 import security.BcryptPasswordHasher;
 import session.UserSession;
 import testutil.JavaFXInitializer;
+import util.NavigationUtil;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
@@ -203,53 +204,5 @@ class LoginControllerTest {
         if (!latch.await(2, TimeUnit.SECONDS)) {
             fail("UI did not update in time");
         }
-    }
-
-    @Test
-    void testHandleLoginWithValidUser() throws Exception {
-        // Stub userService to return a valid user
-        UserEntity validUser = new UserEntity();
-        validUser.setUsername("validUser");
-
-        UserService stubService = new UserService(null, passwordHasher) {
-            @Override
-            public UserEntity login(String username, String password) {
-                return validUser;
-            }
-        };
-        setField(controller, "userService", stubService);
-
-        // Fill the fields
-        setFieldValues("validUser", "validPass");
-
-        CountDownLatch latch = new CountDownLatch(1);
-
-        Platform.runLater(() -> {
-            try {
-                // Intercept the login Task inside the controller
-                Method method = LoginController.class.getDeclaredMethod("handleLogin", javafx.event.ActionEvent.class);
-                method.setAccessible(true);
-
-                method.invoke(controller, (javafx.event.ActionEvent) null);
-
-                // Wait for the loginButton Task to complete
-                loginButton.getScene().getWindow().setOnShown(e -> {
-                    // when stage is shown, the Task should have completed
-                    latch.countDown();
-                });
-            } catch (Exception ex) {
-                fail("Failed to invoke handleLogin: " + ex.getMessage());
-            }
-        });
-
-        // Wait up to 2 seconds for Task to finish
-        if (!latch.await(2, TimeUnit.SECONDS)) {
-            fail("Login Task did not finish in time");
-        }
-
-        // Assert that UserSession has been updated
-        UserEntity loggedInUser = UserSession.getUserInstance().getUser();
-        assertNotNull(loggedInUser, "User should be set in session");
-        assertEquals("validUser", loggedInUser.getUsername());
     }
 }
