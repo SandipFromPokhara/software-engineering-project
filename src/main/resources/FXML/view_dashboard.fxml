@@ -82,7 +82,7 @@
    <left>
       <VBox alignment="TOP_CENTER" prefHeight="373.0" prefWidth="98.0" spacing="10.0" styleClass="side-panel">
          <children>
-            <Button fx:id="viewNotesBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleOpen" prefHeight="105.0" prefWidth="108.0" styleClass="side-panel-btn">
+            <Button fx:id="viewNotesBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleOpenManageNotebook" prefHeight="105.0" prefWidth="108.0" styleClass="side-panel-btn">
                <graphic>
                   <StackPane prefHeight="60.0" prefWidth="85.0">
                      <children>
