@@ -71,23 +71,7 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image (amd64)') {
-            steps {
-                script {
-                    sh """
-                        docker buildx create --use || true
-
-                        docker buildx build \
-                            --platform linux/amd64 \
-                            -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} \
-                            -t ${DOCKERHUB_REPO}:latest \
-                            --load .
-                    """
-                }
-            }
-        }
-
-        stage('Push Docker Image to Docker Hub') {
+        stage('Build & Push Docker Image (amd64)') {
             steps {
                 withCredentials([
                     usernamePassword(
@@ -99,12 +83,18 @@ pipeline {
                     sh """
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
-                        docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}
-                        docker push ${DOCKERHUB_REPO}:latest
+                        docker buildx create --use || true
+
+                        docker buildx build \
+                            --platform linux/amd64 \
+                            -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} \
+                            -t ${DOCKERHUB_REPO}:latest \
+                            --push .
                     """
                 }
             }
         }
+
 
         stage('Cleanup Docker Images') {
             steps {
