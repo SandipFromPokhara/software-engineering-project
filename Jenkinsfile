@@ -71,26 +71,21 @@ pipeline {
             }
         }
 
-        stage('Build & Push Docker Image (amd64)') {
+        stage('Build Docker Image') {
             steps {
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: "${DOCKERHUB_CREDENTIALS_ID}",
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )
-                ]) {
-                    sh """
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                script {
+                    docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}")
+                }
+            }
+        }
 
-                        docker buildx create --use || true
-
-                        docker buildx build \
-                            --platform linux/amd64 \
-                            -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} \
-                            -t ${DOCKERHUB_REPO}:latest \
-                            --push .
-                    """
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS_ID) {
+                        docker.image("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}").push()
+                        docker.image("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}").push('latest')
+                    }
                 }
             }
         }
