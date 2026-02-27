@@ -8,9 +8,9 @@ pipeline {
 
     environment {
         JAVA_HOME = tool 'JDK21'
-        PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
+        PATH = "${env.JAVA_HOME}/bin:/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
 
-        DOCKERHUB_CREDENTIALS_ID = 'docker_jenkins'     // Jenkins Docker Hub credentials ID
+        DOCKERHUB_CREDENTIALS_ID = 'docker_jenkins'
         DOCKERHUB_REPO = 'swostikalama/notevault'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
         BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
@@ -27,9 +27,16 @@ pipeline {
             }
         }
 
+        stage('Verify Java & Docker') {
+            steps {
+                sh 'java -version'
+                sh 'which docker'
+                sh 'docker --version'
+            }
+        }
+
         stage('Run Tests') {
             steps {
-                // Use single Jenkins credential 'sep1' for DB username and password
                 withCredentials([usernamePassword(credentialsId: 'sep1', usernameVariable: 'DB_USER', passwordVariable: 'DB_PASSWORD')]) {
                     sh 'mvn clean test -DDB_USER=$DB_USER -DDB_PASSWORD=$DB_PASSWORD'
                 }
@@ -57,7 +64,6 @@ pipeline {
         stage('Build Docker Image (amd64)') {
             steps {
                 script {
-                    // Ensure Buildx is enabled for cross-platform builds
                     sh """
                         docker buildx create --use || true
                         docker buildx build --platform linux/amd64 -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} .
