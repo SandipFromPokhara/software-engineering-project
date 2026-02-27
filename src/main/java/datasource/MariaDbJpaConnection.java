@@ -39,6 +39,7 @@ public class MariaDbJpaConnection {
                 properties.put("jakarta.persistence.jdbc.user", dbUser);
                 properties.put("jakarta.persistence.jdbc.password", dbPassword);
 
+                LOGGER.info("Connecting to DB: jdbc:mariadb://{}:{}/{} with user {}", dbHost, dbPort, dbName, dbUser);
                 emf = Persistence.createEntityManagerFactory("CompanyMariaDbUnit", properties);
                 LOGGER.info("EntityManagerFactory created successfully");
             } catch (Exception e) {
