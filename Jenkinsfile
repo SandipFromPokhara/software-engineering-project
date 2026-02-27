@@ -6,6 +6,9 @@ pipeline {
     }
 
     environment {
+        DB_HOST = 'host.docker.internal'
+        DB_PORT = '3306'
+        DB_NAME = 'notevault_db'
         // Path to Docker CLI on Windows
         PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
         DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
@@ -24,7 +27,20 @@ pipeline {
 
         stage('Build, Test & Coverage') {
             steps {
-                bat 'mvn clean verify -Djava.awt.headless=true'
+                withCredentials([
+                        string(credentialsId: 'DB_USER', variable: 'DB_USER'),
+                        string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')
+                ]) {
+                    bat """
+                    mvn clean verify ^
+                    -DDB_USER=%DB_USER% ^
+                    -DDB_PASSWORD=%DB_PASSWORD% ^
+                    -DDB_HOST=%DB_HOST% ^
+                    -DDB_PORT=%DB_PORT% ^
+                    -DDB_NAME=%DB_NAME% ^
+                    -Djava.awt.headless=true
+                    """
+                }
             }
         }
 
