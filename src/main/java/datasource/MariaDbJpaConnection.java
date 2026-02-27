@@ -28,6 +28,9 @@ public class MariaDbJpaConnection {
                 if (dbPassword == null) {
                     dbPassword = System.getenv("DB_PASSWORD");
                 }
+                if (dbUser == null || dbPassword == null) {
+                    throw new IllegalStateException("DB_USER or DB_PASSWORD is not set in system properties or environment variables");
+                }
 
                 properties.put("jakarta.persistence.jdbc.user", dbUser);
                 properties.put("jakarta.persistence.jdbc.password", dbPassword);
