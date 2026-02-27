@@ -38,7 +38,7 @@ pipeline {
                 '''
 
                 echo "Waiting for MariaDB to start..."
-                bat 'timeout /t 20'
+                bat 'ping 127.0.0.1 -n 20 > nul'
             }
         }
 
