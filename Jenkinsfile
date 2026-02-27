@@ -32,7 +32,7 @@ pipeline {
                 docker rm -f ${env.CONTAINER_NAME} -ErrorAction SilentlyContinue
 
                 docker run -d --name ${env.CONTAINER_NAME} `
-                    -e MYSQL_ROOT_PASSWORD=root `
+                    -e MYSQL_ROOT_PASSWORD=${env.DB_PASSWORD} `
                     -e MYSQL_DATABASE=${env.DB_NAME} `
                     -p 3306:3306 `
                     mariadb:10.11
@@ -40,18 +40,9 @@ pipeline {
                 Write-Host "Waiting for MariaDB to be ready..."
                 do {
                     Start-Sleep -Seconds 2
-                    \$status = docker exec ${env.CONTAINER_NAME} mysqladmin ping -u root -proot 2>&1
+                    \$status = docker exec ${env.CONTAINER_NAME} mysqladmin ping -u root -p${env.DB_PASSWORD} 2>&1
                 } while (\$status -notmatch 'mysqld is alive')
                 Write-Host "MariaDB is ready."
-
-                # Create CI user for localhost and all hosts
-                docker exec ${env.CONTAINER_NAME} mariadb -u root -proot -e "
-                    CREATE USER IF NOT EXISTS '${env.DB_USER}'@'%' IDENTIFIED BY '${env.DB_PASSWORD}';
-                    CREATE USER IF NOT EXISTS '${env.DB_USER}'@'localhost' IDENTIFIED BY '${env.DB_PASSWORD}';
-                    GRANT ALL PRIVILEGES ON ${env.DB_NAME}.* TO '${env.DB_USER}'@'%';
-                    GRANT ALL PRIVILEGES ON ${env.DB_NAME}.* TO '${env.DB_USER}'@'localhost';
-                    FLUSH PRIVILEGES;"
-                Write-Host "CI user ${env.DB_USER} is ready."
                 """
             }
         }
