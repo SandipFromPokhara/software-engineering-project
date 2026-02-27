@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         DB_HOST = 'localhost'
-        DB_PORT = '3307' // Free port to avoid conflicts
+        DB_PORT = '3307'
         DB_NAME = 'notevault_db'
         PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
         DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
@@ -26,10 +26,11 @@ pipeline {
 
         stage('Start Test DB') {
             steps {
-                withCredentials([
-                        string(credentialsId: 'DB_USER', variable: 'DB_USER'),
-                        string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')
-                ]) {
+                withCredentials([usernamePassword(
+                        credentialsId: 'DB_CREDENTIALS',
+                        usernameVariable: 'DB_USER',
+                        passwordVariable: 'DB_PASSWORD'
+                )]) {
                     powershell """
                     # Remove any existing container
                     docker rm -f ${env.CONTAINER_NAME} -ErrorAction SilentlyContinue
@@ -60,10 +61,11 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                withCredentials([
-                        string(credentialsId: 'DB_USER', variable: 'DB_USER'),
-                        string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')
-                ]) {
+                withCredentials([usernamePassword(
+                        credentialsId: 'DB_CREDENTIALS',
+                        usernameVariable: 'DB_USER',
+                        passwordVariable: 'DB_PASSWORD'
+                )]) {
                     script {
                         bat """
                         mvn clean verify -Djava.awt.headless=true ^
