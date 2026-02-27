@@ -25,21 +25,38 @@ pipeline {
             }
         }
 
+        stage('Start Test DB') {
+            steps {
+                script {
+                    echo "Starting MariaDB container for tests..."
+                    def result = bat(script: 'docker run -d --name test-mariadb -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=notevault_db -p 3306:3306 mariadb:10.11', returnStatus: true)
+                    if (result != 0) {
+                        echo "Failed to start test DB, will skip DB-dependent tests!"
+                        env.SKIP_DB_TESTS = 'true'
+                    } else {
+                        env.SKIP_DB_TESTS = 'false'
+                        bat 'timeout /t 15'
+                    }
+                }
+            }
+        }
+
         stage('Build, Test & Coverage') {
             steps {
                 withCredentials([
                         string(credentialsId: 'DB_USER', variable: 'DB_USER'),
                         string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')
                 ]) {
-                    bat """
-                    mvn clean verify ^
-                    -DDB_USER=%DB_USER% ^
-                    -DDB_PASSWORD=%DB_PASSWORD% ^
-                    -DDB_HOST=%DB_HOST% ^
-                    -DDB_PORT=%DB_PORT% ^
-                    -DDB_NAME=%DB_NAME% ^
-                    -Djava.awt.headless=true
-                    """
+                    script {
+                        def mvnCmd = 'mvn clean verify -Djava.awt.headless=true'
+                        if (env.SKIP_DB_TESTS == 'true') {
+                            echo "Skipping DB-dependent tests..."
+                            mvnCmd += ' -DskipITs=true'
+                        } else {
+                            mvnCmd += " -DDB_USER=%DB_USER% -DDB_PASSWORD=%DB_PASSWORD% -DDB_HOST=%DB_HOST% -DDB_PORT=%DB_PORT% -DDB_NAME=%DB_NAME%"
+                        }
+                        bat mvnCmd
+                    }
                 }
             }
         }
@@ -77,10 +94,11 @@ pipeline {
             }
         }
 
-        stage('Cleanup Docker Images') {
-            steps {
+        post {
+            always {
                 script {
-                    echo "Removing local Docker images"
+                    echo "Cleaning up test DB and Docker images..."
+                    bat "docker rm -f test-mariadb || exit 0"
                     bat "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || exit 0"
                     bat "docker rmi ${DOCKERHUB_REPO}:latest || exit 0"
                 }
