@@ -30,22 +30,32 @@ pipeline {
         stage('Verify Java & Docker') {
             steps {
                 sh 'java -version'
-                sh 'which docker'
                 sh 'docker --version'
+                sh 'which docker'
             }
         }
 
         stage('Run Tests') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'sep1', usernameVariable: 'DB_USER', passwordVariable: 'DB_PASSWORD')]) {
-                    sh 'mvn clean test -DDB_USER=$DB_USER -DDB_PASSWORD=$DB_PASSWORD'
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'sep1',
+                        usernameVariable: 'DB_USER',
+                        passwordVariable: 'DB_PASSWORD'
+                    )
+                ]) {
+                    sh """
+                        mvn clean test \
+                        -DDB_USER=$DB_USER \
+                        -DDB_PASSWORD=$DB_PASSWORD
+                    """
                 }
             }
         }
 
         stage('Code Coverage') {
             steps {
-                sh 'mvn jacoco:report -Djava.awt.headless=true'
+                sh 'mvn jacoco:report'
             }
         }
 
@@ -66,9 +76,12 @@ pipeline {
                 script {
                     sh """
                         docker buildx create --use || true
-                        docker buildx build --platform linux/amd64 \
+
+                        docker buildx build \
+                            --platform linux/amd64 \
                             -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} \
-                            --push .
+                            -t ${DOCKERHUB_REPO}:latest \
+                            --load .
                     """
                 }
             }
@@ -76,10 +89,17 @@ pipeline {
 
         stage('Push Docker Image to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: "${DOCKERHUB_CREDENTIALS_ID}",
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
                     sh """
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker tag ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} ${DOCKERHUB_REPO}:latest
+
+                        docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}
                         docker push ${DOCKERHUB_REPO}:latest
                     """
                 }
