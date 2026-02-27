@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        DB_HOST = 'host.docker.internal'
+        DB_HOST = 'localhost'
         DB_PORT = '3306'
         DB_NAME = 'notevault_db'
         // Path to Docker CLI on Windows
@@ -27,14 +27,18 @@ pipeline {
 
         stage('Start Test DB') {
             steps {
-                script {
-                    echo "Starting MariaDB container for tests..."
-                    def result = bat(script: 'docker run -d --name test-mariadb -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=notevault_db -p 3306:3306 mariadb:10.11', returnStatus: true)
-                    env.SKIP_DB_TESTS = (result != 0) ? 'true' : 'false'
-                    if (env.SKIP_DB_TEST == 'false') {
-                        bat 'timeout /t 15'
-                    }
-                }
+                bat '''
+                docker run -d --name test-mariadb ^
+                 -e MYSQL_ROOT_PASSWORD=root ^
+                 -e MYSQL_DATABASE=notevault_db ^
+                 -e MYSQL_USER=ciuser ^
+                 -e MYSQL_PASSWORD=cipass ^
+                 -p 3306:3306 ^
+                 mariadb:10.11
+                '''
+
+                echo "Waiting for MariaDB to start..."
+                bat 'timeout /t 20'
             }
         }
 
