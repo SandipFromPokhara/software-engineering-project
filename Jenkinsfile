@@ -12,11 +12,8 @@ pipeline {
         BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
         JAVA_TOOL_OPTIONS = "-Dprism.order=sw -Djava.awt.headless=true"
 
-        DB_USER = credentials('notevaultUser')      // Jenkins secret for DB username
-        DB_PASSWORD = credentials('group1oPasswOrD')  // Jenkins secret for DB password
-
-//        DB_CREDS = credentials('sep1') // database credentials
-
+        DB_USER = credentials('sep1_user')      // a secret text for the username
+        DB_PASSWORD = credentials('sep1_pass')  // a secret text for the password
     }
 
     stages {
@@ -31,7 +28,8 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh "mvn clean test -DDB_USER=${DB_USER} -DDB_PASSWORD=${DB_PASSWORD} -Ddb.skip=true"
+                withCredentials([usernamePassword(credentialsId: 'sep1', usernameVariable: 'DB_USER', passwordVariable: 'DB_PASSWORD')]) {
+                            sh 'mvn clean test -DDB_USER=$DB_USER -DDB_PASSWORD=$DB_PASSWORD'
             }
         }
 
