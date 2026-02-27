@@ -93,11 +93,18 @@ pipeline {
                 ]) {
                     sh '''
                         echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+
+                        # Push versioned tag
                         docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}
+
+                        # Tag and push latest
+                        docker tag ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} ${DOCKERHUB_REPO}:latest
+                        docker push ${DOCKERHUB_REPO}:latest
                     '''
                 }
             }
         }
+
 
 
         stage('Cleanup Docker Images') {
