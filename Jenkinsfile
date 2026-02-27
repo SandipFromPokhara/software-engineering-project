@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        DOCKERHUB_CREDENTIALS_ID = 'docker_jenkins'                  // Jenkins Docker Hub credentials ID
+        DOCKERHUB_CREDENTIALS_ID = 'docker_jenkins'
         DOCKERHUB_REPO = 'swostikalama/notevault'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
         BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
@@ -21,15 +21,16 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'edit-test',
-                url: 'git@github.com:SandipFromPokhara/software-engineering-project.git',
-                credentialsId:'private'
+                    url: 'git@github.com:SandipFromPokhara/software-engineering-project.git',
+                    credentialsId: 'private'
             }
         }
 
         stage('Run Tests') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'sep1', usernameVariable: 'DB_USER', passwordVariable: 'DB_PASSWORD')]) {
-                            sh 'mvn clean test -DDB_USER=$DB_USER -DDB_PASSWORD=$DB_PASSWORD'
+                    sh 'mvn clean test -DDB_USER=$DB_USER -DDB_PASSWORD=$DB_PASSWORD'
+                }
             }
         }
 
@@ -54,10 +55,9 @@ pipeline {
         stage('Build Docker Image (amd64)') {
             steps {
                 script {
-                    // Make sure Buildx is enabled on Docker Desktop
                     sh """
-                    docker buildx create --use || true
-                    docker buildx build --platform linux/amd64 -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} .
+                        docker buildx create --use || true
+                        docker buildx build --platform linux/amd64 -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} .
                     """
                 }
             }
@@ -66,7 +66,6 @@ pipeline {
         stage('Push Docker Image to Docker Hub') {
             steps {
                 script {
-                    // Login using Jenkins credentials
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS_ID) {
                         sh "docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}"
                         sh "docker tag ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} ${DOCKERHUB_REPO}:latest"
@@ -84,5 +83,6 @@ pipeline {
                 }
             }
         }
+
     }
 }
