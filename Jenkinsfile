@@ -1,50 +1,35 @@
 pipeline {
     agent any
 
-    environment {
-        JAVA_HOME = "/opt/homebrew/opt/openjdk"
-        PATH = "/usr/local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:${env.JAVA_HOME}/bin:${env.PATH}"
-        DOCKERHUB_CREDENTIALS_ID = 'docker-jenkins'
-        DOCKERHUB_REPO = 'swostikalama/notevault'
-        DOCKER_IMAGE_TAG = 'latest'
-        JAVA_TOOL_OPTIONS = "-Dprism.order=sw -Djava.awt.headless=true"
-    }
-
-
     tools {
         maven 'MAVEN_HOME'
     }
 
-    stages {
+    environment {
+        DOCKERHUB_CREDENTIALS_ID = 'docker_jenkins'                  // Jenkins Docker Hub credentials ID
+        DOCKERHUB_REPO = 'swostikalama/notevault'
+        DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
+        BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
+        JAVA_TOOL_OPTIONS = "-Dprism.order=sw -Djava.awt.headless=true"
+    }
 
-        stage('Check Docker') {
-            steps {
-                sh 'docker --version'
-            }
-        }
+    stages {
 
         stage('Checkout') {
             steps {
-                git branch: 'edit-test',
-                    url: 'git@github.com:SandipFromPokhara/software-engineering-project.git'
+                git branch: 'feature-dev', url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
             }
         }
 
-        stage('Build') {
+        stage('Run Tests') {
             steps {
-                sh 'mvn clean install -Djavafx.platform=mac'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                sh 'mvn test -Djavafx.platform=mac'
+                sh 'mvn clean test'
             }
         }
 
         stage('Code Coverage') {
             steps {
-                sh 'mvn jacoco:report -Djavafx.platform=mac'
+                sh 'mvn jacoco:report -Djava.awt.headless=true'
             }
         }
 
@@ -60,42 +45,37 @@ pipeline {
             }
         }
 
-        /* -------------------------
-           SEPARATE DOCKER STAGES
-           ------------------------- */
-
-        stage('Build Docker Image') {
+        stage('Build Docker Image (amd64)') {
             steps {
-                sh '''
-                    docker build \
-                        -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} .
-                '''
+                script {
+                    // Make sure Buildx is enabled on Docker Desktop
+                    sh """
+                    docker buildx create --use || true
+                    docker buildx build --platform linux/amd64 -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} .
+                    """
+                }
             }
         }
 
-        stage('Push Docker Image to docker_jenkins') {
+        stage('Push Docker Image to Docker Hub') {
             steps {
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: "${DOCKERHUB_CREDENTIALS_ID}",
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )
-                ]) {
-                    sh '''
-                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                        docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}
-                    '''
+                script {
+                    // Login using Jenkins credentials
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS_ID) {
+                        sh "docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}"
+                        sh "docker tag ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} ${DOCKERHUB_REPO}:latest"
+                        sh "docker push ${DOCKERHUB_REPO}:latest"
+                    }
                 }
             }
         }
 
         stage('Cleanup Docker Images') {
             steps {
-                sh '''
-                    docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || true
-                    docker rmi ${DOCKERHUB_REPO}:latest || true
-                '''
+                script {
+                    sh "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || true"
+                    sh "docker rmi ${DOCKERHUB_REPO}:latest || true"
+                }
             }
         }
     }
