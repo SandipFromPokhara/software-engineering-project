@@ -11,6 +11,9 @@ pipeline {
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
         BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
         JAVA_TOOL_OPTIONS = "-Dprism.order=sw -Djava.awt.headless=true"
+
+        DB_USER = credentials('notevaultUser') // Jenkins credentials ID
+        DB_PASSWORD = credentials('group1oPasswOrD')
     }
 
     stages {
