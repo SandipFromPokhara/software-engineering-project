@@ -44,11 +44,12 @@ pipeline {
                         passwordVariable: 'DB_PASSWORD'
                     )
                 ]) {
-                    sh """
+                    sh '''
                         mvn clean test \
                         -DDB_USER=$DB_USER \
                         -DDB_PASSWORD=$DB_PASSWORD
-                    """
+                    '''
+
                 }
             }
         }
@@ -71,21 +72,31 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Docker Image (AMD64)') {
             steps {
-                script {
-                    docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}")
+                dir('Temperature') {
+                    sh '''
+                        docker build \
+                            --platform linux/amd64 \
+                            -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} .
+                    '''
                 }
             }
         }
 
         stage('Push Docker Image to Docker Hub') {
             steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS_ID) {
-                        docker.image("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}").push()
-                        docker.image("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}").push('latest')
-                    }
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: "${DOCKERHUB_CREDENTIALS_ID}",
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh '''
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}
+                    '''
                 }
             }
         }
