@@ -6,7 +6,9 @@ pipeline {
     }
 
     environment {
-        DB_HOST = 'localhost'
+        DB_USER = credentials('DB_USER')
+        DB_PASSWORD = credentials('DB_PASSWORD')
+        DB_HOST = '%CONTAINER_NAME%'
         DB_PORT = '3306'
         DB_NAME = 'notevault_db'
         // Path to Docker CLI on Windows
@@ -28,52 +30,48 @@ pipeline {
 
         stage('Start Test DB') {
             steps {
-                withCredentials([
-                        string(credentialsId: 'DB_USER', variable: 'DB_USER'),
-                        string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')
-                ]) {
-                    bat """
-            REM Remove any existing container
-            docker rm -f %CONTAINER_NAME% || echo Container not found
-
-            REM Run MariaDB container with CI credentials
-            docker run -d --name %CONTAINER_NAME% ^
-             -e MYSQL_ROOT_PASSWORD=root ^
-             -e MYSQL_DATABASE=%DB_NAME% ^
-             -e MYSQL_USER=%DB_USER% ^
-             -e MYSQL_PASSWORD=%DB_PASSWORD% ^
-             -p 3306:3306 ^
-             mariadb:10.11
-
-            REM Wait for MariaDB to be ready
-            :wait
-            docker exec %CONTAINER_NAME% mysqladmin ping -u %DB_USER% -p%DB_PASSWORD% > nul 2>&1
-            if errorlevel 1 (
-                timeout /t 2
-                goto wait
-            )
-            echo MariaDB is ready
-            """
-                }
+                bat """
+                REM Remove any existing container
+                docker rm -f %CONTAINER_NAME% || echo Container not found
+        
+                REM Run MariaDB container with root password
+                docker run -d --name %CONTAINER_NAME% ^
+                    -e MYSQL_ROOT_PASSWORD=root ^
+                    -e MYSQL_DATABASE=%DB_NAME% ^
+                    -p 3306:3306 ^
+                    mariadb:10.11
+        
+                REM Wait until MariaDB is ready
+                :wait
+                docker exec %CONTAINER_NAME% mysqladmin ping -u root -proot > nul 2>&1
+                if errorlevel 1 (
+                    timeout /t 2
+                    goto wait
+                )
+                echo MariaDB is ready
+        
+                REM Create CI user with full privileges
+                docker exec %CONTAINER_NAME% mariadb -u root -proot -e ^
+                "CREATE USER IF NOT EXISTS '%DB_USER%'@'%' IDENTIFIED BY '%DB_PASSWORD%'; ^
+                GRANT ALL PRIVILEGES ON %DB_NAME%.* TO '%DB_USER%'@'%'; ^
+                FLUSH PRIVILEGES;"
+        
+                echo CI user '%DB_USER%' is ready
+                """
             }
         }
 
         stage('Build, Test & Coverage') {
             steps {
-                withCredentials([
-                        string(credentialsId: 'DB_USER', variable: 'DB_USER'),
-                        string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')
-                ]) {
-                    script {
-                        def mvnCmd = 'mvn clean verify -Djava.awt.headless=true'
-                        if (env.SKIP_DB_TESTS == 'true') {
-                            echo "Skipping DB-dependent tests..."
-                            mvnCmd += ' -DskipITs=true'
-                        } else {
-                            mvnCmd += " -DDB_USER=%DB_USER% -DDB_PASSWORD=%DB_PASSWORD% -DDB_HOST=%DB_HOST% -DDB_PORT=%DB_PORT% -DDB_NAME=%DB_NAME%"
-                        }
-                        bat mvnCmd
+                script {
+                    def mvnCmd = 'mvn clean verify -Djava.awt.headless=true'
+                    if (env.SKIP_DB_TESTS == 'true') {
+                        echo "Skipping DB-dependent tests..."
+                        mvnCmd += ' -DskipITs=true'
+                    } else {
+                        mvnCmd += " -DDB_USER=%DB_USER% -DDB_PASSWORD=%DB_PASSWORD% -DDB_HOST=%DB_HOST% -DDB_PORT=%DB_PORT% -DDB_NAME=%DB_NAME%"
                     }
+                    bat mvnCmd
                 }
             }
         }
