@@ -29,78 +29,60 @@ pipeline {
         stage('Start Test DB') {
             steps {
                 powershell """
-                # Remove any existing container
                 docker rm -f ${env.CONTAINER_NAME} -ErrorAction SilentlyContinue
-        
-                # Run MariaDB container
+
                 docker run -d --name ${env.CONTAINER_NAME} `
                     -e MYSQL_ROOT_PASSWORD=root `
                     -e MYSQL_DATABASE=${env.DB_NAME} `
                     -p 3306:3306 `
                     mariadb:10.11
-        
+
                 Write-Host "Waiting for MariaDB to be ready..."
-        
-                # Wait for MariaDB to accept connections
                 do {
                     Start-Sleep -Seconds 2
                     \$status = docker exec ${env.CONTAINER_NAME} mysqladmin ping -u root -proot 2>&1
                 } while (\$status -notmatch 'mysqld is alive')
-        
                 Write-Host "MariaDB is ready."
-        
-                # Create CI user with full privileges
-                docker exec ${env.CONTAINER_NAME} mariadb -u root -proot -e `
-                    "CREATE USER IF NOT EXISTS '${env.DB_USER}'@'%' IDENTIFIED BY '${env.DB_PASSWORD}'; `
-                     GRANT ALL PRIVILEGES ON ${env.DB_NAME}.* TO '${env.DB_USER}'@'%'; `
-                     FLUSH PRIVILEGES;"
-        
+
+                # Create CI user for localhost and all hosts
+                docker exec ${env.CONTAINER_NAME} mariadb -u root -proot -e "
+                    CREATE USER IF NOT EXISTS '${env.DB_USER}'@'%' IDENTIFIED BY '${env.DB_PASSWORD}';
+                    CREATE USER IF NOT EXISTS '${env.DB_USER}'@'localhost' IDENTIFIED BY '${env.DB_PASSWORD}';
+                    GRANT ALL PRIVILEGES ON ${env.DB_NAME}.* TO '${env.DB_USER}'@'%';
+                    GRANT ALL PRIVILEGES ON ${env.DB_NAME}.* TO '${env.DB_USER}'@'localhost';
+                    FLUSH PRIVILEGES;"
                 Write-Host "CI user ${env.DB_USER} is ready."
                 """
             }
         }
 
-        stage('Build, Test & Coverage') {
+        stage('Build & Test') {
             steps {
                 script {
-                    def mvnCmd = 'mvn clean verify -Djava.awt.headless=true'
-                    if (env.SKIP_DB_TESTS == 'true') {
-                        echo "Skipping DB-dependent tests..."
-                        mvnCmd += ' -DskipITs=true'
-                    } else {
-                        mvnCmd += " -DDB_USER=%DB_USER% -DDB_PASSWORD=%DB_PASSWORD% -DDB_HOST=%DB_HOST% -DDB_PORT=%DB_PORT% -DDB_NAME=%DB_NAME%"
-                    }
-                    bat mvnCmd
+                    bat """
+                    mvn clean verify -Djava.awt.headless=true ^
+                        -DDB_USER=${env.DB_USER} ^
+                        -DDB_PASSWORD=${env.DB_PASSWORD} ^
+                        -DDB_HOST=${env.DB_HOST} ^
+                        -DDB_PORT=${env.DB_PORT} ^
+                        -DDB_NAME=${env.DB_NAME} -X
+                    """
                 }
-            }
-        }
-
-        stage('Publish Test Results') {
-            steps {
-                junit '**/target/surefire-reports/*.xml'
-            }
-        }
-
-        stage('Publish Coverage Report') {
-            steps {
-                jacoco()
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    echo "Building Docker image ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}"
                     docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}", ".")
                 }
             }
         }
 
-        stage('Push Docker Image to Docker Hub') {
+        stage('Push Docker Image') {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS_ID) {
-                        echo "Pushing image ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} to Docker Hub"
                         docker.image("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}").push()
                         docker.image("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}").push('latest')
                     }
