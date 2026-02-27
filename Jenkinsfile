@@ -27,15 +27,15 @@ pipeline {
 
         stage('Start Test DB') {
             steps {
-                bat '''
-                docker run -d --name test-mariadb ^
-                 -e MYSQL_ROOT_PASSWORD=root ^
-                 -e MYSQL_DATABASE=notevault_db ^
-                 -e MYSQL_USER=ciuser ^
-                 -e MYSQL_PASSWORD=cipass ^
-                 -p 3306:3306 ^
-                 mariadb:10.11
-                '''
+                bat """
+                    docker run -d --name test-mariadb ^
+                     -e MYSQL_ROOT_PASSWORD=root ^
+                     -e MYSQL_DATABASE=%DB_NAME% ^
+                     -e MYSQL_USER=%DB_USER% ^
+                     -e MYSQL_PASSWORD=%DB_PASSWORD% ^
+                     -p 3306:3306 ^
+                     mariadb:10.11
+                    """
 
                 echo "Waiting for MariaDB to start..."
                 bat 'ping 127.0.0.1 -n 20 > nul'
@@ -100,7 +100,7 @@ pipeline {
         always {
             script {
                 echo "Cleaning up test DB and Docker images..."
-                // bat "docker rm -f test-mariadb || exit 0"
+                bat "docker rm -f test-mariadb || exit 0"
                 bat "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || exit 0"
                 bat "docker rmi ${DOCKERHUB_REPO}:latest || exit 0"
             }
