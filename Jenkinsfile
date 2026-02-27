@@ -1,7 +1,5 @@
-
 pipeline {
     agent any
-
 
     environment {
         PATH = "/usr/local/bin:$PATH"
@@ -13,8 +11,8 @@ pipeline {
     }
 
     tools {
-            maven 'MAVEN_HOME'
-        }
+        maven 'MAVEN_HOME'
+    }
 
     stages {
 
@@ -22,11 +20,12 @@ pipeline {
             steps {
                 sh 'docker --version'
             }
+        }   // ✅ FIXED: this was missing
 
         stage('Checkout') {
             steps {
                 git branch: 'edit-test',
-                url: 'git@github.com:SandipFromPokhara/software-engineering-project.git'
+                    url: 'git@github.com:SandipFromPokhara/software-engineering-project.git'
             }
         }
 
@@ -76,7 +75,6 @@ pipeline {
         stage('Cleanup Docker Images') {
             steps {
                 script {
-                    // Remove local images to save disk space
                     sh "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || true"
                     sh "docker rmi ${DOCKERHUB_REPO}:latest || true"
                 }
