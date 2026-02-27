@@ -33,17 +33,27 @@ pipeline {
                         string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')
                 ]) {
                     bat """
-                    docker run -d --name %CONTAINER_NAME% ^
-                     -e MYSQL_ROOT_PASSWORD=root ^
-                     -e MYSQL_DATABASE=%DB_NAME% ^
-                     -e MYSQL_USER=%DB_USER% ^
-                     -e MYSQL_PASSWORD=%DB_PASSWORD% ^
-                     -p 3306:3306 ^
-                     mariadb:10.11
-                    """
+            REM Remove any existing container
+            docker rm -f %CONTAINER_NAME% || echo Container not found
 
-                    echo "Waiting for MariaDB to start..."
-                    bat 'ping 127.0.0.1 -n 20 > nul'
+            REM Run MariaDB container with CI credentials
+            docker run -d --name %CONTAINER_NAME% ^
+             -e MYSQL_ROOT_PASSWORD=root ^
+             -e MYSQL_DATABASE=%DB_NAME% ^
+             -e MYSQL_USER=%DB_USER% ^
+             -e MYSQL_PASSWORD=%DB_PASSWORD% ^
+             -p 3306:3306 ^
+             mariadb:10.11
+
+            REM Wait for MariaDB to be ready
+            :wait
+            docker exec %CONTAINER_NAME% mysqladmin ping -u %DB_USER% -p%DB_PASSWORD% > nul 2>&1
+            if errorlevel 1 (
+                timeout /t 2
+                goto wait
+            )
+            echo MariaDB is ready
+            """
                 }
             }
         }
