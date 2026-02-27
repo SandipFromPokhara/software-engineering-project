@@ -2,24 +2,31 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'MAVEN_HOME'
-    }
 
     environment {
-        PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
-        DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
+        PATH = "/usr/local/bin:$PATH"
+        DOCKERHUB_CREDENTIALS_ID = 'docker-jenkins'
         DOCKERHUB_REPO = 'swostikalama/notevault'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
         BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
         JAVA_TOOL_OPTIONS = "-Dprism.order=sw -Djava.awt.headless=true"
     }
 
+    tools {
+            maven 'MAVEN_HOME'
+        }
+
     stages {
+
+        stage('Check Docker') {
+            steps {
+                sh 'docker --version'
+            }
 
         stage('Checkout') {
             steps {
-                git branch: 'edit-test', url: 'git@github.com:SandipFromPokhara/software-engineering-project.git'
+                git branch: 'edit-test',
+                url: 'git@github.com:SandipFromPokhara/software-engineering-project.git'
             }
         }
 
