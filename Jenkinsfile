@@ -6,10 +6,8 @@ pipeline {
     }
 
     environment {
-        DB_USER = credentials('DB_USER')
-        DB_PASSWORD = credentials('DB_PASSWORD')
         DB_HOST = 'localhost'
-        DB_PORT = '3306'
+        DB_PORT = '3307' // Use a free port to avoid conflicts
         DB_NAME = 'notevault_db'
         PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
         DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
@@ -28,36 +26,50 @@ pipeline {
 
         stage('Start Test DB') {
             steps {
-                powershell """
-                docker rm -f ${env.CONTAINER_NAME} -ErrorAction SilentlyContinue
+                withCredentials([
+                        string(credentialsId: 'DB_USER', variable: 'DB_USER'),
+                        string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')
+                ]) {
+                    powershell """
+                    # Remove any existing container
+                    docker rm -f ${env.CONTAINER_NAME} -ErrorAction SilentlyContinue
 
-                docker run -d --name ${env.CONTAINER_NAME} `
-                    -e MYSQL_ROOT_PASSWORD=${env.DB_PASSWORD} `
-                    -e MYSQL_DATABASE=${env.DB_NAME} `
-                    -p 3306:3306 `
-                    mariadb:10.11
+                    # Start MariaDB container
+                    docker run -d --name ${env.CONTAINER_NAME} `
+                        -e MYSQL_ROOT_PASSWORD=%DB_PASSWORD% `
+                        -e MYSQL_DATABASE=${env.DB_NAME} `
+                        -p ${env.DB_PORT}:3306 `
+                        mariadb:10.11
 
-                Write-Host "Waiting for MariaDB to be ready..."
-                do {
-                    Start-Sleep -Seconds 2
-                    \$status = docker exec ${env.CONTAINER_NAME} mysqladmin ping -u root -p${env.DB_PASSWORD} 2>&1
-                } while (\$status -notmatch 'mysqld is alive')
-                Write-Host "MariaDB is ready."
-                """
+                    Write-Host "Waiting for MariaDB to be ready..."
+                    \$ready = \$false
+                    while (-not \$ready) {
+                        Start-Sleep -Seconds 2
+                        \$status = docker exec ${env.CONTAINER_NAME} mysqladmin ping -u root -p%DB_PASSWORD% 2>&1
+                        if (\$status -match 'mysqld is alive') { \$ready = \$true }
+                    }
+                    Write-Host "MariaDB is ready."
+                    """
+                }
             }
         }
 
         stage('Build & Test') {
             steps {
-                script {
-                    bat """
-                    mvn clean verify -Djava.awt.headless=true ^
-                        -DDB_USER=${env.DB_USER} ^
-                        -DDB_PASSWORD=${env.DB_PASSWORD} ^
-                        -DDB_HOST=${env.DB_HOST} ^
-                        -DDB_PORT=${env.DB_PORT} ^
-                        -DDB_NAME=${env.DB_NAME} -X
-                    """
+                withCredentials([
+                        string(credentialsId: 'DB_USER', variable: 'DB_USER'),
+                        string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')
+                ]) {
+                    script {
+                        bat """
+                        mvn clean verify -Djava.awt.headless=true ^
+                            -DDB_USER=%DB_USER% ^
+                            -DDB_PASSWORD=%DB_PASSWORD% ^
+                            -DDB_HOST=${env.DB_HOST} ^
+                            -DDB_PORT=${env.DB_PORT} ^
+                            -DDB_NAME=${env.DB_NAME} -X
+                        """
+                    }
                 }
             }
         }
@@ -86,7 +98,7 @@ pipeline {
         always {
             script {
                 echo "Cleaning up test DB and Docker images..."
-                bat "docker rm -f %CONTAINER_NAME% || exit 0"
+                bat "docker rm -f ${env.CONTAINER_NAME} || exit 0"
                 bat "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || exit 0"
                 bat "docker rmi ${DOCKERHUB_REPO}:latest || exit 0"
             }
