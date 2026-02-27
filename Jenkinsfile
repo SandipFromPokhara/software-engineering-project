@@ -25,13 +25,13 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                bat 'mvn clean test'
+                sh 'mvn clean test'
             }
         }
 
         stage('Code Coverage') {
             steps {
-                bat 'mvn jacoco:report -Djava.awt.headless=true'
+                sh 'mvn jacoco:report -Djava.awt.headless=true'
             }
         }
 
@@ -70,8 +70,8 @@ pipeline {
             steps {
                 script {
                     // Remove local images to save disk space
-                    bat "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || true"
-                    bat "docker rmi ${DOCKERHUB_REPO}:latest || true"
+                    sh "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || true"
+                    sh "docker rmi ${DOCKERHUB_REPO}:latest || true"
                 }
             }
         }
