@@ -11,14 +11,9 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 import javafx.util.Duration;
-import util.ToggleUtil;
-import util.UndoRedoManager;
-import util.WordCountUtil;
-import util.TextFormattingUtil;
+import util.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -198,17 +193,12 @@ public class EditNoteController {
         }
 
         noteDao.save(note);
-        close();
+        handleCancel();
     }
 
     @FXML
     private void handleCancel(){
-        close();
-    }
-
-    private void close() {
-        Stage stage = (Stage) updateButton.getScene().getWindow();
-        stage.close();
+        WindowUtil.closeWindow(updateButton);;
     }
 
     private void showStatus(String msg, boolean isError) {
@@ -218,60 +208,13 @@ public class EditNoteController {
     }
 
     private void refreshTagFlowPane() {
-        tagFlowpane.getChildren().clear();
-        selectedTags.stream()
-                .sorted(String::compareToIgnoreCase)
-                .forEach(tagName -> {
-                    HBox tagBox = new HBox();
-                    tagBox.setSpacing(5);
-                    tagBox.getStyleClass().addAll("note-tag", "tag-box");
-
-                    Label label = new Label("#" + tagName);
-                    label.getStyleClass().add("tag-label");
-
-                    Button removeBtn = new Button("x");
-                    removeBtn.getStyleClass().add("tag-remove-btn");
-                    removeBtn.setOnAction(e -> {
-                        selectedTags.remove(tagName);
-                        refreshTagFlowPane();
-                    });
-
-                    tagBox.getChildren().addAll(label, removeBtn);
-                    tagFlowpane.getChildren().add(tagBox);
-                });
+        TagUtil.refreshFlowPane(selectedTags, tagFlowpane);
     }
 
     @FXML
     void handleAddTag() {
         String tagName = tagComboBox.getEditor().getText();
-
-        if (tagName == null || tagName.isBlank()) {
-            return;
-        }
-
-        tagName = tagName.trim();
-
-        int maxLength = 15;
-        if (tagName.length() > maxLength) {
-            showStatus("Tag too long! Max " + maxLength + " characters allowed", true);
-            return;
-        }
-
-        if (!tagName.matches("[a-zA-ZäöåÄÖÅ0-9_-]+")) {
-            showStatus("Invalid characters in tag.", true);
-            return;
-        }
-
-        if (selectedTags.contains(tagName)) {
-            return;
-        }
-
-        selectedTags.add(tagName);
-        if (!tagComboBox.getItems().contains(tagName)) {
-            tagComboBox.getItems().add(tagName);
-        }
-        refreshTagFlowPane();
-        tagComboBox.getEditor().clear();
+        TagUtil.addTagToUI(selectedTags, tagFlowpane, tagComboBox,tagName );
     }
 
     // Update tag button

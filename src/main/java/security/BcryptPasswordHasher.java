@@ -1,18 +1,19 @@
-package util;
+package security;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BcryptPasswordHasher {
+public class BcryptPasswordHasher implements PasswordHasher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BcryptPasswordHasher.class);
-    private static final int BCRYPT_COST = getCost();
+    private final int cost;
 
-    private BcryptPasswordHasher() {
+    public BcryptPasswordHasher() {
+        this.cost = getCost();
     }
 
-    private static int getCost() {
+    private int getCost() {
         String envCost = System.getenv("BCRYPT_COST");
         try {
             return (envCost != null) ? Integer.parseInt(envCost) : 12;
@@ -22,14 +23,16 @@ public class BcryptPasswordHasher {
         }
     }
 
-    public static String hashPassword(String plainPassword) {
+    @Override
+    public String hash(String plainPassword) {
         if (plainPassword == null || plainPassword.isBlank()) {
             throw new IllegalArgumentException("Password cannot be empty");
         }
-        return BCrypt.withDefaults().hashToString(BCRYPT_COST, plainPassword.toCharArray());
+        return BCrypt.withDefaults().hashToString(cost, plainPassword.toCharArray());
     }
 
-    public static boolean verifyPassword(String plainPassword, String hashedPassword) {
+    @Override
+    public boolean verify(String plainPassword, String hashedPassword) {
         if (plainPassword == null || hashedPassword == null || hashedPassword.isBlank()) {
             return false;
         }

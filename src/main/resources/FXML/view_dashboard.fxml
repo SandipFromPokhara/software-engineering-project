@@ -66,9 +66,9 @@
                   </ImageView>
                </graphic>
                <tooltip>
-                  <Tooltip fx:id="toggleTooltip" text="Toggle Dark/Light theme">
+                  <Tooltip fx:id="toggleTooltip" text="Switch Dark/Light theme">
                      <font>
-                        <Font name="System Italic" size="10.0" />
+                        <Font name="System Italic" size="12.0" />
                      </font>
                   </Tooltip>
                </tooltip>
@@ -82,18 +82,18 @@
    <left>
       <VBox alignment="TOP_CENTER" prefHeight="373.0" prefWidth="98.0" spacing="10.0" styleClass="side-panel">
          <children>
-            <Button fx:id="viewNotesBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleOpen" prefHeight="105.0" prefWidth="108.0" styleClass="side-panel-btn">
+            <Button fx:id="viewNotesBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleOpenManageNotebook" prefHeight="105.0" prefWidth="108.0" styleClass="side-panel-btn">
                <graphic>
-                  <StackPane prefHeight="60.0" prefWidth="85.0">
+                  <StackPane prefHeight="150.0" prefWidth="200.0">
                      <children>
                         <ImageView fx:id="sideBtn1" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@/Images/open-folder.png" />
                            </image>
                         </ImageView>
-                        <Label fx:id="viewNotesLabel" alignment="TOP_LEFT" styleClass="side-label" text="Open Notebook" visible="false" StackPane.alignment="TOP_RIGHT">
-                           <font>
-                              <Font name="System Bold" size="9.0" />
+                        <Label fx:id="viewNotesLabel" alignment="TOP_CENTER" styleClass="side-label" text="Manage" visible="false" StackPane.alignment="TOP_RIGHT">
+                            <font>
+                              <Font name="System Bold" size="10.0" />
                            </font>
                         </Label>
                      </children>
@@ -127,7 +127,7 @@
                               <Image url="@/Images/logout.png" />
                            </image>
                         </ImageView>
-                        <Label fx:id="logoutLabel" alignment="TOP_LEFT" styleClass="side-label" text="Logout" visible="false" StackPane.alignment="TOP_RIGHT">
+                        <Label fx:id="logoutLabel" alignment="TOP_CENTER" styleClass="side-label" text="Logout" visible="false" StackPane.alignment="TOP_RIGHT">
                            <font>
                               <Font name="System Bold" size="10.0" />
                            </font>

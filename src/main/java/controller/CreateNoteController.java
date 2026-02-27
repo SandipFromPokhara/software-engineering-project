@@ -13,7 +13,6 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -22,10 +21,7 @@ import entity.NoteEntity;
 import session.NotebookSession;
 import session.NoteSession;
 import session.UserSession;
-import util.WordCountUtil;
-import util.ToggleUtil;
-import util.UndoRedoManager;
-import util.TextFormattingUtil;
+import util.*;
 
 import java.net.URL;
 import java.util.List;
@@ -276,7 +272,7 @@ public class CreateNoteController implements Initializable {
         contentArea.clear();
         annotationArea.clear();
         selectedTags.clear();
-        tagFlowpane.getChildren().clear();
+        refreshTagFlowPane();
         titleField.requestFocus();
 
         // Clear undo/redo history
@@ -289,72 +285,24 @@ public class CreateNoteController implements Initializable {
         statusLabel.setVisible(true);
     }
 
-    private void closeCurrentWindow() {
-        Stage stage = (Stage) titleField.getScene().getWindow();
-        stage.close();
-    }
-
     @FXML
     private void handleBackToHome() {
-        closeCurrentWindow();
+        WindowUtil.closeWindow(titleField);
     }
 
     @FXML
     private void handleClose() {
-        closeCurrentWindow();
+        WindowUtil.closeWindow(titleField);
     }
 
     @FXML
     private void handleAddTag() {
         String tagName = tagComboBox.getEditor().getText();
-
-        if (tagName == null || tagName.isBlank()) {
-            return;
-        }
-
-        tagName = tagName.trim();
-
-        int maxLength = 15;
-        if (tagName.length() > maxLength) {
-            showStatus("Tag too long! Max " + maxLength + " characters allowed", true);
-            return;
-        }
-
-        if (!tagName.matches("[a-zA-ZäöåÄÖÅ0-9_-]+")) {
-            showStatus("Invalid characters in tag", true);
-            return;
-        }
-
-        if (selectedTags.contains(tagName)) {
-            return;
-        }
-
-        selectedTags.add(tagName);
-        if (!tagComboBox.getItems().contains(tagName)) {
-            tagComboBox.getItems().add(tagName);
-        }
-        addTagToFlowPane(tagName);
-
-        tagComboBox.getEditor().clear();
+        TagUtil.addTagToUI(selectedTags, tagFlowpane, tagComboBox, tagName);
     }
 
-    private void addTagToFlowPane(String tagName) {
-        HBox tagBox = new HBox();
-        tagBox.setSpacing(5);
-        tagBox.getStyleClass().addAll("note-tag", "tag-box");
-
-        Label label = new Label("#" + tagName);
-        label.getStyleClass().add("tag-label");
-
-        Button removeBtn = new Button("x");
-        removeBtn.getStyleClass().add("tag-remove-btn");
-        removeBtn.setOnAction(e -> {
-            selectedTags.remove(tagName);
-            tagFlowpane.getChildren().remove(tagBox);
-        });
-
-        tagBox.getChildren().addAll(label, removeBtn);
-        tagFlowpane.getChildren().add(tagBox);
+    private void refreshTagFlowPane() {
+        TagUtil.refreshFlowPane(selectedTags, tagFlowpane);
     }
 
     // Update toggle button icon
