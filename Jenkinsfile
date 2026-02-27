@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         DB_HOST = 'localhost'
-        DB_PORT = '3307' // Use a free port to avoid conflicts
+        DB_PORT = '3307' // Free port to avoid conflicts
         DB_NAME = 'notevault_db'
         PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
         DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
@@ -45,10 +45,14 @@ pipeline {
                     \$ready = \$false
                     while (-not \$ready) {
                         Start-Sleep -Seconds 2
-                        \$status = docker exec ${env.CONTAINER_NAME} mysqladmin ping -u root -p%DB_PASSWORD% 2>&1
+                        \$status = docker exec ${env.CONTAINER_NAME} mysqladmin ping -uroot -p%DB_PASSWORD% 2>&1
                         if (\$status -match 'mysqld is alive') { \$ready = \$true }
                     }
                     Write-Host "MariaDB is ready."
+
+                    # Create test user
+                    docker exec ${env.CONTAINER_NAME} mysql -uroot -p%DB_PASSWORD% -e "CREATE USER IF NOT EXISTS '%DB_USER%'@'%' IDENTIFIED BY '%DB_PASSWORD%'; GRANT ALL PRIVILEGES ON ${env.DB_NAME}.* TO '%DB_USER%'@'%'; FLUSH PRIVILEGES;"
+                    Write-Host "Test DB user created successfully."
                     """
                 }
             }
