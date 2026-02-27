@@ -100,7 +100,7 @@ pipeline {
         always {
             script {
                 echo "Cleaning up test DB and Docker images..."
-                bat "docker rm -f test-mariadb || exit 0"
+                // bat "docker rm -f test-mariadb || exit 0"
                 bat "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || exit 0"
                 bat "docker rmi ${DOCKERHUB_REPO}:latest || exit 0"
             }
