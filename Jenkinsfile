@@ -28,26 +28,34 @@ pipeline {
 
         stage('Start Test DB') {
             steps {
-                bat """
-                REM Remove any existing container
-                docker rm -f %CONTAINER_NAME% || echo Container not found
-
-                REM Run MariaDB container
-                docker run -d --name %CONTAINER_NAME% ^
-                    -e MYSQL_ROOT_PASSWORD=root ^
-                    -e MYSQL_DATABASE=%DB_NAME% ^
-                    -p 3306:3306 ^
+                powershell """
+                # Remove any existing container
+                docker rm -f ${env.CONTAINER_NAME} -ErrorAction SilentlyContinue
+        
+                # Run MariaDB container
+                docker run -d --name ${env.CONTAINER_NAME} `
+                    -e MYSQL_ROOT_PASSWORD=root `
+                    -e MYSQL_DATABASE=${env.DB_NAME} `
+                    -p 3306:3306 `
                     mariadb:10.11
-
-                REM Wait until MariaDB is ready using PowerShell retry
-                powershell -Command "do { Start-Sleep -Seconds 2 } until ((docker exec %CONTAINER_NAME% mysqladmin ping -u root -proot -r) -eq 0)"
-
-                REM Create CI user safely using temp SQL file
-                echo CREATE USER IF NOT EXISTS '%DB_USER%'@'%' IDENTIFIED BY '%DB_PASSWORD%'; GRANT ALL PRIVILEGES ON %DB_NAME%.* TO '%DB_USER%'@'%'; FLUSH PRIVILEGES; > init.sql
-                docker exec -i %CONTAINER_NAME% mariadb -u root -proot < init.sql
-                del init.sql
-
-                echo CI user '%DB_USER%' is ready
+        
+                Write-Host "Waiting for MariaDB to be ready..."
+        
+                # Wait for MariaDB to accept connections
+                do {
+                    Start-Sleep -Seconds 2
+                    \$status = docker exec ${env.CONTAINER_NAME} mysqladmin ping -u root -proot 2>&1
+                } while (\$status -notmatch 'mysqld is alive')
+        
+                Write-Host "MariaDB is ready."
+        
+                # Create CI user with full privileges
+                docker exec ${env.CONTAINER_NAME} mariadb -u root -proot -e `
+                    "CREATE USER IF NOT EXISTS '${env.DB_USER}'@'%' IDENTIFIED BY '${env.DB_PASSWORD}'; `
+                     GRANT ALL PRIVILEGES ON ${env.DB_NAME}.* TO '${env.DB_USER}'@'%'; `
+                     FLUSH PRIVILEGES;"
+        
+                Write-Host "CI user ${env.DB_USER} is ready."
                 """
             }
         }
