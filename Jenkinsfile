@@ -27,6 +27,10 @@ pipeline {
 
         stage('Start Test DB') {
             steps {
+                withCredentials([
+                        string(credentialsId: 'DB_USER', variable: 'DB_USER'),
+                        string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')
+                ]) {
                 bat """
                     docker run -d --name test-mariadb ^
                      -e MYSQL_ROOT_PASSWORD=root ^
