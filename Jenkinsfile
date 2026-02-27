@@ -4,10 +4,8 @@ pipeline {
     environment {
         PATH = "/usr/local/bin:$PATH"
         DOCKERHUB_CREDENTIALS_ID = 'docker-jenkins'
-        DOCKERHUB_REPO = 'swostikalama/notevault'
-        DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
-        BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
-        JAVA_TOOL_OPTIONS = "-Dprism.order=sw -Djava.awt.headless=true"
+        DOCKERHUB_REPO = 'swostikalama/jenkins_temp'
+        DOCKER_IMAGE_TAG = 'latest'
     }
 
     tools {
@@ -20,30 +18,42 @@ pipeline {
             steps {
                 sh 'docker --version'
             }
-        }   // ✅ FIXED: this was missing
+        }
 
         stage('Checkout') {
             steps {
-                git branch: 'edit-test',
-                    url: 'git@github.com:SandipFromPokhara/software-engineering-project.git'
+                git branch: 'main',
+                    url: 'https://github.com/Swostika-Lama/Jenkins_Temp.git'
             }
         }
 
-        stage('Run Tests') {
+        stage('Build') {
             steps {
-                sh 'mvn clean test'
+                dir('Temperature') {
+                    sh 'mvn clean install'
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                dir('Temperature') {
+                    sh 'mvn test'
+                }
             }
         }
 
         stage('Code Coverage') {
             steps {
-                sh 'mvn jacoco:report -Djava.awt.headless=true'
+                dir('Temperature') {
+                    sh 'mvn jacoco:report'
+                }
             }
         }
 
         stage('Publish Test Results') {
             steps {
-                junit '**/target/surefire-reports/*.xml'
+                junit 'Temperature/target/surefire-reports/*.xml'
             }
         }
 
@@ -53,31 +63,42 @@ pipeline {
             }
         }
 
+
+
         stage('Build Docker Image') {
             steps {
-                script {
-                    docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}", ".")
+                dir('Temperature') {
+                    sh '''
+                        docker build \
+                            -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} .
+                    '''
                 }
             }
         }
 
-        stage('Push Docker Image to Docker Hub') {
+        stage('Push Docker Image to docker_jenkins') {
             steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS_ID) {
-                        docker.image("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}").push()
-                        docker.image("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}").push('latest')
-                    }
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: "${DOCKERHUB_CREDENTIALS_ID}",
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh '''
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}
+                    '''
                 }
             }
         }
 
         stage('Cleanup Docker Images') {
             steps {
-                script {
-                    sh "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || true"
-                    sh "docker rmi ${DOCKERHUB_REPO}:latest || true"
-                }
+                sh '''
+                    docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || true
+                    docker rmi ${DOCKERHUB_REPO}:latest || true
+                '''
             }
         }
     }
