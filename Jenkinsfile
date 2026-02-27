@@ -14,6 +14,7 @@ pipeline {
         DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
         DOCKERHUB_REPO = 'sandipranjit/notevault'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
+        CONTAINER_NAME = "test-mariadb-${BUILD_NUMBER}"
         JAVA_TOOL_OPTIONS = "-Dprism.order=sw -Djava.awt.headless=true"
     }
 
@@ -32,7 +33,7 @@ pipeline {
                         string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')
                 ]) {
                     bat """
-                    docker run -d --name test-mariadb ^
+                    docker run -d --name %CONTAINER_NAME% ^
                      -e MYSQL_ROOT_PASSWORD=root ^
                      -e MYSQL_DATABASE=%DB_NAME% ^
                      -e MYSQL_USER=%DB_USER% ^
@@ -105,7 +106,7 @@ pipeline {
         always {
             script {
                 echo "Cleaning up test DB and Docker images..."
-                bat "docker rm -f test-mariadb || exit 0"
+                bat "docker rm -f %CONTAINER_NAME% || exit 0"
                 bat "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || exit 0"
                 bat "docker rmi ${DOCKERHUB_REPO}:latest || exit 0"
             }
