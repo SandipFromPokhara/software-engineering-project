@@ -67,33 +67,27 @@ public class CreateNoteController implements Initializable {
 
     public CreateNoteController() {}
 
-    public void setNotebooks(List<NoteBookEntity> notebooks) {
-        UserEntity user = UserSession.getUserInstance().getUser();
-
-        // Create a copy so we don't modify the original list
-        List<NoteBookEntity> comboItems = new java.util.ArrayList<>(notebooks);
-
-        NoteBookEntity createNewItem = new NoteBookEntity(CREATE_NEW, user);
-        comboItems.add(createNewItem);
-
-        // Set items in the ComboBox
-        notebookComboBox.getItems().setAll(comboItems);
-
-        // Select last created notebook if available
-        NoteBookEntity lastCreated = NotebookSession.getLastCreatedNotebook();
-        if (lastCreated != null && notebooks.contains(lastCreated)) {
-            notebookComboBox.getSelectionModel().select(lastCreated);
-        } else if (!notebooks.isEmpty()) {
-            notebookComboBox.getSelectionModel().select(0); // fallback
-        }
-    }
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
         // Tooltip delay
         tagTooltip.setShowDelay(Duration.millis(100));
         toggleTooltip.setShowDelay(Duration.millis(100));
+
+        // Load current user and notebooks
+        UserEntity currentUser = UserSession.getUserInstance().getUser();
+        List<NoteBookEntity> notebooks = new JpaNoteBookDao().findByUser(currentUser);
+
+        notebooks.sort((n1, n2) -> {
+            if (n1.getCreatedAt() == null) return -1;
+            if (n2.getCreatedAt() == null) return 1;
+            return n1.getCreatedAt().compareTo(n2.getCreatedAt());
+        });
+
+        notebookComboBox.getItems().setAll(notebooks);
+
+        NoteBookEntity createNewItem = new NoteBookEntity(CREATE_NEW, currentUser);
+        notebookComboBox.getItems().add(createNewItem);
 
         notebookComboBox.setConverter(new javafx.util.StringConverter<>() {
             @Override
@@ -107,6 +101,11 @@ public class CreateNoteController implements Initializable {
                 return null;
             }
         });
+
+        // Select first notebook if available
+        if (!notebookComboBox.getItems().isEmpty()) {
+            notebookComboBox.getSelectionModel().select(0);
+        }
 
         noteService = new NoteService();
         statusLabel.setVisible(false);
