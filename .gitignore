@@ -4,9 +4,6 @@ target/
 !**/src/test/**/target/
 .kotlin
 
-# Environment variables
-.env
-
 ### IntelliJ IDEA ###
 .idea/
 .idea/modules.xml
