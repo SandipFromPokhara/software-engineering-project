@@ -12,8 +12,8 @@ pipeline {
         BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
         JAVA_TOOL_OPTIONS = "-Dprism.order=sw -Djava.awt.headless=true"
 
-        DB_USER = credentials('notevaultUser') // Jenkins credentials ID
-        DB_PASSWORD = credentials('group1oPasswOrD')
+        DB_USER = credentials('sep1') // Jenkins credentials ID
+        DB_PASSWORD = credentials('sep1')
     }
 
     stages {
@@ -21,7 +21,8 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'edit-test',
-                url: 'git@github.com:SandipFromPokhara/software-engineering-project.git'
+                url: 'git@github.com:SandipFromPokhara/software-engineering-project.git',
+                credentialsId:'private'
             }
         }
 
