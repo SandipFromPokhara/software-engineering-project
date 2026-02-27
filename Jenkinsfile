@@ -3,12 +3,13 @@ pipeline {
 
     environment {
         JAVA_HOME = "/opt/homebrew/opt/openjdk"
-        PATH = "/opt/homebrew/bin:/opt/homebrew/sbin:${env.JAVA_HOME}/bin:${env.PATH}"
+        PATH = "/usr/local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:${env.JAVA_HOME}/bin:${env.PATH}"
         DOCKERHUB_CREDENTIALS_ID = 'docker-jenkins'
         DOCKERHUB_REPO = 'swostikalama/notevault'
         DOCKER_IMAGE_TAG = 'latest'
         JAVA_TOOL_OPTIONS = "-Dprism.order=sw -Djava.awt.headless=true"
     }
+
 
     tools {
         maven 'MAVEN_HOME'
