@@ -10,7 +10,7 @@ pipeline {
         JAVA_HOME = tool 'JDK21'
         PATH = "${env.JAVA_HOME}/bin:/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
 
-        DOCKERHUB_CREDENTIALS_ID = 'docker_jenkins'
+        DOCKERHUB_CREDENTIALS_ID = 'docker-jenkins'
         DOCKERHUB_REPO = 'swostikalama/notevault'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
         BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
