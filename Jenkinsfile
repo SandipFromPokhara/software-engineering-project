@@ -66,7 +66,9 @@ pipeline {
                 script {
                     sh """
                         docker buildx create --use || true
-                        docker buildx build --platform linux/amd64 -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} .
+                        docker buildx build --platform linux/amd64 \
+                            -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} \
+                            --push .
                     """
                 }
             }
@@ -74,22 +76,20 @@ pipeline {
 
         stage('Push Docker Image to Docker Hub') {
             steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS_ID) {
-                        sh "docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}"
-                        sh "docker tag ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} ${DOCKERHUB_REPO}:latest"
-                        sh "docker push ${DOCKERHUB_REPO}:latest"
-                    }
+                withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker tag ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} ${DOCKERHUB_REPO}:latest
+                        docker push ${DOCKERHUB_REPO}:latest
+                    """
                 }
             }
         }
 
         stage('Cleanup Docker Images') {
             steps {
-                script {
-                    sh "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || true"
-                    sh "docker rmi ${DOCKERHUB_REPO}:latest || true"
-                }
+                sh "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || true"
+                sh "docker rmi ${DOCKERHUB_REPO}:latest || true"
             }
         }
     }
