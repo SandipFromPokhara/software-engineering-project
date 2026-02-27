@@ -27,7 +27,7 @@ pipeline {
         stage('Start Test DB') {
             steps {
                 withCredentials([usernamePassword(
-                        credentialsId: 'DB_CREDENTIALS',
+                        credentialsId: 'DB_CREDENTIALS',  // your Jenkins credential ID
                         usernameVariable: 'DB_USER',
                         passwordVariable: 'DB_PASSWORD'
                 )]) {
@@ -35,9 +35,9 @@ pipeline {
                     # Remove any existing container
                     docker rm -f ${env.CONTAINER_NAME} -ErrorAction SilentlyContinue
         
-                    # Start MariaDB container with a temporary root password
+                    # Start MariaDB container with a root password
                     docker run -d --name ${env.CONTAINER_NAME} `
-                        -e MYSQL_ROOT_PASSWORD=temporaryRootPass `
+                        -e MYSQL_ROOT_PASSWORD=%DB_PASSWORD% `
                         -e MYSQL_DATABASE=${env.DB_NAME} `
                         -p ${env.DB_PORT}:3306 `
                         mariadb:10.11
@@ -46,14 +46,18 @@ pipeline {
                     \$ready = \$false
                     while (-not \$ready) {
                         Start-Sleep -Seconds 2
-                        \$status = docker exec ${env.CONTAINER_NAME} mysqladmin ping -uroot -ptemporaryRootPass 2>&1
+                        \$status = docker exec ${env.CONTAINER_NAME} mysqladmin ping -uroot -p%DB_PASSWORD% 2>&1
                         if (\$status -match 'mysqld is alive') { \$ready = \$true }
                     }
                     Write-Host "MariaDB is ready."
         
-                    # Create test user and grant privileges
-                    docker exec ${env.CONTAINER_NAME} mysql -uroot -ptemporaryRootPass -e "CREATE USER IF NOT EXISTS '$env:DB_USER'@'%' IDENTIFIED BY '$env:DB_PASSWORD'; GRANT ALL PRIVILEGES ON ${env.DB_NAME}.* TO '$env:DB_USER'@'%'; FLUSH PRIVILEGES;"
-                    Write-Host "Test DB user '$env:DB_USER' created successfully."
+                    # Create test user for all hosts (%) and grant privileges
+                    docker exec ${env.CONTAINER_NAME} mysql -uroot -p%DB_PASSWORD% -e "
+                        CREATE USER IF NOT EXISTS '%DB_USER%'@'%' IDENTIFIED BY '%DB_PASSWORD%';
+                        GRANT ALL PRIVILEGES ON ${env.DB_NAME}.* TO '%DB_USER%'@'%';
+                        FLUSH PRIVILEGES;
+                    "
+                    Write-Host "Test DB user created successfully."
                     """
                 }
             }
