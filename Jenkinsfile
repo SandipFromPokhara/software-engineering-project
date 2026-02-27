@@ -30,11 +30,8 @@ pipeline {
                 script {
                     echo "Starting MariaDB container for tests..."
                     def result = bat(script: 'docker run -d --name test-mariadb -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=notevault_db -p 3306:3306 mariadb:10.11', returnStatus: true)
-                    if (result != 0) {
-                        echo "Failed to start test DB, will skip DB-dependent tests!"
-                        env.SKIP_DB_TESTS = 'true'
-                    } else {
-                        env.SKIP_DB_TESTS = 'false'
+                    env.SKIP_DB_TESTS = (result != 0) ? 'true' : 'false'
+                    if (env.SKIP_DB_TEST == 'false') {
                         bat 'timeout /t 15'
                     }
                 }
@@ -93,15 +90,15 @@ pipeline {
                 }
             }
         }
+    }
 
-        post {
-            always {
-                script {
-                    echo "Cleaning up test DB and Docker images..."
-                    bat "docker rm -f test-mariadb || exit 0"
-                    bat "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || exit 0"
-                    bat "docker rmi ${DOCKERHUB_REPO}:latest || exit 0"
-                }
+    post {
+        always {
+            script {
+                echo "Cleaning up test DB and Docker images..."
+                bat "docker rm -f test-mariadb || exit 0"
+                bat "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || exit 0"
+                bat "docker rmi ${DOCKERHUB_REPO}:latest || exit 0"
             }
         }
     }
