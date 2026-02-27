@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        DB_HOST = 'localhost'
+        DB_HOST = '127.0.0.1'
         DB_PORT = '3307' // Free port to avoid conflicts
         DB_NAME = 'notevault_db'
         PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
@@ -34,14 +34,14 @@ pipeline {
                     powershell """
                     # Remove any existing container
                     docker rm -f ${env.CONTAINER_NAME} -ErrorAction SilentlyContinue
-        
-                    # Start MariaDB container with a root password
+
+                    # Start MariaDB container
                     docker run -d --name ${env.CONTAINER_NAME} `
                         -e MYSQL_ROOT_PASSWORD=%DB_PASSWORD% `
                         -e MYSQL_DATABASE=${env.DB_NAME} `
                         -p ${env.DB_PORT}:3306 `
                         mariadb:10.11
-        
+
                     Write-Host "Waiting for MariaDB to be ready..."
                     \$ready = \$false
                     while (-not \$ready) {
@@ -50,14 +50,6 @@ pipeline {
                         if (\$status -match 'mysqld is alive') { \$ready = \$true }
                     }
                     Write-Host "MariaDB is ready."
-        
-                    # Create test user for all hosts (%) and grant privileges
-                    docker exec ${env.CONTAINER_NAME} mysql -uroot -p%DB_PASSWORD% -e "
-                        CREATE USER IF NOT EXISTS '%DB_USER%'@'%' IDENTIFIED BY '%DB_PASSWORD%';
-                        GRANT ALL PRIVILEGES ON ${env.DB_NAME}.* TO '%DB_USER%'@'%';
-                        FLUSH PRIVILEGES;
-                    "
-                    Write-Host "Test DB user created successfully."
                     """
                 }
             }
