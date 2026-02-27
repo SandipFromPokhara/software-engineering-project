@@ -2,10 +2,12 @@ pipeline {
     agent any
 
     environment {
-        PATH = "/usr/local/bin:$PATH"
+        JAVA_HOME = "/opt/homebrew/opt/openjdk"
+        PATH = "/opt/homebrew/bin:/opt/homebrew/sbin:${env.JAVA_HOME}/bin:${env.PATH}"
         DOCKERHUB_CREDENTIALS_ID = 'docker-jenkins'
         DOCKERHUB_REPO = 'swostikalama/notevault'
         DOCKER_IMAGE_TAG = 'latest'
+        JAVA_TOOL_OPTIONS = "-Dprism.order=sw -Djava.awt.headless=true"
     }
 
     tools {
@@ -22,38 +24,32 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/Swostika-Lama/Jenkins_Temp.git'
+                git branch: 'edit-test',
+                    url: 'git@github.com:SandipFromPokhara/software-engineering-project.git'
             }
         }
 
         stage('Build') {
             steps {
-                dir('Temperature') {
-                    sh 'mvn clean install'
-                }
+                sh 'mvn clean install -Djavafx.platform=mac'
             }
         }
 
         stage('Test') {
             steps {
-                dir('Temperature') {
-                    sh 'mvn test'
-                }
+                sh 'mvn test -Djavafx.platform=mac'
             }
         }
 
         stage('Code Coverage') {
             steps {
-                dir('Temperature') {
-                    sh 'mvn jacoco:report'
-                }
+                sh 'mvn jacoco:report -Djavafx.platform=mac'
             }
         }
 
         stage('Publish Test Results') {
             steps {
-                junit 'Temperature/target/surefire-reports/*.xml'
+                junit '**/target/surefire-reports/*.xml'
             }
         }
 
@@ -63,16 +59,16 @@ pipeline {
             }
         }
 
-
+        /* -------------------------
+           SEPARATE DOCKER STAGES
+           ------------------------- */
 
         stage('Build Docker Image') {
             steps {
-                dir('Temperature') {
-                    sh '''
-                        docker build \
-                            -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} .
-                    '''
-                }
+                sh '''
+                    docker build \
+                        -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} .
+                '''
             }
         }
 
