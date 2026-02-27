@@ -4,7 +4,7 @@ pipeline {
     environment {
         PATH = "/usr/local/bin:$PATH"
         DOCKERHUB_CREDENTIALS_ID = 'docker-jenkins'
-        DOCKERHUB_REPO = 'swostikalama/jenkins_temp'
+        DOCKERHUB_REPO = 'swostikalama/notevault'
         DOCKER_IMAGE_TAG = 'latest'
     }
 
