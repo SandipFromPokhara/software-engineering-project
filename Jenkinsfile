@@ -31,7 +31,7 @@ pipeline {
                         string(credentialsId: 'DB_USER', variable: 'DB_USER'),
                         string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD')
                 ]) {
-                bat """
+                    bat """
                     docker run -d --name test-mariadb ^
                      -e MYSQL_ROOT_PASSWORD=root ^
                      -e MYSQL_DATABASE=%DB_NAME% ^
@@ -41,8 +41,9 @@ pipeline {
                      mariadb:10.11
                     """
 
-                echo "Waiting for MariaDB to start..."
-                bat 'ping 127.0.0.1 -n 20 > nul'
+                    echo "Waiting for MariaDB to start..."
+                    bat 'ping 127.0.0.1 -n 20 > nul'
+                }
             }
         }
 
