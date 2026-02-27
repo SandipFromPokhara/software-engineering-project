@@ -6,14 +6,11 @@ pipeline {
     }
 
     environment {
-        DOCKERHUB_CREDENTIALS_ID = 'docker_jenkins'
+        DOCKERHUB_CREDENTIALS_ID = 'docker_jenkins'     // Jenkins Docker Hub credentials ID
         DOCKERHUB_REPO = 'swostikalama/notevault'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
         BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
         JAVA_TOOL_OPTIONS = "-Dprism.order=sw -Djava.awt.headless=true"
-
-        DB_USER = credentials('sep1_user')      // a secret text for the username
-        DB_PASSWORD = credentials('sep1_pass')  // a secret text for the password
     }
 
     stages {
@@ -28,6 +25,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
+                // Use single Jenkins credential 'sep1' for DB username and password
                 withCredentials([usernamePassword(credentialsId: 'sep1', usernameVariable: 'DB_USER', passwordVariable: 'DB_PASSWORD')]) {
                     sh 'mvn clean test -DDB_USER=$DB_USER -DDB_PASSWORD=$DB_PASSWORD'
                 }
@@ -55,6 +53,7 @@ pipeline {
         stage('Build Docker Image (amd64)') {
             steps {
                 script {
+                    // Ensure Buildx is enabled for cross-platform builds
                     sh """
                         docker buildx create --use || true
                         docker buildx build --platform linux/amd64 -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} .
@@ -83,6 +82,5 @@ pipeline {
                 }
             }
         }
-
     }
 }
