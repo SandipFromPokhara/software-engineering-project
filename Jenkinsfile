@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -7,11 +6,11 @@ pipeline {
     }
 
     environment {
+        // Path to Docker CLI on Windows
         PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
         DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
         DOCKERHUB_REPO = 'sandipranjit/notevault'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
-        BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
         JAVA_TOOL_OPTIONS = "-Dprism.order=sw -Djava.awt.headless=true"
     }
 
@@ -23,15 +22,9 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
+        stage('Build, Test & Coverage') {
             steps {
-                bat 'mvn clean test'
-            }
-        }
-
-        stage('Code Coverage') {
-            steps {
-                bat 'mvn jacoco:report -Djava.awt.headless=true'
+                bat 'mvn clean verify -Djava.awt.headless=true'
             }
         }
 
@@ -50,6 +43,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+                    echo "Building Docker image ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}"
                     docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}", ".")
                 }
             }
@@ -59,6 +53,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS_ID) {
+                        echo "Pushing image ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} to Docker Hub"
                         docker.image("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}").push()
                         docker.image("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}").push('latest')
                     }
@@ -69,9 +64,9 @@ pipeline {
         stage('Cleanup Docker Images') {
             steps {
                 script {
-                    // Remove local images to save disk space
-                    bat "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || true"
-                    bat "docker rmi ${DOCKERHUB_REPO}:latest || true"
+                    echo "Removing local Docker images"
+                    bat "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || exit 0"
+                    bat "docker rmi ${DOCKERHUB_REPO}:latest || exit 0"
                 }
             }
         }
