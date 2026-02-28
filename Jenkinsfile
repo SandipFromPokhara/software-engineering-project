@@ -6,11 +6,12 @@ pipeline {
     }
 
     environment {
+        // Use your preconfigured local DB for testing
         DB_HOST = '127.0.0.1'
         DB_PORT = '3307'
         DB_NAME = 'notevault_test_db'
-        DB_USER = 'ciuser'
-        DB_PASSWORD = 'ciuserpass'
+        DB_USER = 'localuser'            // your local DB username
+        DB_PASSWORD = 'localpass'        // your local DB password
         BCRYPT_COST = '12'
         DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
         DOCKERHUB_REPO = 'sandipranjit/notevault'
@@ -25,45 +26,6 @@ pipeline {
             steps {
                 git branch: 'feature-dev',
                         url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
-            }
-        }
-
-        stage('Start Test DB') {
-            steps {
-                script {
-                    // Remove old container if exists
-                    bat 'docker rm -f test-mariadb || exit 0'
-
-                    // Start fresh MariaDB container
-                    bat """
-                    docker run -d --name test-mariadb ^
-                        -e MYSQL_ROOT_PASSWORD=rootpass ^
-                        -e MYSQL_DATABASE=%DB_NAME% ^
-                        -p %DB_PORT%:3306 ^
-                        mariadb:10.11
-                    """
-
-                    // Wait for DB to be ready (max 30 tries)
-                    bat """
-                    powershell -NoProfile -Command ^
-                        "$ready=$false; $tries=0; ^
-                        while (-not $ready -and $tries -lt 30) { ^
-                            Start-Sleep -Seconds 2; ^
-                            try { docker exec test-mariadb mysqladmin ping -uroot -prootpass | Out-Null; $ready=$true } ^
-                            catch { $ready=$false }; ^
-                            $tries++ ^
-                        }; ^
-                        if (-not $ready) { Write-Host 'MariaDB did not start in time'; exit 1 }"
-                    """
-
-                    // Create CI user in the DB
-                    bat """
-                    docker exec test-mariadb mysql -uroot -prootpass -e ^
-                        "CREATE USER IF NOT EXISTS '%DB_USER%'@'%' IDENTIFIED BY '%DB_PASSWORD%'; ^
-                        GRANT ALL PRIVILEGES ON %DB_NAME%.* TO '%DB_USER%'@'%'; ^
-                        FLUSH PRIVILEGES;"
-                    """
-                }
             }
         }
 
@@ -118,17 +80,6 @@ pipeline {
                     docker push %DOCKERHUB_REPO%:latest
                     """
                 }
-            }
-        }
-    }
-
-    post {
-        always {
-            script {
-                echo "Cleaning up test DB and Docker images..."
-                bat "docker rm -f test-mariadb || exit 0"
-                bat "docker rmi %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% || exit 0"
-                bat "docker rmi %DOCKERHUB_REPO%:latest || exit 0"
             }
         }
     }
