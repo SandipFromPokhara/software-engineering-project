@@ -9,6 +9,8 @@ import javafx.concurrent.Task;
 import entity.UserEntity;
 import dao.user.JpaUserDao;
 import javafx.stage.Stage;
+import security.BcryptPasswordHasher;
+import security.PasswordHasher;
 import services.UserService;
 import util.NavigationUtil;
 import session.UserSession;
@@ -16,7 +18,8 @@ import session.UserSession;
 public class LoginController {
 
     private UserService userService;
-    private JpaUserDao userDao = new JpaUserDao();
+    private JpaUserDao userDao;
+    private PasswordHasher passwordHasher;
 
     @FXML
     private TextField usernameField;
@@ -88,7 +91,9 @@ public class LoginController {
 
     @FXML
     private void initialize() {
-        userService = new UserService(userDao);
+        userDao = new JpaUserDao();
+        passwordHasher = new BcryptPasswordHasher();
+        userService = new UserService(userDao, passwordHasher);
         loginButton.setDisable(true);
         statusLabel.setVisible(false);
 

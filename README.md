@@ -4,8 +4,6 @@
 
 While the application provides secure notebook and note management, the primary focus of this project is the DevOps lifecycle, including CI/CD automation, testing strategy, containerization, and structured team collaboration.
 
-Developed by a team of 4 students.
-
 ---
 
 ## Project Objectives
@@ -91,10 +89,7 @@ Defines relational structure for:
   - `User`
   - `Notebook`
   - `Note`
-
-Notebook
-
-Note
+  - `Tags`
 
 5️⃣ Session Management
 
@@ -143,6 +138,7 @@ Database: `notevault_db`
 ```
 User (0..N) ────── (1) Notebook
 Notebook (0..N) ── (1) Note
+Note (0..N) ────── (0..N) Tag
 ```
 
 **Cascading Rules**
@@ -150,6 +146,10 @@ Notebook (0..N) ── (1) Note
 - Deleting a User → Deletes associated Notebooks
 
 - Deleting a Notebook → Deletes associated Notes
+
+- Deleting a Note → Deletes entries in note_tags, Tags remain
+
+- Deleting a Tag → Deletes entries in note_tags, Notes remain
 
 ---
 
@@ -169,7 +169,6 @@ The project implements a fully automated CI/CD workflow using Jenkins, Maven, Do
 - Docker image build
 - Kubernetes deployment (Minikube)
 - MariaDB runtime connection
-
 
 ---
 
@@ -345,4 +344,3 @@ mvn javafx:run
 ```
 
 ---
-

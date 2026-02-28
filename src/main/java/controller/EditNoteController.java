@@ -6,14 +6,14 @@ import entity.NoteEntity;
 import entity.TagEntity;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 import javafx.util.Duration;
-import util.UndoRedoManager;
-import util.TextFormattingUtil;
+import util.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -23,12 +23,13 @@ public class EditNoteController {
     private NoteDAO noteDao;
     private TagDAO tagDao;
     private NoteEntity note;
-    private Set<String> selectedTags = new HashSet<>();
+    Set<String> selectedTags = new HashSet<>();
 
     @FXML
     private Label title;
+
     @FXML
-    TextField titleBox;
+    TextField titleField;
     @FXML
     private Label content;
 
@@ -39,7 +40,7 @@ public class EditNoteController {
     private Label annotation;
 
     @FXML
-    TextArea annotationBox;
+    TextField annotationBox;
 
     @FXML
     Button updateButton;
@@ -48,13 +49,13 @@ public class EditNoteController {
     private Button cancelButton;
 
     @FXML
-    private Label statusLabel;
+    Label statusLabel;
 
     @FXML
-    private FlowPane tagFlowpane;
+    FlowPane tagFlowpane;
 
     @FXML
-    private ComboBox<String> tagComboBox;
+    ComboBox<String> tagComboBox;
 
     @FXML
     private Button addTagBtn;
@@ -62,20 +63,19 @@ public class EditNoteController {
     @FXML
     private Tooltip tagTooltip;
 
+    @FXML
+    private ImageView tagIcon;
+
+    @FXML
+    private Label wordCountLabel;
+
     // Undo/Redo components
     @FXML private MenuItem undoMenuItem;
     @FXML private MenuItem redoMenuItem;
 
     // Toolbar buttons
-    @FXML private Button boldButton;
-    @FXML private Button italicButton;
-    @FXML private Button underlineButton;
-    @FXML private Button textColorButton;
     @FXML private Button bulletListButton;
     @FXML private Button numberedListButton;
-    @FXML private Button alignLeftButton;
-    @FXML private Button alignCenterButton;
-    @FXML private Button alignRightButton;
     @FXML private Button headingUpButton;
     @FXML private Button headingDownButton;
 
@@ -91,15 +91,23 @@ public class EditNoteController {
     }
 
     public void initialize() {
+        WordCountUtil.bind(contentBox, wordCountLabel);
+
         tagTooltip.setShowDelay(Duration.millis(100));
         tagComboBox.setEditable(true);
 
         // Initialize undo/redo manager
         undoRedoManager.initialize(undoMenuItem, redoMenuItem);
-        undoRedoManager.registerField("title", titleBox);
+        undoRedoManager.registerField("title", titleField);
         undoRedoManager.registerField("content", contentBox);
         undoRedoManager.registerField("annotation", annotationBox);
 
+        // Apply theme once scene is ready
+        javafx.application.Platform.runLater(() -> {
+            Scene scene = titleField.getScene();
+            ToggleUtil.applyTheme(scene);
+            updateTagIcon();
+        });
         // Enable list auto-continuation for content box
         TextFormattingUtil.enableListAutoContinuation(contentBox);
     }
@@ -122,38 +130,17 @@ public class EditNoteController {
         System.out.println("Button clicked: " + buttonId);
 
         switch (buttonId) {
-            case "boldButton":
-                System.out.println("Bold button clicked ");
-                break;
-            case "italicButton":
-                System.out.println("Italic button clicked ");
-                break;
-            case "underlineButton":
-                System.out.println("Underline button clicked ");
-                break;
-            case "textColorButton":
-                System.out.println("Text Color button clicked ");
-                break;
             case "bulletListButton":
                 TextFormattingUtil.toggleBulletList(contentBox, bulletListButton);
                 break;
             case "numberedListButton":
                 TextFormattingUtil.toggleNumberedList(contentBox, numberedListButton);
                 break;
-            case "alignLeftButton":
-                System.out.println("Align Left button clicked ");
-                break;
-            case "alignCenterButton":
-                System.out.println("Align Center button clicked ");
-                break;
-            case "alignRightButton":
-                System.out.println("Align Right button clicked ");
-                break;
             case "headingUpButton":
-                System.out.println("Heading Up button clicked ");
+                TextFormattingUtil.increaseFontSize(contentBox);
                 break;
             case "headingDownButton":
-                System.out.println("Heading Down button clicked ");
+                TextFormattingUtil.decreaseFontSize(contentBox);
                 break;
         }
     }
@@ -170,7 +157,7 @@ public class EditNoteController {
 
     public void setNote(NoteEntity note){
         this.note = note;
-        titleBox.setText(note.getTitle());
+        titleField.setText(note.getTitle());
         contentBox.setText(note.getContent());
         annotationBox.setText(note.getAnnotation());
 
@@ -186,7 +173,7 @@ public class EditNoteController {
             return;
         }
 
-        note.setTitle(titleBox.getText());
+        note.setTitle(titleField.getText());
         note.setContent(contentBox.getText());
         note.setAnnotation(annotationBox.getText());
 
@@ -206,17 +193,12 @@ public class EditNoteController {
         }
 
         noteDao.save(note);
-        close();
+        handleCancel();
     }
 
     @FXML
     private void handleCancel(){
-        close();
-    }
-
-    private void close() {
-        Stage stage = (Stage) updateButton.getScene().getWindow();
-        stage.close();
+        WindowUtil.closeWindow(updateButton);;
     }
 
     private void showStatus(String msg, boolean isError) {
@@ -226,58 +208,21 @@ public class EditNoteController {
     }
 
     private void refreshTagFlowPane() {
-        tagFlowpane.getChildren().clear();
-        selectedTags.stream()
-                .sorted(String::compareToIgnoreCase)
-                .forEach(tagName -> {
-                    HBox tagBox = new HBox();
-                    tagBox.setSpacing(5);
-                    tagBox.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 4 8 4 8; -fx-background-radius: 10;");
-
-                    Label label = new Label("#" + tagName);
-
-                    Button removeBtn = new Button("x");
-                    removeBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: red;");
-                    removeBtn.setOnAction(e -> {
-                        selectedTags.remove(tagName);
-                        refreshTagFlowPane();
-                    });
-
-                    tagBox.getChildren().addAll(label, removeBtn);
-                    tagFlowpane.getChildren().add(tagBox);
-                });
+        TagUtil.refreshFlowPane(selectedTags, tagFlowpane);
     }
 
     @FXML
-    private void handleAddTag() {
+    void handleAddTag() {
         String tagName = tagComboBox.getEditor().getText();
+        TagUtil.addTagToUI(selectedTags, tagFlowpane, tagComboBox,tagName );
+    }
 
-        if (tagName == null || tagName.isBlank()) {
-            return;
-        }
+    // Update tag button
+    private void updateTagIcon() {
+        String path = ToggleUtil.isDarkMode()
+                ? "/Images/tag-white.png"
+                : "/Images/tag-black.png";
 
-        tagName = tagName.trim();
-
-        int maxLength = 15;
-        if (tagName.length() > maxLength) {
-            showStatus("Tag too long! Max " + maxLength + " characters allowed", true);
-            return;
-        }
-
-        if (!tagName.matches("[a-zA-ZäöåÄÖÅ0-9_-]+")) {
-            showStatus("Invalid characters in tag.", true);
-            return;
-        }
-
-        if (selectedTags.contains(tagName)) {
-            return;
-        }
-
-        selectedTags.add(tagName);
-        if (!tagComboBox.getItems().contains(tagName)) {
-            tagComboBox.getItems().add(tagName);
-        }
-        refreshTagFlowPane();
-        tagComboBox.getEditor().clear();
+        tagIcon.setImage(new Image(path));
     }
 }

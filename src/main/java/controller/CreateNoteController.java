@@ -8,9 +8,11 @@ import entity.UserEntity;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -19,8 +21,7 @@ import entity.NoteEntity;
 import session.NotebookSession;
 import session.NoteSession;
 import session.UserSession;
-import util.UndoRedoManager;
-import util.TextFormattingUtil;
+import util.*;
 
 import java.net.URL;
 import java.util.List;
@@ -59,30 +60,14 @@ public class CreateNoteController implements Initializable {
     private Button addTagBtn;
 
     // Toolbar buttons
-    @FXML
-    private Button boldButton;
-    @FXML
-    private Button italicButton;
-    @FXML
-    private Button underlineButton;
-    @FXML
-    private Button textColorButton;
-    @FXML
-    private Button bulletListButton;
-    @FXML
-    private Button numberedListButton;
-    @FXML
-    private Button alignLeftButton;
-    @FXML
-    private Button alignCenterButton;
-    @FXML
-    private Button alignRightButton;
-    @FXML
-    private Button headingUpButton;
-    @FXML
-    private Button headingDownButton;
-    @FXML
-    private Tooltip tagTooltip;
+    @FXML private Button bulletListButton;
+    @FXML private Button numberedListButton;
+    @FXML private Button headingUpButton;
+    @FXML private Button headingDownButton;
+    @FXML private Tooltip tagTooltip, toggleTooltip;
+    @FXML private Button toggleBtn;
+    @FXML private ImageView tagIcon;
+    @FXML private Label wordCountLabel;
 
     // Undo/Redo components
     @FXML
@@ -97,7 +82,12 @@ public class CreateNoteController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
+        // Tooltip delay
         tagTooltip.setShowDelay(Duration.millis(100));
+        toggleTooltip.setShowDelay(Duration.millis(100));
+
+        // Load current user and notebooks
         UserEntity currentUser = UserSession.getUserInstance().getUser();
         List<NoteBookEntity> notebooks = new JpaNoteBookDao().findByUser(currentUser);
 
@@ -155,6 +145,14 @@ public class CreateNoteController implements Initializable {
         undoRedoManager.registerField("content", contentArea);
         undoRedoManager.registerField("annotation", annotationArea);
 
+        // Apply theme once scene is ready
+        javafx.application.Platform.runLater(() -> {
+            Scene scene = titleField.getScene();
+            ToggleUtil.applyTheme(scene);
+            updateToggleIcon();
+            updateTagIcon();
+            WordCountUtil.bind(contentArea, wordCountLabel);
+        });
         // Enable list auto-continuation for content area
         TextFormattingUtil.enableListAutoContinuation(contentArea);
     }
@@ -268,40 +266,18 @@ public class CreateNoteController implements Initializable {
         Button clickedButton = (Button) event.getSource();
         String buttonId = clickedButton.getId();
 
-        System.out.println("Button clicked: " + buttonId);
         switch (buttonId) {
-            case "boldButton":
-                System.out.println("Bold button");
-                break;
-            case "italicButton":
-                System.out.println("Italic button ");
-                break;
-            case "underlineButton":
-                System.out.println("Underline button");
-                break;
-            case "textColorButton":
-                System.out.println("Text Color");
-                break;
             case "bulletListButton":
                 TextFormattingUtil.toggleBulletList(contentArea, bulletListButton);
                 break;
             case "numberedListButton":
                 TextFormattingUtil.toggleNumberedList(contentArea, numberedListButton);
                 break;
-            case "alignLeftButton":
-                System.out.println("Align Left");
-                break;
-            case "alignCenterButton":
-                System.out.println("Align Center");
-                break;
-            case "alignRightButton":
-                System.out.println("Align Right");
-                break;
             case "headingUpButton":
-                System.out.println("Heading Up");
+                TextFormattingUtil.increaseFontSize(contentArea);
                 break;
             case "headingDownButton":
-                System.out.println("Heading Down");
+                TextFormattingUtil.decreaseFontSize(contentArea);
                 break;
         }
     }
@@ -311,7 +287,7 @@ public class CreateNoteController implements Initializable {
         contentArea.clear();
         annotationArea.clear();
         selectedTags.clear();
-        tagFlowpane.getChildren().clear();
+        refreshTagFlowPane();
         titleField.requestFocus();
 
         // Clear undo/redo history
@@ -324,70 +300,58 @@ public class CreateNoteController implements Initializable {
         statusLabel.setVisible(true);
     }
 
-    private void closeCurrentWindow() {
-        Stage stage = (Stage) titleField.getScene().getWindow();
-        stage.close();
-    }
-
     @FXML
     private void handleBackToHome() {
-        closeCurrentWindow();
+        WindowUtil.closeWindow(titleField);
     }
 
     @FXML
     private void handleClose() {
-        closeCurrentWindow();
+        WindowUtil.closeWindow(titleField);
     }
 
     @FXML
     private void handleAddTag() {
         String tagName = tagComboBox.getEditor().getText();
-
-        if (tagName == null || tagName.isBlank()) {
-            return;
-        }
-
-        tagName = tagName.trim();
-
-        int maxLength = 15;
-        if (tagName.length() > maxLength) {
-            showStatus("Tag too long! Max " + maxLength + " characters allowed", true);
-            return;
-        }
-
-        if (!tagName.matches("[a-zA-ZäöåÄÖÅ0-9_-]+")) {
-            showStatus("Invalid characters in tag", true);
-            return;
-        }
-
-        if (selectedTags.contains(tagName)) {
-            return;
-        }
-
-        selectedTags.add(tagName);
-        if (!tagComboBox.getItems().contains(tagName)) {
-            tagComboBox.getItems().add(tagName);
-        }
-        addTagToFlowPane(tagName);
-
-        tagComboBox.getEditor().clear();
+        TagUtil.addTagToUI(selectedTags, tagFlowpane, tagComboBox, tagName);
     }
 
-    private void addTagToFlowPane(String tagName) {
-        HBox tagBox = new HBox();
-        tagBox.setSpacing(5);
-        tagBox.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 4 8 4 8; -fx-background-radius: 10;");
+    private void refreshTagFlowPane() {
+        TagUtil.refreshFlowPane(selectedTags, tagFlowpane);
+    }
 
-        Label label = new Label("#" + tagName);
+    // Update toggle button icon
+    private void updateToggleIcon() {
+        ImageView icon = new ImageView(
+                new Image(ToggleUtil.isDarkMode() ? "/Images/light-theme.png" : "/Images/dark-theme.png")
+        );
+        icon.setFitWidth(20);
+        icon.setFitHeight(20);
+        icon.setPreserveRatio(true);
+        toggleBtn.setGraphic(icon);
+    }
 
-        Button removeBtn = new Button("x");
-        removeBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: red;");
-        removeBtn.setOnAction(e -> {
-            selectedTags.remove(tagName);
-            tagFlowpane.getChildren().remove(tagBox);
-        });
+    @FXML
+    private void handleThemeToggle() {
+        Scene scene = saveButton.getScene();
+        ToggleUtil.toggleTheme(scene);
 
-        tagBox.getChildren().addAll(label, removeBtn);
-        tagFlowpane.getChildren().add(tagBox);
+        ImageView icon = new ImageView(new Image(ToggleUtil.isDarkMode() ? "/Images/light-theme.png" : "/Images/dark-theme.png"));
+
+        icon.setFitWidth(20);
+        icon.setFitHeight(20);
+        icon.setPreserveRatio(true);
+
+        toggleBtn.setGraphic(icon);
+        updateTagIcon();
+    }
+
+    // Update tag button
+    private void updateTagIcon() {
+        String path = ToggleUtil.isDarkMode()
+                ? "/Images/tag-white.png"
+                : "/Images/tag-black.png";
+
+        tagIcon.setImage(new Image(path));
     }
 }
