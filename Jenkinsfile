@@ -164,16 +164,19 @@ pipeline {
                             docker run -d --name test-db \
                                 -e MARIADB_ROOT_PASSWORD=root \
                                 -e MARIADB_DATABASE=${DB_NAME} \
+                                -e MARIADB_USER=notevaultUser \
+                                -e MARIADB_PASSWORD=group1oPasswOrD \
                                 -p ${DB_PORT}:3306 \
                                 mariadb:latest
                         """
-                        sh 'sleep 15'  // simple wait for DB
+                        sh 'sleep 20'
                     } else {
                         echo "Docker not available, using local DB"
                     }
                 }
             }
         }
+
 
         stage('Run Tests') {
             steps {
