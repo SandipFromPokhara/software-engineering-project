@@ -32,38 +32,38 @@ pipeline {
                         passwordVariable: 'DB_PASSWORD'
                 )]) {
                     script {
-                        // Remove old container if exists
+                        // Remove old container
                         bat 'docker rm -f test-mariadb || exit 0'
 
-                        // Start MariaDB container
+                        // Start container
                         bat """
-                        docker run -d --name test-mariadb ^
-                            -e MYSQL_ROOT_PASSWORD=%DB_PASSWORD% ^
-                            -e MYSQL_DATABASE=%DB_NAME% ^
-                            -p 3307:3306 ^
-                            mariadb:10.11
-                        """
+                docker run -d --name test-mariadb ^
+                    -e MYSQL_ROOT_PASSWORD=%DB_PASSWORD% ^
+                    -e MYSQL_DATABASE=%DB_NAME% ^
+                    -p 3307:3306 ^
+                    mariadb:10.11
+                """
 
-                        // Wait until DB is ready (max 30 tries)
-                        bat """
-                        powershell -NoProfile -Command ^
-                        "$ready = $false; $tries=0; ^
-                        while (-not $ready -and $tries -lt 30) { ^
-                            Start-Sleep -Seconds 2; ^
-                            try { docker exec test-mariadb mysqladmin ping -uroot -p%DB_PASSWORD% | Out-Null; $ready=$true } ^
-                            catch { $ready=$false }; ^
-                            $tries++ ^
-                        }; ^
-                        if (-not $ready) { Write-Host 'MariaDB did not start in time'; exit 1 }"
-                        """
+                        // Wait for DB ready
+                        bat '''
+                            powershell -NoProfile -Command ^
+                            $ready=$false; $tries=0; ^
+                            while (-not $ready -and $tries -lt 30) { ^
+                                Start-Sleep -Seconds 2; ^
+                                try { docker exec test-mariadb mysqladmin ping -uroot -p%DB_PASSWORD% | Out-Null; $ready=$true } ^
+                                catch { $ready=$false }; ^
+                                $tries++ ^
+                            }; ^
+                            if (-not $ready) { Write-Host "MariaDB did not start in time"; exit 1 }
+                            '''
 
-                        // Create CI user with same credentials as Jenkins
-                        bat """
-                        docker exec test-mariadb mysql -uroot -p%DB_PASSWORD% -e ^
-                        "CREATE USER IF NOT EXISTS '%DB_USER%'@'%' IDENTIFIED BY '%DB_PASSWORD%'; ^
-                        GRANT ALL PRIVILEGES ON %DB_NAME%.* TO '%DB_USER%'@'%'; ^
-                        FLUSH PRIVILEGES;"
-                        """
+                                    // Create CI user
+                                    bat """
+                            docker exec test-mariadb mysql -uroot -p%DB_PASSWORD% -e ^
+                            "CREATE USER IF NOT EXISTS '%DB_USER%'@'%' IDENTIFIED BY '%DB_PASSWORD%'; ^
+                            GRANT ALL PRIVILEGES ON %DB_NAME%.* TO '%DB_USER%'@'%'; ^
+                            FLUSH PRIVILEGES;"
+                            """
                     }
                 }
             }
