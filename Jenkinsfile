@@ -6,9 +6,9 @@ pipeline {
     }
 
     environment {
-        DB_HOST = '127.0.0.1'
-        DB_PORT = '3307'
-        DB_NAME = 'notevault_test_db'
+        DB_HOST = 'localhost'
+        DB_PORT = '3306'
+        DB_NAME = 'notevault_db'
         BCRYPT_COST = '12'
         DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
         DOCKERHUB_REPO = 'sandipranjit/notevault'
