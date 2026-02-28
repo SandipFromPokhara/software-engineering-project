@@ -207,7 +207,17 @@ pipeline {
             }
         }
 
-        stage('Build & Push Docker') {
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    docker build \
+                        --platform linux/amd64, linux/arm64 \
+                        -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} .
+                '''
+            }
+        }
+
+        stage('Push Docker Image to Docker Hub') {
             steps {
                 withCredentials([
                     usernamePassword(
@@ -216,18 +226,19 @@ pipeline {
                         passwordVariable: 'DOCKER_PASS'
                     )
                 ]) {
-                    sh """
+                    sh '''
                         echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                        docker build -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} .
+
+                        # Push versioned tag
                         docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}
+
+                        # Tag and push latest
                         docker tag ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} ${DOCKERHUB_REPO}:latest
                         docker push ${DOCKERHUB_REPO}:latest
-                    """
+                    '''
                 }
             }
         }
-
-    }
 
     post {
         always {
