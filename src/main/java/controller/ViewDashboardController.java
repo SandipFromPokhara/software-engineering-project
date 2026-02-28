@@ -300,7 +300,7 @@ public class ViewDashboardController {
         boolean confirmed = AlertUtil.showConfirmation(
                 deleteButton.getScene().getWindow(),
                 "Delete Note",
-                "Delete \"" + selectedNote.getTitle() + "\"?\nThis action cannot be undone. Are you sure you want to delete this note?");
+                "Delete \"" + selectedNote.getTitle() + "\"?\nThis action cannot be undone. Are you sure?");
 
         if (confirmed) {
             try {
