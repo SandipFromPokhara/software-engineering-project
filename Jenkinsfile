@@ -9,7 +9,6 @@ pipeline {
         DB_HOST = '127.0.0.1'
         DB_PORT = '3307'
         DB_NAME = 'notevault_test_db'
-        PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
         DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
         DOCKERHUB_REPO = 'sandipranjit/notevault'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
@@ -32,33 +31,38 @@ pipeline {
                         usernameVariable: 'DB_USER',
                         passwordVariable: 'DB_PASSWORD'
                 )]) {
-                    powershell """
-                    # Remove existing container if present
-                    docker rm -f test-mariadb -ErrorAction SilentlyContinue
+                    script {
+                        // Remove old container if exists
+                        bat 'docker rm -f test-mariadb || exit 0'
 
-                    # Run MariaDB container
-                    docker run -d --name test-mariadb `
-                        -e MYSQL_ROOT_PASSWORD=$env:DB_PASSWORD `
-                        -e MYSQL_DATABASE=$env:DB_NAME `
-                        -p 3307:3306 `
-                        mariadb:10.11
+                        // Start container
+                        bat """
+                        docker run -d --name test-mariadb ^
+                            -e MYSQL_ROOT_PASSWORD=%DB_PASSWORD% ^
+                            -e MYSQL_DATABASE=%DB_NAME% ^
+                            -p 3307:3306 ^
+                            mariadb:10.11
+                        """
 
-                    Write-Host "Waiting for MariaDB to be ready..."
-                    \$ready = \$false
-                    while (-not \$ready) {
-                        Start-Sleep -Seconds 2
-                        \$status = docker exec test-mariadb mysqladmin ping -uroot -p$env:DB_PASSWORD 2>&1
-                        if (\$status -match 'mysqld is alive') { \$ready = \$true }
+                        // Wait until DB is ready
+                        bat """
+                        powershell -command ^
+                        "\$ready = \$false; ^
+                        while (-not \$ready) { ^
+                            Start-Sleep 2; ^
+                            try { docker exec test-mariadb mysqladmin ping -uroot -p%DB_PASSWORD% | Out-Null; \$ready = \$true } ^
+                            catch { \$ready = \$false } ^
+                        }"
+                        """
+
+                        // Create CI user once
+                        bat """
+                        docker exec test-mariadb mysql -uroot -p%DB_PASSWORD% -e ^
+                        "CREATE USER IF NOT EXISTS 'ciuser'@'%' IDENTIFIED BY 'ciuserpass'; ^
+                         GRANT ALL PRIVILEGES ON %DB_NAME%.* TO 'ciuser'@'%'; ^
+                         FLUSH PRIVILEGES;"
+                        """
                     }
-                    Write-Host "MariaDB is ready."
-
-                    # Create CI user and grant privileges
-                    docker exec test-mariadb mysql -uroot -p$env:DB_PASSWORD -e "
-                        CREATE USER IF NOT EXISTS 'ciuser'@'%' IDENTIFIED BY 'ciuserpass';
-                        GRANT ALL PRIVILEGES ON $env:DB_NAME.* TO 'ciuser'@'%';
-                        FLUSH PRIVILEGES;"
-                    Write-Host "Test DB user created successfully."
-                    """
                 }
             }
         }
@@ -70,16 +74,14 @@ pipeline {
                         usernameVariable: 'DB_USER',
                         passwordVariable: 'DB_PASSWORD'
                 )]) {
-                    script {
-                        bat """
-                        mvn clean verify -Djava.awt.headless=true ^
-                            -DDB_USER=%DB_USER% ^
-                            -DDB_PASSWORD=%DB_PASSWORD% ^
-                            -DDB_HOST=%DB_HOST% ^
-                            -DDB_PORT=%DB_PORT% ^
-                            -DDB_NAME=%DB_NAME%
-                        """
-                    }
+                    bat """
+                    mvn clean verify -Djava.awt.headless=true ^
+                        -DDB_USER=%DB_USER% ^
+                        -DDB_PASSWORD=%DB_PASSWORD% ^
+                        -DDB_HOST=%DB_HOST% ^
+                        -DDB_PORT=%DB_PORT% ^
+                        -DDB_NAME=%DB_NAME%
+                    """
                 }
             }
         }
@@ -116,10 +118,10 @@ pipeline {
                         passwordVariable: 'DOCKER_PASS'
                 )]) {
                     bat """
-                        docker login -u %DOCKER_USER% -p %DOCKER_PASS%
-                        docker push %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG%
-                        docker tag %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% %DOCKERHUB_REPO%:latest
-                        docker push %DOCKERHUB_REPO%:latest
+                    docker login -u %DOCKER_USER% -p %DOCKER_PASS%
+                    docker push %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG%
+                    docker tag %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% %DOCKERHUB_REPO%:latest
+                    docker push %DOCKERHUB_REPO%:latest
                     """
                 }
             }
