@@ -33,32 +33,30 @@ pipeline {
                         passwordVariable: 'DB_PASSWORD'
                 )]) {
                     powershell """
+                    # Remove existing container if present
                     docker rm -f test-mariadb -ErrorAction SilentlyContinue
-        
+
+                    # Run MariaDB container
                     docker run -d --name test-mariadb `
-                        -e MYSQL_ROOT_PASSWORD=%DB_PASSWORD% `
-                        -e MYSQL_DATABASE=notevault_test_db `
+                        -e MYSQL_ROOT_PASSWORD=$env:DB_PASSWORD `
+                        -e MYSQL_DATABASE=$env:DB_NAME `
                         -p 3307:3306 `
                         mariadb:10.11
-        
+
                     Write-Host "Waiting for MariaDB to be ready..."
                     \$ready = \$false
                     while (-not \$ready) {
                         Start-Sleep -Seconds 2
-                        \$status = docker exec test-mariadb mysqladmin ping -uroot -p%DB_PASSWORD% 2>&1
+                        \$status = docker exec test-mariadb mysqladmin ping -uroot -p$env:DB_PASSWORD 2>&1
                         if (\$status -match 'mysqld is alive') { \$ready = \$true }
                     }
                     Write-Host "MariaDB is ready."
-        
-                    docker exec test-mariadb mysql -uroot -p%DB_PASSWORD% -e `
-                        "CREATE USER IF NOT EXISTS '%DB_USER%'@'%' IDENTIFIED BY '%DB_PASSWORD%'; `
-                         GRANT ALL PRIVILEGES ON notevault_test_db.* TO '%DB_USER%'@'%'; `
-                         FLUSH PRIVILEGES;"
-                         
-                    docker exec test-mariadb mysql -uroot -p%DB_PASSWORD% -e `
-                        "CREATE USER IF NOT EXISTS '%DB_USER%'@'172.17.0.1' IDENTIFIED BY '%DB_PASSWORD%'; `
-                         GRANT ALL PRIVILEGES ON notevault_test_db.* TO '%DB_USER%'@'172.17.0.1'; `
-                         FLUSH PRIVILEGES;"
+
+                    # Create CI user and grant privileges
+                    docker exec test-mariadb mysql -uroot -p$env:DB_PASSWORD -e "
+                        CREATE USER IF NOT EXISTS 'ciuser'@'%' IDENTIFIED BY 'ciuserpass';
+                        GRANT ALL PRIVILEGES ON $env:DB_NAME.* TO 'ciuser'@'%';
+                        FLUSH PRIVILEGES;"
                     Write-Host "Test DB user created successfully."
                     """
                 }
@@ -133,8 +131,8 @@ pipeline {
             script {
                 echo "Cleaning up test DB and Docker images..."
                 bat "docker rm -f test-mariadb || exit 0"
-                bat "docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || exit 0"
-                bat "docker rmi ${DOCKERHUB_REPO}:latest || exit 0"
+                bat "docker rmi %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% || exit 0"
+                bat "docker rmi %DOCKERHUB_REPO%:latest || exit 0"
             }
         }
     }
