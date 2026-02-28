@@ -216,7 +216,17 @@ pipeline {
             }
         }
 
-        stage('Build & Push Multi-Arch Docker Image') {
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    docker build \
+                        --platform linux/amd64,linux/arm64 \
+                        -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} .
+                '''
+            }
+        }
+
+        stage('Push Docker Image to Docker Hub') {
             steps {
                 withCredentials([
                     usernamePassword(
@@ -228,30 +238,16 @@ pipeline {
                     sh '''
                         echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
 
-                        # Create buildx builder if not exists
-                        docker buildx create --use --name multi-builder || true
+                        # Push versioned tag
+                        docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}
 
-                        # Multi-arch build and push
-                        docker buildx build \
-                            --platform linux/amd64,linux/arm64 \
-                            -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} \
-                            -t ${DOCKERHUB_REPO}:latest \
-                            --push .
+                        # Tag and push latest
+                        docker tag ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} ${DOCKERHUB_REPO}:latest
+                        docker push ${DOCKERHUB_REPO}:latest
                     '''
                 }
             }
         }
-
-        stage('Cleanup Docker Images & Container') {
-            steps {
-                sh '''
-                    docker rmi ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} || true
-                    docker rmi ${DOCKERHUB_REPO}:latest || true
-                    docker rm -f test-db || true
-                '''
-            }
-        }
-    }
 
     post {
         always {
