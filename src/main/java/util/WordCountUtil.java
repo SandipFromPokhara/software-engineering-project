@@ -3,7 +3,6 @@ package util;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 
-
 public class WordCountUtil {
 
     public static void bind(TextArea textArea, Label wordCountLabel) {

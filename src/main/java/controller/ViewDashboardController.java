@@ -8,7 +8,6 @@ import com.itextpdf.layout.element.Paragraph;
 import dao.note.JpaNoteDao;
 import dao.note.NoteDAO;
 import dao.notebook.JpaNoteBookDao;
-import dao.notebook.NoteBookDAO;
 import dao.tag.JpaTagDao;
 import dao.tag.TagDAO;
 import entity.*;
@@ -23,8 +22,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.util.Duration;
 import session.NotebookSession;
-import util.DialogUtil;
-import util.NavigationUtil;
+import util.*;
 import session.NoteSession;
 import session.UserSession;
 
@@ -32,8 +30,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
-import util.ToggleUtil;
-import util.WordCountUtil;
 
 import java.io.File;
 import java.util.List;
@@ -45,7 +41,6 @@ public class ViewDashboardController {
 
     static final Logger logger = Logger.getLogger(ViewDashboardController.class.getName());
     private NoteBookEntity activeNotebook;
-    private NoteBookDAO notebookDao;
     private NoteDAO noteDao;
     private TagDAO tagDao;
 
@@ -107,7 +102,6 @@ public class ViewDashboardController {
     public void initialize() {
         toggleTooltip.setShowDelay(Duration.millis(100));
 
-        this.notebookDao = new JpaNoteBookDao();
         this.noteDao = new JpaNoteDao();
         this.tagDao = new JpaTagDao();
 
@@ -134,8 +128,6 @@ public class ViewDashboardController {
             toggleBtn.setGraphic(icon);
         });
 
-        loadNotebooks();
-
         editButton.setDisable(true);
         deleteButton.setDisable(true);
         noteTitleLabel.setText("Select a note to view");
@@ -144,6 +136,30 @@ public class ViewDashboardController {
 
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("formattedCreatedTime"));
+        notesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+
+        List<NoteBookEntity> notebooks = new JpaNoteBookDao().findByUser(user);
+
+        notebooks.sort((n1, n2) -> {
+            if (n1.getCreatedAt() == null) return -1;
+            if (n2.getCreatedAt() == null) return 1;
+            return n1.getCreatedAt().compareTo(n2.getCreatedAt());
+        });
+
+        NoteBookEntity lastCreatedNotebook = NotebookSession.getLastCreatedNotebook();
+        NoteBookEntity selectedNotebook;
+        if (lastCreatedNotebook != null && notebooks.contains(lastCreatedNotebook)) {
+            selectedNotebook = lastCreatedNotebook;
+        } else if (!notebooks.isEmpty()) {
+            selectedNotebook = notebooks.get(0);
+        } else {
+            selectedNotebook = null;
+        }
+
+        activeNotebook = selectedNotebook;
+        if (activeNotebook != null) {
+            loadNotes();
+        }
 
         notesTable.getSelectionModel().selectedItemProperty().addListener((observable, oldSelection, newSelection) -> {
             if (newSelection != null) {
@@ -164,53 +180,10 @@ public class ViewDashboardController {
                 deleteButton.setDisable(true);
             }
         });
-        notesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
         setupHover(viewNotesBtn, viewNotesLabel);
         setupHover(createNoteBtn, createNoteLabel);
         setupHover(logoutBtn, logoutLabel);
-    }
-
-    private void loadNotebooks() {
-
-        UserEntity user = UserSession.getUserInstance().getUser();
-
-        Task<List<NoteBookEntity>> loadNotebooksTask = new Task<>() {
-            @Override
-            protected List<NoteBookEntity> call() {
-                return notebookDao.findByUser(user);
-            }
-        };
-
-        loadNotebooksTask.setOnSucceeded(e -> {
-            List<NoteBookEntity> notebooks = loadNotebooksTask.getValue();
-
-            if (notebooks.isEmpty()) {
-                Stage owner = (Stage) rootPane.getScene().getWindow();
-                NavigationUtil.openWindow(owner, "/FXML/create_note.fxml", "NoteVault - Create Note", true, true, null);
-
-                loadNotes();
-                return;
-            }
-            NoteBookEntity lastCreated = NotebookSession.getLastCreatedNotebook();
-
-            if (lastCreated != null) {
-                for (NoteBookEntity nb : notebooks) {
-                    if (nb.getId().equals(lastCreated.getId())) {
-                        activeNotebook = nb;
-                        break;
-                    }
-                }
-                NotebookSession.clear();
-            }
-
-            if (activeNotebook == null && !notebooks.isEmpty()) {
-                activeNotebook = notebooks.get(0);
-            }
-
-            loadNotes();
-        });
-        new Thread(loadNotebooksTask).start();
     }
 
     private void loadNotes() {
@@ -226,28 +199,27 @@ public class ViewDashboardController {
         loadNotesTask.setOnSucceeded(e -> {
             List<NoteEntity> notes = loadNotesTask.getValue();
 
+            notes.sort((n1, n2) -> {
+                if (n1.getUpdatedTime() == null) return 1;
+                if (n2.getUpdatedTime() == null) return -1;
+                return n2.getUpdatedTime().compareTo(n1.getUpdatedTime());
+            });
+
             notesTable.getItems().setAll(notes);
 
-            if (!notes.isEmpty()) {
+            // Select last created note if exists
+            NoteEntity lastCreated = NoteSession.getLastCreatedNote();
+            if (lastCreated != null) {
+                notesTable.getItems().stream()
+                                     .filter(n -> n.getId().equals(lastCreated.getId()))
+                                     .findFirst()
+                                     .ifPresent(n -> notesTable.getSelectionModel().select(n));
+                NoteSession.clear();
+            } else if (!notes.isEmpty()) {
                 notesTable.getSelectionModel().selectFirst();
             }
-
-            NoteEntity lastCreated = NoteSession.getLastCreatedNote();
-
-            if (lastCreated != null) {
-                for (NoteEntity n : notes) {
-                    if (n.getId().equals(lastCreated.getId())) {
-                        notesTable.getSelectionModel().select(n);
-                        break;
-                    }
-                }
-                NoteSession.clear();
-            }
-
-            if (notesTable.getSelectionModel().getSelectedItem() == null) {
-                editButton.setDisable(true);
-                deleteButton.setDisable(true);
-            }
+            editButton.setDisable(false);
+            deleteButton.setDisable(false);
         });
 
         new Thread(loadNotesTask).start();
@@ -266,22 +238,26 @@ public class ViewDashboardController {
     }
 
     @FXML
-    private void handleOpen() {
-        UserEntity currentUser = UserSession.getUserInstance().getUser();
-        List<NoteBookEntity> notebooksList = notebookDao.findByUser(currentUser);
-        if (notebooksList.isEmpty()) return;
+    private void handleOpenManageNotebook() {
+        try {
+            Stage owner = (Stage) rootPane.getScene().getWindow();
 
-        ChoiceDialog<NoteBookEntity> dialog = new ChoiceDialog<>(activeNotebook, notebooksList);
-        dialog.setTitle("Open Notebook");
-        dialog.setHeaderText("Select a notebook to open");
-        dialog.setContentText("Available notebooks:");
-        dialog.initOwner(userMenuButton.getScene().getWindow());
+            NavigationUtil.openWindow(owner, "/FXML/manage_notebooks.fxml", "Manage Notebooks", false, true,
+                    (ManageNotebookController controller) -> {
+                        controller.loadNotebooks();
+                        controller.setActiveNotebook(activeNotebook);
+                    });
 
-        Optional<NoteBookEntity> result = dialog.showAndWait();
-        if (result.isPresent()) {
-            activeNotebook = result.get();
-            loadNotes();
+            NoteBookEntity lastNotebook = NotebookSession.getLastCreatedNotebook();
+            if (lastNotebook != null) {
+                activeNotebook = lastNotebook;
+                NotebookSession.clear();
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Failed to open Manage Notebooks window", e);
         }
+
+        loadNotes();
     }
 
     private void setupHover(Button button, Label label) {
@@ -296,20 +272,11 @@ public class ViewDashboardController {
     private void handleLogout() {
         Window window = rootPane.getScene().getWindow();
 
-        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmDialog.setTitle("Logout");
-        confirmDialog.setHeaderText("Are your sure you want to logout?");
-        confirmDialog.setContentText("Any unsaved changes may be lost!");
-        confirmDialog.initOwner(window);
+        boolean confirmed = AlertUtil.showConfirmation(
+                window, "Logout", "Are you sure you want to logout? Any unsaved changes may be lost!"
+        );
 
-        ButtonType logout = new ButtonType("Logout");
-        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-
-        confirmDialog.getButtonTypes().setAll(logout, cancel);
-
-        Optional<ButtonType> result = confirmDialog.showAndWait();
-
-        if (result.isPresent() && result.get() == logout) {
+        if (confirmed) {
             Scene scene = rootPane.getScene();
             scene.getStylesheets().removeIf(s -> s.endsWith("theme.css"));
             scene.getRoot().getStyleClass().removeAll("dark", "light");
@@ -330,16 +297,12 @@ public class ViewDashboardController {
         }
 
         // Show confirmation dialog
-        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmDialog.setTitle("Delete Note");
-        confirmDialog.setHeaderText("Delete \"" + selectedNote.getTitle() + "\"?");
-        confirmDialog.setContentText("This action cannot be undone. Are you sure you want to delete this note?");
-        confirmDialog.initOwner(deleteButton.getScene().getWindow());
+        boolean confirmed = AlertUtil.showConfirmation(
+                deleteButton.getScene().getWindow(),
+                "Delete Note",
+                "Delete \"" + selectedNote.getTitle() + "\"?\nThis action cannot be undone. Are you sure?");
 
-        Optional<ButtonType> result = confirmDialog.showAndWait();
-
-        // If user confirms deletion
-        if (result.isPresent() && result.get() == ButtonType.OK) {
+        if (confirmed) {
             try {
                 // Delete from database
                 noteDao.delete(selectedNote);
@@ -358,14 +321,8 @@ public class ViewDashboardController {
                     deleteButton.setDisable(true);
                 }
             } catch (Exception e) {
-                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                errorAlert.setTitle("Error");
-                errorAlert.setHeaderText("Failed to delete note");
-                errorAlert.setContentText("An error occurred: " + e.getMessage());
-                errorAlert.initOwner(deleteButton.getScene().getWindow());
-                errorAlert.showAndWait();
-
-                e.printStackTrace();
+                logger.log(Level.SEVERE, "Failed to delete note with ID: " + selectedNote.getId(), e);
+                AlertUtil.showError(deleteButton.getScene().getWindow(), "Failed to delete note: " + e.getMessage());
             }
         }
     }
@@ -397,13 +354,12 @@ public class ViewDashboardController {
 
     @FXML
     private void handleAbout() {
-        DialogUtil.showAbout(userMenuButton.getScene().getWindow());
+        DialogUtil.showAbout(rootPane.getScene().getWindow());
     }
 
     @FXML
     public void handleClose() {
-        Stage stage = (Stage) userMenuButton.getScene().getWindow();
-        stage.close();
+        WindowUtil.closeWindow(rootPane);
     }
 
     @FXML
@@ -430,7 +386,7 @@ public class ViewDashboardController {
     @FXML
     private void handleExport() {
         if (activeNotebook == null) {
-            showWarning("No notebook selected.");
+            AlertUtil.showWarning(rootPane.getScene().getWindow(), "No notebook selected.");
             return;
         }
         ChoiceDialog<String> dialog = new ChoiceDialog<>(
@@ -456,7 +412,7 @@ public class ViewDashboardController {
     private void exportSelectedNote() {
         NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
         if (selectedNote == null) {
-            showWarning("Please select a note to export.");
+            AlertUtil.showWarning(rootPane.getScene().getWindow(), "No notes available in this notebook.");
             return;
         }
         List<NoteEntity> singleNoteList = List.of(selectedNote);
@@ -466,7 +422,7 @@ public class ViewDashboardController {
     private void exportEntireNotebook() {
         List<NoteEntity> notes = noteDao.findByNotebook(activeNotebook); // active one not
         if (notes.isEmpty()) {
-            showWarning("Notebook is empty.");
+            AlertUtil.showWarning(rootPane.getScene().getWindow(), "No notebook selected.");
             return;
         }
         exportNotesToPdf(notes, activeNotebook.getTitle());
@@ -512,39 +468,12 @@ public class ViewDashboardController {
             }
 
             document.close();
-            showInfo("Export successful!");
+            AlertUtil.showInfo(rootPane.getScene().getWindow(), "Export successful!");
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Export failed", e);
-            showError("Export failed.");
+            AlertUtil.showError(rootPane.getScene().getWindow(), "Export failed.");
         }
-    }
-
-    private void showWarning(String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Warning");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.initOwner(userMenuButton.getScene().getWindow());
-        alert.showAndWait();
-    }
-
-    private void showInfo(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Information");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.initOwner(userMenuButton.getScene().getWindow());
-        alert.showAndWait();
-    }
-
-    private void showError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.initOwner(userMenuButton.getScene().getWindow());
-        alert.showAndWait();
     }
 
     @FXML

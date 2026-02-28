@@ -6,15 +6,16 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 import session.UserSession;
-import util.BcryptPasswordHasher;
-import util.Validation;
+import security.BcryptPasswordHasher;
+import security.PasswordHasher;
+import security.Validation;
+import util.WindowUtil;
 
 public class UserDashboardController {
 
     private final JpaUserDao userDao = new JpaUserDao();
-
+    private PasswordHasher passwordHasher;
     @FXML
     private TextField firstNameField;
 
@@ -38,6 +39,7 @@ public class UserDashboardController {
 
     @FXML
     public void initialize() {
+        passwordHasher = new BcryptPasswordHasher();
         Validation.hideMessage(messageLabel);
 
         UserEntity currentUser = UserSession.getUserInstance().getUser();
@@ -91,7 +93,7 @@ public class UserDashboardController {
             if (!Validation.validatePasswordStrength(newPassword, messageLabel)) {
                 return;
             }
-            currentUser.changePasswordHash(BcryptPasswordHasher.hashPassword(newPassword));
+            currentUser.changePasswordHash(passwordHasher.hash(newPassword));
         }
 
         currentUser.setLastName(newLastName);
@@ -107,7 +109,6 @@ public class UserDashboardController {
 
     @FXML
     private void handleCancel() {
-        Stage stage = (Stage) firstNameField.getScene().getWindow();
-        stage.close();
+        WindowUtil.closeWindow(firstNameField);
     }
 }

@@ -14,6 +14,7 @@ public class JpaTagDao implements TagDAO{
 
     @Override
     public TagEntity save(TagEntity tag) {
+        if (tag == null) throw new IllegalArgumentException("Tag cannot be null");
         if (tag.getId() == null && existsByName(tag.getTagName())) throw new IllegalArgumentException("Tag with this name already exists");
 
         EntityManager em = MariaDbJpaConnection.createEntityManager();
@@ -111,11 +112,18 @@ public class JpaTagDao implements TagDAO{
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
             em.getTransaction().begin();
+            TypedQuery<TagEntity> query = em.createQuery("SELECT t FROM TagEntity t WHERE t.tagName = :tagName AND t.id != :currentId", TagEntity.class);
+            query.setParameter("tagName", tag.getTagName());
+            query.setParameter("currentId", tag.getId());
+            if (!query.getResultList().isEmpty()) {
+                throw new IllegalArgumentException("Tag with this name already exists");
+            }
+
             em.merge(tag);
             em.getTransaction().commit();
-        } catch (Exception e) {
+        } catch (IllegalArgumentException  e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
-            throw new RuntimeException("Failed to updated tag: " + tag, e);
+            throw e;
         } finally {
             em.close();
         }
@@ -132,7 +140,7 @@ public class JpaTagDao implements TagDAO{
 
             if (managedTag != null) {
                 for (NoteEntity note : managedTag.getNotes()) {
-                    note.getTags().remove(managedTag);
+                    note.removeTag(managedTag);
                 }
                 em.remove(managedTag);
             }
