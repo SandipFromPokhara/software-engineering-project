@@ -22,7 +22,6 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'feature-dev', url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
-                credentialsId: 'github-pat'
             }
         }
 
