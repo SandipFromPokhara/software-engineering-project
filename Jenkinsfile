@@ -9,7 +9,7 @@ pipeline {
         DB_HOST = '127.0.0.1'
         DB_PORT = '3306'
         DB_NAME = 'notevault_db'
-        DB_CREDENTIALS_ID = 'DB_CREDENTIAL'
+        DB_CREDENTIALS_ID = 'DB_CREDENTIALS'
         DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
         DOCKERHUB_REPO = 'sandipranjit/notevault'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
