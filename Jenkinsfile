@@ -59,7 +59,10 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat "docker build -t ${env.DOCKERHUB_REPO}:${env.DOCKER_IMAGE_TAG} ."
+                bat 'docker version'
+                bat 'docker info'
+
+                bat "docker build -t ${env.DOCKERHUB_REPO}:${env.DOCKER_IMAGE_TAG} . --progress=plain"
             }
         }
 
@@ -71,7 +74,7 @@ pipeline {
                         passwordVariable: 'DOCKER_PASS'
                 )]) {
                     bat """
-            docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+            echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
             docker push ${env.DOCKERHUB_REPO}:${env.DOCKER_IMAGE_TAG}
             docker tag ${env.DOCKERHUB_REPO}:${env.DOCKER_IMAGE_TAG} ${env.DOCKERHUB_REPO}:latest
             docker push ${env.DOCKERHUB_REPO}:latest
