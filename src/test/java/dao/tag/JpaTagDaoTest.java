@@ -8,6 +8,7 @@ import entity.UserEntity;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,26 +17,35 @@ import static org.junit.jupiter.api.Assertions.*;
 class JpaTagDaoTest {
 
     private static JpaTagDao tagDao;
+    private List<TagEntity> testTags;
 
     @BeforeAll
     static void setupAll() {
         tagDao = new JpaTagDao();
     }
 
-    @BeforeEach
-    void cleanDatabase() {
-        // Remove all tags to prevent duplicate name issues
-        tagDao.findAll().forEach(tagDao::delete);
-    }
-
     private String uniqueName(String base) {
         return base + "_" + System.currentTimeMillis();
+    }
+
+    @BeforeEach
+    void initTestTags() {
+        testTags = new ArrayList<>();
+    }
+
+    @AfterEach
+    void cleanupTestTags() {
+        if (testTags != null) {
+            testTags.forEach(tagDao::delete);
+        }
     }
 
     @Test
     void testSaveAndFindTag() {
         TagEntity tag = new TagEntity(uniqueName("TestTag"));
         TagEntity saved = tagDao.save(tag);
+
+        testTags.add(saved);
 
         assertNotNull(saved.getId());
 
