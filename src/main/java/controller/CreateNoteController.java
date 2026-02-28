@@ -37,38 +37,63 @@ public class CreateNoteController implements Initializable {
     private NoteService noteService;
     private Set<String> selectedTags = new HashSet<>();
 
-    @FXML private TextField titleField;
-    @FXML private TextArea contentArea;
-    @FXML private TextArea annotationArea;
-    @FXML private Button saveButton;
-    @FXML private Button clearButton;
-    @FXML private Label statusLabel;
-    @FXML private ComboBox<NoteBookEntity> notebookComboBox;
-    @FXML private FlowPane tagFlowpane;
-    @FXML private ComboBox<String> tagComboBox;
-    @FXML private Button addTagBtn;
+    @FXML
+    private TextField titleField;
+    @FXML
+    private TextArea contentArea;
+    @FXML
+    private TextArea annotationArea;
+    @FXML
+    private Button saveButton;
+    @FXML
+    private Button clearButton;
+    @FXML
+    private Label statusLabel;
+    @FXML
+    private ComboBox<NoteBookEntity> notebookComboBox;
+    @FXML
+    private FlowPane tagFlowpane;
+    @FXML
+    private ComboBox<String> tagComboBox;
+    @FXML
+    private Button addTagBtn;
 
     // Toolbar buttons
-    @FXML private Button boldButton;
-    @FXML private Button italicButton;
-    @FXML private Button underlineButton;
-    @FXML private Button textColorButton;
-    @FXML private Button bulletListButton;
-    @FXML private Button numberedListButton;
-    @FXML private Button alignLeftButton;
-    @FXML private Button alignCenterButton;
-    @FXML private Button alignRightButton;
-    @FXML private Button headingUpButton;
-    @FXML private Button headingDownButton;
-    @FXML private Tooltip tagTooltip;
+    @FXML
+    private Button boldButton;
+    @FXML
+    private Button italicButton;
+    @FXML
+    private Button underlineButton;
+    @FXML
+    private Button textColorButton;
+    @FXML
+    private Button bulletListButton;
+    @FXML
+    private Button numberedListButton;
+    @FXML
+    private Button alignLeftButton;
+    @FXML
+    private Button alignCenterButton;
+    @FXML
+    private Button alignRightButton;
+    @FXML
+    private Button headingUpButton;
+    @FXML
+    private Button headingDownButton;
+    @FXML
+    private Tooltip tagTooltip;
 
     // Undo/Redo components
-    @FXML private MenuItem undoMenuItem;
-    @FXML private MenuItem redoMenuItem;
+    @FXML
+    private MenuItem undoMenuItem;
+    @FXML
+    private MenuItem redoMenuItem;
 
     private UndoRedoManager undoRedoManager = new UndoRedoManager();
 
-    public CreateNoteController() {}
+    public CreateNoteController() {
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -90,7 +115,9 @@ public class CreateNoteController implements Initializable {
         notebookComboBox.setConverter(new javafx.util.StringConverter<>() {
             @Override
             public String toString(NoteBookEntity notebook) {
-                if (notebook == null) { return ""; }
+                if (notebook == null) {
+                    return "";
+                }
                 return notebook.getTitle() == null ? "" : notebook.getTitle();
             }
 
@@ -110,7 +137,7 @@ public class CreateNoteController implements Initializable {
         saveButton.setDisable(true);
 
         // Disable save button if title is empty or ComboBox has no selection
-        titleField.textProperty().addListener((obs, old, newVal) ->  updateSaveButton());
+        titleField.textProperty().addListener((obs, old, newVal) -> updateSaveButton());
         notebookComboBox.getSelectionModel().selectedItemProperty().addListener((obs, old, newVal) -> updateSaveButton());
 
         // Load existing tags from database
