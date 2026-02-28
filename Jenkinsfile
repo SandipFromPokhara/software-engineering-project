@@ -73,7 +73,7 @@ pipeline {
                     set RETRIES=3
                     :LOGIN_RETRY
                     echo Logging in to Docker...
-                    echo "%DOCKER_PASS%" | docker login -u "%DOCKER_USER%" --password-stdin
+                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
                     if %ERRORLEVEL% neq 0 (
                         set /a RETRIES-=1
                         if %RETRIES% gtr 0 (
