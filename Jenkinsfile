@@ -210,6 +210,12 @@ pipeline {
                 junit '**/target/surefire-reports/*.xml'
             }
         }
+        stage('Build JAR') {
+            steps {
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+
 
         stage('Build Docker Image') {
             steps {
