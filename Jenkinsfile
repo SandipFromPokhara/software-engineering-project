@@ -21,15 +21,14 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'feature-dev',
-                        url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
+                git branch: 'feature-dev', url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
             }
         }
 
         stage('Build & Test') {
             steps {
                 withCredentials([usernamePassword(
-                        credentialsId: 'LOCAL_DB_CREDENTIALS',
+                        credentialsId: 'DB_CREDENTIALS',
                         usernameVariable: 'DB_USER',
                         passwordVariable: 'DB_PASSWORD'
                 )]) {
