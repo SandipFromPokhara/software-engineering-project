@@ -35,7 +35,7 @@ pipeline {
                         // Remove old container if exists
                         bat 'docker rm -f test-mariadb || exit 0'
 
-                        // Start container
+                        // Start MariaDB container
                         bat """
                         docker run -d --name test-mariadb ^
                             -e MYSQL_ROOT_PASSWORD=%DB_PASSWORD% ^
@@ -44,23 +44,25 @@ pipeline {
                             mariadb:10.11
                         """
 
-                        // Wait until DB is ready
+                        // Wait until DB is ready (max 30 tries)
                         bat """
-                        powershell -command ^
-                        "\$ready = \$false; ^
-                        while (-not \$ready) { ^
-                            Start-Sleep 2; ^
-                            try { docker exec test-mariadb mysqladmin ping -uroot -p%DB_PASSWORD% | Out-Null; \$ready = \$true } ^
-                            catch { \$ready = \$false } ^
-                        }"
+                        powershell -NoProfile -Command ^
+                        "$ready = $false; $tries=0; ^
+                        while (-not $ready -and $tries -lt 30) { ^
+                            Start-Sleep -Seconds 2; ^
+                            try { docker exec test-mariadb mysqladmin ping -uroot -p%DB_PASSWORD% | Out-Null; $ready=$true } ^
+                            catch { $ready=$false }; ^
+                            $tries++ ^
+                        }; ^
+                        if (-not $ready) { Write-Host 'MariaDB did not start in time'; exit 1 }"
                         """
 
-                        // Create CI user once
+                        // Create CI user with same credentials as Jenkins
                         bat """
                         docker exec test-mariadb mysql -uroot -p%DB_PASSWORD% -e ^
-                        "CREATE USER IF NOT EXISTS 'ciuser'@'%' IDENTIFIED BY 'ciuserpass'; ^
-                         GRANT ALL PRIVILEGES ON %DB_NAME%.* TO 'ciuser'@'%'; ^
-                         FLUSH PRIVILEGES;"
+                        "CREATE USER IF NOT EXISTS '%DB_USER%'@'%' IDENTIFIED BY '%DB_PASSWORD%'; ^
+                        GRANT ALL PRIVILEGES ON %DB_NAME%.* TO '%DB_USER%'@'%'; ^
+                        FLUSH PRIVILEGES;"
                         """
                     }
                 }
@@ -118,7 +120,7 @@ pipeline {
                         passwordVariable: 'DOCKER_PASS'
                 )]) {
                     bat """
-                    docker login -u %DOCKER_USER% -p %DOCKER_PASS%
+                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
                     docker push %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG%
                     docker tag %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% %DOCKERHUB_REPO%:latest
                     docker push %DOCKERHUB_REPO%:latest
@@ -132,6 +134,7 @@ pipeline {
         always {
             script {
                 echo "Cleaning up test DB and Docker images..."
+                // Ignore errors on cleanup
                 bat "docker rm -f test-mariadb || exit 0"
                 bat "docker rmi %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% || exit 0"
                 bat "docker rmi %DOCKERHUB_REPO%:latest || exit 0"
