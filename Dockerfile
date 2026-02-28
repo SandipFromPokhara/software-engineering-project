@@ -56,7 +56,7 @@ COPY --from=build /app/app.jar ./app.jar
 
 # Environment variables
 ENV DB_HOST=host.docker.internal
-ENV DB_PORT=3306
+ENV DB_PORT=3307
 ENV DB_USER=databaseuser
 ENV DB_PASSWORD=secretpassword
 ENV DB_NAME=notevault_db
