@@ -22,6 +22,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'feature-dev', url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
+                credentialsId: 'github-pat';
             }
         }
 
@@ -33,7 +34,7 @@ pipeline {
                         passwordVariable: 'DB_PASSWORD'
                 )]) {
                     bat """
-                mvn clean verify -Djava.awt.headless=true ^
+                    mvn clean test ^
                     -DDB_USER=%DB_USER% ^
                     -DDB_PASSWORD=%DB_PASSWORD% ^
                     -DDB_HOST=%DB_HOST% ^
