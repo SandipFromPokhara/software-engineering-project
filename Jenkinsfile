@@ -24,6 +24,63 @@ pipeline {
             }
         }
 
+        stage('Start Test DB (Optional)') {
+            steps {
+                withCredentials([usernamePassword(
+                        credentialsId: 'DB_CREDENTIALS',
+                        usernameVariable: 'DB_USER',
+                        passwordVariable: 'DB_PASSWORD'
+                )]) {
+                    script {
+                        def dockerAvailable = true
+                        try {
+                            bat 'docker --version'
+                        } catch (err) {
+                            echo "Docker not available, will use existing DB"
+                            dockerAvailable = false
+                        }
+
+                        if (dockerAvailable) {
+                            // Remove any old container
+                            bat 'docker rm -f test-mariadb || exit 0'
+
+                            // Start fresh MariaDB container
+                            bat """
+                            docker run -d --name test-mariadb ^
+                                -e MYSQL_ROOT_PASSWORD=%DB_PASSWORD% ^
+                                -e MYSQL_DATABASE=%DB_NAME% ^
+                                -p 3307:3306 ^
+                                mariadb:10.11
+                            """
+
+                            // Wait for DB readiness
+                            bat '''
+                            powershell -NoProfile -Command ^
+                            $ready=$false; $tries=0; ^
+                            while (-not $ready -and $tries -lt 30) { ^
+                                Start-Sleep -Seconds 2; ^
+                                try { docker exec test-mariadb mysqladmin ping -uroot -p%DB_PASSWORD% | Out-Null; $ready=$true } ^
+                                catch { $ready=$false }; ^
+                                $tries++ ^
+                            }; ^
+                            if (-not $ready) { Write-Host "MariaDB did not start in time"; exit 1 }
+                            '''
+
+                            // Create CI user
+                            bat """
+                            docker exec test-mariadb mysql -uroot -p%DB_PASSWORD% -e ^
+                            "CREATE USER IF NOT EXISTS '%DB_USER%'@'%' IDENTIFIED BY '%DB_PASSWORD%'; ^
+                            GRANT ALL PRIVILEGES ON %DB_NAME%.* TO '%DB_USER%'@'%'; ^
+                            FLUSH PRIVILEGES;"
+                            """
+                        } else {
+                            echo "Skipping container creation. Using existing DB at %DB_HOST%:%DB_PORT%"
+                        }
+                    }
+                }
+            }
+        }
+
         stage('Build & Test') {
             steps {
                 withCredentials([usernamePassword(
@@ -32,7 +89,7 @@ pipeline {
                         passwordVariable: 'DB_PASSWORD'
                 )]) {
                     bat """
-                    echo Running Maven tests against existing DB
+                    echo Running Maven tests
                     mvn clean verify -Djava.awt.headless=true ^
                         -DDB_USER=%DB_USER% ^
                         -DDB_PASSWORD=%DB_PASSWORD% ^
@@ -88,7 +145,12 @@ pipeline {
 
     post {
         always {
-            echo "CI pipeline finished. No containers were created; Docker images cleanup optional."
+            script {
+                echo "Cleaning up Docker images and test container..."
+                bat "docker rm -f test-mariadb || exit 0"
+                bat "docker rmi %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% || exit 0"
+                bat "docker rmi %DOCKERHUB_REPO%:latest || exit 0"
+            }
         }
     }
 }
