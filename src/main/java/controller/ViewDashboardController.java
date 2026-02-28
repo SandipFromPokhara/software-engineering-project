@@ -32,6 +32,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -75,7 +76,8 @@ public class ViewDashboardController {
 
     @FXML
     private Label noteTitleLabel,
-                  wordCountLabel;
+            wordCountLabel,
+            dbStatusLabel;
 
     @FXML
     private TextArea noteViewArea,
@@ -92,11 +94,12 @@ public class ViewDashboardController {
 
     @FXML
     private ImageView tagIcon,
-                    sideBtn1,
-                    sideBtn2,
-                    sideBtn3;
+            sideBtn1,
+            sideBtn2,
+            sideBtn3;
 
-    public ViewDashboardController() {}
+    public ViewDashboardController() {
+    }
 
     @FXML
     public void initialize() {
@@ -184,6 +187,9 @@ public class ViewDashboardController {
         setupHover(viewNotesBtn, viewNotesLabel);
         setupHover(createNoteBtn, createNoteLabel);
         setupHover(logoutBtn, logoutLabel);
+
+        dbStatusLabel.setText("● Local Storage Active (MariaDB)");
+        dbStatusLabel.setStyle("-fx-text-fill: green;");
     }
 
     private void loadNotes() {
@@ -211,9 +217,9 @@ public class ViewDashboardController {
             NoteEntity lastCreated = NoteSession.getLastCreatedNote();
             if (lastCreated != null) {
                 notesTable.getItems().stream()
-                                     .filter(n -> n.getId().equals(lastCreated.getId()))
-                                     .findFirst()
-                                     .ifPresent(n -> notesTable.getSelectionModel().select(n));
+                        .filter(n -> n.getId().equals(lastCreated.getId()))
+                        .findFirst()
+                        .ifPresent(n -> notesTable.getSelectionModel().select(n));
                 NoteSession.clear();
             } else if (!notes.isEmpty()) {
                 notesTable.getSelectionModel().selectFirst();
@@ -229,12 +235,12 @@ public class ViewDashboardController {
         tagFlowpane.getChildren().clear();
 
         note.getTags().stream()
-                    .sorted((t1, t2) -> t1.getTagName().compareToIgnoreCase(t2.getTagName()))
-                    .forEach(tag -> {
-                        Label tagLabel = new Label("#" + tag.getTagName());
-                        tagLabel.getStyleClass().addAll("note-tag", "tag-box");
-                        tagFlowpane.getChildren().add(tagLabel);
-                    });
+                .sorted((t1, t2) -> t1.getTagName().compareToIgnoreCase(t2.getTagName()))
+                .forEach(tag -> {
+                    Label tagLabel = new Label("#" + tag.getTagName());
+                    tagLabel.getStyleClass().addAll("note-tag", "tag-box");
+                    tagFlowpane.getChildren().add(tagLabel);
+                });
     }
 
     @FXML
@@ -262,10 +268,10 @@ public class ViewDashboardController {
 
     private void setupHover(Button button, Label label) {
         button.setOnMouseEntered(e ->
-            label.setVisible(true));
+                label.setVisible(true));
 
         button.setOnMouseExited(e ->
-            label.setVisible(false));
+                label.setVisible(false));
     }
 
     @FXML
@@ -499,5 +505,42 @@ public class ViewDashboardController {
         sideBtn1.setImage(new Image(dark ? "/Images/open-folder-dark.png" : "/Images/open-folder.png"));
         sideBtn2.setImage(new Image(dark ? "/Images/create-file-dark.png" : "/Images/create-file.png"));
         sideBtn3.setImage(new Image(dark ? "/Images/logout-dark.png" : "/Images/logout.png"));
+    }
+
+    @FXML
+    private void handleOpenFAQ() {
+        Stage stage = (Stage) rootPane.getScene().getWindow();
+        NavigationUtil.<FAQController>openWindow(stage, "/FXML/faq_view.fxml", "Frequently Asked Questions", true, true, controller -> controller.initFaq(false));
+    }
+
+    @FXML
+    private void handleOpenDataFolder() {
+        Window owner = rootPane.getScene().getWindow();
+        String title = "Access Local Storage";
+        String message = """
+                You are about to open your NoteVault database folder.
+                
+                Please do not move, rename, or delete these files,
+                as this will result in data loss. Continue?""";
+
+        boolean confirmed = AlertUtil.showConfirmation(owner, title, message);
+
+        if (confirmed) {
+            try {
+                String userHome = System.getProperty("user.home");
+                File dataDir = new File(userHome, ".NoteVault/data");
+                if (!dataDir.exists()) {
+                    dataDir.mkdirs();
+                }
+                if (java.awt.Desktop.isDesktopSupported()) {
+                    java.awt.Desktop.getDesktop().open(dataDir);
+                } else {
+                    AlertUtil.showWarning(owner, "Your system does not support opening file folders automatically.");
+                }
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Failed to open folder", e);
+                AlertUtil.showError(owner, "Failed to open folder: " + e.getMessage());
+            }
+        }
     }
 }
