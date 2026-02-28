@@ -126,7 +126,7 @@ pipeline {
 
     environment {
         JAVA_HOME = tool 'JDK21'
-        PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
+        PATH = "${env.JAVA_HOME}/bin:/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
 
         DOCKERHUB_CREDENTIALS_ID = 'docker-jenkins'
         DOCKERHUB_REPO = 'swostikalama/notevault'
