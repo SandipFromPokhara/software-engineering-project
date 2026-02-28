@@ -150,6 +150,7 @@ pipeline {
             steps {
                 sh 'java -version || true'
                 sh 'docker --version || echo "Docker not installed"'
+                sh 'which docker'
             }
         }
 
