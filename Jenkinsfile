@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        DB_HOST = 'localhost'
+        DB_HOST = '127.0.0.1'
         DB_PORT = '3306'
         DB_NAME = 'notevault_db'
         BCRYPT_COST = '12'
@@ -71,7 +71,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 withCredentials([usernamePassword(
-                        credentialsId: "${DOCKERHUB_CREDENTIALS_ID}",
+                        credentialsId: "Docker_Hub",
                         usernameVariable: 'DOCKER_USER',
                         passwordVariable: 'DOCKER_PASS'
                 )]) {
