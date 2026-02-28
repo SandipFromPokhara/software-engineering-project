@@ -34,7 +34,7 @@ pipeline {
                 )]) {
                     bat """
                     mvn clean test -DDB_USER=%DB_USER% -DDB_PASSWORD=%DB_PASSWORD% -DDB_HOST=%DB_HOST% -DDB_PORT=%DB_PORT% -DDB_NAME=%DB_NAME%
-                """
+                    """
                 }
             }
         }
@@ -57,16 +57,7 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                bat 'docker version'
-                bat 'docker info'
-
-                bat "docker build -t ${env.DOCKERHUB_REPO}:${env.DOCKER_IMAGE_TAG} . --progress=plain"
-            }
-        }
-
-        stage('Push Docker Image') {
+        stage('Build & Push Docker Image') {
             steps {
                 withCredentials([usernamePassword(
                         credentialsId: 'Docker_Hub',
@@ -74,11 +65,38 @@ pipeline {
                         passwordVariable: 'DOCKER_PASS'
                 )]) {
                     bat """
-            echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
-            docker push ${env.DOCKERHUB_REPO}:${env.DOCKER_IMAGE_TAG}
-            docker tag ${env.DOCKERHUB_REPO}:${env.DOCKER_IMAGE_TAG} ${env.DOCKERHUB_REPO}:latest
-            docker push ${env.DOCKERHUB_REPO}:latest
-            """
+                    REM --- Debug environment ---
+                    echo DOCKER_USER=%DOCKER_USER%
+                    echo Length of DOCKER_PASS=%DOCKER_PASS%
+
+                    REM --- Docker Login with retry ---
+                    set RETRIES=3
+                    :LOGIN_RETRY
+                    echo Logging in to Docker...
+                    echo "%DOCKER_PASS%" | docker login -u "%DOCKER_USER%" --password-stdin
+                    if %ERRORLEVEL% neq 0 (
+                        set /a RETRIES-=1
+                        if %RETRIES% gtr 0 (
+                            echo Retry Docker login...
+                            goto LOGIN_RETRY
+                        )
+                        echo Docker login failed
+                        exit /b 1
+                    )
+
+                    REM --- Build Docker Image ---
+                    docker build --pull -t %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% .
+
+                    REM --- Verify image exists ---
+                    docker images
+
+                    REM --- Push Docker Image with build number tag ---
+                    docker push %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG%
+
+                    REM --- Tag as latest and push ---
+                    docker tag %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% %DOCKERHUB_REPO%:latest
+                    docker push %DOCKERHUB_REPO%:latest
+                    """
                 }
             }
         }
