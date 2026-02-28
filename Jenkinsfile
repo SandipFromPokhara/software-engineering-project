@@ -6,12 +6,9 @@ pipeline {
     }
 
     environment {
-        // Use your preconfigured local DB for testing
         DB_HOST = '127.0.0.1'
         DB_PORT = '3307'
         DB_NAME = 'notevault_test_db'
-        DB_USER = 'localuser'            // your local DB username
-        DB_PASSWORD = 'localpass'        // your local DB password
         BCRYPT_COST = '12'
         DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
         DOCKERHUB_REPO = 'sandipranjit/notevault'
@@ -31,7 +28,12 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                bat """
+                withCredentials([usernamePassword(
+                        credentialsId: 'LOCAL_DB_CREDENTIALS',
+                        usernameVariable: 'DB_USER',
+                        passwordVariable: 'DB_PASSWORD'
+                )]) {
+                    bat """
                 mvn clean verify -Djava.awt.headless=true ^
                     -DDB_USER=%DB_USER% ^
                     -DDB_PASSWORD=%DB_PASSWORD% ^
@@ -39,6 +41,7 @@ pipeline {
                     -DDB_PORT=%DB_PORT% ^
                     -DDB_NAME=%DB_NAME%
                 """
+                }
             }
         }
 
