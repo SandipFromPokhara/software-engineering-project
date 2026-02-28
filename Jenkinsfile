@@ -54,6 +54,11 @@ pipeline {
                         "CREATE USER IF NOT EXISTS '%DB_USER%'@'%' IDENTIFIED BY '%DB_PASSWORD%'; `
                          GRANT ALL PRIVILEGES ON notevault_test_db.* TO '%DB_USER%'@'%'; `
                          FLUSH PRIVILEGES;"
+                         
+                    docker exec test-mariadb mysql -uroot -p%DB_PASSWORD% -e `
+                        "CREATE USER IF NOT EXISTS '%DB_USER%'@'172.17.0.1' IDENTIFIED BY '%DB_PASSWORD%'; `
+                         GRANT ALL PRIVILEGES ON notevault_test_db.* TO '%DB_USER%'@'172.17.0.1'; `
+                         FLUSH PRIVILEGES;"
                     Write-Host "Test DB user created successfully."
                     """
                 }
