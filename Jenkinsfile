@@ -33,12 +33,7 @@ pipeline {
                         passwordVariable: 'DB_PASSWORD'
                 )]) {
                     bat """
-                    mvn clean test ^
-                    -DDB_USER=%DB_USER% ^
-                    -DDB_PASSWORD=%DB_PASSWORD% ^
-                    -DDB_HOST=%DB_HOST% ^
-                    -DDB_PORT=%DB_PORT% ^
-                    -DDB_NAME=%DB_NAME%
+                    mvn clean test -DDB_USER=%DB_USER% -DDB_PASSWORD=%DB_PASSWORD% -DDB_HOST=%DB_HOST% -DDB_PORT=%DB_PORT% -DDB_NAME=%DB_NAME%
                 """
                 }
             }
