@@ -136,8 +136,6 @@ public class EditNoteController {
         Button clickedButton = (Button) event.getSource();
         String buttonId = clickedButton.getId();
 
-        System.out.println("Button clicked: " + buttonId);
-
         switch (buttonId) {
             case "bulletListButton":
                 TextFormattingUtil.toggleList(contentBox, bulletListButton, new BulletListStrategy());
@@ -208,7 +206,6 @@ public class EditNoteController {
     @FXML
     private void handleCancel() {
         WindowUtil.closeWindow(updateButton);
-        ;
     }
 
     private void showStatus(String msg, boolean isError) {
