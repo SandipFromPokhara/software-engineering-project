@@ -20,18 +20,26 @@ public class MariaDbJpaConnection {
                 Map<String, String> properties = new ConcurrentHashMap<>();
 
                 String dbUser = System.getProperty("DB_USER");
-                if (dbUser == null) {
-                    dbUser = System.getenv("DB_USER");
-                }
+                if (dbUser == null) dbUser = System.getenv("DB_USER");
 
                 String dbPassword = System.getProperty("DB_PASSWORD");
-                if (dbPassword == null) {
-                    dbPassword = System.getenv("DB_PASSWORD");
-                }
+                if (dbPassword == null) dbPassword = System.getenv("DB_PASSWORD");
 
+                String dbHost = System.getProperty("DB_HOST");
+                if (dbHost == null) dbHost = System.getenv("DB_HOST");
+
+                String dbPort = System.getProperty("DB_PORT");
+                if (dbPort == null) dbPort = System.getenv("DB_PORT");
+
+                String dbName = System.getProperty("DB_NAME");
+                if (dbName == null) dbName = System.getenv("DB_NAME");
+
+                properties.put("jakarta.persistence.jdbc.url",
+                        "jdbc:mariadb://" + dbHost + ":" + dbPort + "/" + dbName);
                 properties.put("jakarta.persistence.jdbc.user", dbUser);
                 properties.put("jakarta.persistence.jdbc.password", dbPassword);
 
+                LOGGER.info("Connecting to DB: jdbc:mariadb://{}:{}/{} with user {}", dbHost, dbPort, dbName, dbUser);
                 emf = Persistence.createEntityManagerFactory("CompanyMariaDbUnit", properties);
                 LOGGER.info("EntityManagerFactory created successfully");
             } catch (Exception e) {

@@ -11,14 +11,12 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 import javafx.util.Duration;
-import util.ToggleUtil;
-import util.UndoRedoManager;
-import util.WordCountUtil;
-import util.TextFormattingUtil;
+import util.*;
+import util.bulletList.BulletListStrategy;
+import util.bulletList.NumberedListStrategy;
+import util.bulletList.TextFormattingUtil;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -75,14 +73,20 @@ public class EditNoteController {
     private Label wordCountLabel;
 
     // Undo/Redo components
-    @FXML private MenuItem undoMenuItem;
-    @FXML private MenuItem redoMenuItem;
+    @FXML
+    private MenuItem undoMenuItem;
+    @FXML
+    private MenuItem redoMenuItem;
 
     // Toolbar buttons
-    @FXML private Button bulletListButton;
-    @FXML private Button numberedListButton;
-    @FXML private Button headingUpButton;
-    @FXML private Button headingDownButton;
+    @FXML
+    private Button bulletListButton;
+    @FXML
+    private Button numberedListButton;
+    @FXML
+    private Button headingUpButton;
+    @FXML
+    private Button headingDownButton;
 
     private UndoRedoManager undoRedoManager = new UndoRedoManager();
 
@@ -132,14 +136,12 @@ public class EditNoteController {
         Button clickedButton = (Button) event.getSource();
         String buttonId = clickedButton.getId();
 
-        System.out.println("Button clicked: " + buttonId);
-
         switch (buttonId) {
             case "bulletListButton":
-                TextFormattingUtil.toggleBulletList(contentBox, bulletListButton);
+                TextFormattingUtil.toggleList(contentBox, bulletListButton, new BulletListStrategy());
                 break;
             case "numberedListButton":
-                TextFormattingUtil.toggleNumberedList(contentBox, numberedListButton);
+                TextFormattingUtil.toggleList(contentBox, numberedListButton, new NumberedListStrategy());
                 break;
             case "headingUpButton":
                 TextFormattingUtil.increaseFontSize(contentBox);
@@ -160,7 +162,7 @@ public class EditNoteController {
         );
     }
 
-    public void setNote(NoteEntity note){
+    public void setNote(NoteEntity note) {
         this.note = note;
         titleField.setText(note.getTitle());
         contentBox.setText(note.getContent());
@@ -172,7 +174,7 @@ public class EditNoteController {
     }
 
     @FXML
-    void handleUpdate(){
+    void handleUpdate() {
         if (noteDao == null || tagDao == null || note == null) {
             showStatus("Internal error. Please reopen edit window", true);
             return;
@@ -183,7 +185,7 @@ public class EditNoteController {
         note.setAnnotation(annotationBox.getText());
 
         // Clear old tags first
-        for (TagEntity tag: new HashSet<>(note.getTags())) {
+        for (TagEntity tag : new HashSet<>(note.getTags())) {
             note.removeTag(tag);
         }
 
@@ -198,17 +200,12 @@ public class EditNoteController {
         }
 
         noteDao.save(note);
-        close();
+        handleCancel();
     }
 
     @FXML
-    private void handleCancel(){
-        close();
-    }
-
-    private void close() {
-        Stage stage = (Stage) updateButton.getScene().getWindow();
-        stage.close();
+    private void handleCancel() {
+        WindowUtil.closeWindow(updateButton);
     }
 
     private void showStatus(String msg, boolean isError) {
@@ -218,60 +215,13 @@ public class EditNoteController {
     }
 
     private void refreshTagFlowPane() {
-        tagFlowpane.getChildren().clear();
-        selectedTags.stream()
-                .sorted(String::compareToIgnoreCase)
-                .forEach(tagName -> {
-                    HBox tagBox = new HBox();
-                    tagBox.setSpacing(5);
-                    tagBox.getStyleClass().addAll("note-tag", "tag-box");
-
-                    Label label = new Label("#" + tagName);
-                    label.getStyleClass().add("tag-label");
-
-                    Button removeBtn = new Button("x");
-                    removeBtn.getStyleClass().add("tag-remove-btn");
-                    removeBtn.setOnAction(e -> {
-                        selectedTags.remove(tagName);
-                        refreshTagFlowPane();
-                    });
-
-                    tagBox.getChildren().addAll(label, removeBtn);
-                    tagFlowpane.getChildren().add(tagBox);
-                });
+        TagUtil.refreshFlowPane(selectedTags, tagFlowpane);
     }
 
     @FXML
     void handleAddTag() {
         String tagName = tagComboBox.getEditor().getText();
-
-        if (tagName == null || tagName.isBlank()) {
-            return;
-        }
-
-        tagName = tagName.trim();
-
-        int maxLength = 15;
-        if (tagName.length() > maxLength) {
-            showStatus("Tag too long! Max " + maxLength + " characters allowed", true);
-            return;
-        }
-
-        if (!tagName.matches("[a-zA-ZäöåÄÖÅ0-9_-]+")) {
-            showStatus("Invalid characters in tag.", true);
-            return;
-        }
-
-        if (selectedTags.contains(tagName)) {
-            return;
-        }
-
-        selectedTags.add(tagName);
-        if (!tagComboBox.getItems().contains(tagName)) {
-            tagComboBox.getItems().add(tagName);
-        }
-        refreshTagFlowPane();
-        tagComboBox.getEditor().clear();
+        TagUtil.addTagToUI(selectedTags, tagFlowpane, tagComboBox, tagName);
     }
 
     // Update tag button

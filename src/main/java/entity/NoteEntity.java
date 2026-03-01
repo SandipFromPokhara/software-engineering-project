@@ -18,7 +18,7 @@ public class NoteEntity {
     @Column(name="title")
     private String title;
 
-    @Column(name="content")
+    @Column(name="content", columnDefinition="TEXT")
     private String content;
 
     @Column(name="annotation")

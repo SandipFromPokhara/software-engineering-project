@@ -11,7 +11,12 @@ import security.Validation;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class SignUpController {
+
+    private static final Logger logger = Logger.getLogger(SignUpController.class.getName());
     private PasswordHasher passwordHasher;
 
     @FXML private TextField firstNameField;
@@ -101,20 +106,21 @@ public class SignUpController {
                         Thread.sleep(1500); // 1.5-second delay
                         javafx.application.Platform.runLater(() -> NavigationUtil.replaceScene(currentStage, "/FXML/login_view.fxml", "NoteVault - Login", false));
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        logger.log(Level.SEVERE, "Navigation thread interrupted for user: " + username, e);
                     }
                 }).start();
             } else {
                 Validation.showMessage(messageLabel, "Failed to create account!", Validation.MessageType.ERROR);
             }
         } catch (IllegalArgumentException e) {
+            logger.log(Level.WARNING, "Illegal argument during sign-up for username: " + username, e);
             Validation.showMessage(messageLabel, "Validation error: " + e.getMessage(), Validation.MessageType.ERROR);
         } catch (RuntimeException e) {
+            logger.log(Level.SEVERE, "Runtime exception during sign-up for username: " + username + ", email: " + email, e);
             Validation.showMessage(messageLabel, "Database error occurred. Please try again.", Validation.MessageType.ERROR);
-            e.printStackTrace();
         } catch (Exception e) {
+            logger.log(Level.SEVERE, "Unexpected exception during sign-up for username: " + username + ", email: " + email, e);
             Validation.showMessage(messageLabel, "An unexpected error occurred. Please try again.", Validation.MessageType.ERROR);
-            e.printStackTrace();
         }
     }
 
