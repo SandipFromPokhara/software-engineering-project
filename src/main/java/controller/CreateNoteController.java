@@ -22,6 +22,9 @@ import session.NotebookSession;
 import session.NoteSession;
 import session.UserSession;
 import util.*;
+import util.bulletList.BulletListStrategy;
+import util.bulletList.NumberedListStrategy;
+import util.bulletList.TextFormattingUtil;
 
 import java.net.URL;
 import java.util.List;
@@ -60,14 +63,22 @@ public class CreateNoteController implements Initializable {
     private Button addTagBtn;
 
     // Toolbar buttons
-    @FXML private Button bulletListButton;
-    @FXML private Button numberedListButton;
-    @FXML private Button headingUpButton;
-    @FXML private Button headingDownButton;
-    @FXML private Tooltip tagTooltip, toggleTooltip;
-    @FXML private Button toggleBtn;
-    @FXML private ImageView tagIcon;
-    @FXML private Label wordCountLabel;
+    @FXML
+    private Button bulletListButton;
+    @FXML
+    private Button numberedListButton;
+    @FXML
+    private Button headingUpButton;
+    @FXML
+    private Button headingDownButton;
+    @FXML
+    private Tooltip tagTooltip, toggleTooltip;
+    @FXML
+    private Button toggleBtn;
+    @FXML
+    private ImageView tagIcon;
+    @FXML
+    private Label wordCountLabel;
 
     // Undo/Redo components
     @FXML
@@ -268,10 +279,10 @@ public class CreateNoteController implements Initializable {
 
         switch (buttonId) {
             case "bulletListButton":
-                TextFormattingUtil.toggleBulletList(contentArea, bulletListButton);
+                TextFormattingUtil.toggleList(contentArea, bulletListButton, new BulletListStrategy());
                 break;
             case "numberedListButton":
-                TextFormattingUtil.toggleNumberedList(contentArea, numberedListButton);
+                TextFormattingUtil.toggleList(contentArea, numberedListButton, new NumberedListStrategy());
                 break;
             case "headingUpButton":
                 TextFormattingUtil.increaseFontSize(contentArea);
