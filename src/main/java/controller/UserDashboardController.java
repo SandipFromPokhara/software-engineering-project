@@ -1,6 +1,7 @@
 package controller;
 
 import dao.user.JpaUserDao;
+import dao.user.UserDAO;
 import entity.UserEntity;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -18,7 +19,7 @@ import java.util.TimerTask;
 
 public class UserDashboardController {
 
-    private final JpaUserDao userDao = new JpaUserDao();
+    private UserDAO userDao = new JpaUserDao();
     private PasswordHasher passwordHasher;
     @FXML
     private TextField firstNameField;
@@ -123,5 +124,13 @@ public class UserDashboardController {
     @FXML
     private void handleCancel() {
         WindowUtil.closeWindow(firstNameField);
+    }
+
+    public void setUserDao(UserDAO userDao) {
+        this.userDao = userDao;
+    }
+
+    public void setPasswordHasher(PasswordHasher passwordHasher) {
+        this.passwordHasher = passwordHasher;
     }
 }
