@@ -13,7 +13,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +20,6 @@ import services.NoteService;
 import session.NoteSession;
 import session.NotebookSession;
 import session.UserSession;
-import testutil.JavaFXInitializer;
 import testutil.JavaFxTestExtension;
 
 import java.lang.reflect.Field;
@@ -185,11 +183,6 @@ class CreateNoteControllerTest {
             } catch (Exception e) {
             }
         }
-    }
-
-    @BeforeAll
-    static void initJavaFX() {
-        JavaFXInitializer.init();
     }
 
     @BeforeEach
