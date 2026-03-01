@@ -158,7 +158,7 @@ Note (0..N) ────── (0..N) Tag
 The project implements a fully automated CI/CD workflow using Jenkins, Maven, Docker, and Kubernetes.
 
 
-![NoteVault DevOps Pipeline](Documents/assets/notevault-devops-pipeline.gif)
+![NoteVault DevOps Pipeline](Documents/assets/notevault-pipeline.gif)
 
 **Pipeline Stages:**
 - Feature branch commit (`feature-dev`)
