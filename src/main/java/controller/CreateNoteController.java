@@ -40,6 +40,8 @@ public class CreateNoteController implements Initializable {
     private static final String CREATE_NEW = "Create New Notebook...";
     private NoteService noteService;
     private Set<String> selectedTags = new HashSet<>();
+    private JpaNoteBookDao notebookDao;
+    private JpaTagDao tagDao;
 
     @FXML
     private TextField titleField;
@@ -100,7 +102,7 @@ public class CreateNoteController implements Initializable {
 
         // Load current user and notebooks
         UserEntity currentUser = UserSession.getUserInstance().getUser();
-        List<NoteBookEntity> notebooks = new JpaNoteBookDao().findByUser(currentUser);
+        List<NoteBookEntity> notebooks = (notebookDao != null ? notebookDao : new JpaNoteBookDao()).findByUser(currentUser);
 
         notebooks.sort((n1, n2) -> {
             if (n1.getCreatedAt() == null) return -1;
@@ -133,7 +135,9 @@ public class CreateNoteController implements Initializable {
             notebookComboBox.getSelectionModel().select(0);
         }
 
-        noteService = new NoteService();
+        if (noteService == null) {
+            noteService = new NoteService();
+        }
         statusLabel.setVisible(false);
         saveButton.setDisable(true);
 
@@ -141,8 +145,8 @@ public class CreateNoteController implements Initializable {
         titleField.textProperty().addListener((obs, old, newVal) -> updateSaveButton());
         notebookComboBox.getSelectionModel().selectedItemProperty().addListener((obs, old, newVal) -> updateSaveButton());
 
-        // Load existing tags from database
-        List<TagEntity> allTags = new JpaTagDao().findAll();
+        // Load existing tags
+        List<TagEntity> allTags = (tagDao != null ? tagDao : new JpaTagDao()).findAll();
         List<String> tagNames = allTags.stream()
                 .map(TagEntity::getTagName)
                 .sorted(String::compareToIgnoreCase)
@@ -215,7 +219,7 @@ public class CreateNoteController implements Initializable {
                         .filter(name -> !name.isEmpty())
                         .map(name -> {
                             NoteBookEntity newNotebook = new NoteBookEntity(name, UserSession.getUserInstance().getUser());
-                            newNotebook = new JpaNoteBookDao().save(newNotebook);
+                            newNotebook = (notebookDao != null ? notebookDao : new JpaNoteBookDao()).save(newNotebook);
                             NotebookSession.setLastCreatedNotebook(newNotebook);
                             // Add new notebook to ComboBox before "Create New"
                             notebookComboBox.getItems().removeIf(nb -> CREATE_NEW.equals(nb.getTitle()));
@@ -243,14 +247,14 @@ public class CreateNoteController implements Initializable {
             NoteEntity note = new NoteEntity(title.trim(), content, annotation);
             note.setNotebook(selectedNotebook);
 
-            JpaTagDao tagDao = new JpaTagDao();
+            JpaTagDao tagDaoInstance = (tagDao != null ? tagDao : new JpaTagDao());
 
             for (String tagName : selectedTags) {
-                TagEntity tag = tagDao.findByName(tagName);
+                TagEntity tag = tagDaoInstance.findByName(tagName);
 
                 if (tag == null) {
                     tag = new TagEntity(tagName);
-                    tag = tagDao.save(tag);
+                    tag = tagDaoInstance.save(tag);
                 }
                 note.addTag(tag);
             }
@@ -364,5 +368,17 @@ public class CreateNoteController implements Initializable {
                 : "/Images/tag-black.png";
 
         tagIcon.setImage(new Image(path));
+    }
+
+    public void setNoteService(NoteService noteService) {
+        this.noteService = noteService;
+    }
+
+    public void setNotebookDao(JpaNoteBookDao notebookDao) {
+        this.notebookDao = notebookDao;
+    }
+
+    public void setTagDao(JpaTagDao tagDao) {
+        this.tagDao = tagDao;
     }
 }
