@@ -2,6 +2,7 @@ package controller;
 
 import dao.user.JpaUserDao;
 import entity.UserEntity;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -11,6 +12,9 @@ import security.BcryptPasswordHasher;
 import security.PasswordHasher;
 import security.Validation;
 import util.WindowUtil;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class UserDashboardController {
 
@@ -105,6 +109,15 @@ public class UserDashboardController {
         Validation.showMessage(messageLabel, "Account updated successfully", Validation.MessageType.SUCCESS);
         passwordField.clear();
         confirmPasswordField.clear();
+
+        // Close the window after a short delay to show the success message
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(() -> WindowUtil.closeWindow(firstNameField));
+            }
+        }, 1500); // 1.5 second delay
     }
 
     @FXML
