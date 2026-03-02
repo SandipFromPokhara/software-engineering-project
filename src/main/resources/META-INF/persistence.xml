@@ -6,13 +6,13 @@
     <persistence-unit name="CompanyMariaDbUnit" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <properties>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:mariadb://localhost:3306/NoteVault"/>
-            <property name="jakarta.persistence.jdbc.user" value="DB_username"/>
-            <property name="jakarta.persistence.jdbc.password" value="DB_password"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:mariadb://${DB_HOST}:${DB_PORT}/${DB_NAME}"/>
+            <property name="jakarta.persistence.jdbc.user" value="DB_USER"/>
+            <property name="jakarta.persistence.jdbc.password" value="DB_PASSWORD"/>
             <property name="jakarta.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver"/>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
             <property name="jakarta.persistence.sql-dialect" value="org.hibernate.dialect.MariaDBDialect"/>
-            <property name="hibernate.show_sql" value="true" />
+            <property name="hibernate.show_sql" value="false"/>
         </properties>
     </persistence-unit>
 </persistence>

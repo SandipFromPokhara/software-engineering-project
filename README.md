@@ -4,8 +4,6 @@
 
 While the application provides secure notebook and note management, the primary focus of this project is the DevOps lifecycle, including CI/CD automation, testing strategy, containerization, and structured team collaboration.
 
-Developed by a team of 4 students.
-
 ---
 
 ## Project Objectives
@@ -159,8 +157,7 @@ Note (0..N) ────── (0..N) Tag
 
 The project implements a fully automated CI/CD workflow using Jenkins, Maven, Docker, and Kubernetes.
 
-
-![NoteVault DevOps Pipeline](Documents/assets/notevault-devops-pipeline.gif)
+![NoteVault DevOps Pipeline](Documents/assets/notevault-pipeline.gif)
 
 **Pipeline Stages:**
 - Feature branch commit (`feature-dev`)

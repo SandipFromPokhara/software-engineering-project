@@ -1,0 +1,310 @@
+/* BASE STYLES */
+.root {
+    -fx-font-family: "System";
+}
+
+.button {
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.help-label {
+    -fx-min-height: 16px;
+    -fx-min-width: 16px;
+    -fx-alignment: center;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+    -fx-transition: all 0.2s;
+}
+
+.root .side-panel-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* LIGHT MODE */
+.root.light {
+    -fx-base: #f8f8f8;
+    -fx-background: #f8f8f8;
+    -fx-text-fill: #000000;
+}
+
+.root.light .side-panel {
+    -fx-background-color: #9bbab0;
+}
+
+.root.light .side-panel-btn:hover {
+    -fx-background-color: #afc7bf;
+    -fx-text-fill: white;
+}
+
+.root.light .side-label {
+    -fx-background-color: transparent;
+    -fx-text-fill: black;
+    -fx-padding: 5;
+    -fx-background-radius: 6;
+}
+
+.root.light .side-label:hover {
+    -fx-background-color: #c0c0c0;
+}
+
+/* Editor container & toolbar - only colors */
+.root.light .editor-container {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d0d0d0;
+}
+
+.root.light .editor-toolbar {
+    -fx-background-color: linear-gradient(to bottom, #f8f8f8 0%, #ececec 100%);
+    -fx-border-color: #d0d0d0;
+}
+
+/* Toolbar buttons - only colors */
+.root.light .toolbar-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #333333;
+}
+
+.root.light .toolbar-btn:hover {
+    -fx-background-color: rgba(0,0,0,0.06);
+}
+
+.root.light .toolbar-btn:pressed {
+    -fx-background-color: rgba(0,0,0,0.12);
+}
+
+.root.light .toolbar-btn.active {
+    -fx-background-color: rgba(66,133,244,0.15);
+    -fx-border-color: #4285f4;
+}
+
+/* TextAreas & TextFields - only colors */
+.root.light .editor-textarea,
+.root.light .text-area {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #000000;
+    -fx-border-color: transparent;
+}
+
+.root.light .editor-textfield,
+.root.light .text-field {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #000000;
+    -fx-border-color: #d0d0d0;
+}
+
+/* ComboBoxes */
+.root.light .combo-box,
+.root.light .editor-combo {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #000000;
+    -fx-border-color: #d0d0d0;
+}
+
+.root.light .combo-box .list-cell:hover {
+    -fx-background-color: #6e6e6e;
+}
+
+/* Tags */
+.root.light .note-tag,
+.root.light .tag-box {
+    -fx-background-color: #e0e0e0;
+    -fx-text-fill: #000000;
+    -fx-background-radius: 8;
+    -fx-padding: 4 10;
+}
+
+.root.light .tag-remove-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: red;
+}
+
+/* Help label */
+.root.light .help-label {
+    -fx-background-color: #e0e0e0;
+    -fx-text-fill: #0e639c;
+}
+
+.root.light .help-label:hover {
+    -fx-background-color: #0e639c;
+    -fx-text-fill: white;
+}
+
+/* Tooltip */
+.root.light .tooltip {
+    -fx-background-color: #e0e0e0;
+    -fx-text-fill: #000000;
+}
+
+/* Status label */
+.root.light .status-label {
+    -fx-text-fill: #000000;
+}
+
+/* ScrollPane */
+.root.light .scroll-pane {
+    -fx-background: #f8f8f8;
+}
+
+/* DARK MODE */
+.root.dark {
+    -fx-base: #303030;
+    -fx-background: #303030;
+    -fx-text-fill: #e6e6e6;
+}
+
+.root.dark .side-panel {
+    -fx-background-color: #222222;
+}
+
+.root.dark .side-panel-btn:hover {
+    -fx-background-color: #02b7ba;
+}
+
+.root.dark .side-label {
+    -fx-background-color: #00003b;
+    -fx-text-fill: white;
+    -fx-padding: 5;
+    -fx-background-radius: 6;
+}
+
+.root.dark .side-label:hover {
+    -fx-background-color: #02b7ba;
+}
+
+/* Editor container & toolbar - only colors */
+.root.dark .editor-container {
+    -fx-background-color: #212121;
+    -fx-border-color: #3d2b2b;
+}
+
+.root.dark .editor-toolbar {
+    -fx-background-color: #525252;
+    -fx-border-color: #3d2b2b;
+}
+
+/* Toolbar buttons - only colors */
+.root.dark .toolbar-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #cccccc;
+}
+
+.root.dark .toolbar-btn:hover {
+    -fx-background-color: #3a3a3a;
+}
+
+.root.dark .toolbar-btn:pressed {
+    -fx-background-color: #444444;
+}
+
+.root.dark .toolbar-btn.active {
+    -fx-background-color: #094771;
+    -fx-text-fill: white;
+}
+
+/* TextAreas & TextFields - only colors */
+.root.dark .editor-textarea,
+.root.dark .text-area {
+    -fx-background-color: #636161;
+    -fx-control-inner-background: #636161;
+    -fx-text-fill: #f2f0f0;
+    -fx-highlight-fill: #f2f0f0;
+    -fx-prompt-text-fill: #f2f0f0;
+    -fx-highlight-text-fill: white;
+}
+
+.root.dark .text-field,
+.root.dark .editor-textfield {
+    -fx-background-color: #636161;
+    -fx-text-fill: #f2f0f0;
+    -fx-border-color: #3c3c3c;
+}
+
+/* ComboBoxes */
+.root.dark .combo-box,
+.root.dark .editor-combo {
+    -fx-background-color: #2d2d2d;
+    -fx-control-inner-background: #2d2d2d;
+    -fx-text-fill: #e6e6e6;
+    -fx-border-color: #3c3c3c;
+}
+
+.root.dark .combo-box-base > .text-field {
+    -fx-prompt-text-fill: #e6e6e6;
+}
+
+.root.dark .combo-box .list-view {
+    -fx-background-color: #252526;
+}
+
+.root.dark .combo-box .list-cell {
+    -fx-background-color: #252526;
+    -fx-text-fill: #f5f5f5;
+}
+
+.root.dark .combo-box .list-cell:hover {
+    -fx-background-color: #575757;
+}
+
+/* Buttons */
+.root.dark .button {
+    -fx-background-color: #6e6d6d;
+    -fx-text-fill: #ffffff;
+}
+
+.root.dark .side-panel .side-panel-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.root.dark .button:hover {
+    -fx-background-color: #8f8f8f;
+}
+
+/* Tags */
+.root.dark .note-tag,
+.root.dark .tag-box {
+    -fx-background-color: #0e639c;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-padding: 4 10;
+}
+
+.root.dark .tag-remove-btn {
+    -fx-background-color: #ff5555;
+    -fx-text-fill: white;
+    -fx-background-radius: 50%;
+    -fx-padding: 2 6 2 6;
+}
+
+/* Help label */
+.root.dark .help-label {
+    -fx-background-color: #2d2d2d;
+    -fx-text-fill: #4fc3f7;
+    -fx-border-color: #4fc3f7;
+}
+
+.root.dark .help-label:hover {
+    -fx-background-color: #4fc3f7;
+    -fx-text-fill: #1e1e1e;
+}
+
+/* Tooltip */
+.root.dark .tooltip {
+    -fx-background-color: #2d2d2d;
+    -fx-text-fill: #e6e6e6;
+}
+
+/* Status label */
+.root.dark .status-label {
+    -fx-text-fill: #4fc3f7;
+}
+
+/* ScrollPane */
+.root.dark .scroll-pane {
+    -fx-background: #1e1e1e;
+}

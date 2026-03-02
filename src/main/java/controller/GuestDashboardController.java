@@ -1,0 +1,96 @@
+package controller;
+
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import util.NavigationUtil;
+import java.util.logging.Level;
+
+import static controller.ViewDashboardController.logger;
+
+
+public class GuestDashboardController {
+
+    @FXML
+    private Button home;
+
+    @FXML
+    private Button newFiles;
+
+    @FXML
+    private Button login;
+
+    @FXML
+    private Button register;
+
+    @FXML
+    private HBox topBar;
+
+    @FXML
+    private Label title;
+
+    @FXML
+    private Label content;
+
+    @FXML
+    VBox centerPane;
+
+    @FXML
+    private void handleHome() {
+        Stage stage = (Stage) home.getScene().getWindow();
+        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "Welcome to NoteVault", false
+        );
+    }
+
+    private void loadContent(String fxmlFile) {
+        try {
+            Parent view = FXMLLoader.load(
+                    getClass().getResource("/FXML/" + fxmlFile)
+            );
+
+            StackPane wrapper = new StackPane(view);
+            VBox.setVgrow(wrapper, Priority.ALWAYS);
+
+            //To make responsive
+            wrapper.prefWidthProperty().bind(centerPane.widthProperty());
+            wrapper.prefHeightProperty().bind(centerPane.heightProperty());
+
+            centerPane.getChildren().setAll(wrapper);
+
+        //logger
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Failed to load FXML file: " + fxmlFile, e);
+        }
+    }
+
+    @FXML
+    void handleNewFiles() {
+        loadContent("createFilesGuest.fxml");
+    }
+
+    @FXML
+    private void handleLogin() {
+        Stage stage = (Stage) login.getScene().getWindow();
+        NavigationUtil.replaceScene(
+                stage,
+                "/FXML/login_view.fxml",
+                "NoteVault - LogIn",
+                false
+        );
+    }
+
+    @FXML
+    private void handleSignUp() {
+        Stage stage = (Stage) register.getScene().getWindow();
+        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml", "NoteVault - Register", false
+        );
+
+    }
+}
