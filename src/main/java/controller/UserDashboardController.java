@@ -1,7 +1,9 @@
 package controller;
 
 import dao.user.JpaUserDao;
+import dao.user.UserDAO;
 import entity.UserEntity;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -12,9 +14,12 @@ import security.PasswordHasher;
 import security.Validation;
 import util.WindowUtil;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class UserDashboardController {
 
-    private final JpaUserDao userDao = new JpaUserDao();
+    private UserDAO userDao = new JpaUserDao();
     private PasswordHasher passwordHasher;
     @FXML
     private TextField firstNameField;
@@ -105,10 +110,27 @@ public class UserDashboardController {
         Validation.showMessage(messageLabel, "Account updated successfully", Validation.MessageType.SUCCESS);
         passwordField.clear();
         confirmPasswordField.clear();
+
+        // Close the window after a short delay to show the success message
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(() -> WindowUtil.closeWindow(firstNameField));
+            }
+        }, 1500); // 1.5 second delay
     }
 
     @FXML
     private void handleCancel() {
         WindowUtil.closeWindow(firstNameField);
+    }
+
+    public void setUserDao(UserDAO userDao) {
+        this.userDao = userDao;
+    }
+
+    public void setPasswordHasher(PasswordHasher passwordHasher) {
+        this.passwordHasher = passwordHasher;
     }
 }

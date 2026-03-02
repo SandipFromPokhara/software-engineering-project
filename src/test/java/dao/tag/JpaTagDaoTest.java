@@ -8,6 +8,7 @@ import entity.UserEntity;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,26 +17,35 @@ import static org.junit.jupiter.api.Assertions.*;
 class JpaTagDaoTest {
 
     private static JpaTagDao tagDao;
+    private List<TagEntity> testTags;
 
     @BeforeAll
     static void setupAll() {
         tagDao = new JpaTagDao();
     }
 
-    @BeforeEach
-    void cleanDatabase() {
-        // Remove all tags to prevent duplicate name issues
-        tagDao.findAll().forEach(tagDao::delete);
-    }
-
     private String uniqueName(String base) {
         return base + "_" + System.currentTimeMillis();
+    }
+
+    @BeforeEach
+    void initTestTags() {
+        testTags = new ArrayList<>();
+    }
+
+    @AfterEach
+    void cleanupTestTags() {
+        if (testTags != null) {
+            testTags.forEach(tagDao::delete);
+        }
     }
 
     @Test
     void testSaveAndFindTag() {
         TagEntity tag = new TagEntity(uniqueName("TestTag"));
         TagEntity saved = tagDao.save(tag);
+
+        testTags.add(saved);
 
         assertNotNull(saved.getId());
 
@@ -52,6 +62,7 @@ class JpaTagDaoTest {
         tag.setTagName(uniqueName("MergedName"));
 
         TagEntity merged = tagDao.save(tag); // for merge branch
+        testTags.add(merged);
 
         assertEquals(tag.getId(), merged.getId());
         assertEquals(tag.getTagName(), merged.getTagName());
@@ -67,6 +78,7 @@ class JpaTagDaoTest {
         String name = uniqueName("ExistsTag");
         TagEntity tag = new TagEntity(name);
         tagDao.save(tag);
+        testTags.add(tag);
 
         assertTrue(tagDao.existsByName(name));
         assertFalse(tagDao.existsByName(name + "_none"));
@@ -77,6 +89,7 @@ class JpaTagDaoTest {
         String name = uniqueName("FindByName");
         TagEntity tag = new TagEntity(name);
         tagDao.save(tag);
+        testTags.add(tag);
 
         TagEntity found = tagDao.findByName(name);
         assertNotNull(found);
@@ -94,6 +107,9 @@ class JpaTagDaoTest {
     void testFindAll() {
         TagEntity tag1 = tagDao.save(new TagEntity(uniqueName("Tag1")));
         TagEntity tag2 = tagDao.save(new TagEntity(uniqueName("Tag2")));
+
+        testTags.add(tag1);
+        testTags.add(tag2);
 
         List<TagEntity> allTags = tagDao.findAll();
         assertTrue(allTags.contains(tag1));
@@ -116,6 +132,7 @@ class JpaTagDaoTest {
 
         tag.setTagName(uniqueName("NewName"));
         tagDao.update(tag);
+        testTags.add(tag);
 
         TagEntity updated = tagDao.findById(tag.getId());
         assertEquals(tag.getTagName(), updated.getTagName());
@@ -206,6 +223,8 @@ class JpaTagDaoTest {
 
         TagEntity tag1 = tagDao.save(new TagEntity(name1));
         TagEntity tag2 = tagDao.save(new TagEntity(name2));
+        testTags.add(tag1);
+        testTags.add(tag2);
 
         // try to rename tag2 to name1
         tag2.setTagName(name1);

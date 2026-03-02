@@ -22,6 +22,9 @@ import session.NotebookSession;
 import session.NoteSession;
 import session.UserSession;
 import util.*;
+import util.bulletList.BulletListStrategy;
+import util.bulletList.NumberedListStrategy;
+import util.bulletList.TextFormattingUtil;
 
 import java.net.URL;
 import java.util.List;
@@ -37,35 +40,58 @@ public class CreateNoteController implements Initializable {
     private static final String CREATE_NEW = "Create New Notebook...";
     private NoteService noteService;
     private Set<String> selectedTags = new HashSet<>();
+    private JpaNoteBookDao notebookDao;
+    private JpaTagDao tagDao;
 
-    @FXML private TextField titleField;
-    @FXML private TextArea contentArea;
-    @FXML private TextArea annotationArea;
-    @FXML private Button saveButton;
-    @FXML private Button clearButton;
-    @FXML private Label statusLabel;
-    @FXML private ComboBox<NoteBookEntity> notebookComboBox;
-    @FXML private FlowPane tagFlowpane;
-    @FXML private ComboBox<String> tagComboBox;
-    @FXML private Button addTagBtn;
+    @FXML
+    private TextField titleField;
+    @FXML
+    private TextArea contentArea;
+    @FXML
+    private TextArea annotationArea;
+    @FXML
+    private Button saveButton;
+    @FXML
+    private Button clearButton;
+    @FXML
+    private Label statusLabel;
+    @FXML
+    private ComboBox<NoteBookEntity> notebookComboBox;
+    @FXML
+    private FlowPane tagFlowpane;
+    @FXML
+    private ComboBox<String> tagComboBox;
+    @FXML
+    private Button addTagBtn;
 
     // Toolbar buttons
-    @FXML private Button bulletListButton;
-    @FXML private Button numberedListButton;
-    @FXML private Button headingUpButton;
-    @FXML private Button headingDownButton;
-    @FXML private Tooltip tagTooltip, toggleTooltip;
-    @FXML private Button toggleBtn;
-    @FXML private ImageView tagIcon;
-    @FXML private Label wordCountLabel;
+    @FXML
+    private Button bulletListButton;
+    @FXML
+    private Button numberedListButton;
+    @FXML
+    private Button headingUpButton;
+    @FXML
+    private Button headingDownButton;
+    @FXML
+    private Tooltip tagTooltip, toggleTooltip;
+    @FXML
+    private Button toggleBtn;
+    @FXML
+    private ImageView tagIcon;
+    @FXML
+    private Label wordCountLabel;
 
     // Undo/Redo components
-    @FXML private MenuItem undoMenuItem;
-    @FXML private MenuItem redoMenuItem;
+    @FXML
+    private MenuItem undoMenuItem;
+    @FXML
+    private MenuItem redoMenuItem;
 
     private UndoRedoManager undoRedoManager = new UndoRedoManager();
 
-    public CreateNoteController() {}
+    public CreateNoteController() {
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -76,7 +102,7 @@ public class CreateNoteController implements Initializable {
 
         // Load current user and notebooks
         UserEntity currentUser = UserSession.getUserInstance().getUser();
-        List<NoteBookEntity> notebooks = new JpaNoteBookDao().findByUser(currentUser);
+        List<NoteBookEntity> notebooks = (notebookDao != null ? notebookDao : new JpaNoteBookDao()).findByUser(currentUser);
 
         notebooks.sort((n1, n2) -> {
             if (n1.getCreatedAt() == null) return -1;
@@ -92,7 +118,9 @@ public class CreateNoteController implements Initializable {
         notebookComboBox.setConverter(new javafx.util.StringConverter<>() {
             @Override
             public String toString(NoteBookEntity notebook) {
-                if (notebook == null) { return ""; }
+                if (notebook == null) {
+                    return "";
+                }
                 return notebook.getTitle() == null ? "" : notebook.getTitle();
             }
 
@@ -107,16 +135,18 @@ public class CreateNoteController implements Initializable {
             notebookComboBox.getSelectionModel().select(0);
         }
 
-        noteService = new NoteService();
+        if (noteService == null) {
+            noteService = new NoteService();
+        }
         statusLabel.setVisible(false);
         saveButton.setDisable(true);
 
         // Disable save button if title is empty or ComboBox has no selection
-        titleField.textProperty().addListener((obs, old, newVal) ->  updateSaveButton());
+        titleField.textProperty().addListener((obs, old, newVal) -> updateSaveButton());
         notebookComboBox.getSelectionModel().selectedItemProperty().addListener((obs, old, newVal) -> updateSaveButton());
 
-        // Load existing tags from database
-        List<TagEntity> allTags = new JpaTagDao().findAll();
+        // Load existing tags
+        List<TagEntity> allTags = (tagDao != null ? tagDao : new JpaTagDao()).findAll();
         List<String> tagNames = allTags.stream()
                 .map(TagEntity::getTagName)
                 .sorted(String::compareToIgnoreCase)
@@ -189,7 +219,7 @@ public class CreateNoteController implements Initializable {
                         .filter(name -> !name.isEmpty())
                         .map(name -> {
                             NoteBookEntity newNotebook = new NoteBookEntity(name, UserSession.getUserInstance().getUser());
-                            newNotebook = new JpaNoteBookDao().save(newNotebook);
+                            newNotebook = (notebookDao != null ? notebookDao : new JpaNoteBookDao()).save(newNotebook);
                             NotebookSession.setLastCreatedNotebook(newNotebook);
                             // Add new notebook to ComboBox before "Create New"
                             notebookComboBox.getItems().removeIf(nb -> CREATE_NEW.equals(nb.getTitle()));
@@ -217,14 +247,14 @@ public class CreateNoteController implements Initializable {
             NoteEntity note = new NoteEntity(title.trim(), content, annotation);
             note.setNotebook(selectedNotebook);
 
-            JpaTagDao tagDao = new JpaTagDao();
+            JpaTagDao tagDaoInstance = (tagDao != null ? tagDao : new JpaTagDao());
 
             for (String tagName : selectedTags) {
-                TagEntity tag = tagDao.findByName(tagName);
+                TagEntity tag = tagDaoInstance.findByName(tagName);
 
                 if (tag == null) {
                     tag = new TagEntity(tagName);
-                    tag = tagDao.save(tag);
+                    tag = tagDaoInstance.save(tag);
                 }
                 note.addTag(tag);
             }
@@ -253,10 +283,10 @@ public class CreateNoteController implements Initializable {
 
         switch (buttonId) {
             case "bulletListButton":
-                TextFormattingUtil.toggleBulletList(contentArea, bulletListButton);
+                TextFormattingUtil.toggleList(contentArea, bulletListButton, new BulletListStrategy());
                 break;
             case "numberedListButton":
-                TextFormattingUtil.toggleNumberedList(contentArea, numberedListButton);
+                TextFormattingUtil.toggleList(contentArea, numberedListButton, new NumberedListStrategy());
                 break;
             case "headingUpButton":
                 TextFormattingUtil.increaseFontSize(contentArea);
@@ -338,5 +368,17 @@ public class CreateNoteController implements Initializable {
                 : "/Images/tag-black.png";
 
         tagIcon.setImage(new Image(path));
+    }
+
+    public void setNoteService(NoteService noteService) {
+        this.noteService = noteService;
+    }
+
+    public void setNotebookDao(JpaNoteBookDao notebookDao) {
+        this.notebookDao = notebookDao;
+    }
+
+    public void setTagDao(JpaTagDao tagDao) {
+        this.tagDao = tagDao;
     }
 }
