@@ -154,28 +154,28 @@ pipeline {
             }
         }
 
-        stage('Start MariaDB') {
-            steps {
-                script {
-                    def dockerExists = sh(script: 'which docker', returnStatus: true) == 0
-                    if (dockerExists) {
-                        sh 'docker rm -f test-db || true'
-                        sh """
-                            docker run -d --name test-db \
-                                -e MARIADB_ROOT_PASSWORD=root \
-                                -e MARIADB_DATABASE=${DB_NAME} \
-                                -e MARIADB_USER=notevaultUser \
-                                -e MARIADB_PASSWORD=group1oPasswOrD \
-                                -p ${DB_PORT}:3306 \
-                                mariadb:latest
-                        """
-                        sh 'sleep 20'
-                    } else {
-                        echo "Docker not available, using local DB"
-                    }
-                }
-            }
-        }
+//        stage('Start MariaDB') {
+//            steps {
+//                script {
+//                    def dockerExists = sh(script: 'which docker', returnStatus: true) == 0
+//                    if (dockerExists) {
+//                        sh 'docker rm -f test-db || true'
+//                        sh """
+//                            docker run -d --name test-db \
+//                                -e MARIADB_ROOT_PASSWORD=root \
+//                                -e MARIADB_DATABASE=${DB_NAME} \
+//                                -e MARIADB_USER=notevaultUser \
+//                                -e MARIADB_PASSWORD=group1oPasswOrD \
+//                                -p ${DB_PORT}:3306 \
+//                                mariadb:latest
+//                        """
+//                        sh 'sleep 20'
+//                    } else {
+//                        echo "Docker not available, using local DB"
+//                    }
+//                }
+//            }
+//        }
 
 
         stage('Run Tests') {
