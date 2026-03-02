@@ -132,7 +132,7 @@ pipeline {
         DOCKERHUB_REPO = 'swostikalama/notevault'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
         DB_HOST = 'localhost'
-        DB_PORT = '3307'
+        DB_PORT = '3306'
         DB_NAME = 'notevault_db'
     }
 
