@@ -252,11 +252,4 @@ pipeline {
 
     }
 
-    post {
-        always {
-            echo "Cleaning up..."
-            sh 'docker rm -f test-db || true'
-            echo "Build finished"
-        }
-    }
 }
