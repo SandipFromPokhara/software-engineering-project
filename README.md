@@ -1,30 +1,59 @@
 # NoteVault
 
-**NoteVault** is a JavaFX desktop application for hierarchical note management, developed as part of the **Software Engineering Project 1** course.
+**NoteVault** is a JavaFX desktop application for hierarchical note management.
+It was developed as part of the **Software Engineering Project 1** course, demonstrating modern DevOps practices alongside Java application development.
 
 While the application provides secure notebook and note management, the primary focus of this project is the DevOps lifecycle, including CI/CD automation, testing strategy, containerization, and structured team collaboration.
 
 ---
 
-## Project Objectives
+## Summary
 
-This project demonstrates:
+- Hierarchical notebook & note management
+- Secure authentication with BCrypt
+- Responsive GUI using JavaFX background threads
+- CI/CD pipeline with Jenkins
+- Containerization with Docker
 
-- Clean layered architecture
+---
 
-- Secure authentication implementation
+## Technologies Used
 
-- Background-threaded UI responsiveness (JavaFX Tasks)
+- **Frontend:** `JavaFX (FXML + SceneBuilder)`
+- **Backend:** `Java 21`, `JPA/Hibernate`
+- **Database:** `MariaDB`
+- **DevOps:** `Docker`, `JaCoCo`, `JUnit`, `Jenkins`, `Maven`
+- **Project Management:** `Git (feature branches)`, `Trello`
 
-- CI/CD pipeline automation with Jenkins
+---
 
-- Automated testing & coverage reporting
+## Database Architecture
 
-- Containerization using Docker
+NoteVault uses a MariaDB database (`notevault_db`) to manage users, notebooks, notes, and tags.
+The database is automatically initialized when the application runs; no manual setup is needed.
 
-- Kubernetes deployment using Minikube
+**Entity Relationships**
+```
+User (0..N) ────── (1) Notebook
+Notebook (0..N) ── (1) Note
+Note (0..N) ────── (0..N) Tag
+```
 
-- Collaborative Git workflow using feature branches
+**Cascading Rules**
+
+- Deleting a User → Deletes associated Notebooks
+
+- Deleting a Notebook → Deletes associated Notes
+
+- Deleting a Note → Deletes entries in note_tags, Tags remain
+
+- Deleting a Tag → Deletes entries in note_tags, Notes remain
+
+**Note on Database Credentials & Docker**
+> The application uses environment variables for database credentials (`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`).  
+> For a ready-to-run setup, you can use Docker Compose — see [Related Files](Documents/Related_Files/setup-instructions.md) for detailed instructions.
+
+For full table details and diagrams, see [Database Documentation](Documents/Database/database-architecture.md) and [ER & Relational Diagrams](Documents/Diagrams/).
 
 ---
 
@@ -44,303 +73,20 @@ Focus: DevOps Process & Automation
 
 ---
 
-## Branch & Development Workflow
-
-> IMPORTANT: Active development code is located in the `feature-dev` branch.
-The `main` branch contains the initial project skeleton.
-
-**Clone the full project:**
-``` bash
-git clone -b feature-dev https://github.com/SandipFromPokhara/software-engineering-project.git
-```
-
----
-
-## System Architecture
-
-The system follows a Layered Architecture to ensure separation of concerns.
-
-1️⃣ Controller Layer
-
-- JavaFX Controllers manage UI logic.
-
-- Database operations run in background threads using JavaFX Tasks.
-
-- Prevents UI blocking and ensures responsiveness.
-
-2️⃣ Service Layer
-
-- Encapsulates business logic (e.g., `UserService.login()`).
-
-- Prevents direct UI-to-DAO coupling.
-
-3️⃣ DAO Layer
-
-- Implements Repository pattern.
-
-- Uses JPA (Hibernate) for persistence.
-
-- Manages MariaDB interaction.
-
-4️⃣ Entity Layer
-
-Defines relational structure for:
-
-  - `User`
-  - `Notebook`
-  - `Note`
-  - `Tags`
-
-5️⃣ Session Management
-
-- Singleton-based session classes (e.g., `UserSession`)
-
-- Maintains application state across controllers.
-
----
-
-## Security Implementation
-
-Security was treated as a core requirement.
-
-**Password Security**
-
-- BCrypt hashing
-
-- No plain-text passwords stored
-
-**Validation**
-
-- Email format validation
-
-- Password complexity enforcement
-
-- Empty fields validation
-
-- Client-side validation before persistence
-
-**Secure Configuration**
-
-Database credentials are injected via environment variables:
-``` env
-DB_USER
-DB_PASSWORD
-```
-No sensitive credentials are stored in source control.
-
----
-
-## Database Architecture
-
-Database: `notevault_db`
-
-**Entity Relationships**
-```
-User (0..N) ────── (1) Notebook
-Notebook (0..N) ── (1) Note
-Note (0..N) ────── (0..N) Tag
-```
-
-**Cascading Rules**
-
-- Deleting a User → Deletes associated Notebooks
-
-- Deleting a Notebook → Deletes associated Notes
-
-- Deleting a Note → Deletes entries in note_tags, Tags remain
-
-- Deleting a Tag → Deletes entries in note_tags, Notes remain
-
----
-
 ## DevOps Pipeline
 
-The project implements a fully automated CI/CD workflow using Jenkins, Maven, Docker, and Kubernetes.
-
+> High-level overview of CI/CD, testing, and containerization stages.
 
 ![NoteVault DevOps Pipeline](Documents/assets/notevault-pipeline.gif)
 
-**Pipeline Stages:**
-- Feature branch commit (`feature-dev`)
-- Jenkins automated build trigger
-- Maven compilation & dependency resolution
-- JUnit test execution
-- JaCoCo coverage reporting
-- Docker image build
-- Kubernetes deployment (Minikube)
-- MariaDB runtime connection
-
 ---
 
-**CI Stage**
+## Useful Links
 
-- Automated build using Maven
+- **GitHub repository:** [software-engineering-project](https://github.com/SandipFromPokhara/software-engineering-project.git)
 
-- Unit testing with JUnit
+- **Trello workspace:** [SEP1_Team9](https://trello.com/w/sep1_team9/home)
 
-- Coverage reporting via JaCoCo
+- **Detailed DevOps process, project management:** [Related Files](Documents/Related_Files/)
 
-- Pipeline fails if tests fail
-
----
-
-**Containerization**
-
-- Application packaged as Docker image
-
-- Environment variables injected securely
-
-- Ensures consistent runtime environment
-
----
-
-**Kubernetes Deployment**
-
-- Deployment validated using Minikube
-
-- Demonstrates container orchestration readiness
-
-- Ensures reproducible deployment environment
-
----
-
-**Testing & Quality Assurance**
-
-- Unit testing with JUnit
-
-- Code coverage analysis using JaCoCo
-
-- Automated validation in CI pipeline
-
-- Fail-fast pipeline design
-
----
-
-## Project Management & Agile Process
-
-The team followed Agile Scrum methodology throughout the development lifecycle.
-
-**Sprint Structure**
-
-- Total Sprints: **4**
-
-- Sprint Duration: 2 weeks
-
-- Sprint Planning conducted at the beginning of each cycle
-
-- Sprint Review & Retrospective at the end of each sprint
-
-**Scrum Master Rotation**
-
-To ensure shared leadership and equal responsibility:
-
-- The Scrum Master role rotates every sprint.
-
-- Each team member serves as Scrum Master for one sprint.
-
-- Responsibilities included:
-
-    - Sprint planning coordination
-
-    - Task assignment oversight
-
-    - Monitoring progress
-
-    - Facilitating retrospective discussions
-
-This approach strengthens accountability and cross-functional understanding.
-
-**Task Management**
-
-Project tasks were managed using:
-
-**Trello**
-
-Used for:
-
-- Backlog management
-
-- Sprint task tracking
-
-- Priority management
-
-- Workflow visualization
-
-Typical workflow:
-```
-Backlog → To Do → In Progress → Review → Done
-```
-
-** Sprint Overview Table
-
-| Sprint | Duration                | Focus Area                                 | Scrum Master          |
-|--------|-------------------------|--------------------------------------------|-----------------------|
-| 1      | 13.01.2026 - 27.01.2026 | Planning & Project Setup                   | Sandip Ranjit         |
-| 2      | 27.01.2026 - 10.02.2026 | CRUD Operations, Authentication & DB Setup | Swostika Lama         |
-| 3      | 10.02.2026 - 03.03.2026 | CI/CD integration                          | Dinal Maha Vidanelage |
-| 4      | 03.03.2026 - 10.03.2026 | Containerization & Deployment              | Twe He Gam Aung       |
-
----
-
-## Tech Stack
-
-Frontend:
-
-- JavaFX (FXML + SceneBuilder)
-
-Backend:
-
-- Java 21
-
-- JPA / Hibernate
-
-- MariaDB
-
-Security:
-
-- BCrypt
-
-DevOps:
-
-- Docker
-
-- JaCoCo
-
-- Jenkins
-
-- JUnit
-
-- Kubernetes (Minikube)
-
-- Maven
-
----
-
-##  Setup & Run
-1️⃣ **Database**
-
-Create:
-
-```
-notevault_db
-```
-
-2️⃣ **Environment Variables**
-
-Set:
-```
-DB_USER
-DB_PASSWORD
-```
-
-3️⃣ **Build**
-``` bash
-mvn clean install
-```
-
-4️⃣ **Run**
-``` bash
-mvn javafx:run
-```
-
----
+- **Sprint reports and reviews:** [Sprint Documentations](Documents/Sprint_Reports/)

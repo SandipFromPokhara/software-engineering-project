@@ -34,6 +34,16 @@ public class MariaDbJpaConnection {
                 String dbName = System.getProperty("DB_NAME");
                 if (dbName == null) dbName = System.getenv("DB_NAME");
 
+                if (dbUser == null || dbPassword == null || dbHost == null || dbPort == null || dbName == null) {
+                    LOGGER.error("Database environment variables are not set properly");
+                    throw new IllegalStateException("Database environment variables are not set properly.");
+                }
+
+                if (isBlank(dbUser) || isBlank(dbPassword) || isBlank(dbHost) || isBlank(dbPort) || isBlank(dbName)) {
+                    LOGGER.error("Database env variables are missing or empty.");
+                    throw new IllegalStateException("Required database environment variables are missing or empty.");
+                }
+
                 properties.put("jakarta.persistence.jdbc.url",
                         "jdbc:mariadb://" + dbHost + ":" + dbPort + "/" + dbName);
                 properties.put("jakarta.persistence.jdbc.user", dbUser);
@@ -59,5 +69,9 @@ public class MariaDbJpaConnection {
             emf.close();
             emf = null;
         }
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 }

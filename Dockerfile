@@ -15,10 +15,4 @@ COPY target/notevault.jar app.jar
 
 ENV DISPLAY=host.docker.internal:0.0
 
-ENV DB_HOST=host.docker.internal
-ENV DB_PORT=3306
-ENV DB_USER=databaseuser
-ENV DB_PASSWORD=secretpassword
-ENV DB_NAME=notevault_db
-
 CMD ["java", "-Dprism.order=sw", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml,javafx.swing", "-jar", "app.jar"]
