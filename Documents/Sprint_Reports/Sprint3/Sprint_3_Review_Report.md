@@ -2,7 +2,7 @@
 
 ## Sprint 3 Review – NoteVault
 
-- **Project**: NoteVault = Digital Notetaking and Annotation Tool.
+- **Project**: NoteVault = Digital Note-taking and Annotation Tool.
 - **Sprint Duration**: 10.02.2026 - 03.03.2026.
 - **Team Members**: Sandip Ranjit, Twe He Gam Aung, Dinal Maha Vidanelage and Swostika Lama.
 - **Scrum Master**: Dinal Maha Vidanelage.
@@ -66,7 +66,7 @@ During the Sprint 3 review, the team demonstrated:
 - Extended features: Text Modification, Undo/Redo, PDF Export, Tag/Label, and Toggle Theme functionality.
 - Working Jenkins CI/CD pipeline with automated build, test, and coverage report stages.
 - JaCoCo code coverage report showing 53% coverage.
-- Docker image running successfully on Docker Desktop.
+- Docker image(backend + frontend) running successfully on Docker Desktop.
 - Improved application performance and bug fixes.
 - End-to-end functionality of the NoteVault application.
 
@@ -116,9 +116,9 @@ This demonstration showed significant progress in both feature implementation an
 | Team Members          | Tasks                                                                                                                      | 
 |-----------------------|----------------------------------------------------------------------------------------------------------------------------|
 | Dinal Maha Vidanelage | Scrum master, implement undo/redo feature and font size, create unit test, check Jenkins pipeline and create docker image. |
-| Sandip Ranjit         | Fix bugs, create Docker image, implement new features to the app, check Jenkins pipeline.                                  |
+| Sandip Ranjit         | Fix bugs, create Docker image, implement Notebook Dashboard, tag/label and toggle theme features, check Jenkins pipeline.  |
 | Swostika Lama         | implement new feature (export) on the app, write unit testing, jenkins pipeline integration, create docker image.          |
-| Twe He Gam Aung       | Implement User Dash board, Design UI for text editing feature. Implement bullet list and number list. And testing.         |
+| Twe He Gam Aung       | Implement User Dashboard, Design UI for text editing feature, implement bullet list and number list, and testing.          |
 
 ---
 
