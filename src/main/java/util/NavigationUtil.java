@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.io.IOException;
 
 public class NavigationUtil {
@@ -59,13 +60,7 @@ public class NavigationUtil {
             stage.centerOnScreen();
 
             // Set minimum size for key windows
-            if (!(DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath))) {
-                stage.setMinWidth(0);
-                stage.setMinHeight(0);
-            } else {
-                stage.setMinWidth(700);
-                stage.setMinHeight(550);
-            }
+            applyMinSize(stage, fxmlPath);
 
             // Configure controller if needed
             if (consumer != null) {
@@ -99,20 +94,31 @@ public class NavigationUtil {
             stage.getIcons().add(new Image("/Images/NV.png"));
             stage.setResizable(resizable);
 
-            // Min size for main windows
-            if (!(DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath))) {
-                stage.setMinWidth(0);
-                stage.setMinHeight(0);
-            } else {
-                stage.setMinWidth(700);
-                stage.setMinHeight(550);
-            }
+            // Set minimum size for key windows
+            applyMinSize(stage, fxmlPath);
 
             stage.sizeToScene();
             stage.centerOnScreen();
             stage.show();
         } catch (IOException e) {
             LOGGER.error("Failed to load FXML: {}", fxmlPath, e);
+        }
+    }
+
+    private static void applyMinSize(Stage stage, String fxmlPath) {
+        if (!GraphicsEnvironment.isHeadless()) {
+            // For key windows, set default min size
+            if (DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath)) {
+                stage.setMinWidth(700);
+                stage.setMinHeight(550);
+            } else {
+                stage.setMinWidth(0);
+                stage.setMinHeight(0);
+            }
+        } else {
+            // Headless / Docker mode: allow resizing freely
+            stage.setMinWidth(0);
+            stage.setMinHeight(0);
         }
     }
 }
