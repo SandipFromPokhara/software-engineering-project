@@ -58,12 +58,7 @@ public class NavigationUtil {
             stage.getIcons().setAll(new Image("/Images/NV.png"));
             stage.setResizable(resizable);
             applyMinSize(stage, fxmlPath);
-            stage.setOnShown(e -> {
-                if (!resizable) {
-                    stage.setMaximized(false);
-                    stage.setResizable(false);
-                }
-            });
+
             stage.centerOnScreen();
 
             // Configure controller if needed
