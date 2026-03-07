@@ -57,10 +57,16 @@ public class NavigationUtil {
 
             stage.getIcons().setAll(new Image("/Images/NV.png"));
             stage.setResizable(resizable);
-            stage.centerOnScreen();
-
-            // Set minimum size for key windows
             applyMinSize(stage, fxmlPath);
+
+            // Maximize button behavior under X11/Docker
+            if (!resizable) {
+                stage.setMaximized(false); // entry/login/signup: ensure no maximize
+            } else if (isRunningInX11()) {
+                // Force proper state after showing
+                javafx.application.Platform.runLater(() -> stage.setMaximized(false));
+            }
+            stage.centerOnScreen();
 
             // Configure controller if needed
             if (consumer != null) {
@@ -105,20 +111,21 @@ public class NavigationUtil {
         }
     }
 
+    private static boolean isRunningInX11() {
+        String display = System.getenv("DISPLAY");
+        return display != null && !display.isBlank();
+    }
+
     private static void applyMinSize(Stage stage, String fxmlPath) {
-        if (!GraphicsEnvironment.isHeadless()) {
-            // For key windows, set default min size
-            if (DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath)) {
-                stage.setMinWidth(700);
-                stage.setMinHeight(550);
-            } else {
-                stage.setMinWidth(0);
-                stage.setMinHeight(0);
-            }
+        // Key windows that should allow maximizing
+        boolean isKeyWindow = DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath);
+
+        if (isKeyWindow) {
+            stage.setMinWidth(700);
+            stage.setMinHeight(550);
         } else {
-            // Headless / Docker mode: allow resizing freely
-            stage.setMinWidth(0);
-            stage.setMinHeight(0);
+            stage.setMinWidth(600);
+            stage.setMinHeight(400);
         }
     }
 }
