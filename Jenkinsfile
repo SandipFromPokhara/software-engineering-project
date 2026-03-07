@@ -18,7 +18,7 @@ pipeline {
         DOCKERHUB_REPO = 'sandipranjit/notevault'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
         BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
-        JAVA_TOOL_OPTIONS = "-Dprism.order=sw -Djava.awt.headless=true"
+        JAVA_TOOL_OPTIONS = "-Dprism.order=sw"
     }
 
     stages {
