@@ -54,14 +54,17 @@ public class NavigationUtil {
             stage.setScene(scene);
             stage.setTitle(title);
 
-            stage.getIcons().add(new Image("/Images/NV.png"));
+            stage.getIcons().setAll(new Image("/Images/NV.png"));
             stage.setResizable(resizable);
             stage.centerOnScreen();
 
             // Set minimum size for key windows
-            if (DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath)) {
+            if (!(DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath))) {
+                stage.setMinWidth(0);
+                stage.setMinHeight(0);
+            } else {
                 stage.setMinWidth(700);
-                stage.setMinHeight(650);
+                stage.setMinHeight(550);
             }
 
             // Configure controller if needed
