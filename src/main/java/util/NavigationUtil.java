@@ -58,14 +58,12 @@ public class NavigationUtil {
             stage.getIcons().setAll(new Image("/Images/NV.png"));
             stage.setResizable(resizable);
             applyMinSize(stage, fxmlPath);
-
-            // Maximize button behavior under X11/Docker
-            if (!resizable) {
-                stage.setMaximized(false); // entry/login/signup: ensure no maximize
-            } else if (isRunningInX11()) {
-                // Force proper state after showing
-                javafx.application.Platform.runLater(() -> stage.setMaximized(false));
-            }
+            stage.setOnShown(e -> {
+                if (!resizable) {
+                    stage.setMaximized(false);
+                    stage.setResizable(false);
+                }
+            });
             stage.centerOnScreen();
 
             // Configure controller if needed
