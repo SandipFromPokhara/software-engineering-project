@@ -2,7 +2,7 @@ FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
-    libx11-6 libxext6 libxrender1 libxtst6 libxi6 libgtk-3-0 mesa-utils xvfb wget unzip \
+    libx11-6 libxext6 libxrender1 libxtst6 libxi6 libgtk-3-0 mesa-utils wget unzip \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /javafx-sdk \
@@ -13,6 +13,6 @@ RUN mkdir -p /javafx-sdk \
 
 COPY target/notevault.jar app.jar
 
-ENV DISPLAY=:99
+ENV DISPLAY=host.docker.internal:0.0
 
-CMD ["sh", "-c", "Xvfb :99 -screen 0 1280x1024x24 & java -Dprism.order=sw --module-path /javafx-sdk/lib --add-modules javafx.controls,javafx.fxml,javafx.swing -jar app.jar"]
+CMD ["java", "-Dprism.order=sw", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml,javafx.swing", "-jar", "app.jar"]
