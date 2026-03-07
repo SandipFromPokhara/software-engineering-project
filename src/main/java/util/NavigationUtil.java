@@ -104,11 +104,6 @@ public class NavigationUtil {
         }
     }
 
-    private static boolean isRunningInX11() {
-        String display = System.getenv("DISPLAY");
-        return display != null && !display.isBlank();
-    }
-
     private static void applyMinSize(Stage stage, String fxmlPath) {
         // Key windows that should allow maximizing
         boolean isKeyWindow = DASHBOARD_FXML.equals(fxmlPath) || CREATE_FXML.equals(fxmlPath) || EDIT_FXML.equals(fxmlPath);
