@@ -25,17 +25,27 @@ pipeline {
             }
         }
 
-        stage('Build & Test') {
+        stage('Build') {
+            steps {
+                bat 'mvn clean compile'
+            }
+        }
+
+        stage('Test') {
             steps {
                 withCredentials([usernamePassword(
                         credentialsId: DB_CREDENTIALS_ID,
                         usernameVariable: 'DB_USER',
                         passwordVariable: 'DB_PASSWORD'
                 )]) {
-                    bat """
-                        mvn clean package -DDB_USER=%DB_USER% -DDB_PASSWORD=%DB_PASSWORD% -DDB_HOST=%DB_HOST% -DDB_PORT=%DB_PORT% -DDB_NAME=%DB_NAME%
-                    """
+                    bat 'mvn test -DDB_USER=%DB_USER% -DDB_PASSWORD=%DB_PASSWORD% -DDB_HOST=%DB_HOST% -DDB_PORT=%DB_PORT% -DDB_NAME=%DB_NAME%'
                 }
+            }
+        }
+
+        stage('Package') {
+            steps {
+                bat 'mvn package -DskipTests'
             }
         }
 
@@ -79,7 +89,7 @@ pipeline {
                 )]) {
                     bat """
                         REM --- Login to Docker Hub ---
-                        docker login -u %DOCKER_USER% --password-stdin < "%DOCKER_PASS%"
+                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
                         
                         REM --- Push image with build number tag ---
                         echo Pushing Docker image %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG%...

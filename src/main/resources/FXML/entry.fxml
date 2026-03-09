@@ -36,7 +36,7 @@
                   <Font name="System Italic" size="12.0" />
                </font>
             </Label>
-            <VBox layoutX="79.2" layoutY="162.0" maxWidth="1.7976931348623157E308" prefHeight="120.0" prefWidth="172.0" spacing="18.0" AnchorPane.leftAnchor="79.0" AnchorPane.rightAnchor="66.0" AnchorPane.topAnchor="170.0">
+            <VBox alignment="CENTER" layoutX="76.0" layoutY="162.0" maxWidth="1.7976931348623157E308" prefHeight="155.0" prefWidth="205.0" spacing="18.0" AnchorPane.leftAnchor="76.0" AnchorPane.rightAnchor="36.0" AnchorPane.topAnchor="170.0">
                <children>
                   <Button fx:id="loginButton" mnemonicParsing="false" onAction="#onLogin" prefHeight="26.0" prefWidth="165.0" style="-fx-background-color: #266973; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-border-radius: 6;" text="Login">
                      <font>
@@ -48,19 +48,22 @@
                         <Font name="Times New Roman Bold" size="13.0" />
                      </font>
                   </Button>
-                  <Button fx:id="guestButton" mnemonicParsing="false" onAction="#onContinueAsGuest" prefHeight="25.0" prefWidth="165.0" style="-fx-background-color: #266973; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-border-radius: 6;" text="Continue as guest">
+                  <Button fx:id="guestButton" mnemonicParsing="false" onAction="#onContinueAsGuest" prefHeight="26.0" prefWidth="165.0" style="-fx-background-color: #266973; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-border-radius: 6;" text="Continue as guest">
                      <font>
                         <Font name="Times New Roman Bold" size="13.0" />
                      </font>
                   </Button>
-                  <Hyperlink fx:id="faqLink" alignment="CENTER" contentDisplay="CENTER" onAction="#handleOpenFAQ" text="Frequently Asked Questions" textFill="#266973" underline="true">
+                  <Hyperlink fx:id="faqLink" alignment="CENTER" contentDisplay="CENTER" graphicTextGap="5.0" maxWidth="1.7976931348623157E308" onAction="#handleOpenFAQ" prefHeight="22.0" prefWidth="200.0" text="Frequently Asked Questions" textFill="#266973" underline="true">
                      <VBox.margin>
-                        <Insets left="4.0" />
+                        <Insets />
                      </VBox.margin>
+                     <font>
+                        <Font size="11.0" />
+                     </font>
                   </Hyperlink>
                </children>
                <padding>
-                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                  <Insets bottom="5.0" left="2.0" right="2.0" top="5.0" />
                </padding>
             </VBox>
          </children>
