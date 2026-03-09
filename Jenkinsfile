@@ -24,7 +24,8 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
+                git branch: 'test', url: 'git@github.com:SandipFromPokhara/software-engineering-project.git',
+                credentialsId: 'private'
             }
         }
 
