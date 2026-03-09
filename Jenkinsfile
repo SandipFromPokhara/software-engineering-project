@@ -7,9 +7,13 @@ pipeline {
 
     tools {
         maven 'MAVEN_HOME'
+        jdk 'JDK21'
     }
 
     environment {
+        JAVA_HOME = tool 'JDK21'
+        PATH = "${env.JAVA_HOME}/bin:/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
+
         DB_HOST = '127.0.0.1'
         DB_PORT = '3306'
         DB_NAME = 'notevault_db'
