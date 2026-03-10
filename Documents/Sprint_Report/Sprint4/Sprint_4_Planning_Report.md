@@ -5,7 +5,7 @@
 **Project:** NoteVault - Digital Note-taking and Annotation Tool  
 **Sprint Duration:** 04.03.2026 – Week 8  
 **Team:** Dinal Maha Vidanelage, Sandip Ranjit, Swostika Lama, Twe He Gam Aung  
-**Scrum Master for Sprint 4:** Twe He Gam Aung
+**Scrum Master for Sprint 4:** Twe He Gam Aung  
 
 ---
 
@@ -23,16 +23,16 @@ By the end of Sprint 4, the team aims to deliver a fully deployable prototype wi
 
 ## Sprint Objectives
 
-- Perform final testing of all application features
-- Fix remaining bugs and UI issues
-- Verify authentication, data handling, and note management features
-- Finalize Docker container configuration for deployment
-- Push Docker image to Docker Hub
-- Test the deployed Docker container in a deployment environment
-- Update GitHub repository documentation and project description
-- Prepare final project presentation
-- Demonstrate the application workflow and system architecture
-- Collect feedback from classmates after prototype demonstration
+- Perform final testing of all application features  
+- Fix remaining bugs and UI issues  
+- Verify authentication, data handling, and note management features  
+- Finalize Docker container configuration for deployment  
+- Push Docker image to Docker Hub  
+- Test the deployed Docker container in a deployment environment  
+- Update GitHub repository documentation and project description  
+- Prepare final project presentation  
+- Demonstrate the application workflow and system architecture  
+- Collect feedback from classmates after prototype demonstration  
 
 ---
 
@@ -54,13 +54,13 @@ The following Product Backlog items were selected for Sprint 4:
 
 ## Expected Deliverables
 
-- Fully functional NoteVault application ready for demonstration
-- Docker image publicly available on Docker Hub
-- Successful deployment and testing of the Docker container
-- Updated GitHub repository with final documentation and project details
-- Updated Trello board reflecting Sprint 4 progress
-- Final project presentation prepared and delivered
-- Demonstration of application workflow and key features
+- Fully functional NoteVault application ready for demonstration  
+- Docker image publicly available on Docker Hub  
+- Successful deployment and testing of the Docker container  
+- Updated GitHub repository with final documentation and project details  
+- Updated Trello board reflecting Sprint 4 progress  
+- Final project presentation prepared and delivered  
+- Demonstration of application workflow and key features  
 
 ---
 
@@ -77,11 +77,11 @@ Since most technical features were implemented during Sprint 3, the primary focu
 
 A task is considered complete when:
 
-- The application runs correctly without errors
-- All core features are fully functional and tested
-- Docker image is successfully published to Docker Hub
-- The deployed container runs correctly in the testing environment
-- Documentation is updated and clearly explains project setup and usage
-- GitHub repository contains final project code and documentation
-- Trello board reflects completed tasks
+- The application runs correctly without errors  
+- All core features are fully functional and tested  
+- Docker image is successfully published to Docker Hub  
+- The deployed container runs correctly in the testing environment  
+- Documentation is updated and clearly explains project setup and usage  
+- GitHub repository contains final project code and documentation  
+- Trello board reflects completed tasks  
 - The final presentation and system demonstration are successfully prepared
