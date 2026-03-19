@@ -9,13 +9,13 @@ services:
       MYSQL_DATABASE: ${DB_NAME:-notevault_db}
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-rootpassword}
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
 
   app:
-    build: .
-    container_name: notevault-app
+    image: swostikalama/notevault
+    container_name: notevault-frontend
     depends_on:
       - db
     environment:
@@ -27,7 +27,7 @@ services:
       DISPLAY: host.docker.internal:0
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-    network_mode: bridge
+#    network_mode: bridge
 
 volumes:
   db_data:

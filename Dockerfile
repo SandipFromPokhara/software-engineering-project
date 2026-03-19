@@ -6,13 +6,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /javafx-sdk \
-    && wget -O javafx.zip https://download2.gluonhq.com/openjfx/21.0.2/openjfx-21.0.2_linux-x64_bin-sdk.zip \
+    && wget -O javafx.zip https://download2.gluonhq.com/openjfx/21.0.11/openjfx-21.0.11-ea+2_linux-aarch64_bin-sdk.zip \
     && unzip javafx.zip -d /javafx-sdk \
-    && mv /javafx-sdk/javafx-sdk-21.0.2/lib /javafx-sdk/lib \
-    && rm -rf /javafx-sdk/javafx-sdk-21.0.2 javafx.zip
+    && mv /javafx-sdk/javafx-sdk-21.0.11/lib /javafx-sdk/lib \
+    && rm -rf /javafx-sdk/javafx-sdk-21.0.11 javafx.zip
 
 COPY target/notevault.jar app.jar
 
 ENV DISPLAY=host.docker.internal:0.0
 
-CMD ["java", "-Dprism.order=sw", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml,javafx.swing", "-jar", "app.jar"]
+#CMD ["java", "-Dprism.order=sw", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml,javafx.swing", "-jar", "app.jar"]
+CMD ["java", "--module-path", "/javafx-sdk/lib", "--add-modules", "javafx.controls,javafx.fxml", "-jar", "app.jar"]
