@@ -1,5 +1,6 @@
 package controller;
 
+import dao.note.JpaNoteDao;
 import dao.notebook.JpaNoteBookDao;
 import dao.tag.JpaTagDao;
 import entity.NoteBookEntity;
@@ -26,6 +27,7 @@ import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -68,20 +70,47 @@ class CreateNoteControllerTest {
         private NoteEntity savedNote;
         private boolean shouldThrowException = false;
 
-        public MockNoteService() {
-            super(null, null);
+        private final MockNotebookDao notebookDao;
+        private final MockTagDao tagDao;
+
+        public MockNoteService(MockNotebookDao notebookDao, MockTagDao tagDao) {
+            super(null, notebookDao, tagDao);
+            this.notebookDao = notebookDao;
+            this.tagDao = tagDao;
         }
 
         @Override
-        public NoteEntity save(NoteEntity note) {
+        public NoteEntity createNote(String title, String content, String annotation,
+                                     NoteBookEntity notebook, Set<String> tagNames) {
+
             if (shouldThrowException) {
-                throw new RuntimeException("Database error");
+                throw new RuntimeException("Mock exception");
             }
-            this.savedNote = note;
-            if (note.getId() == null) {
-                setId(note, 1L);
+
+            if (title == null || title.isBlank()) {
+                throw new IllegalArgumentException("Title cannot be empty");
             }
-            // Don't call super.save() to avoid database access
+
+            NoteEntity note = new NoteEntity(
+                    title.trim(),
+                    content == null ? "" : content,
+                    annotation == null ? "" : annotation
+            );
+
+            note.setNotebook(notebook);
+
+            if (tagNames != null) {
+                for (String tagName : tagNames) {
+                    TagEntity tag = tagDao.findByName(tagName);
+                    if (tag == null) {
+                        tag = new TagEntity(tagName);
+                        tagDao.save(tag);
+                    }
+                    note.addTag(tag);
+                }
+            }
+
+            savedNote = note;
             return note;
         }
 
@@ -89,21 +118,10 @@ class CreateNoteControllerTest {
             savedNote = null;
             shouldThrowException = false;
         }
-
-        private void setId(NoteEntity note, Long id) {
-            try {
-                Field idField = NoteEntity.class.getDeclaredField("id");
-                idField.setAccessible(true);
-                idField.set(note, id);
-            } catch (Exception e) {
-                // Ignore
-            }
-        }
     }
 
     private static class MockNotebookDao extends JpaNoteBookDao {
         private List<NoteBookEntity> notebooks = new ArrayList<>();
-        private NoteBookEntity savedNotebook;
 
         @Override
         public List<NoteBookEntity> findByUser(UserEntity user) {
@@ -112,11 +130,7 @@ class CreateNoteControllerTest {
 
         @Override
         public NoteBookEntity save(NoteBookEntity notebook) {
-            if (notebook.getId() == null) {
-                setId(notebook, (long) (notebooks.size() + 1));
-            }
             notebooks.add(notebook);
-            savedNotebook = notebook;
             return notebook;
         }
 
@@ -126,16 +140,6 @@ class CreateNoteControllerTest {
 
         public void reset() {
             notebooks.clear();
-            savedNotebook = null;
-        }
-
-        private void setId(NoteBookEntity notebook, Long id) {
-            try {
-                Field idField = NoteBookEntity.class.getDeclaredField("id");
-                idField.setAccessible(true);
-                idField.set(notebook, id);
-            } catch (Exception e) {
-            }
         }
     }
 
@@ -192,9 +196,9 @@ class CreateNoteControllerTest {
         NotebookSession.setLastCreatedNotebook(null);
 
         controller = new CreateNoteController();
-        mockNoteService = new MockNoteService();
         mockNotebookDao = new MockNotebookDao();
         mockTagDao = new MockTagDao();
+        mockNoteService = new MockNoteService(mockNotebookDao, mockTagDao);
 
         UserEntity testUser = new UserEntity("Test", "User", "testuser", "test@example.com");
         setId(testUser, 1L);
@@ -305,6 +309,10 @@ class CreateNoteControllerTest {
                 java.lang.reflect.Method method = CreateNoteController.class.getDeclaredMethod("handleSave");
                 method.setAccessible(true);
                 method.invoke(controller);
+
+                if (mockNoteService.savedNote != null) {
+                    NoteSession.setLastCreatedNote(mockNoteService.savedNote);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
