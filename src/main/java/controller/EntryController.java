@@ -2,12 +2,21 @@ package controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
 import javafx.stage.Stage;
+import util.Localization;
 import util.NavigationUtil;
 
-public class EntryController {
+import java.util.Locale;
 
+public class EntryController {
+    @FXML
+    private Label hello;
+
+    @FXML
+    private Label welcome;
     @FXML
     private Button guestButton;
 
@@ -19,6 +28,9 @@ public class EntryController {
 
     @FXML
     private Hyperlink faqLink;
+
+    @FXML
+    private ComboBox<Locale> languageDropdown; //added
 
     @FXML
     private void onLogin() {
@@ -58,5 +70,28 @@ public class EntryController {
                 controller -> {
                     controller.initFaq(true);
                 });
+    }
+
+    // Added new initialize method for localization entry page
+    @FXML
+    public void initialize() {
+        hello.textProperty().bind(Localization.bind("entry.hello"));
+        welcome.textProperty().bind(Localization.bind("entry.welcome"));
+        loginButton.textProperty().bind(Localization.bind("entry.login"));
+        registerButton.textProperty().bind(Localization.bind("entry.register"));
+        guestButton.textProperty().bind(Localization.bind("entry.guest"));
+        faqLink.textProperty().bind(Localization.bind("entry.faq"));
+
+        languageDropdown.getItems().addAll(
+                Locale.ENGLISH,
+                new Locale("fi"),
+                new Locale("np")
+        );
+
+        languageDropdown.setValue(Locale.ENGLISH);
+
+        languageDropdown.setOnAction(e ->
+                Localization.setLocale(languageDropdown.getValue())
+        );
     }
 }

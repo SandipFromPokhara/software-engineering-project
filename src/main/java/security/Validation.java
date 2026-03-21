@@ -17,6 +17,14 @@ public class Validation {
             return false;
         }
 
+        if (!validateName(firstName, "First name", messageLabel)) {
+            return false;
+        }
+
+        if (!validateName(lastName, "Last name", messageLabel)) {
+            return false;
+        }
+
         // Validate username format
         if (!validateUsername(username, messageLabel)) {
             return false;

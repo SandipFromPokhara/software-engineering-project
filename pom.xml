@@ -150,6 +150,16 @@
                 </configuration>
             </plugin>
 
+            <!-- JavaFX plugin  -->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>Main</mainClass>
+                </configuration>
+            </plugin>
+
             <!-- Shade plugin to create a fat JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -208,5 +218,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
