@@ -6,6 +6,7 @@ import entity.UserEntity;
 import javafx.stage.Stage;
 import security.BcryptPasswordHasher;
 import security.PasswordHasher;
+import util.Localization;
 import util.NavigationUtil;
 import security.Validation;
 import javafx.fxml.FXML;
@@ -28,6 +29,9 @@ public class SignUpController {
     @FXML private Hyperlink loginLink;
     @FXML private Label messageLabel;
     @FXML private Button backButton;
+    @FXML private Label createAccount;
+    @FXML private Label joinAccount;
+    @FXML private Label haveAccount;
 
     private UserDAO userDAO;
 
@@ -35,9 +39,28 @@ public class SignUpController {
     public void initialize() {
         userDAO = new JpaUserDao();
         passwordHasher = new BcryptPasswordHasher();
+
+        // LOCALIZATION BINDINGS
+        createAccount.textProperty().bind(Localization.bind("signup.createAccount"));
+        joinAccount.textProperty().bind(Localization.bind("signup.joinAccount"));
+
+        firstNameField.promptTextProperty().bind(Localization.bind("signup.placeholder_firstname"));
+        lastNameField.promptTextProperty().bind(Localization.bind("signup.placeholder_lastname"));
+        usernameField.promptTextProperty().bind(Localization.bind("signup.placeholder_username"));
+        emailField.promptTextProperty().bind(Localization.bind("signup.placeholder_email"));
+        passwordField.promptTextProperty().bind(Localization.bind("signup.placeholder_password"));
+        confirmPasswordField.promptTextProperty().bind(Localization.bind("signup.placeholder_confirm_password"));
+
+        signUpButton.textProperty().bind(Localization.bind("signup.button"));
+        haveAccount.textProperty().bind(Localization.bind("signup.haveAccount"));
+        loginLink.textProperty().bind(Localization.bind("signup.login"));
+        backButton.textProperty().bind(Localization.bind("signup.back"));
+
+        // Keep your existing logic
         signUpButton.setOnAction(event -> handleSignUp());
         signUpButton.setDefaultButton(true);
     }
+
 
     @FXML
     public void onLogin() {
@@ -71,14 +94,14 @@ public class SignUpController {
             // Check if username already exists
             UserEntity existingUserByUsername = userDAO.findByUsername(username);
             if (existingUserByUsername != null) {
-                Validation.showMessage(messageLabel, "The username is already taken.", Validation.MessageType.ERROR);
+                Validation.showMessage(messageLabel,Localization.get ("signup.username_taken"), Validation.MessageType.ERROR);
                 return;
             }
 
             // Check if email already exists
             UserEntity existingUserByEmail = userDAO.findByEmail(email);
             if (existingUserByEmail != null) {
-                Validation.showMessage(messageLabel, "The email already exists.", Validation.MessageType.ERROR);
+                Validation.showMessage(messageLabel,Localization.get ("signup.email_exists"), Validation.MessageType.ERROR);
                 return;
             }
 
@@ -93,7 +116,7 @@ public class SignUpController {
             UserEntity savedUser = userDAO.save(newUser);
 
             if (savedUser != null && savedUser.getId() != null) {
-                Validation.showMessage(messageLabel, "Account created successfully!", Validation.MessageType.SUCCESS);
+                Validation.showMessage(messageLabel, Localization.get("signup.success"), Validation.MessageType.SUCCESS);
                 clearFields();
 
                 // Get stage before entering the thread
@@ -109,17 +132,22 @@ public class SignUpController {
                     }
                 }).start();
             } else {
-                Validation.showMessage(messageLabel, "Failed to create account!", Validation.MessageType.ERROR);
+                Validation.showMessage(messageLabel, Localization.get("signup.failed"), Validation.MessageType.ERROR);
+
             }
         } catch (IllegalArgumentException e) {
             logger.log(Level.WARNING, "Illegal argument during sign-up for username: " + username, e);
-            Validation.showMessage(messageLabel, "Validation error: " + e.getMessage(), Validation.MessageType.ERROR);
+            Validation.showMessage(
+                    messageLabel,
+                    Localization.get("signup.validation_error").replace("{message}", e.getMessage()),
+                    Validation.MessageType.ERROR
+            );
         } catch (RuntimeException e) {
             logger.log(Level.SEVERE, "Runtime exception during sign-up for username: " + username + ", email: " + email, e);
-            Validation.showMessage(messageLabel, "Database error occurred. Please try again.", Validation.MessageType.ERROR);
+            Validation.showMessage(messageLabel, Localization.get("signup.db_error"), Validation.MessageType.ERROR);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Unexpected exception during sign-up for username: " + username + ", email: " + email, e);
-            Validation.showMessage(messageLabel, "An unexpected error occurred. Please try again.", Validation.MessageType.ERROR);
+            Validation.showMessage(messageLabel, Localization.get("signup.unexpected_error"), Validation.MessageType.ERROR);
         }
     }
 

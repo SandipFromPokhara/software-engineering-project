@@ -34,13 +34,13 @@
             <VBox alignment="CENTER" layoutX="61.0" layoutY="14.0" prefHeight="60.0" prefWidth="204.0" AnchorPane.topAnchor="14.0">
                <children>
    
-                       <Label alignment="CENTER" prefHeight="32.0" prefWidth="200.0" text="Create Account" textFill="#297883">
+                       <Label alignment="CENTER" prefHeight="32.0" prefWidth="200.0" fx:id="createAccount" text="Create Account" textFill="#297883">
                            <font>
                                <Font name="System Italic" size="22.0" />
                            </font>
                        </Label>
    
-                       <Label text="Join NoteVault Today" textFill="#307494">
+                       <Label fx:id="joinAccount" text="Join NoteVault Today" textFill="#307494">
                            <font>
                                <Font name="System Italic" size="12.0" />
                            </font>
@@ -91,7 +91,7 @@
 
                     <HBox alignment="CENTER" spacing="2.0">
                         <children>
-                            <Label text="Already have an account?" textFill="#455A64">
+                            <Label fx:id="haveAccount" text="Already have an account?" textFill="#455A64">
                                 <font>
                                     <Font size="11" />
                                 </font>
