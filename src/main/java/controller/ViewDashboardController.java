@@ -50,6 +50,26 @@ public class ViewDashboardController {
     @FXML
     private MenuButton userMenuButton;
 
+//userMenu button inside these option
+    @FXML private MenuItem manageAccountItem;
+    @FXML private MenuItem deleteAccountItem;
+    @FXML private MenuItem logoutItem;
+
+
+    //    For File and Help option
+    @FXML private Menu fileMenu;
+    @FXML private Menu helpMenu;
+
+    @FXML private MenuItem newNoteItem;
+    @FXML private MenuItem exportItem;
+    @FXML private MenuItem closeItem;
+
+    @FXML private MenuItem faqItem;
+    @FXML private MenuItem aboutItem;
+
+    @FXML
+    private Button openData;
+
     @FXML
     private Button viewNotesBtn,
             createNoteBtn,
@@ -102,22 +122,59 @@ public class ViewDashboardController {
 
     @FXML
     public void initialize() {
-        toggleTooltip.setShowDelay(Duration.millis(100));
-        WordCountUtil.bind(noteViewArea, wordCountLabel);
 
+        // LOCALIZATION BINDINGS
+
+        fileMenu.textProperty().bind(Localization.bind("menu.file"));
+        newNoteItem.textProperty().bind(Localization.bind("menu.newNote"));
+        exportItem.textProperty().bind(Localization.bind("menu.exportPdf"));
+        closeItem.textProperty().bind(Localization.bind("menu.close"));
+
+        helpMenu.textProperty().bind(Localization.bind("menu.help"));
+        faqItem.textProperty().bind(Localization.bind("logged.faq"));
+        aboutItem.textProperty().bind(Localization.bind("menu.about"));
+
+        viewNotesLabel.textProperty().bind(Localization.bind("notebook.manage_label"));
+        createNoteLabel.textProperty().bind(Localization.bind("note.create_label"));
+        logoutLabel.textProperty().bind(Localization.bind("note.logout_label"));
+
+        titleColumn.textProperty().bind(Localization.bind("note.title"));
+        dateColumn.textProperty().bind(Localization.bind("note.date"));
+
+        editButton.textProperty().bind(Localization.bind("note.edit"));
+        deleteButton.textProperty().bind(Localization.bind("note.delete"));
+
+        dbStatusLabel.textProperty().bind(Localization.bind("dashboard.dbStatus"));
+        openData.textProperty().bind(Localization.bind("dashboard.openData"));
+
+        manageAccountItem.textProperty().bind(Localization.bind("user.manage_account"));
+        deleteAccountItem.textProperty().bind(Localization.bind("user.delete_account"));
+        logoutItem.textProperty().bind(Localization.bind("user.logout"));
+
+
+
+
+        //Localize user menu button (dynamic)
         UserEntity user = UserSession.getUserInstance().getUser();
-        if (user != null) {
-            userMenuButton.setText("Welcome, " + user.getFirstName() + " " + user.getLastName());
+        if(user != null) {
+            String template = Localization.get("dashboard.welcomeButton");
+            String username = user.getFirstName()+ " " +user.getLastName();
+            String text = template.replace("{username}", username);
+            userMenuButton.setText(text);
         }
+
+        toggleTooltip.setShowDelay(Duration.millis(100));
+        WordCountUtil.bind(noteViewArea, wordCountLabel); // not sure
+
 
         rootPane.getStyleClass().add("root");
         setupTheme();
 
         editButton.setDisable(true);
         deleteButton.setDisable(true);
-        noteTitleLabel.setText("Select a note to view");
-        noteViewArea.clear();
-        annotationViewArea.clear();
+//        noteTitleLabel.setText("Select a note to view");
+//        noteViewArea.clear();
+//        annotationViewArea.clear();
 
         setupTableColumns();
         setupHoverEffects();
@@ -127,7 +184,7 @@ public class ViewDashboardController {
         activeNotebook = dashboardService.getInitialNotebook();
         if (activeNotebook != null) loadNotes();
 
-        dbStatusLabel.setText("● Local Storage Active (MariaDB)");
+//        dbStatusLabel.setText("● Local Storage Active (MariaDB)");
         dbStatusLabel.setStyle("-fx-text-fill: green;");
     }
 
@@ -167,6 +224,7 @@ public class ViewDashboardController {
     }
 
     private void displayNote(NoteEntity note) {
+        noteTitleLabel.textProperty().unbind(); // important
         noteTitleLabel.setText(note.getTitle());
         noteViewArea.setText(note.getContent());
         annotationViewArea.setText(note.getAnnotation());
@@ -176,7 +234,9 @@ public class ViewDashboardController {
     }
 
     private void clearNoteDisplay() {
-        noteTitleLabel.setText("Select a note to view details");
+//        noteTitleLabel.setText("Select a note to view details");
+        noteTitleLabel.textProperty().unbind();
+        noteTitleLabel.textProperty().bind(Localization.bind("dashboard.selectNote"));
         noteViewArea.clear();
         annotationViewArea.clear();
         tagFlowpane.getChildren().clear();
@@ -272,7 +332,8 @@ public class ViewDashboardController {
         try {
             Stage owner = (Stage) rootPane.getScene().getWindow();
 
-            NavigationUtil.openWindow(owner, "/FXML/manage_notebooks.fxml", "Manage Notebooks", false, true,
+            NavigationUtil.openWindow(owner, "/FXML/manage_notebooks.fxml",
+                    Localization.get("notebook.manage_label"), false, true,
                     (ManageNotebookController controller) -> {
                         controller.loadNotebooks();
                         controller.setActiveNotebook(activeNotebook);
@@ -295,7 +356,9 @@ public class ViewDashboardController {
         Window window = rootPane.getScene().getWindow();
 
         boolean confirmed = AlertUtil.showConfirmation(
-                window, "Logout", "Are you sure you want to logout? Any unsaved changes may be lost!"
+                window,
+                Localization.get("account.logout"),
+                Localization.get("account.logout_warning")
         );
 
         if (confirmed) {
@@ -305,7 +368,7 @@ public class ViewDashboardController {
             ToggleUtil.setDarkMode(false);
 
             Stage stage = (Stage) window;
-            NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "Welcome To NoteVault", false);
+            NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "Welcome To NoteVault", false); //entry.title not working need to do this
         }
     }
 
@@ -436,7 +499,7 @@ public class ViewDashboardController {
     }
 
     private void exportEntireNotebook() {
-        List<NoteEntity> notes = dashboardService.loadNotes(activeNotebook); // active one not
+        List<NoteEntity> notes = dashboardService.loadNotes(activeNotebook); // active one
         if (notes.isEmpty()) {
             AlertUtil.showWarning(rootPane.getScene().getWindow(), "No notebook selected.");
             return;
