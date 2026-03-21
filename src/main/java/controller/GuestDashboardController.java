@@ -10,7 +10,10 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import util.Localization;
 import util.NavigationUtil;
+
+import java.util.Locale;
 import java.util.logging.Level;
 
 import static controller.ViewDashboardController.logger;
@@ -91,6 +94,13 @@ public class GuestDashboardController {
         Stage stage = (Stage) register.getScene().getWindow();
         NavigationUtil.replaceScene(stage, "/FXML/signup.fxml", "NoteVault - Register", false
         );
+
+    }
+
+    @FXML
+    public void initialize() {
+        login.textProperty().bind(Localization.bind("guest.login"));
+        register.textProperty().bind(Localization.bind("guest.register"));
 
     }
 }
