@@ -415,7 +415,7 @@ public class ViewDashboardController {
         if (selectedNote == null) return;
 
         Stage stage = (Stage) rootPane.getScene().getWindow();
-        NavigationUtil.openWindow(stage, "/FXML/edit.fxml", "NoteVault - Edit Note", true, true,
+        NavigationUtil.openWindow(stage, "/FXML/edit.fxml",Localization.get("edit.window.title"), true, true,
                 (EditNoteController controller) -> {
                     controller.setNoteDao(new JpaNoteDao());
                     controller.setTagDao(new JpaTagDao());
@@ -439,7 +439,7 @@ public class ViewDashboardController {
     @FXML
     public void handleManageAccount() {
         Stage stage = (Stage) rootPane.getScene().getWindow();
-        NavigationUtil.openWindow(stage, "/FXML/user_dashboard.fxml", "NoteVault - Manage Account", false, true, null);
+        NavigationUtil.openWindow(stage, "/FXML/user_dashboard.fxml",Localization.get("account.window_title"), false, true, null);
 
         UserEntity user = UserSession.getUserInstance().getUser();
         if (user != null) {

@@ -5,6 +5,7 @@ import dao.user.UserDAO;
 import entity.UserEntity;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -39,15 +40,55 @@ public class UserDashboardController {
 
     @FXML
     private PasswordField confirmPasswordField;
+    @FXML
+    private Label confirm;
 
     @FXML
     private Label messageLabel;
+    @FXML
+    private Label manageAccount;
+    @FXML
+    private Label note;
+    @FXML
+    private Label firstLock;
+    @FXML
+    private Label lastNameLabel;
+    @FXML
+    private Label usernameLabel;
+    @FXML
+    private Label emailLock;
+    @FXML
+    private Label newPassword;
+    @FXML
+    private Button manageCancel;
+
+    @FXML
+    private Button manageUpdate;
 
     @FXML
     public void initialize() {
         passwordHasher = new BcryptPasswordHasher();
         Validation.hideMessage(messageLabel);
 
+        // LOCALIZATION BINDINGS
+        manageAccount.textProperty().bind(Localization.bind("account.title"));
+        note.textProperty().bind(Localization.bind("account.note"));
+        confirm.textProperty().bind(Localization.bind("account.confirm_password"));
+
+        firstLock.textProperty().bind(Localization.bind("account.first_name"));
+        lastNameLabel.textProperty().bind(Localization.bind("account.last_name"));
+        usernameLabel.textProperty().bind(Localization.bind("account.username"));
+        emailLock.textProperty().bind(Localization.bind("account.email"));
+        newPassword.textProperty().bind(Localization.bind("account.new_password"));
+        confirm.textProperty().bind(Localization.bind("account.confirm_password"));
+        passwordField.promptTextProperty().bind(Localization.bind("account.password_hint"));
+        confirmPasswordField.promptTextProperty().bind(Localization.bind("account.password_repeat"));
+        manageCancel.textProperty().bind(Localization.bind("account.cancel"));
+        manageUpdate.textProperty().bind(Localization.bind("account.update"));
+
+
+
+        // Load user data
         UserEntity currentUser = UserSession.getUserInstance().getUser();
         if (currentUser == null) {
             Validation.showMessage(messageLabel, Localization.get("dashboard.no_session"), Validation.MessageType.ERROR);
@@ -58,7 +99,9 @@ public class UserDashboardController {
         lastNameField.setText(currentUser.getLastName());
         usernameField.setText(currentUser.getUsername());
         emailField.setText(currentUser.getEmail());
+
     }
+
 
     @FXML
     private void handleUpdate() {
