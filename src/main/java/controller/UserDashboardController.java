@@ -12,6 +12,7 @@ import session.UserSession;
 import security.BcryptPasswordHasher;
 import security.PasswordHasher;
 import security.Validation;
+import util.Localization;
 import util.WindowUtil;
 
 import java.util.Timer;
@@ -49,7 +50,7 @@ public class UserDashboardController {
 
         UserEntity currentUser = UserSession.getUserInstance().getUser();
         if (currentUser == null) {
-            Validation.showMessage(messageLabel, "No active user session found", Validation.MessageType.ERROR);
+            Validation.showMessage(messageLabel, Localization.get("dashboard.no_session"), Validation.MessageType.ERROR);
             return;
         }
 
@@ -63,7 +64,7 @@ public class UserDashboardController {
     private void handleUpdate() {
         UserEntity currentUser = UserSession.getUserInstance().getUser();
         if (currentUser == null) {
-            Validation.showMessage(messageLabel, "No active user session found", Validation.MessageType.ERROR);
+            Validation.showMessage(messageLabel,Localization.get("dashboard.no_session") , Validation.MessageType.ERROR);
             return;
         }
 
@@ -73,7 +74,7 @@ public class UserDashboardController {
         String confirmPassword = confirmPasswordField.getText() == null ? "" : confirmPasswordField.getText();
 
         if (newLastName.isEmpty() || newUsername.isEmpty()) {
-            Validation.showMessage(messageLabel, "Last name and username are required", Validation.MessageType.ERROR);
+            Validation.showMessage(messageLabel, Localization.get("dashboard.required_fields"), Validation.MessageType.ERROR);
             return;
         }
 
@@ -87,7 +88,7 @@ public class UserDashboardController {
 
         UserEntity existingUserWithUsername = userDao.findByUsername(newUsername);
         if (existingUserWithUsername != null && !existingUserWithUsername.getId().equals(currentUser.getId())) {
-            Validation.showMessage(messageLabel, "Username already exists", Validation.MessageType.ERROR);
+            Validation.showMessage(messageLabel, Localization.get("dashboard.username_exists"), Validation.MessageType.ERROR);
             return;
         }
 
@@ -107,7 +108,7 @@ public class UserDashboardController {
         userDao.update(currentUser);
         UserSession.getUserInstance().setUser(currentUser);
 
-        Validation.showMessage(messageLabel, "Account updated successfully", Validation.MessageType.SUCCESS);
+        Validation.showMessage(messageLabel,Localization.get("dashboard.update_success"), Validation.MessageType.SUCCESS);
         passwordField.clear();
         confirmPasswordField.clear();
 
