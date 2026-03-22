@@ -28,7 +28,7 @@
                <children>
                   <VBox spacing="6.0">
                      <children>
-                        <Label text="Note Title">
+                        <Label fx:id="noteTitleLabel" text="Note Title">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
@@ -45,7 +45,7 @@
                   </VBox>
                   <VBox spacing="5.0">
                      <children>
-                        <Label text="Select Notebook">
+                        <Label fx:id="selectLabel" text="Select Notebook">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
@@ -58,7 +58,7 @@
                   </VBox>
                   <VBox spacing="5.0" VBox.vgrow="ALWAYS">
                      <children>
-                        <Label text="Note Content">
+                        <Label fx:id="noteContentLabel" text="Note Content">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
@@ -138,7 +138,7 @@
                   </HBox>
                   <VBox prefWidth="700.0" spacing="5.0">
                      <children>
-                        <Label text="Annotations">
+                        <Label fx:id="noteAnnotationLabel" text="Annotations">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
@@ -168,7 +168,7 @@
                               <Image url="@/Images/tag-black.png" />
                            </image>
                         </ImageView>
-                        <Label styleClass="tag-label" text="Tags">
+                        <Label styleClass="tag-label" fx:id="noteTagLabel" text="Tags">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
@@ -231,13 +231,13 @@
          <children>
               <MenuBar HBox.hgrow="ALWAYS">
                   <menus>
-                      <Menu mnemonicParsing="false" text="File">
+                      <Menu mnemonicParsing="false" fx:id="fileMenu" text="File">
                           <items>
-                              <MenuItem mnemonicParsing="false" onAction="#handleBackToHome" text="Back to Dashboard" />
-                              <MenuItem mnemonicParsing="false" onAction="#handleClose" text="Close" />
+                              <MenuItem mnemonicParsing="false" onAction="#handleBackToHome" fx:id="backDashboard" text="Back to Dashboard" />
+                              <MenuItem mnemonicParsing="false" onAction="#handleClose" fx:id="closeFile" text="Close" />
                           </items>
                       </Menu>
-                      <Menu mnemonicParsing="false" text="Edit">
+                      <Menu mnemonicParsing="false" fx:id="editMenu" text="Edit">
                           <items>
                               <MenuItem fx:id="undoMenuItem" accelerator="Ctrl+Z" mnemonicParsing="false" onAction="#handleUndo" text="Undo" />
                               <MenuItem fx:id="redoMenuItem" accelerator="Ctrl+Y" mnemonicParsing="false" onAction="#handleRedo" text="Redo" />
