@@ -70,7 +70,7 @@ public class SignUpController {
     @FXML
     private void handleBack() {
         Stage stage = (Stage) backButton.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "Welcome to NoteVault", false);
+        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", Localization.get("entry.window_title"), false);
     }
 
     private void handleSignUp() {
@@ -126,7 +126,7 @@ public class SignUpController {
                 new Thread(() -> {
                     try {
                         Thread.sleep(1500); // 1.5-second delay
-                        javafx.application.Platform.runLater(() -> NavigationUtil.replaceScene(currentStage, "/FXML/login_view.fxml", "NoteVault - Login", false));
+                        javafx.application.Platform.runLater(() -> NavigationUtil.replaceScene(currentStage, "/FXML/login_view.fxml", Localization.get("dashboard.window_title"), false));
                     } catch (InterruptedException e) {
                         logger.log(Level.SEVERE, "Navigation thread interrupted for user: " + username, e);
                     }
@@ -153,7 +153,7 @@ public class SignUpController {
 
     private void navigateToLogin() {
         Stage stage = (Stage) loginLink.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/login_view.fxml", "NoteVault - LogIn", false);
+        NavigationUtil.replaceScene(stage, "/FXML/login_view.fxml", Localization.get("login.window_title"), false);
     }
 
     private void clearFields() {
