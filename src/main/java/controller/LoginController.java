@@ -89,7 +89,7 @@ public class LoginController {
             } else {
                 loginButton.setDisable(false);
                 statusLabel.setTextFill(Color.RED);
-                statusLabel.setText("Invalid username or password");
+                statusLabel.setText(Localization.get("login.invalid"));
                 statusLabel.setVisible(true);
             }
         });
@@ -114,6 +114,7 @@ public class LoginController {
         loginButton.textProperty().bind(Localization.bind("login.button"));
         loginNoAccount.textProperty().bind(Localization.bind("login.noAccount_label"));
         signupLink.textProperty().bind(Localization.bind("login.signup"));
+        backButton.textProperty().bind(Localization.bind("login.back"));
 
         usernameField.textProperty().addListener((o, oldV, newV) -> checkFields());
         passwordField.textProperty().addListener((o, oldV, newV) -> checkFields());
