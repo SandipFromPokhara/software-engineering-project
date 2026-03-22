@@ -13,6 +13,7 @@ import session.NotebookSession;
 import session.UserSession;
 import javafx.fxml.FXML;
 import util.AlertUtil;
+import util.Localization;
 import util.WindowUtil;
 
 import java.util.Comparator;
@@ -28,6 +29,9 @@ public class ManageNotebookController {
     private NoteBookEntity activeNotebook;
 
     @FXML
+    private Label manageTitle;
+
+    @FXML
     private ListView<NoteBookEntity> notebookListView;
 
     @FXML
@@ -41,6 +45,14 @@ public class ManageNotebookController {
     private void initialize() {
         notebookDao = new JpaNoteBookDao();
 
+        // LOCALIZATION BINDINGS
+        manageTitle.textProperty().bind(Localization.bind("notebooks.title"));
+        openBtn.textProperty().bind(Localization.bind("notebooks.open"));
+        renameBtn.textProperty().bind(Localization.bind("notebooks.rename"));
+        deleteBtn.textProperty().bind(Localization.bind("notebooks.delete"));
+        closeBtn.textProperty().bind(Localization.bind("notebooks.close"));
+
+        // Disable buttons initially
         renameBtn.setDisable(true);
         deleteBtn.setDisable(true);
 
@@ -56,6 +68,19 @@ public class ManageNotebookController {
             renameBtn.setDisable(!isSelected);
             deleteBtn.setDisable(!isSelected);
         });
+
+        notebookListView.setCellFactory(TextFieldListCell.forListView(new StringConverter<>() {
+            @Override
+            public String toString(NoteBookEntity nb) {
+                return nb.getTitle();
+            }
+
+            @Override
+            public NoteBookEntity fromString(String string) {
+                return notebookListView.getSelectionModel().getSelectedItem();
+            }
+        }));
+
 
         notebookListView.setCellFactory(TextFieldListCell.forListView(new StringConverter<>() {
             @Override
@@ -118,9 +143,15 @@ public class ManageNotebookController {
         if (selected == null) return;
 
         TextInputDialog dialog = new TextInputDialog(selected.getTitle());
-        dialog.setTitle("Rename Notebook");
-        dialog.setHeaderText("Rename Notebook");
-        dialog.setContentText("New name:");
+        dialog.setTitle(Localization.get("notebooks.rename"));
+        dialog.setHeaderText(Localization.get("notebooks.rename"));
+        dialog.setContentText(Localization.get("notebooks.new_name"));
+
+        // Localize OK and Cancel buttons
+        ButtonType okButton = new ButtonType(Localization.get("notebooks.rename_ok"), ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType(Localization.get("notebooks.rename_cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        dialog.getDialogPane().getButtonTypes().setAll(okButton, cancelButton);
 
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(newName -> {
@@ -133,7 +164,10 @@ public class ManageNotebookController {
                 notebookListView.refresh();
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Failed to rename notebook: " + selected.getTitle(), e);
-                AlertUtil.showError(notebookListView.getScene().getWindow(), "Rename failed.\nCould not rename notebook.");
+                AlertUtil.showError(
+                        notebookListView.getScene().getWindow(),
+                        Localization.get("notebooks.rename_failed")
+                );
             }
         });
     }
@@ -145,8 +179,10 @@ public class ManageNotebookController {
 
         boolean confirmed = AlertUtil.showConfirmation(
                 notebookListView.getScene().getWindow(),
-                "Delete Notebook",
-                "Delete notebook \"" + selected.getTitle() + "\"?\nAll notes inside will also be deleted. This cannot be undone.");
+                Localization.get("notebooks.delete"),
+                Localization.get("notebooks.delete_confirm")
+                        .replace("{title}", selected.getTitle())
+        );
 
         if (confirmed) {
             try {
