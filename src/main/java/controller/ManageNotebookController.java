@@ -196,7 +196,7 @@ public class ManageNotebookController {
                 }
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Failed to delete notebook", e);
-                AlertUtil.showError(notebookListView.getScene().getWindow(), "Could not delete notebook.");
+                AlertUtil.showError(notebookListView.getScene().getWindow(), Localization.get("notebook.deleteAlert"));
             }
         }
     }
