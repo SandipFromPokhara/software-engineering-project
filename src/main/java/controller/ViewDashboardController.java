@@ -455,10 +455,10 @@ public class ViewDashboardController {
     @FXML
     public void handleDeleteAccount() {
         Stage stage = (Stage) rootPane.getScene().getWindow();
-        NavigationUtil.openWindow(stage, "/FXML/delete_user.fxml", "NoteVault - Delete Account", false, true, null);
+        NavigationUtil.openWindow(stage, "/FXML/delete_user.fxml", Localization.get("account.delete_window_title"), false, true, null);
 
         if (UserSession.getUserInstance().getUser() == null) {
-            NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "Welcome To NoteVault", false);
+            NavigationUtil.replaceScene(stage, "/FXML/entry.fxml",Localization.get("entry.window_title"), false);
         }
     }
 
@@ -560,7 +560,7 @@ public class ViewDashboardController {
     @FXML
     private void handleOpenFAQ() {
         Stage stage = (Stage) rootPane.getScene().getWindow();
-        NavigationUtil.<FAQController>openWindow(stage, "/FXML/faq_view.fxml", "Frequently Asked Questions", true, true, controller -> controller.initFaq(false));
+        NavigationUtil.<FAQController>openWindow(stage, "/FXML/faq_view.fxml",Localization.get("faq.window_title"), true, true, controller -> controller.initFaq(false));
     }
 
     @FXML

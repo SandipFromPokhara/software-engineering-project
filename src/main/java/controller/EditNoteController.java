@@ -12,6 +12,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import util.*;
 import util.bulletList.BulletListStrategy;
@@ -87,6 +88,10 @@ public class EditNoteController {
     private Button headingUpButton;
     @FXML
     private Button headingDownButton;
+    @FXML
+    private Label editTags;
+    @FXML
+    private Menu editMenu;
 
     private UndoRedoManager undoRedoManager = new UndoRedoManager();
 
@@ -100,6 +105,30 @@ public class EditNoteController {
     }
 
     public void initialize() {
+        // LOCALIZATION BINDINGS
+        title.textProperty().bind(Localization.bind("edit.title_label"));
+        editMenu.textProperty().bind(Localization.bind("edit.menu"));
+        undoMenuItem.textProperty().bind(Localization.bind("edit.undo"));
+        redoMenuItem.textProperty().bind(Localization.bind("edit.redo"));
+
+        content.textProperty().bind(Localization.bind("edit.content_label"));
+        annotation.textProperty().bind(Localization.bind("edit.annotations"));
+        editTags.textProperty().bind(Localization.bind("edit.tags"));
+
+        updateButton.textProperty().bind(Localization.bind("edit.update"));
+        cancelButton.textProperty().bind(Localization.bind("edit.cancel"));
+
+        annotationBox.promptTextProperty().bind(Localization.bind("edit.placeholder_annotations"));
+        tagComboBox.promptTextProperty().bind(Localization.bind("edit.placeholder_tags"));
+        addTagBtn.textProperty().bind(Localization.bind("edit.add_tags"));
+        titleField.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                Stage stage = (Stage) newScene.getWindow();
+                stage.titleProperty().bind(Localization.bind("edit.window.title"));
+            }
+        });
+
+
         WordCountUtil.bind(contentBox, wordCountLabel);
 
         tagTooltip.setShowDelay(Duration.millis(100));

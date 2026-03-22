@@ -24,7 +24,7 @@
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <menus>
-                <Menu mnemonicParsing="false" text="Edit">
+                <Menu mnemonicParsing="false" fx:id="editMenu" text="Edit">
                     <items>
                         <MenuItem fx:id="undoMenuItem" accelerator="Ctrl+Z" mnemonicParsing="false" onAction="#handleUndo" text="Undo" />
                         <MenuItem fx:id="redoMenuItem" accelerator="Ctrl+Y" mnemonicParsing="false" onAction="#handleRedo" text="Redo" />
@@ -154,7 +154,7 @@
                                     <Image url="@/Images/tag-black.png" />
                                 </image>
                             </ImageView>
-                            <Label styleClass="tag-label" text="Tags">
+                            <Label styleClass="tag-label" fx:id="editTags" text="Tags">
                                 <font>
                                     <Font name="System Bold" size="14.0" />
                                 </font>
