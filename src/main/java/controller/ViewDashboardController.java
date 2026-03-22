@@ -171,10 +171,7 @@ public class ViewDashboardController {
         setupTheme();
 
         editButton.setDisable(true);
-        deleteButton.setDisable(true);
-//        noteTitleLabel.setText("Select a note to view");
-//        noteViewArea.clear();
-//        annotationViewArea.clear();
+        deleteButton.setDisable(true);;
 
         setupTableColumns();
         setupHoverEffects();
@@ -184,7 +181,7 @@ public class ViewDashboardController {
         activeNotebook = dashboardService.getInitialNotebook();
         if (activeNotebook != null) loadNotes();
 
-//        dbStatusLabel.setText("● Local Storage Active (MariaDB)");
+
         dbStatusLabel.setStyle("-fx-text-fill: green;");
     }
 
@@ -374,28 +371,25 @@ public class ViewDashboardController {
 
     @FXML
     public void handleDelete() {
-        // Get the selected note
         NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
-
         if (selectedNote == null) {
             return;
         }
 
-        // Show confirmation dialog
-        boolean confirmed = AlertUtil.showConfirmation(
-                deleteButton.getScene().getWindow(),
-                "Delete Note",
-                "Delete \"" + selectedNote.getTitle() + "\"?\nThis action cannot be undone. Are you sure?");
+        Window owner = deleteButton.getScene().getWindow();
+
+        String title = Localization.get("delete.window_title");
+
+        String template = Localization.get("delete_note.confirm");
+        String message = template.replace("{{title}}", selectedNote.getTitle());
+
+        boolean confirmed = AlertUtil.showConfirmation(owner, title, message);
 
         if (confirmed) {
             try {
-                // Delete from database
                 dashboardService.deleteNote(selectedNote);
-
-                // Remove from TableView
                 notesTable.getItems().remove(selectedNote);
 
-                // Select first note if any
                 if (!notesTable.getItems().isEmpty()) {
                     notesTable.getSelectionModel().selectFirst();
                 } else {
@@ -403,15 +397,16 @@ public class ViewDashboardController {
                 }
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Failed to delete note with ID: " + selectedNote.getId(), e);
-                AlertUtil.showError(deleteButton.getScene().getWindow(), "Failed to delete note: " + e.getMessage());
+                AlertUtil.showError(owner, Localization.get("delete.failed"));
             }
         }
     }
 
+
     @FXML
     public void handleCreate() {
         Stage owner = (Stage) rootPane.getScene().getWindow();
-        NavigationUtil.openWindow(owner, "/FXML/create_note.fxml", "NoteVault - Create Note", true, true, null);
+        NavigationUtil.openWindow(owner, "/FXML/create_note.fxml", Localization.get("create.window_title"), true, true, null);
     }
 
     @FXML
@@ -465,33 +460,41 @@ public class ViewDashboardController {
     @FXML
     private void handleExport() {
         if (activeNotebook == null) {
-            AlertUtil.showWarning(rootPane.getScene().getWindow(), "No notebook selected.");
+            AlertUtil.showWarning(rootPane.getScene().getWindow(), Localization.get("export.no_notebook"));
             return;
         }
+
         ChoiceDialog<String> dialog = new ChoiceDialog<>(
-                "Selected Note",
-                "Selected Note",
-                "Entire Notebook"
+                Localization.get("export.dialog.option.selected"),
+                Localization.get("export.dialog.option.selected"),
+                Localization.get("export.dialog.option.notebook")
         );
-        dialog.setTitle("Export Options");
-        dialog.setHeaderText("Choose what to export:");
-        dialog.setContentText("Export:");
+
+        dialog.setTitle(Localization.get("export.dialog.title"));
+        dialog.setHeaderText(Localization.get("export.dialog.header"));
+        dialog.setContentText(Localization.get("export.dialog.label"));
+
+        ButtonType ok = new ButtonType(Localization.get("account.logout_ok"), ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType(Localization.get("account.logout_cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        dialog.getDialogPane().getButtonTypes().setAll(ok, cancel);
+
 
         Optional<String> result = dialog.showAndWait();
-
         if (result.isEmpty()) return;
 
-        if (result.get().equals("Selected Note")) {
+        if (result.get().equals(Localization.get("export.dialog.option.selected"))) {
             exportSelectedNote();
         } else {
             exportEntireNotebook();
         }
     }
 
+
     private void exportSelectedNote() {
         NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
         if (selectedNote == null) {
-            AlertUtil.showWarning(rootPane.getScene().getWindow(), "No notes available in this notebook.");
+            AlertUtil.showWarning(rootPane.getScene().getWindow(),Localization.get("export.no_notes"));
             return;
         }
         List<NoteEntity> singleNoteList = List.of(selectedNote);
@@ -501,7 +504,7 @@ public class ViewDashboardController {
     private void exportEntireNotebook() {
         List<NoteEntity> notes = dashboardService.loadNotes(activeNotebook); // active one
         if (notes.isEmpty()) {
-            AlertUtil.showWarning(rootPane.getScene().getWindow(), "No notebook selected.");
+            AlertUtil.showWarning(rootPane.getScene().getWindow(),Localization.get("export.no_notebook"));
             return;
         }
         exportNotesToPdf(notes, activeNotebook.getTitle());
@@ -509,7 +512,7 @@ public class ViewDashboardController {
 
     private void exportNotesToPdf(List<NoteEntity> notes, String fileName) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export as PDF");
+        fileChooser.setTitle(Localization.get("menu.exportPdf"));
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("PDF Files", "*.pdf")
         );
@@ -547,11 +550,11 @@ public class ViewDashboardController {
             }
 
             document.close();
-            AlertUtil.showInfo(rootPane.getScene().getWindow(), "Export successful!");
+            AlertUtil.showInfo(rootPane.getScene().getWindow(),Localization.get("export.success"));
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Export failed", e);
-            AlertUtil.showError(rootPane.getScene().getWindow(), "Export failed.");
+            AlertUtil.showError(rootPane.getScene().getWindow(), Localization.get("export.failed"));
         }
     }
 
