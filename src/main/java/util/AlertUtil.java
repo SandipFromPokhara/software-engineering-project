@@ -1,6 +1,8 @@
 package util;
 
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Window;
 
 public class AlertUtil {
@@ -42,10 +44,18 @@ public class AlertUtil {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
+
         if (owner != null) {
             alert.initOwner(owner);
         }
 
-        return alert.showAndWait().filter(response -> response == javafx.scene.control.ButtonType.OK).isPresent();
+        // Localized buttons
+        ButtonType okButton = new ButtonType(Localization.get("account.logout_ok"), ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType(Localization.get("account.logout_cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(okButton, cancelButton);
+
+        return alert.showAndWait().filter(response -> response == okButton).isPresent();
     }
+
 }

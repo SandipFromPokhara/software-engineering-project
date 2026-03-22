@@ -13,7 +13,6 @@ import javafx.stage.Stage;
 import util.Localization;
 import util.NavigationUtil;
 
-import java.util.Locale;
 import java.util.logging.Level;
 
 import static controller.ViewDashboardController.logger;
@@ -48,7 +47,7 @@ public class GuestDashboardController {
     @FXML
     private void handleHome() {
         Stage stage = (Stage) home.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "Welcome to NoteVault", false
+        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", Localization.get("entry.window_title"), false
         );
     }
 
@@ -69,7 +68,7 @@ public class GuestDashboardController {
 
         //logger
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Failed to load FXML file: " + fxmlFile, e);
+            logger.log(Level.SEVERE, Localization.get("error.fxml_load") + fxmlFile, e);
         }
     }
 
@@ -84,7 +83,7 @@ public class GuestDashboardController {
         NavigationUtil.replaceScene(
                 stage,
                 "/FXML/login_view.fxml",
-                "NoteVault - LogIn",
+                Localization.get("login.window_title"),
                 false
         );
     }
@@ -92,7 +91,7 @@ public class GuestDashboardController {
     @FXML
     private void handleSignUp() {
         Stage stage = (Stage) register.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml", "NoteVault - Register", false
+        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml",Localization.get("register.window_title"), false
         );
 
     }
