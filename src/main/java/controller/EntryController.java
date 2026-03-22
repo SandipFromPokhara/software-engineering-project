@@ -38,7 +38,7 @@ public class EntryController {
         NavigationUtil.replaceScene(
                 stage,
                 "/FXML/login_view.fxml",
-                "NoteVault - LogIn",
+                Localization.get("login.window_title"),
                 false);
     }
 
@@ -48,7 +48,7 @@ public class EntryController {
         NavigationUtil.replaceScene(
                 stage,
                 "/FXML/signup.fxml",
-                "NoteVault - Register",false);
+                Localization.get("register.window_title"),false);
     }
 
     @FXML
@@ -57,7 +57,7 @@ public class EntryController {
         NavigationUtil.replaceScene(
                 stage,
                 "/FXML/guestDashboard.fxml",
-                "NoteVault - Guest Mode", true);
+                Localization.get("guest.window_title"), true);
     }
 
     @FXML
@@ -65,7 +65,7 @@ public class EntryController {
         NavigationUtil.<FAQController>openWindow(
                 null,
                 "/FXML/faq_view.fxml",
-                "Frequently Asked Questions",
+                Localization.get("faq.window_title"),
                 true, true,
                 controller -> {
                     controller.initFaq(true);
