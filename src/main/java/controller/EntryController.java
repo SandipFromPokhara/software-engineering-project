@@ -85,7 +85,9 @@ public class EntryController {
         languageDropdown.getItems().addAll(
                 Locale.ENGLISH,
                 new Locale("fi"),
-                new Locale("np")
+                new Locale("np"),
+                new Locale("si"),
+                new Locale("my")
         );
 
         languageDropdown.setValue(Locale.ENGLISH);
