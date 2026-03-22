@@ -1,5 +1,6 @@
 package controller;
 
+
 import dao.notebook.JpaNoteBookDao;
 import dao.tag.JpaTagDao;
 import entity.NoteBookEntity;
@@ -18,13 +19,13 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import services.NoteService;
 import entity.NoteEntity;
-import session.NotebookSession;
-import session.NoteSession;
 import session.UserSession;
 import util.*;
 import util.bulletList.BulletListStrategy;
 import util.bulletList.NumberedListStrategy;
 import util.bulletList.TextFormattingUtil;
+import util.events.EventBus;
+import util.events.NoteCreatedEvent;
 
 import java.net.URL;
 import java.util.List;
@@ -42,6 +43,26 @@ public class CreateNoteController implements Initializable {
     private Set<String> selectedTags = new HashSet<>();
     private JpaNoteBookDao notebookDao;
     private JpaTagDao tagDao;
+
+    @FXML
+    private Menu fileMenu;
+    @FXML
+    private Menu editMenu;
+    @FXML
+    private MenuItem backDashboard;
+    @FXML
+    private MenuItem closeFile;
+
+    @FXML
+    private Label noteTitleLabel;
+    @FXML
+    private Label noteContentLabel;
+    @FXML
+    private Label noteAnnotationLabel;
+    @FXML
+    private Label noteTagLabel;
+    @FXML
+    private Label selectLabel;
 
     @FXML
     private TextField titleField;
@@ -95,6 +116,45 @@ public class CreateNoteController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
+        // LOCALIZATION BINDINGS
+        fileMenu.textProperty().bind(Localization.bind("file.menu"));
+        editMenu.textProperty().bind(Localization.bind("edit.menu"));
+        closeFile.textProperty().bind(Localization.bind("file.menu-item1"));
+        backDashboard.textProperty().bind(Localization.bind("file.menu-item2"));
+        undoMenuItem.textProperty().bind(Localization.bind("edit.undo"));
+        redoMenuItem.textProperty().bind(Localization.bind("edit.redo"));
+
+        noteTitleLabel.textProperty().bind(Localization.bind("create.title_label"));
+        noteContentLabel.textProperty().bind(Localization.bind("create.note_content"));
+        selectLabel.textProperty().bind(Localization.bind("notebook.select_label"));
+        notebookComboBox.promptTextProperty().bind(Localization.bind("create.new_notebook_label"));
+        WordCountUtil.bind(contentArea, wordCountLabel);
+
+
+        noteAnnotationLabel.textProperty().bind(Localization.bind("create.note_annotations"));
+        noteTagLabel.textProperty().bind(Localization.bind("create.tags"));
+
+
+        saveButton.textProperty().bind(Localization.bind("create.save"));
+        clearButton.textProperty().bind(Localization.bind("create.clear"));
+
+        titleField.promptTextProperty().bind(Localization.bind("create.placeholder_title"));
+        contentArea.promptTextProperty().bind(Localization.bind("create.placeholder_content"));
+        annotationArea.promptTextProperty().bind(Localization.bind("create.placeholder_annotations"));
+
+        tagComboBox.promptTextProperty().bind(Localization.bind("create.placeholder_tags"));
+        addTagBtn.textProperty().bind(Localization.bind("create.add_tags"));
+
+        notebookComboBox.promptTextProperty().bind(Localization.bind("notebook.create"));
+
+        titleField.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                Stage stage = (Stage) newScene.getWindow();
+                stage.titleProperty().bind(Localization.bind("create.title"));
+            }
+        });
+
 
         // Tooltip delay
         tagTooltip.setShowDelay(Duration.millis(100));
@@ -190,78 +250,40 @@ public class CreateNoteController implements Initializable {
 
     @FXML
     private void handleSave() {
-        NoteBookEntity selectedNotebook = notebookComboBox.getSelectionModel().getSelectedItem();
-
-        if (selectedNotebook == null) {
-            showStatus("Please select a notebook", true);
-            return;
-        }
-
         try {
             String title = titleField.getText().trim();
             String content = contentArea.getText() == null ? "" : contentArea.getText();
             String annotation = annotationArea.getText() == null ? "" : annotationArea.getText();
 
-            if (title.isEmpty()) {
-                showStatus("Please enter a note title", true);
+            NoteBookEntity selectedNotebook = notebookComboBox.getSelectionModel().getSelectedItem();
+
+            if (selectedNotebook == null) {
+                showStatus(Localization.get("create.error_no_notebook"), true);
                 return;
             }
 
+            if (title.isEmpty()) {
+                showStatus(Localization.get("create.error_no_title"), true);
+                return;
+            }
+
+            // Handle "Create New Notebook"
             if (CREATE_NEW.equals(selectedNotebook.getTitle())) {
-                TextInputDialog dialog = new TextInputDialog();
-                dialog.setTitle("New Notebook");
-                dialog.setHeaderText("Create a new notebook");
-                dialog.setContentText("Enter notebook name:");
-                dialog.initOwner(titleField.getScene().getWindow());
-
-                selectedNotebook = dialog.showAndWait()
-                        .map(String::trim)
-                        .filter(name -> !name.isEmpty())
-                        .map(name -> {
-                            NoteBookEntity newNotebook = new NoteBookEntity(name, UserSession.getUserInstance().getUser());
-                            newNotebook = (notebookDao != null ? notebookDao : new JpaNoteBookDao()).save(newNotebook);
-                            NotebookSession.setLastCreatedNotebook(newNotebook);
-                            // Add new notebook to ComboBox before "Create New"
-                            notebookComboBox.getItems().removeIf(nb -> CREATE_NEW.equals(nb.getTitle()));
-                            notebookComboBox.getItems().add(newNotebook);
-
-                            notebookComboBox.getItems().sort((n1, n2) -> {
-                                if (n1.getCreatedAt() == null) return -1;
-                                if (n2.getCreatedAt() == null) return 1;
-                                return n1.getCreatedAt().compareTo(n2.getCreatedAt());
-                            });
-
-                            NoteBookEntity createNewItem = new NoteBookEntity(CREATE_NEW, UserSession.getUserInstance().getUser());
-                            notebookComboBox.getItems().add(createNewItem);
-
-                            notebookComboBox.getSelectionModel().select(newNotebook);
-                            return newNotebook;
-                        }).orElse(null);
-
-                if (selectedNotebook == null) {
-                    showStatus("Notebook creation cancelled", true);
+                String name = promptForNotebookName();
+                if (name == null) {
+                    showStatus(Localization.get("create.cancelled"), true);
                     return;
                 }
+
+                selectedNotebook = noteService.createNotebook(name);
+                addNotebookToComboBox(selectedNotebook);
             }
 
-            NoteEntity note = new NoteEntity(title.trim(), content, annotation);
-            note.setNotebook(selectedNotebook);
+            NoteEntity createdNote = noteService.createNote(title, content, annotation, selectedNotebook, selectedTags);
 
-            JpaTagDao tagDaoInstance = (tagDao != null ? tagDao : new JpaTagDao());
+            EventBus.publish(new NoteCreatedEvent(createdNote));
 
-            for (String tagName : selectedTags) {
-                TagEntity tag = tagDaoInstance.findByName(tagName);
-
-                if (tag == null) {
-                    tag = new TagEntity(tagName);
-                    tag = tagDaoInstance.save(tag);
-                }
-                note.addTag(tag);
-            }
-
-            NoteEntity createdNote = noteService.save(note);
-            NoteSession.setLastCreatedNote(createdNote);
-            showStatus("Note saved successfully!", false);
+            showStatus(Localization.get("create.success"), false);
 
             Stage stage = (Stage) titleField.getScene().getWindow();
             stage.close();
@@ -380,5 +402,32 @@ public class CreateNoteController implements Initializable {
 
     public void setTagDao(JpaTagDao tagDao) {
         this.tagDao = tagDao;
+    }
+
+    private String promptForNotebookName() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle(Localization.get("create.new_notebook"));
+        dialog.setHeaderText(Localization.get("create.new_notebook"));
+        dialog.setContentText(Localization.get("create.placeholder_title"));
+
+        dialog.initOwner(titleField.getScene().getWindow());
+
+        return dialog.showAndWait()
+                .map(String::trim)
+                .filter(name -> !name.isEmpty())
+                .orElse(null);
+    }
+
+    private void addNotebookToComboBox(NoteBookEntity newNotebook) {
+        notebookComboBox.getItems().removeIf(nb -> CREATE_NEW.equals(nb.getTitle()));
+        notebookComboBox.getItems().add(newNotebook);
+
+        notebookComboBox.getItems().sort((n1, n2) ->
+                n1.getCreatedAt().compareTo(n2.getCreatedAt())
+        );
+
+        notebookComboBox.getItems().add(new NoteBookEntity(CREATE_NEW, newNotebook.getUser()));
+
+        notebookComboBox.getSelectionModel().select(newNotebook);
     }
 }

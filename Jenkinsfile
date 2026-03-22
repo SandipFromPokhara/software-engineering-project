@@ -18,7 +18,6 @@ pipeline {
         DOCKERHUB_REPO = 'sandipranjit/notevault'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
         BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
-        JAVA_TOOL_OPTIONS = "-Dprism.order=sw -Djava.awt.headless=true"
     }
 
     stages {
@@ -93,12 +92,12 @@ pipeline {
                             '''
                     } else {
                         bat """
-                    REM --- Build Docker image with build number tag ---
-                    docker build --pull -t %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% .
-    
-                    REM --- Verify image exists ---
-                    docker images
-                """
+                        REM --- Build Docker image with build number tag ---
+                        docker build --pull -t %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% .
+        
+                        REM --- Verify image exists ---
+                        docker images
+                    """
                     }
                 }
             }

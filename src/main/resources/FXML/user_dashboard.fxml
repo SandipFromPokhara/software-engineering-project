@@ -11,38 +11,38 @@
 
 <VBox alignment="TOP_LEFT" prefHeight="380.0" prefWidth="460.0" spacing="12.0" style="-fx-background-color: #f4f4f4; -fx-padding: 20;" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.UserDashboardController">
     <children>
-        <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Manage Account" />
-        <Label style="-fx-text-fill: #6b6b6b;" text="Note: Permission to update last name, username, and password only!" />
+        <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" fx:id="manageAccount" text="Manage Account" />
+        <Label style="-fx-text-fill: #6b6b6b;" fx:id="note" text="Note: Permission to update last name, username, and password only!" />
         <Separator />
 
-        <Label text="First Name (locked)" />
+        <Label fx:id="firstLock" text="First Name (locked)" />
         <TextField fx:id="firstNameField" editable="false" focusTraversable="false" />
 
-        <Label text="Last Name" />
+        <Label fx:id="lastNameLabel" text="Last Name" />
         <TextField fx:id="lastNameField" promptText="Enter your last name" />
 
-        <Label text="Username" />
+        <Label fx:id="usernameLabel" text="Username" />
         <TextField fx:id="usernameField" promptText="Enter your username" />
 
-        <Label text="Email (locked)" />
+        <Label fx:id="emailLock" text="Email (locked)" />
         <TextField fx:id="emailField" editable="false" focusTraversable="false" />
 
-        <Label text="New Password (optional)" />
+        <Label fx:id="newPassword" text="New Password (optional)" />
         <PasswordField fx:id="passwordField" promptText="Leave blank to keep current password" />
 
-        <Label text="Confirm New Password" />
+        <Label fx:id="confirm" text="Confirm New Password" />
         <PasswordField fx:id="confirmPasswordField" promptText="Repeat new password" />
 
         <Label fx:id="messageLabel" textFill="#d32f2f" visible="false" wrapText="true" />
 
         <HBox alignment="CENTER_RIGHT" spacing="10.0">
             <children>
-                <Button mnemonicParsing="false" onAction="#handleCancel" text="Cancel">
+                <Button mnemonicParsing="false" fx:id="manageCancel" onAction="#handleCancel" text="Cancel">
                     <HBox.margin>
                         <Insets top="8.0" />
                     </HBox.margin>
                 </Button>
-                <Button mnemonicParsing="false" onAction="#handleUpdate" style="-fx-background-color: #2e7d32; -fx-text-fill: white;" text="Update">
+                <Button mnemonicParsing="false" fx:id="manageUpdate" onAction="#handleUpdate" style="-fx-background-color: #2e7d32; -fx-text-fill: white;" text="Update">
                     <HBox.margin>
                         <Insets top="8.0" />
                     </HBox.margin>

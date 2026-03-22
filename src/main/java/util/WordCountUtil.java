@@ -8,21 +8,28 @@ public class WordCountUtil {
     public static void bind(TextArea textArea, Label wordCountLabel) {
         if (textArea == null || wordCountLabel == null) return;
 
+        // Update on every text change
         textArea.textProperty().addListener((obs, oldText, newText) -> {
-            int words = countWords(newText);
-            int chars = newText.length();
-
-            wordCountLabel.setText("Words: " + words + " | Chars: " + chars);
+            updateLabel(newText, wordCountLabel);
         });
 
-        // Initialize label with current content
-        int initialWords = countWords(textArea.getText());
-        int initialChars = textArea.getText() != null ? textArea.getText().length() : 0;
-        wordCountLabel.setText("Words: " + initialWords + " | Chars: " + initialChars);
+        // Initialize with localized template
+        updateLabel(textArea.getText(), wordCountLabel);
     }
 
-    // Update word & character count
-    private static int  countWords(String text) {
+    private static void updateLabel(String text, Label label) {
+        int words = countWords(text);
+        int chars = text != null ? text.length() : 0;
+
+        String template = Localization.get("create.words_chars_label");
+        String formatted = template
+                .replace("{{words}}", String.valueOf(words))
+                .replace("{{chars}}", String.valueOf(chars));
+
+        label.setText(formatted);
+    }
+
+    private static int countWords(String text) {
         if (text == null || text.isBlank()) return 0;
         return text.trim().split("\\s+").length;
     }
