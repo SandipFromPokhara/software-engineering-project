@@ -19,19 +19,34 @@ public class SignUpController {
     private static final Logger logger = Logger.getLogger(SignUpController.class.getName());
     private PasswordHasher passwordHasher;
 
-    @FXML private TextField firstNameField;
-    @FXML private TextField lastNameField;
-    @FXML private TextField usernameField;
-    @FXML private TextField emailField;
-    @FXML private PasswordField passwordField;
-    @FXML private PasswordField confirmPasswordField;
-    @FXML private Button signUpButton;
-    @FXML private Hyperlink loginLink;
-    @FXML private Label messageLabel;
-    @FXML private Button backButton;
-    @FXML private Label createAccount;
-    @FXML private Label joinAccount;
-    @FXML private Label haveAccount;
+    @FXML
+    private TextField firstNameField;
+    @FXML
+    private TextField lastNameField;
+    @FXML
+    private TextField usernameField;
+    @FXML
+    private TextField emailField;
+    @FXML
+    private PasswordField passwordField;
+    @FXML
+    private PasswordField confirmPasswordField;
+    @FXML
+    private Button signUpButton;
+    @FXML
+    private Hyperlink loginLink;
+    @FXML
+    private Label messageLabel;
+    @FXML
+    private Button backButton;
+    @FXML
+    private Label createAccount;
+    @FXML
+    private Label joinAccount;
+    @FXML
+    private Label haveAccount;
+    @FXML
+    private Label privacyLabel;
 
     private UserDAO userDAO;
 
@@ -55,6 +70,7 @@ public class SignUpController {
         haveAccount.textProperty().bind(Localization.bind("signup.haveAccount"));
         loginLink.textProperty().bind(Localization.bind("signup.login"));
         backButton.textProperty().bind(Localization.bind("signup.back"));
+        privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));// Text from the left image
 
         // Keep your existing logic
         signUpButton.setOnAction(event -> handleSignUp());
@@ -94,14 +110,14 @@ public class SignUpController {
             // Check if username already exists
             UserEntity existingUserByUsername = userDAO.findByUsername(username);
             if (existingUserByUsername != null) {
-                Validation.showMessage(messageLabel,Localization.get ("signup.username_taken"), Validation.MessageType.ERROR);
+                Validation.showMessage(messageLabel, Localization.get("signup.username_taken"), Validation.MessageType.ERROR);
                 return;
             }
 
             // Check if email already exists
             UserEntity existingUserByEmail = userDAO.findByEmail(email);
             if (existingUserByEmail != null) {
-                Validation.showMessage(messageLabel,Localization.get ("signup.email_exists"), Validation.MessageType.ERROR);
+                Validation.showMessage(messageLabel, Localization.get("signup.email_exists"), Validation.MessageType.ERROR);
                 return;
             }
 
@@ -169,5 +185,7 @@ public class SignUpController {
         this.userDAO = userDAO;
     }
 
-    public void setPasswordHasher(PasswordHasher hasher) { this.passwordHasher = hasher; }
+    public void setPasswordHasher(PasswordHasher hasher) {
+        this.passwordHasher = hasher;
+    }
 }
