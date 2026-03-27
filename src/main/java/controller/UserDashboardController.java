@@ -9,11 +9,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import security.MessageType;
 import session.UserSession;
 import security.BcryptPasswordHasher;
 import security.PasswordHasher;
 import security.Validation;
 import util.Localization;
+import util.ShowMessageUtil;
 import util.WindowUtil;
 
 import java.util.Timer;
@@ -69,7 +71,7 @@ public class UserDashboardController {
     @FXML
     public void initialize() {
         passwordHasher = new BcryptPasswordHasher();
-        Validation.hideMessage(messageLabel);
+        ShowMessageUtil.hideMessage(messageLabel);
 
         // LOCALIZATION BINDINGS
         manageAccount.textProperty().bind(Localization.bind("account.title"));
@@ -87,12 +89,10 @@ public class UserDashboardController {
         manageCancel.textProperty().bind(Localization.bind("account.cancel"));
         manageUpdate.textProperty().bind(Localization.bind("account.update"));
 
-
-
         // Load user data
         UserEntity currentUser = UserSession.getUserInstance().getUser();
         if (currentUser == null) {
-            Validation.showMessage(messageLabel, Localization.get("dashboard.no_session"), Validation.MessageType.ERROR);
+            ShowMessageUtil.showMessageKey(messageLabel, "dashboard.no_session", MessageType.ERROR);
             return;
         }
 
@@ -103,12 +103,11 @@ public class UserDashboardController {
 
     }
 
-
     @FXML
     private void handleUpdate() {
         UserEntity currentUser = UserSession.getUserInstance().getUser();
         if (currentUser == null) {
-            Validation.showMessage(messageLabel,Localization.get("dashboard.no_session") , Validation.MessageType.ERROR);
+            ShowMessageUtil.showMessageKey(messageLabel, "dashboard.no_session", MessageType.ERROR);
             return;
         }
 
@@ -117,32 +116,41 @@ public class UserDashboardController {
         String newPassword = passwordField.getText() == null ? "" : passwordField.getText();
         String confirmPassword = confirmPasswordField.getText() == null ? "" : confirmPasswordField.getText();
 
-        if (newLastName.isEmpty() || newUsername.isEmpty()) {
-            Validation.showMessage(messageLabel, Localization.get("dashboard.required_fields"), Validation.MessageType.ERROR);
-            return;
-        }
+        Validation.ValidationResult result = Validation.validateSignup(
+                "",                 // firstName not updated here
+                newLastName,
+                newUsername,
+                "",
+                newPassword,
+                confirmPassword
+        );
 
-        if (!Validation.validateName(newLastName, "Last name", messageLabel)) {
-            return;
-        }
-
-        if (!Validation.validateUsername(newUsername, messageLabel)) {
+        if (!result.success()) {
+            ShowMessageUtil.showMessageKey(messageLabel, "dashboard.validation_error", MessageType.ERROR);
             return;
         }
 
         UserEntity existingUserWithUsername = userDao.findByUsername(newUsername);
         if (existingUserWithUsername != null && !existingUserWithUsername.getId().equals(currentUser.getId())) {
-            Validation.showMessage(messageLabel, Localization.get("dashboard.username_exists"), Validation.MessageType.ERROR);
+            ShowMessageUtil.showMessageKey(messageLabel, Localization.get("dashboard.username_exists"), MessageType.ERROR);
             return;
         }
 
         if (!newPassword.isBlank()) {
-            if (!Validation.validatePasswordMatch(newPassword, confirmPassword, messageLabel)) {
+
+            if (!Validation.validatePasswordMatch(newPassword, confirmPassword)) {
+                ShowMessageUtil.showMessageKey(messageLabel, "passwords.do_not_match", MessageType.ERROR);
                 return;
             }
-            if (!Validation.validatePasswordStrength(newPassword, messageLabel)) {
+
+            if (newPassword.length() < 6 ||
+                    !newPassword.matches(".*\\d.*") ||
+                    !newPassword.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*")) {
+
+                ShowMessageUtil.showMessageKey(messageLabel, "password.not_strong", MessageType.ERROR);
                 return;
             }
+
             currentUser.changePasswordHash(passwordHasher.hash(newPassword));
         }
 
@@ -152,7 +160,7 @@ public class UserDashboardController {
         userDao.update(currentUser);
         UserSession.getUserInstance().setUser(currentUser);
 
-        Validation.showMessage(messageLabel,Localization.get("dashboard.update_success"), Validation.MessageType.SUCCESS);
+        ShowMessageUtil.showMessageKey(messageLabel,"dashboard.update_success", MessageType.SUCCESS);
         passwordField.clear();
         confirmPasswordField.clear();
 
