@@ -8,6 +8,8 @@ import com.itextpdf.layout.element.Paragraph;
 import dao.note.JpaNoteDao;
 import dao.tag.JpaTagDao;
 import entity.*;
+import javafx.application.Platform; // added import
+import javafx.beans.binding.Bindings;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.control.TableView;
@@ -18,6 +20,9 @@ import javafx.scene.layout.FlowPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
+import model.LanguageModel;
+import model.LanguageModel.Language;
 import services.DashboardService;
 import session.NotebookSession;
 import util.*;
@@ -117,6 +122,13 @@ public class ViewDashboardController {
             sideBtn2,
             sideBtn3;
 
+    @FXML private ComboBox<String> languageCombo;
+
+    @FXML
+    private Label languageIconLabel;
+
+    private javafx.beans.binding.StringBinding welcomeBinding;
+
     public ViewDashboardController() {
     }
 
@@ -151,27 +163,41 @@ public class ViewDashboardController {
         deleteAccountItem.textProperty().bind(Localization.bind("user.delete_account"));
         logoutItem.textProperty().bind(Localization.bind("user.logout"));
 
-
-
-
-        //Localize user menu button (dynamic)
+        // Localize user menu button (dynamic, updates on language change)
         UserEntity user = UserSession.getUserInstance().getUser();
-        if(user != null) {
-            String template = Localization.get("dashboard.welcomeButton");
-            String username = user.getFirstName()+ " " +user.getLastName();
-            String text = template.replace("{username}", username);
-            userMenuButton.setText(text);
+        if (user != null) {
+            String username = user.getFirstName() + " " + user.getLastName();
+            welcomeBinding = Bindings.createStringBinding(
+                    () -> Localization.get("dashboard.welcomeButton").replace("{username}", username),
+                    Localization.localeProperty()
+            );
+            userMenuButton.textProperty().bind(welcomeBinding);
         }
+
+        // Localize default note-title label when nothing is selected
+        noteTitleLabel.textProperty().bind(Localization.bind("dashboard.selectNote"));
+
+        // Keep dashboard window title in sync with current language
+        Platform.runLater(() -> {
+            Stage stage = (Stage) rootPane.getScene().getWindow();
+            if (stage != null) {
+                stage.setTitle(Localization.get("dashboard.window_title"));
+                Localization.localeProperty().addListener((obs, oldLoc, newLoc) ->
+                        stage.setTitle(Localization.get("dashboard.window_title")));
+            }
+        });
+
+        // --- Language ComboBox setup ---
+        setupLanguageCombo();
 
         toggleTooltip.setShowDelay(Duration.millis(100));
         WordCountUtil.bind(noteViewArea, wordCountLabel); // not sure
-
 
         rootPane.getStyleClass().add("root");
         setupTheme();
 
         editButton.setDisable(true);
-        deleteButton.setDisable(true);;
+        deleteButton.setDisable(true);
 
         setupTableColumns();
         setupHoverEffects();
@@ -183,6 +209,78 @@ public class ViewDashboardController {
 
 
         dbStatusLabel.setStyle("-fx-text-fill: green;");
+    }
+
+    private void setupLanguageCombo() {
+        languageCombo.getItems().addAll(LanguageModel.LANGUAGES.keySet());
+
+        // Closed state: show code, color depends on theme
+        languageCombo.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(String code, boolean empty) {
+                super.updateItem(code, empty);
+                if (empty || code == null) {
+                    setText("");
+                } else {
+                    setText(code);
+                }
+                // Always transparent background, text color matches theme
+                String color = ToggleUtil.isDarkMode() ? "white" : "#266973";
+                setStyle("-fx-background-color: transparent; " +
+                        "-fx-text-fill: " + color + "; " +
+                        "-fx-font-weight: bold; " +
+                        "-fx-font-size: 11px;");
+            }
+        });
+
+        // Open state: show full name, always teal on white
+        languageCombo.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(String code, boolean empty) {
+                super.updateItem(code, empty);
+                if (empty || code == null) {
+                    setText("");
+                    setStyle("");
+                } else {
+                    setText(LanguageModel.LANGUAGES.get(code).fullName()
+                            + "  (" + LanguageModel.LANGUAGES.get(code).nativeName() + ")");
+                    // Let CSS handle this — don't set style here
+                    setStyle("");
+                }
+            }
+        });
+
+        languageCombo.setConverter(new StringConverter<>() {
+            @Override public String toString(String code) { return code == null ? "" : code; }
+            @Override public String fromString(String s) { return s; }
+        });
+
+        Language current = LanguageModel.getByLocale(Localization.getLocale());
+        languageCombo.setValue(current.code());
+
+        languageCombo.setOnAction(e -> {
+            String selected = languageCombo.getValue();
+            if (selected != null) {
+                Localization.setLocale(LanguageModel.LANGUAGES.get(selected).locale());
+                // Refresh button cell color after locale/theme change
+                languageCombo.setButtonCell(new ListCell<>() {
+                    @Override
+                    protected void updateItem(String code, boolean empty) {
+                        super.updateItem(code, empty);
+                        if (empty || code == null) {
+                            setText("");
+                        } else {
+                            setText(code);
+                        }
+                        String color = ToggleUtil.isDarkMode() ? "white" : "#266973";
+                        setStyle("-fx-background-color: transparent; " +
+                                "-fx-text-fill: " + color + "; " +
+                                "-fx-font-weight: bold; " +
+                                "-fx-font-size: 11px;");
+                    }
+                });
+            }
+        });
     }
 
     // ---------- TABLE & NOTES ----------
@@ -221,7 +319,7 @@ public class ViewDashboardController {
     }
 
     private void displayNote(NoteEntity note) {
-        noteTitleLabel.textProperty().unbind(); // important
+        noteTitleLabel.textProperty().unbind(); // important so we can show the concrete title
         noteTitleLabel.setText(note.getTitle());
         noteViewArea.setText(note.getContent());
         annotationViewArea.setText(note.getAnnotation());
@@ -231,7 +329,7 @@ public class ViewDashboardController {
     }
 
     private void clearNoteDisplay() {
-//        noteTitleLabel.setText("Select a note to view details");
+        // Return to the localized "select note" message and keep it reactive to language changes
         noteTitleLabel.textProperty().unbind();
         noteTitleLabel.textProperty().bind(Localization.bind("dashboard.selectNote"));
         noteViewArea.clear();
@@ -272,7 +370,7 @@ public class ViewDashboardController {
     // ---------- UI & THEME ----------
 
     private void setupTheme() {
-        javafx.application.Platform.runLater(() -> {
+        Platform.runLater(() -> {
             ToggleUtil.applyTheme(rootPane.getScene());
             ImageView icon = new ImageView(
                     new Image(ToggleUtil.isDarkMode() ? "/Images/light-theme.png" : "/Images/dark-theme.png")
@@ -282,7 +380,25 @@ public class ViewDashboardController {
             icon.setPreserveRatio(true);
             toggleBtn.setGraphic(icon);
             updateIcons();
+
+            // Update globe label color for current theme
+            updateLanguageIconColor();
         });
+    }
+
+    private void updateLanguageIconColor() {
+        if (languageIconLabel != null) {
+            String globeColor = ToggleUtil.isDarkMode() ? "white" : "#266973";
+            languageIconLabel.setStyle("-fx-font-size: 12px; -fx-padding: 3 2 3 6; -fx-text-fill: " + globeColor + ";");
+        }
+
+        // Also update the combo's displayed text color to match the theme
+        if (languageCombo != null && languageCombo.getButtonCell() != null) {
+            String textColor = ToggleUtil.isDarkMode() ? "white" : "#266973";
+            languageCombo.getButtonCell().setStyle(
+                    "-fx-text-fill: " + textColor + "; -fx-font-weight: bold; " +
+                            "-fx-font-size: 11px; -fx-background-color: transparent;");
+        }
     }
 
     private void setupHover(Button button, Label label) {
@@ -310,6 +426,7 @@ public class ViewDashboardController {
         toggleBtn.setGraphic(icon);
 
         updateIcons();
+        updateLanguageIconColor(); // keep globe label in sync when toggling
     }
 
     // Update side-panel buttons
@@ -365,7 +482,8 @@ public class ViewDashboardController {
             ToggleUtil.setDarkMode(false);
 
             Stage stage = (Stage) window;
-            NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "Welcome To NoteVault", false); //entry.title not working need to do this
+            // Use localized window title instead of hard-coded English string
+            NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", Localization.get("entry.window_title"), false);
         }
     }
 
@@ -439,11 +557,16 @@ public class ViewDashboardController {
     @FXML
     public void handleManageAccount() {
         Stage stage = (Stage) rootPane.getScene().getWindow();
-        NavigationUtil.openWindow(stage, "/FXML/user_dashboard.fxml",Localization.get("account.window_title"), false, true, null);
+        NavigationUtil.openWindow(stage, "/FXML/user_dashboard.fxml", Localization.get("account.window_title"), false, true, null);
 
         UserEntity user = UserSession.getUserInstance().getUser();
         if (user != null) {
-            userMenuButton.setText("Welcome, " + user.getFirstName() + " " + user.getLastName());
+            String username = user.getFirstName() + " " + user.getLastName();
+            welcomeBinding = Bindings.createStringBinding(
+                    () -> Localization.get("dashboard.welcomeButton").replace("{username}", username),
+                    Localization.localeProperty()
+            );
+            userMenuButton.textProperty().bind(welcomeBinding);
         }
     }
 
