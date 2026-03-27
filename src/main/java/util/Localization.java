@@ -5,6 +5,7 @@ import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -21,10 +22,15 @@ public class Localization {
         return locale.get();
     }
 
-    public static String get(String key) {
-        return ResourceBundle
-                .getBundle("MessagesBundle", getLocale())
-                .getString(key);
+    public static String get(String key, Object... args) {
+        ResourceBundle bundle = ResourceBundle.getBundle("i18n.MessagesBundle", getLocale());
+
+        if (!bundle.containsKey(key)) {
+            return "!" + key + "!";
+        }
+
+        String value = bundle.getString(key);
+        return MessageFormat.format(value, args);
     }
 
     public static StringBinding bind(String key) {
