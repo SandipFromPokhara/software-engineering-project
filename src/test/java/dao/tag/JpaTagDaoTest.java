@@ -7,8 +7,8 @@ import entity.TagEntity;
 import entity.UserEntity;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
-
 import java.util.ArrayList;
+
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class JpaTagDaoTest {
 
     private static JpaTagDao tagDao;
+
     private List<TagEntity> testTags;
 
     @BeforeAll
@@ -62,6 +63,7 @@ class JpaTagDaoTest {
         tag.setTagName(uniqueName("MergedName"));
 
         TagEntity merged = tagDao.save(tag); // for merge branch
+
         testTags.add(merged);
 
         assertEquals(tag.getId(), merged.getId());
@@ -78,6 +80,7 @@ class JpaTagDaoTest {
         String name = uniqueName("ExistsTag");
         TagEntity tag = new TagEntity(name);
         tagDao.save(tag);
+
         testTags.add(tag);
 
         assertTrue(tagDao.existsByName(name));
@@ -89,6 +92,7 @@ class JpaTagDaoTest {
         String name = uniqueName("FindByName");
         TagEntity tag = new TagEntity(name);
         tagDao.save(tag);
+
         testTags.add(tag);
 
         TagEntity found = tagDao.findByName(name);
@@ -132,6 +136,7 @@ class JpaTagDaoTest {
 
         tag.setTagName(uniqueName("NewName"));
         tagDao.update(tag);
+
         testTags.add(tag);
 
         TagEntity updated = tagDao.findById(tag.getId());
@@ -223,6 +228,7 @@ class JpaTagDaoTest {
 
         TagEntity tag1 = tagDao.save(new TagEntity(name1));
         TagEntity tag2 = tagDao.save(new TagEntity(name2));
+
         testTags.add(tag1);
         testTags.add(tag2);
 

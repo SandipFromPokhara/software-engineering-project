@@ -47,6 +47,9 @@ public class LoginController {
     private Label loginNoAccount;
 
     @FXML
+    private Label privacyLabel;
+
+    @FXML
     private void handleBack() {
         Stage stage = (Stage) backButton.getScene().getWindow();
         NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", Localization.get("entry.window_title"), false);
@@ -115,6 +118,7 @@ public class LoginController {
         loginNoAccount.textProperty().bind(Localization.bind("login.noAccount_label"));
         signupLink.textProperty().bind(Localization.bind("login.signup"));
         backButton.textProperty().bind(Localization.bind("login.back"));
+        privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));// Text from the left image
 
         usernameField.textProperty().addListener((o, oldV, newV) -> checkFields());
         passwordField.textProperty().addListener((o, oldV, newV) -> checkFields());
