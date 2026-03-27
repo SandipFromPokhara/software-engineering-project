@@ -7,11 +7,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.stage.Stage;
+import security.MessageType;
 import security.PasswordHasher;
 import session.UserSession;
 import security.BcryptPasswordHasher;
-import security.Validation;
 import util.Localization;
+import util.ShowMessageUtil;
 
 public class DeleteUserController {
 
@@ -44,7 +45,7 @@ public class DeleteUserController {
         deleteButton.textProperty().bind(Localization.bind("account.delete_confirm_button"));
         cancelButton.textProperty().bind(Localization.bind("account.delete_cancel"));
 
-        Validation.hideMessage(messageLabel);
+        ShowMessageUtil.hideMessage(messageLabel);
         passwordHasher = new BcryptPasswordHasher();
     }
 
@@ -52,18 +53,18 @@ public class DeleteUserController {
     private void handleDelete() {
         UserEntity currentUser = UserSession.getUserInstance().getUser();
         if (currentUser == null) {
-            Validation.showMessage(messageLabel, Localization.get("delete.no_session"), Validation.MessageType.ERROR);
+            ShowMessageUtil.showMessageKey(messageLabel, Localization.get("delete.no_session"), MessageType.ERROR);
             return;
         }
 
         String password = passwordField.getText() == null ? "" : passwordField.getText();
         if (password.isBlank()) {
-            Validation.showMessage(messageLabel,Localization.get("delete.password_required"), Validation.MessageType.ERROR);
+            ShowMessageUtil.showMessageKey(messageLabel, "delete.password_required", MessageType.ERROR);
             return;
         }
 
         if (!passwordHasher.verify(password, currentUser.getPasswordHash())) {
-            Validation.showMessage(messageLabel,Localization.get("delete.incorrect_password"), Validation.MessageType.ERROR);
+            ShowMessageUtil.showMessageKey(messageLabel, "delete.incorrect_password", MessageType.ERROR);
             return;
         }
 
@@ -72,7 +73,7 @@ public class DeleteUserController {
             UserSession.getUserInstance().setUser(null);
             closeWindow();
         } catch (Exception e) {
-            Validation.showMessage(messageLabel,Localization.get("delete.failed"), Validation.MessageType.ERROR);
+            ShowMessageUtil.showMessageKey(messageLabel,Localization.get("delete.failed"), MessageType.ERROR);
         }
     }
 
