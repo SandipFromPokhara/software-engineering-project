@@ -23,9 +23,8 @@ public class LoginController {
     private PasswordHasher passwordHasher;
 
     @FXML
-    private Label loginWelcome;
-    @FXML
-    private Label loginNote;
+    private Label loginWelcome, loginNote, statusLabel, loginNoAccount;
+
     @FXML
     private TextField usernameField;
 
@@ -33,18 +32,45 @@ public class LoginController {
     private PasswordField passwordField;
 
     @FXML
-    private Button loginButton;
-
-    @FXML
-    private Label statusLabel;
+    private Button loginButton, backButton;
 
     @FXML
     private Hyperlink signupLink;
 
+
     @FXML
-    private Button backButton;
-    @FXML
-    private Label loginNoAccount;
+    private void initialize() {
+        userDao = new JpaUserDao();
+        passwordHasher = new BcryptPasswordHasher();
+        userService = new UserService(userDao, passwordHasher);
+
+        loginButton.setDisable(true);
+        statusLabel.setVisible(false);
+
+        // LOCALIZATION BINDINGS
+        loginWelcome.textProperty().bind(Localization.bind("login.welcome_label"));
+        loginNote.textProperty().bind(Localization.bind("login.note_label"));
+        usernameField.promptTextProperty().bind(Localization.bind("login.placeholder_name"));
+        passwordField.promptTextProperty().bind(Localization.bind("login.placeholder_password"));
+        loginButton.textProperty().bind(Localization.bind("login.button"));
+        loginNoAccount.textProperty().bind(Localization.bind("login.noAccount_label"));
+        signupLink.textProperty().bind(Localization.bind("login.signup"));
+        backButton.textProperty().bind(Localization.bind("login.back"));
+
+        usernameField.textProperty().addListener((o, oldV, newV) -> checkFields());
+        passwordField.textProperty().addListener((o, oldV, newV) -> checkFields());
+
+        usernameField.setOnAction(this::handleLogin);
+        passwordField.setOnAction(this::handleLogin);
+
+        loginButton.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null && newScene.getWindow() != null) {
+                if (newScene.getWindow() instanceof Stage stage) {
+                    stage.titleProperty().bind(Localization.bind("login.window_title"));
+                }
+            }
+        });
+    }
 
     @FXML
     private void handleBack() {
@@ -95,41 +121,6 @@ public class LoginController {
         });
         new Thread(loginTask).start();
     }
-
-    @FXML
-    private void initialize() {
-        userDao = new JpaUserDao();
-        passwordHasher = new BcryptPasswordHasher();
-        userService = new UserService(userDao, passwordHasher);
-
-        loginButton.setDisable(true);
-        statusLabel.setVisible(false);
-
-
-        // LOCALIZATION BINDINGS
-        loginWelcome.textProperty().bind(Localization.bind("login.welcome_label"));
-        loginNote.textProperty().bind(Localization.bind("login.note_label"));
-        usernameField.promptTextProperty().bind(Localization.bind("login.placeholder_name"));
-        passwordField.promptTextProperty().bind(Localization.bind("login.placeholder_password"));
-        loginButton.textProperty().bind(Localization.bind("login.button"));
-        loginNoAccount.textProperty().bind(Localization.bind("login.noAccount_label"));
-        signupLink.textProperty().bind(Localization.bind("login.signup"));
-        backButton.textProperty().bind(Localization.bind("login.back"));
-
-        usernameField.textProperty().addListener((o, oldV, newV) -> checkFields());
-        passwordField.textProperty().addListener((o, oldV, newV) -> checkFields());
-
-        usernameField.setOnAction(this::handleLogin);
-        passwordField.setOnAction(this::handleLogin);
-
-        loginButton.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null) {
-                Stage stage = (Stage) newScene.getWindow();
-                stage.titleProperty().bind(Localization.bind("login.window_title"));
-            }
-        });
-    }
-
 
     @FXML
     private void handleSignUp() {
