@@ -15,6 +15,7 @@ import services.UserService;
 import util.Localization;
 import util.NavigationUtil;
 import session.UserSession;
+import util.WindowUtil;
 
 public class LoginController {
 
@@ -63,13 +64,7 @@ public class LoginController {
         usernameField.setOnAction(this::handleLogin);
         passwordField.setOnAction(this::handleLogin);
 
-        loginButton.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null && newScene.getWindow() != null) {
-                if (newScene.getWindow() instanceof Stage stage) {
-                    stage.titleProperty().bind(Localization.bind("login.window_title"));
-                }
-            }
-        });
+        WindowUtil.bindStageTitle(loginButton, "login.window_title");
     }
 
     @FXML

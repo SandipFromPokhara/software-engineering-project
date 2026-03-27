@@ -121,13 +121,8 @@ public class EditNoteController {
         annotationBox.promptTextProperty().bind(Localization.bind("edit.placeholder_annotations"));
         tagComboBox.promptTextProperty().bind(Localization.bind("edit.placeholder_tags"));
         addTagBtn.textProperty().bind(Localization.bind("edit.add_tags"));
-        titleField.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null) {
-                Stage stage = (Stage) newScene.getWindow();
-                stage.titleProperty().bind(Localization.bind("edit.window.title"));
-            }
-        });
 
+        WindowUtil.bindStageTitle(titleField, "edit.window.title");
 
         WordCountUtil.bind(contentBox, wordCountLabel);
 
@@ -143,8 +138,10 @@ public class EditNoteController {
         // Apply theme once scene is ready
         javafx.application.Platform.runLater(() -> {
             Scene scene = titleField.getScene();
-            ToggleUtil.applyTheme(scene);
-            updateTagIcon();
+            if (scene != null) {
+                ToggleUtil.applyTheme(scene);
+                updateTagIcon();
+            }
         });
         // Enable list auto-continuation for content box
         TextFormattingUtil.enableListAutoContinuation(contentBox);
