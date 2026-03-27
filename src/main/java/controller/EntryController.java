@@ -30,6 +30,9 @@ public class EntryController {
     private Hyperlink faqLink;
 
     @FXML
+    private Label privacyLabel;
+
+    @FXML
     private ComboBox<Locale> languageDropdown; //added
 
     @FXML
@@ -48,7 +51,7 @@ public class EntryController {
         NavigationUtil.replaceScene(
                 stage,
                 "/FXML/signup.fxml",
-                Localization.get("register.window_title"),false);
+                Localization.get("register.window_title"), false);
     }
 
     @FXML
@@ -81,6 +84,7 @@ public class EntryController {
         registerButton.textProperty().bind(Localization.bind("entry.register"));
         guestButton.textProperty().bind(Localization.bind("entry.guest"));
         faqLink.textProperty().bind(Localization.bind("entry.faq"));
+        privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));
 
         languageDropdown.getItems().addAll(
                 Locale.ENGLISH,
