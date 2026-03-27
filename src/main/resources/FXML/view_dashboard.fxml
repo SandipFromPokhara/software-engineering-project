@@ -185,7 +185,7 @@
                         </HBox>
                         <VBox>
                            <children>
-                              <Label text="Annotations:" />
+                              <Label fx:id="annotation" text="Annotations:" />
                               <TextArea fx:id="annotationViewArea" editable="false" prefHeight="22.0" prefWidth="204.0" style="-fx-background-color: transparent;" styleClass="editor-textarea" wrapText="true">
                                  <VBox.margin>
                                     <Insets top="5.0" />
