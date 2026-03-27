@@ -11,7 +11,7 @@ public class LanguageModel {
     public static final Map<String, Language> LANGUAGES = new LinkedHashMap<>();
 
     static {
-        LANGUAGES.put("EN", new Language("EN", "English",   "English",    Locale.ENGLISH));
+        LANGUAGES.put("EN", new Language("EN", "English",   "Default",    Locale.ENGLISH));
         LANGUAGES.put("FI", new Language("FI", "Finnish",   "Suomi",      new Locale("fi")));
         LANGUAGES.put("NP", new Language("NP", "Nepali",    "नेपाली",      new Locale("ne")));
         LANGUAGES.put("MY", new Language("MY", "Burmese",   "မြန်မာဘာသာ", new Locale("my")));

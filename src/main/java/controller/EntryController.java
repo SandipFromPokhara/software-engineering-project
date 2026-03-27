@@ -23,6 +23,7 @@ public class EntryController {
     @FXML private Button loginButton;
     @FXML private Button registerButton;
     @FXML private Hyperlink faqLink;
+    @FXML private Label privacyLabel;
     @FXML private Button languageButton; // world icon button
 
     @FXML
@@ -97,5 +98,6 @@ public class EntryController {
         registerButton.textProperty().bind(Localization.bind("entry.register"));
         guestButton.textProperty().bind(Localization.bind("entry.guest"));
         faqLink.textProperty().bind(Localization.bind("entry.faq"));
+        privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));
     }
 }

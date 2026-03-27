@@ -23,7 +23,7 @@
     </padding>
     <children>
 
-        <Label fx:id="titleLabel" text="Select Language" textFill="#266973">
+        <Label fx:id="titleLabel" text="Choose Language" textFill="#266973">
             <font><Font name="Times New Roman Bold" size="16.0" /></font>
         </Label>
 
@@ -35,7 +35,7 @@
 
         <Separator style="-fx-background-color: #b0d8de;" />
 
-        <Button fx:id="confirmButton" text="Apply"
+        <Button fx:id="confirmButton" text="Select"
                 maxWidth="Infinity"
                 prefHeight="34.0"
                 onAction="#handleConfirm"
