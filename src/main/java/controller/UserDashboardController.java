@@ -23,6 +23,7 @@ public class UserDashboardController {
 
     private UserDAO userDao = new JpaUserDao();
     private PasswordHasher passwordHasher;
+
     @FXML
     private TextField firstNameField;
 

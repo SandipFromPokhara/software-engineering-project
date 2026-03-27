@@ -11,9 +11,7 @@ import org.junit.jupiter.api.*;
 import services.UserService;
 import security.PasswordHasher;
 import security.BcryptPasswordHasher;
-import session.UserSession;
 import testutil.JavaFXInitializer;
-import util.NavigationUtil;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
