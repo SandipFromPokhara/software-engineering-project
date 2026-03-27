@@ -53,7 +53,6 @@ public class NavigationUtil {
             Scene scene = new Scene(root);
             scene.getStylesheets().add("/css/row_color.css");
             stage.setScene(scene);
-            stage.setTitle(title);
 
             stage.getIcons().setAll(new Image("/Images/NV.png"));
             stage.setResizable(resizable);
@@ -89,7 +88,7 @@ public class NavigationUtil {
             scene.getStylesheets().add("/css/row_color.css");
 
             stage.setScene(scene);
-            stage.setTitle(title);
+
             stage.getIcons().add(new Image("/Images/NV.png"));
             stage.setResizable(resizable);
 
