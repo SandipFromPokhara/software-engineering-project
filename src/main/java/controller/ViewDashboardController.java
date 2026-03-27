@@ -50,22 +50,19 @@ public class ViewDashboardController {
     @FXML
     private MenuButton userMenuButton;
 
-//userMenu button inside these option
-    @FXML private MenuItem manageAccountItem;
-    @FXML private MenuItem deleteAccountItem;
-    @FXML private MenuItem logoutItem;
+    // userMenu button
+    @FXML
+    private MenuItem manageAccountItem, deleteAccountItem, logoutItem;
 
+    // For File and Help option
+    @FXML
+    private Menu fileMenu, helpMenu;
 
-    //    For File and Help option
-    @FXML private Menu fileMenu;
-    @FXML private Menu helpMenu;
+    @FXML
+    private MenuItem newNoteItem, exportItem, closeItem;
 
-    @FXML private MenuItem newNoteItem;
-    @FXML private MenuItem exportItem;
-    @FXML private MenuItem closeItem;
-
-    @FXML private MenuItem faqItem;
-    @FXML private MenuItem aboutItem;
+    @FXML
+    private MenuItem faqItem, aboutItem;
 
     @FXML
     private Button openData;
@@ -99,6 +96,9 @@ public class ViewDashboardController {
             dbStatusLabel;
 
     @FXML
+    private Label annotation;
+
+    @FXML
     private TextArea noteViewArea,
             annotationViewArea;
 
@@ -124,7 +124,6 @@ public class ViewDashboardController {
     public void initialize() {
 
         // LOCALIZATION BINDINGS
-
         fileMenu.textProperty().bind(Localization.bind("menu.file"));
         newNoteItem.textProperty().bind(Localization.bind("menu.newNote"));
         exportItem.textProperty().bind(Localization.bind("menu.exportPdf"));
@@ -144,6 +143,8 @@ public class ViewDashboardController {
         editButton.textProperty().bind(Localization.bind("note.edit"));
         deleteButton.textProperty().bind(Localization.bind("note.delete"));
 
+        annotation.textProperty().bind(Localization.bind("dashboard.annotations"));
+
         dbStatusLabel.textProperty().bind(Localization.bind("dashboard.dbStatus"));
         openData.textProperty().bind(Localization.bind("dashboard.openData"));
 
@@ -151,21 +152,16 @@ public class ViewDashboardController {
         deleteAccountItem.textProperty().bind(Localization.bind("user.delete_account"));
         logoutItem.textProperty().bind(Localization.bind("user.logout"));
 
-
-
-
         //Localize user menu button (dynamic)
         UserEntity user = UserSession.getUserInstance().getUser();
         if(user != null) {
-            String template = Localization.get("dashboard.welcomeButton");
             String username = user.getFirstName()+ " " +user.getLastName();
-            String text = template.replace("{username}", username);
+            String text = Localization.get("dashboard.welcomeButton", username);
             userMenuButton.setText(text);
         }
 
         toggleTooltip.setShowDelay(Duration.millis(100));
         WordCountUtil.bind(noteViewArea, wordCountLabel); // not sure
-
 
         rootPane.getStyleClass().add("root");
         setupTheme();
@@ -380,8 +376,7 @@ public class ViewDashboardController {
 
         String title = Localization.get("delete.window_title");
 
-        String template = Localization.get("delete_note.confirm");
-        String message = template.replace("{{title}}", selectedNote.getTitle());
+        String message = Localization.get("delete_note.confirm", title);
 
         boolean confirmed = AlertUtil.showConfirmation(owner, title, message);
 
@@ -401,7 +396,6 @@ public class ViewDashboardController {
             }
         }
     }
-
 
     @FXML
     public void handleCreate() {
@@ -490,7 +484,6 @@ public class ViewDashboardController {
         }
     }
 
-
     private void exportSelectedNote() {
         NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
         if (selectedNote == null) {
@@ -558,8 +551,6 @@ public class ViewDashboardController {
         }
     }
 
-
-
     @FXML
     private void handleOpenFAQ() {
         Stage stage = (Stage) rootPane.getScene().getWindow();
@@ -569,12 +560,9 @@ public class ViewDashboardController {
     @FXML
     private void handleOpenDataFolder() {
         Window owner = rootPane.getScene().getWindow();
-        String title = "Access Local Storage";
-        String message = """
-                You are about to open your NoteVault database folder.
-                
-                Please do not move, rename, or delete these files,
-                as this will result in data loss. Continue?""";
+
+        String title = Localization.get("dashboard.folder.title");
+        String message = Localization.get("dashboard.folder.message");
 
         boolean confirmed = AlertUtil.showConfirmation(owner, title, message);
 
@@ -588,11 +576,11 @@ public class ViewDashboardController {
                 if (java.awt.Desktop.isDesktopSupported()) {
                     java.awt.Desktop.getDesktop().open(dataDir);
                 } else {
-                    AlertUtil.showWarning(owner, "Your system does not support opening file folders automatically.");
+                    AlertUtil.showWarning(owner, Localization.get("dashboard.folder.warning"));
                 }
             } catch (IOException e) {
                 logger.log(Level.SEVERE, "Failed to open folder", e);
-                AlertUtil.showError(owner, "Failed to open folder: " + e.getMessage());
+                AlertUtil.showError(owner, Localization.get("dashboard.folder.error", e.getMessage()));
             }
         }
     }
