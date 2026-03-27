@@ -2,40 +2,29 @@ package services;
 
 import dao.user.JpaUserDao;
 import entity.UserEntity;
-import util.BcryptPasswordHasher;
+import security.PasswordHasher;
 
 public class UserService {
     private final JpaUserDao userDao;
-    private static UserEntity loggedInUser = null;
+    private final PasswordHasher passwordHasher;
 
-    public UserService(JpaUserDao userDao) {
+    public UserService(JpaUserDao userDao, PasswordHasher passwordHasher) {
         this.userDao = userDao;
+        this.passwordHasher = passwordHasher;
     }
 
-    public boolean login(String username, String password) {
+    public UserEntity login(String username, String password) {
         if (username == null || username.isBlank() || password == null || password.isBlank()) {
-            return false;
+            return null;
         }
         UserEntity user = userDao.findByUsername(username);
-        if (user == null) return false;
+        if (user == null) return null;
 
         String hashedPassword = user.getPasswordHash();
-        boolean authenticated = BcryptPasswordHasher.verifyPassword(password, hashedPassword);
-
-        if (authenticated) {
-            loggedInUser = user;
-            NoteService.setCurrentUser(user); // Set user for NoteService
+        if (passwordHasher.verify(password, hashedPassword)) {
+            return user;
+        } else {
+            return null;
         }
-
-        return authenticated;
-    }
-
-    public static UserEntity getLoggedInUser() {
-        return loggedInUser;
-    }
-
-    public static void logout() {
-        loggedInUser = null;
-        NoteService.setCurrentUser(null);
     }
 }

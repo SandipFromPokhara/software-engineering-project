@@ -2,9 +2,12 @@ package services;
 
 import dao.note.JpaNoteDao;
 import dao.notebook.JpaNoteBookDao;
-import entity.NoteEntity;
-import entity.NoteBookEntity;
-import entity.UserEntity;
+import dao.tag.JpaTagDao;
+import entity.*;
+import session.UserSession;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * Service layer for Note operations
@@ -13,86 +16,88 @@ public class NoteService {
 
     private final JpaNoteDao noteDao;
     private final JpaNoteBookDao notebookDao;
-    private Long cachedNotebookId = null;
-    private static UserEntity currentUser = null;
+    private final JpaTagDao tagDao;
 
     public NoteService() {
         this.noteDao = new JpaNoteDao();
         this.notebookDao = new JpaNoteBookDao();
+        this.tagDao = new JpaTagDao();
     }
 
-    public NoteService(UserEntity user) {
-        this.noteDao = new JpaNoteDao();
-        this.notebookDao = new JpaNoteBookDao();
-        currentUser = user;
-        this.cachedNotebookId = null;
-    }
-
-    /**
-     * Sets the current logged-in user
-     */
-    public static void setCurrentUser(UserEntity user) {
-        currentUser = user;
-    }
-
-    /**
-     * Gets the current logged-in user
-     */
-    public static UserEntity getCurrentUser() {
-        return currentUser;
+    public NoteService(JpaNoteDao noteDao, JpaNoteBookDao notebookDao, JpaTagDao tagDao) {
+        this.noteDao = noteDao;
+        this.notebookDao = notebookDao;
+        this.tagDao = tagDao;
     }
 
     /**
      * Creates a new note with title, content, and annotation
      */
-    public NoteEntity createNote(String title, String content, String annotation) {
-        if (title == null || title.trim().isEmpty()) {
+    public NoteEntity createNote(String title, String content, String annotation, NoteBookEntity notebookParameter, Set<String> tagNames) {
+
+        if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("Title cannot be empty");
         }
 
+        UserEntity currentUser = UserSession.getUserInstance().getUser();
         if (currentUser == null) {
             throw new IllegalStateException("No user logged in. Please login first.");
         }
 
-        // Combine content and annotation
-        String fullContent = (content != null ? content : "");
-        if (annotation != null && !annotation.trim().isEmpty()) {
-            fullContent += "\n\n--- Annotations ---\n" + annotation;
+        // Get or create notebook for current user
+        NoteBookEntity notebookToUse = (notebookParameter != null) ? notebookParameter : getOrCreatePersonalNotebook(currentUser);
+
+        // Create and save note - separate content and annotation
+        NoteEntity note = new NoteEntity(title.trim(), content != null ? content : "", annotation != null ? annotation: "");
+        note.setNotebook(notebookToUse);
+
+        // Shift tag handling logic from controller
+        if (tagNames != null) {
+            for (String tagName : tagNames) {
+                String normalized = tagName.trim().toLowerCase();
+                TagEntity tag = tagDao.findByName(normalized);
+
+                if (tag == null) {
+                    tag = tagDao.save(new TagEntity(normalized));
+                }
+
+                note.addTag(tag);
+            }
         }
 
-        // Get or create notebook for current user
-        NoteBookEntity notebook = getNotebookForUser();
-
-        // Create and save note
-        NoteEntity note = new NoteEntity(title.trim(), fullContent);
-        note.setNotebook(notebook);
-
         return noteDao.save(note);
+    }
+
+    public NoteBookEntity createNotebook(String name) {
+        UserEntity user = UserSession.getUserInstance().getUser();
+
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Notebook name cannot be empty");
+        }
+
+        NoteBookEntity notebook = new NoteBookEntity(name.trim(), user);
+        return notebookDao.save(notebook);
     }
 
     /**
      * Gets or creates a notebook for the logged-in user
      */
-    private NoteBookEntity getNotebookForUser() {
-        // Use cached notebook if available
-        if (cachedNotebookId != null) {
-            NoteBookEntity notebook = notebookDao.findById(cachedNotebookId);
-            if (notebook != null) return notebook;
-        }
+    private NoteBookEntity getOrCreatePersonalNotebook(UserEntity user) {
 
-        // Find existing notebook for this user (efficient query)
-        NoteBookEntity notebook = notebookDao.findByUserId(currentUser.getId());
-        if (notebook != null) {
-            cachedNotebookId = notebook.getId();
-            return notebook;
+        // Find existing notebook for this user
+        List<NoteBookEntity> notebooks = notebookDao.findByUser(user);
+
+        if (!notebooks.isEmpty()) {
+            return notebooks.get(0);
         }
 
         // Create personal notebook for user (e.g., "John's Notebook")
-        String notebookName = currentUser.getFirstName() + "'s Notebook";
-        notebook = new NoteBookEntity(notebookName, currentUser);
-        notebook = notebookDao.save(notebook);
-        cachedNotebookId = notebook.getId();
+        String notebookName = user.getFirstName() + "'s Notebook";
+        NoteBookEntity unsavedNotebook  = new NoteBookEntity(notebookName, user);
+        return notebookDao.save(unsavedNotebook);
+    }
 
-        return notebook;
+    public NoteEntity save(NoteEntity note) {
+        return noteDao.save(note);
     }
 }

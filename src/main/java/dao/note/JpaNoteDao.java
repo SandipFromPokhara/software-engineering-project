@@ -1,6 +1,7 @@
 package dao.note;
 
 import datasource.MariaDbJpaConnection;
+import entity.NoteBookEntity;
 import entity.NoteEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -8,6 +9,8 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 
 public class JpaNoteDao implements NoteDAO{
+
+    public JpaNoteDao() {}
 
     @Override
     public NoteEntity save(NoteEntity note) {
@@ -60,17 +63,38 @@ public class JpaNoteDao implements NoteDAO{
     }
 
     @Override
+    public List<NoteEntity> findByNotebook(NoteBookEntity notebook) {
+
+        if (notebook == null) throw new IllegalArgumentException("Notebook cannot be null");
+        EntityManager em = MariaDbJpaConnection.createEntityManager();
+        try {
+            TypedQuery<NoteEntity> query = em.createQuery("Select n from NoteEntity n where n.notebook = :notebook", NoteEntity.class);
+            query.setParameter("notebook", notebook);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public void delete(NoteEntity note) {
-        if (note == null) throw new IllegalArgumentException("Note cannot be null");
+        if (note == null || note.getId() == null)
+            throw new IllegalArgumentException("Note or ID is null");
 
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
             em.getTransaction().begin();
-            NoteEntity managedNote = em.merge(note);
-            em.remove(managedNote);
+
+            NoteEntity managed =
+                    em.find(NoteEntity.class, note.getId());
+
+            if (managed != null) {
+                em.remove(managed);
+            }
             em.getTransaction().commit();
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
             throw new RuntimeException("Failed to delete note", e);
         } finally {
             em.close();

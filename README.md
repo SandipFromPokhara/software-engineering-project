@@ -1,82 +1,92 @@
-## Project Overview
+# NoteVault
 
-NoteVault is a Java-based digital note-taking and annotation desktop application developed as a part of *Software Engineering Project 1* course.
+**NoteVault** is a JavaFX desktop application for hierarchical note management.
+It was developed as part of the **Software Engineering Project 1** course, demonstrating modern DevOps practices alongside Java application development.
 
-The project focuses on applying DevOps practices, Agile development, automated testing, and CI/CD pipelines.
+While the application provides secure notebook and note management, the primary focus of this project is the DevOps lifecycle, including CI/CD automation, testing strategy, containerization, and structured team collaboration.
 
-## Running the Application
+---
 
-### Prerequisites
-- JDK 21 (required)
-- Maven 3.6+
-The app will launch using Maven's JavaFX plugin, which handles all JavaFX module configuration automatically.
+## Summary
 
-### From Terminal/Command Line
-```bash
-mvn javafx:run
+- Hierarchical notebook & note management
+- Secure authentication with BCrypt
+- Responsive GUI using JavaFX background threads
+- CI/CD pipeline with Jenkins
+- Containerization with Docker
+
+---
+
+## Technologies Used
+
+- **Frontend:** `JavaFX (FXML + SceneBuilder)`
+- **Backend:** `Java 21`, `JPA/Hibernate`
+- **Database:** `MariaDB`
+- **DevOps:** `Docker`, `JaCoCo`, `JUnit`, `Jenkins`, `Maven`
+- **Project Management:** `Git (feature branches)`, `Trello`
+
+---
+
+## Database Architecture
+
+NoteVault uses a MariaDB database (`notevault_db`) to manage users, notebooks, notes, and tags.
+The database is automatically initialized when the application runs; no manual setup is needed.
+
+**Entity Relationships**
+```
+User (0..N) ────── (1) Notebook
+Notebook (0..N) ── (1) Note
+Note (0..N) ────── (0..N) Tag
 ```
 
+**Cascading Rules**
 
+- Deleting a User → Deletes associated Notebooks
 
-## Technology Stack
-The selected technology stack fully satisfies the course requirements and supports all the planned functionalities of the application.
+- Deleting a Notebook → Deletes associated Notes
 
-### Frontend
-- JavaFX
-- SceneBuilder
+- Deleting a Note → Deletes entries in note_tags, Tags remain
 
-**Rationale:**
+- Deleting a Tag → Deletes entries in note_tags, Notes remain
 
-JavaFX provides a structured and maintainable framework for building desktop user interfaces using Java.
-SceneBuilder allows visual UI design, and separation of UI and application logic.
-This approach supports clean code practices and improves maintainability.
+**Note on Database Credentials & Docker**
+> The application uses environment variables for database credentials (`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`).  
+> For a ready-to-run setup, you can use Docker Compose — see [Related Files](Documents/Related_Files/setup-instructions.md) for detailed instructions.
 
-### Backend
-- Java
+For full table details and diagrams, see [Database Documentation](Documents/Database/database-architecture.md) and [ER & Relational Diagrams](Documents/Diagrams/).
 
-**Rationale:**
+---
 
-Java is the primary programming language required by the course. 
-It offers strong object-oriented principles, extensive library support, and seamless integration with testing, build automation, and CI/CD tools used throughout the project.
+## Team
 
-### Database
-- MariaDB
+Developed by a team of 4 students as part of:
 
-**Rationale:**
+**Software Engineering Project 1**
+Focus: DevOps Process & Automation
 
-MariaDB is a relational database system that supports structured data storage and persistence. 
-It integrates well with Java applications and allows reliable storage, retrieval, and modification of data. 
-Its use ensures that all data-related functionalities are fully supported without limitations.
+**Team members**
 
-### Additional Tools and Frameworks
+- Dinal Maha Vidanelage
+- Sandip Ranjit
+- Swostika Lama
+- Twe He Gam Aung
 
-- IntelliJ IDEA - Integrated Development Environment
+---
 
-- Maven – Dependency management and build automation
+## DevOps Pipeline
 
-- JUnit – Unit testing framework
+> High-level overview of CI/CD, testing, and containerization stages.
 
-- JaCoCo – Code coverage analysis
+![NoteVault DevOps Pipeline](Documents/assets/notevault-pipeline.gif)
 
-- Jenkins – Continuous integration and automated testing
+---
 
-- Docker – Application packaging and environment consistency
+## Useful Links
 
-- Kubernetes (Minikube) - local container orchestration and experimentation
+- **GitHub repository:** [software-engineering-project](https://github.com/SandipFromPokhara/software-engineering-project.git)
 
-- GitHub – Version control and collaboration
+- **Trello workspace:** [SEP1_Team9](https://trello.com/w/sep1_team9/home)
 
-- Trello – Agile project management and sprint tracking
+- **Detailed DevOps process, project management:** [Related Files](Documents/Related_Files/)
 
-- Figma – UI/UX prototyping
-
-**Rationale:**
-
-These tools collectively support automation, testing, quality assurance, and DevOps workflows, which are the core focus of the course.
-
-## DevOps and Automation
-
-The project follows DevOps principles by integrating automated build, testing, and packaging processes.
-Jenkins pipelines are used to automate compilation, unit testing, and code coverage analysis.
-Docker is used to package the application into a consistent runtime environment, ensuring reliable deployment across different systems.
-Kubernetes is used in local development environment to demonstrate basic orchestration concepts and is not intended for production-scale deployment in this project.
+- **Sprint reports and reviews:** [Sprint Documentations](Documents/Sprint_Reports/)

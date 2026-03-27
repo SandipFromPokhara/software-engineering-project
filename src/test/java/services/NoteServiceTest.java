@@ -1,167 +1,165 @@
 package services;
 
+import dao.note.JpaNoteDao;
+import dao.notebook.JpaNoteBookDao;
+import dao.tag.JpaTagDao;
+import entity.NoteBookEntity;
+import entity.NoteEntity;
+import entity.TagEntity;
 import entity.UserEntity;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import session.UserSession;
+
+import java.util.ArrayList;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-/**
- * JUnit tests for NoteService - createNote functionality
- */
 class NoteServiceTest {
 
+    private JpaNoteDao noteDao;
+    private JpaNoteBookDao notebookDao;
     private NoteService noteService;
-    private static UserEntity testUser;
-
-    @BeforeAll
-    static void setupUser() {
-        // Create a test user for all tests
-        testUser = new UserEntity("Test", "User", "testuser", "test@notevault.com");
-    }
+    private JpaTagDao tagDao;
 
     @BeforeEach
     void setUp() {
-        noteService = new NoteService();
-        NoteService.setCurrentUser(testUser);
-    }
-
-    @AfterEach
-    void tearDown() {
-        NoteService.setCurrentUser(null);
-    }
-
-    // ==================== Title Validation Tests ====================
-
-    @Test
-    @DisplayName("Should throw exception when title is null")
-    void createNote_NullTitle_ThrowsException() {
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> noteService.createNote(null, "content", "annotation")
-        );
-        assertEquals("Title cannot be empty", exception.getMessage());
+        noteDao = mock(JpaNoteDao.class);
+        notebookDao = mock(JpaNoteBookDao.class);
+        tagDao = mock(JpaTagDao.class);
+        noteService = new NoteService(noteDao, notebookDao, tagDao);
     }
 
     @Test
-    @DisplayName("Should throw exception when title is empty")
-    void createNote_EmptyTitle_ThrowsException() {
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> noteService.createNote("", "content", "annotation")
-        );
-        assertEquals("Title cannot be empty", exception.getMessage());
+    void createNoteNullTitleTest() {
+        UserEntity user = new UserEntity();
+        user.setFirstName("Test");
+
+        try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
+            UserSession session = mock(UserSession.class);
+            when(session.getUser()).thenReturn(user);
+            mockedSession.when(UserSession::getUserInstance).thenReturn(session);
+
+            assertThrows(IllegalArgumentException.class, () ->
+                noteService.createNote(null, "content", "annotation", null, null));
+        }
     }
 
     @Test
-    @DisplayName("Should throw exception when title is only whitespace")
-    void createNote_WhitespaceTitle_ThrowsException() {
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> noteService.createNote("   ", "content", "annotation")
-        );
-        assertEquals("Title cannot be empty", exception.getMessage());
-    }
+    void createNoteBlankTitleTest() {
+        UserEntity user = new UserEntity();
+        user.setFirstName("Test");
 
-    // ==================== User Validation Tests ====================
+        try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
+            UserSession session = mock(UserSession.class);
+            when(session.getUser()).thenReturn(user);
+            mockedSession.when(UserSession::getUserInstance).thenReturn(session);
 
-    @Test
-    @DisplayName("Should throw exception when no user is logged in")
-    void createNote_NoUserLoggedIn_ThrowsException() {
-        NoteService.setCurrentUser(null);
-
-        IllegalStateException exception = assertThrows(
-            IllegalStateException.class,
-            () -> noteService.createNote("Test Title", "content", "annotation")
-        );
-        assertEquals("No user logged in. Please login first.", exception.getMessage());
-    }
-
-    // ==================== Current User Tests ====================
-
-    @Test
-    @DisplayName("Should set and get current user correctly")
-    void setCurrentUser_ValidUser_ReturnsUser() {
-        UserEntity user = new UserEntity("John", "Doe", "johndoe", "john@test.com");
-        NoteService.setCurrentUser(user);
-
-        assertEquals(user, NoteService.getCurrentUser());
+            assertThrows(IllegalArgumentException.class, () ->
+                noteService.createNote("   ", "content", "annotation", null, null));
+        }
     }
 
     @Test
-    @DisplayName("Should clear current user when set to null")
-    void setCurrentUser_Null_ClearsUser() {
-        NoteService.setCurrentUser(testUser);
-        NoteService.setCurrentUser(null);
+    void createNoteNoUserLoggedInTest() {
+        try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
+            UserSession session = mock(UserSession.class);
+            when(session.getUser()).thenReturn(null);
+            mockedSession.when(UserSession::getUserInstance).thenReturn(session);
 
-        assertNull(NoteService.getCurrentUser());
-    }
-
-    // ==================== Content and Annotation Tests ====================
-
-    @Test
-    @DisplayName("Should handle null content gracefully")
-    void createNote_NullContent_ShouldNotThrow() {
-        // This test verifies the logic handles null content
-        // Actual DB save would need mocking for full test
-        NoteService.setCurrentUser(testUser);
-
-        // Verify no exception for null content (validation passes)
-        assertDoesNotThrow(() -> {
-            // The method should not throw for null content
-            // It will fail at DB level without proper setup, but validation passes
-            try {
-                noteService.createNote("Valid Title", null, "annotation");
-            } catch (RuntimeException e) {
-                // Expected - DB not connected in test
-                // But title validation passed
-            }
-        });
+            assertThrows(IllegalStateException.class, () ->
+                noteService.createNote("title", "content", "annotation", null, null));
+        }
     }
 
     @Test
-    @DisplayName("Should handle null annotation gracefully")
-    void createNote_NullAnnotation_ShouldNotThrow() {
-        NoteService.setCurrentUser(testUser);
+    void createNoteWithNotebookTest() {
+        UserEntity user = new UserEntity();
+        user.setFirstName("Test");
+        NoteBookEntity notebook = new NoteBookEntity("Test Notebook", user);
+        Set<String> tags = Set.of("NotNull");
+        NoteEntity expectedNote = new NoteEntity("Test Title", "content", "annotation");
 
-        assertDoesNotThrow(() -> {
-            try {
-                noteService.createNote("Valid Title", "content", null);
-            } catch (RuntimeException e) {
-                // Expected - DB not connected in test
-            }
-        });
+        try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
+            UserSession session = mock(UserSession.class);
+            when(session.getUser()).thenReturn(user);
+            mockedSession.when(UserSession::getUserInstance).thenReturn(session);
+            when(noteDao.save(any(NoteEntity.class))).thenReturn(expectedNote);
+
+            NoteEntity result = noteService.createNote("Test Title", "content", "annotation", notebook, tags);
+
+            assertNotNull(result);
+            verify(noteDao, times(1)).save(any(NoteEntity.class));
+        }
     }
 
     @Test
-    @DisplayName("Should handle empty annotation gracefully")
-    void createNote_EmptyAnnotation_ShouldNotThrow() {
-        NoteService.setCurrentUser(testUser);
+    void createNoteNullNotebookCreatesPersonalNotebookTest() {
+        UserEntity user = new UserEntity();
+        user.setFirstName("Test");
+        NoteBookEntity personalNotebook = new NoteBookEntity("Test's Notebook", user);
+        NoteEntity expectedNote = new NoteEntity("Test Title", "content", "annotation");
 
-        assertDoesNotThrow(() -> {
-            try {
-                noteService.createNote("Valid Title", "content", "");
-            } catch (RuntimeException e) {
-                // Expected - DB not connected in test
-            }
-        });
+        try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
+            UserSession session = mock(UserSession.class);
+            when(session.getUser()).thenReturn(user);
+            mockedSession.when(UserSession::getUserInstance).thenReturn(session);
+            when(notebookDao.findByUser(user)).thenReturn(new ArrayList<>());
+            when(notebookDao.save(any(NoteBookEntity.class))).thenReturn(personalNotebook);
+            when(noteDao.save(any(NoteEntity.class))).thenReturn(expectedNote);
+
+            NoteEntity result = noteService.createNote("Test Title", "content", "annotation", null, null);
+
+            assertNotNull(result);
+            verify(notebookDao, times(1)).findByUser(user);
+            verify(notebookDao, times(1)).save(any(NoteBookEntity.class));
+            verify(noteDao, times(1)).save(any(NoteEntity.class));
+        }
     }
 
-    // ==================== Title Trimming Tests ====================
+    @Test
+    void createNoteNullContentUsesEmptyStringTest() {
+        UserEntity user = new UserEntity();
+        user.setFirstName("Test");
+        NoteBookEntity notebook = new NoteBookEntity("Content Notebook", user);
+        Set<String> tags = Set.of("NotNull");
+        NoteEntity expectedNote = new NoteEntity("Test Title", "", "annotation");
+
+        try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
+            UserSession session = mock(UserSession.class);
+            when(session.getUser()).thenReturn(user);
+            mockedSession.when(UserSession::getUserInstance).thenReturn(session);
+            when(noteDao.save(any(NoteEntity.class))).thenReturn(expectedNote);
+
+            NoteEntity result = noteService.createNote("Test Title", null, "annotation", notebook, tags);
+
+            assertNotNull(result);
+            verify(noteDao, times(1)).save(any(NoteEntity.class));
+        }
+    }
 
     @Test
-    @DisplayName("Should trim whitespace from title")
-    void createNote_TitleWithWhitespace_ShouldTrim() {
-        NoteService.setCurrentUser(testUser);
+    void createNoteNullAnnotationUsesEmptyStringTest() {
+        UserEntity user = new UserEntity();
+        user.setFirstName("Test");
+        NoteBookEntity notebook = new NoteBookEntity("Annotation Notebook", user);
+        Set<String> tags = Set.of("NotNull");
+        NoteEntity expectedNote = new NoteEntity("Test Title", "content", "");
 
-        // Title with leading/trailing whitespace should pass validation
-        // (will be trimmed before saving)
-        assertDoesNotThrow(() -> {
-            try {
-                noteService.createNote("  Valid Title  ", "content", "annotation");
-            } catch (RuntimeException e) {
-                // Expected - DB not connected in test
-                // But validation passed (title was trimmed and valid)
-            }
-        });
+        try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
+            UserSession session = mock(UserSession.class);
+            when(session.getUser()).thenReturn(user);
+            mockedSession.when(UserSession::getUserInstance).thenReturn(session);
+            when(noteDao.save(any(NoteEntity.class))).thenReturn(expectedNote);
+
+            NoteEntity result = noteService.createNote("Test Title", "content", null, notebook, tags);
+
+            assertNotNull(result);
+            verify(noteDao, times(1)).save(any(NoteEntity.class));
+        }
     }
 }

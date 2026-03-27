@@ -2,12 +2,15 @@ package dao.notebook;
 
 import datasource.MariaDbJpaConnection;
 import entity.NoteBookEntity;
+import entity.UserEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
 public class JpaNoteBookDao implements NoteBookDAO{
+
+    public JpaNoteBookDao() {}
 
     @Override
     public NoteBookEntity save(NoteBookEntity noteBook) {
@@ -44,12 +47,26 @@ public class JpaNoteBookDao implements NoteBookDAO{
     }
 
     @Override
+    public List<NoteBookEntity> findByUser(UserEntity user) {
+        if (user == null) throw new IllegalArgumentException("User cannot be null");
+
+        EntityManager em = MariaDbJpaConnection.createEntityManager();
+        try {
+            TypedQuery<NoteBookEntity> query = em.createQuery("Select n from NoteBookEntity n where n.user = :user", NoteBookEntity.class);
+            query.setParameter("user", user);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public List<NoteBookEntity> findByTitle(String title) {
         if (title == null) throw new IllegalArgumentException("Title cannot be null");
 
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
-            TypedQuery<NoteBookEntity> query = em.createQuery("Select t from NoteBookEntity t where t.title = :title", NoteBookEntity.class);
+            TypedQuery<NoteBookEntity> query = em.createQuery("Select n from NoteBookEntity n where n.title = :title", NoteBookEntity.class);
             query.setParameter("title", title);
             return query.getResultList();
         } finally {
@@ -71,7 +88,6 @@ public class JpaNoteBookDao implements NoteBookDAO{
         } finally {
             em.close();
         }
-
     }
 
     @Override

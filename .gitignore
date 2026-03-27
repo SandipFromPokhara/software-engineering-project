@@ -1,11 +1,10 @@
+### Maven / build artifacts ###
 target/
+dependency-reduced-pom.xml
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 .kotlin
-
-# Environment variables
-.env
 
 ### IntelliJ IDEA ###
 .idea/
@@ -49,5 +48,3 @@ build/
 
 ### Personal notes ###
 MyNotes.md
-
-Documents/SQL_helpers/
