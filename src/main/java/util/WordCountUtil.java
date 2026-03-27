@@ -21,12 +21,8 @@ public class WordCountUtil {
         int words = countWords(text);
         int chars = text != null ? text.length() : 0;
 
-        String template = Localization.get("create.words_chars_label");
-        String formatted = template
-                .replace("{{words}}", String.valueOf(words))
-                .replace("{{chars}}", String.valueOf(chars));
-
-        label.setText(formatted);
+        String countDisplay = Localization.get("create.words_chars_label", words, chars);
+        label.setText(countDisplay);
     }
 
     private static int countWords(String text) {
