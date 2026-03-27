@@ -13,6 +13,11 @@ public class WordCountUtil {
             updateLabel(newText, wordCountLabel);
         });
 
+        // Update on language change
+        Localization.localeProperty().addListener((obs, oldLoc, newLoc) -> {
+            updateLabel(textArea.getText(), wordCountLabel);
+        });
+
         // Initialize with localized template
         updateLabel(textArea.getText(), wordCountLabel);
     }
