@@ -180,8 +180,7 @@ public class ManageNotebookController {
         boolean confirmed = AlertUtil.showConfirmation(
                 notebookListView.getScene().getWindow(),
                 Localization.get("notebooks.delete"),
-                Localization.get("notebooks.delete_confirm")
-                        .replace("{title}", selected.getTitle())
+                Localization.get("notebooks.delete_confirm", selected.getTitle())
         );
 
         if (confirmed) {
