@@ -40,7 +40,7 @@ public class Localization {
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.MessagesBundle", getLocale());
 
         if (!bundle.containsKey(key)) {
-            logger.log(Level.WARNING, "Missing i18n key: {}", key);
+            logger.log(Level.WARNING, "Missing i18n key: {0}", key);
             return "!" + key + "!";
         }
 
