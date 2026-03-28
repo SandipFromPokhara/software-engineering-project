@@ -9,11 +9,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import security.MessageType;
 import session.UserSession;
 import security.BcryptPasswordHasher;
 import security.PasswordHasher;
 import security.Validation;
 import util.Localization;
+import util.ShowMessageUtil;
 import util.WindowUtil;
 
 import java.util.Timer;
@@ -41,8 +43,6 @@ public class UserDashboardController {
 
     @FXML
     private PasswordField confirmPasswordField;
-    @FXML
-    private Label confirm;
 
     @FXML
     private Label messageLabel;
@@ -69,30 +69,26 @@ public class UserDashboardController {
     @FXML
     public void initialize() {
         passwordHasher = new BcryptPasswordHasher();
-        Validation.hideMessage(messageLabel);
+        ShowMessageUtil.hideMessage(messageLabel);
 
         // LOCALIZATION BINDINGS
         manageAccount.textProperty().bind(Localization.bind("account.title"));
         note.textProperty().bind(Localization.bind("account.note"));
-        confirm.textProperty().bind(Localization.bind("account.confirm_password"));
 
         firstLock.textProperty().bind(Localization.bind("account.first_name"));
         lastNameLabel.textProperty().bind(Localization.bind("account.last_name"));
         usernameLabel.textProperty().bind(Localization.bind("account.username"));
         emailLock.textProperty().bind(Localization.bind("account.email"));
         newPassword.textProperty().bind(Localization.bind("account.new_password"));
-        confirm.textProperty().bind(Localization.bind("account.confirm_password"));
         passwordField.promptTextProperty().bind(Localization.bind("account.password_hint"));
         confirmPasswordField.promptTextProperty().bind(Localization.bind("account.password_repeat"));
         manageCancel.textProperty().bind(Localization.bind("account.cancel"));
         manageUpdate.textProperty().bind(Localization.bind("account.update"));
 
-
-
         // Load user data
         UserEntity currentUser = UserSession.getUserInstance().getUser();
         if (currentUser == null) {
-            Validation.showMessage(messageLabel, Localization.get("dashboard.no_session"), Validation.MessageType.ERROR);
+            ShowMessageUtil.showMessageKey(messageLabel, "dashboard.no_session", MessageType.ERROR);
             return;
         }
 
@@ -103,46 +99,52 @@ public class UserDashboardController {
 
     }
 
-
     @FXML
     private void handleUpdate() {
         UserEntity currentUser = UserSession.getUserInstance().getUser();
         if (currentUser == null) {
-            Validation.showMessage(messageLabel,Localization.get("dashboard.no_session") , Validation.MessageType.ERROR);
+            ShowMessageUtil.showMessageKey(messageLabel, "dashboard.no_session", MessageType.ERROR);
             return;
         }
 
         String newLastName = lastNameField.getText() == null ? "" : lastNameField.getText().trim();
         String newUsername = usernameField.getText() == null ? "" : usernameField.getText().trim();
-        String newPassword = passwordField.getText() == null ? "" : passwordField.getText();
-        String confirmPassword = confirmPasswordField.getText() == null ? "" : confirmPasswordField.getText();
+        String newPassword = passwordField.getText() == null ? "" : passwordField.getText().trim();
+        String confirmPassword = confirmPasswordField.getText() == null ? "" : confirmPasswordField.getText().trim();
 
-        if (newLastName.isEmpty() || newUsername.isEmpty()) {
-            Validation.showMessage(messageLabel, Localization.get("dashboard.required_fields"), Validation.MessageType.ERROR);
-            return;
-        }
+        Validation.ValidationResult result = Validation.validateUpdate(
+                newLastName,
+                newUsername,
+                newPassword,
+                confirmPassword
+        );
 
-        if (!Validation.validateName(newLastName, "Last name", messageLabel)) {
-            return;
-        }
-
-        if (!Validation.validateUsername(newUsername, messageLabel)) {
+        if (!result.success()) {
+            ShowMessageUtil.showMessageKey(messageLabel, "dashboard.validation_error", MessageType.ERROR);
             return;
         }
 
         UserEntity existingUserWithUsername = userDao.findByUsername(newUsername);
         if (existingUserWithUsername != null && !existingUserWithUsername.getId().equals(currentUser.getId())) {
-            Validation.showMessage(messageLabel, Localization.get("dashboard.username_exists"), Validation.MessageType.ERROR);
+            ShowMessageUtil.showMessageKey(messageLabel, "dashboard.username_exists", MessageType.ERROR);
             return;
         }
 
         if (!newPassword.isBlank()) {
-            if (!Validation.validatePasswordMatch(newPassword, confirmPassword, messageLabel)) {
+
+            if (!Validation.validatePasswordMatch(newPassword, confirmPassword)) {
+                ShowMessageUtil.showMessageKey(messageLabel, "account.password_no_match", MessageType.ERROR);
                 return;
             }
-            if (!Validation.validatePasswordStrength(newPassword, messageLabel)) {
+
+            if (newPassword.length() < 6 ||
+                    !newPassword.matches(".*\\d.*") ||
+                    !newPassword.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*")) {
+
+                ShowMessageUtil.showMessageKey(messageLabel, "password.not_strong", MessageType.ERROR);
                 return;
             }
+
             currentUser.changePasswordHash(passwordHasher.hash(newPassword));
         }
 
@@ -152,7 +154,7 @@ public class UserDashboardController {
         userDao.update(currentUser);
         UserSession.getUserInstance().setUser(currentUser);
 
-        Validation.showMessage(messageLabel,Localization.get("dashboard.update_success"), Validation.MessageType.SUCCESS);
+        ShowMessageUtil.showMessageKey(messageLabel,"dashboard.update_success", MessageType.SUCCESS);
         passwordField.clear();
         confirmPasswordField.clear();
 

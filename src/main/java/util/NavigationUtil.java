@@ -37,7 +37,7 @@ public class NavigationUtil {
      * @param modal       If true, window is modal
      * @param consumer    Optional callback to configure the controller
      */
-    public static <T> void openWindow(Stage owner, String fxmlPath, String title,
+    public static <T> void openWindow(Stage owner, String fxmlPath, String titleKey,
                                       boolean resizable, boolean modal,
                                       ControllerConsumer<T> consumer) {
         try {
@@ -53,10 +53,13 @@ public class NavigationUtil {
             Scene scene = new Scene(root);
             scene.getStylesheets().add("/css/row_color.css");
             stage.setScene(scene);
-            stage.setTitle(title);
 
             stage.getIcons().setAll(new Image("/Images/NV.png"));
             stage.setResizable(resizable);
+
+            stage.titleProperty().unbind();
+            stage.titleProperty().bind(Localization.bind(titleKey));
+
             applyMinSize(stage, fxmlPath);
 
             stage.centerOnScreen();
@@ -80,7 +83,7 @@ public class NavigationUtil {
     /**
      * Replace the scene on an existing stage
      */
-    public static void replaceScene(Stage stage, String fxmlPath, String title, boolean resizable) {
+    public static void replaceScene(Stage stage, String fxmlPath, String titleKey, boolean resizable) {
         try {
             FXMLLoader loader = new FXMLLoader(NavigationUtil.class.getResource(fxmlPath));
             Parent root = loader.load();
@@ -89,9 +92,12 @@ public class NavigationUtil {
             scene.getStylesheets().add("/css/row_color.css");
 
             stage.setScene(scene);
-            stage.setTitle(title);
+
             stage.getIcons().add(new Image("/Images/NV.png"));
             stage.setResizable(resizable);
+
+            stage.titleProperty().unbind();
+            stage.titleProperty().bind(Localization.bind(titleKey));
 
             // Set minimum size for key windows
             applyMinSize(stage, fxmlPath);

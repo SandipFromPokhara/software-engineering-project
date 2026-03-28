@@ -20,7 +20,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="700.0" styleClass="root" stylesheets="@/css/createNote.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateNoteController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="710.0" styleClass="root" stylesheets="@/css/createNote.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateNoteController">
    <center>
       <AnchorPane BorderPane.alignment="CENTER">
          <children>
@@ -168,14 +168,14 @@
                               <Image url="@/Images/tag-black.png" />
                            </image>
                         </ImageView>
-                        <Label styleClass="tag-label" fx:id="noteTagLabel" text="Tags">
+                        <Label fx:id="noteTagLabel" styleClass="tag-label" text="Tags">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
                         <Label alignment="CENTER" styleClass="help-label" text="?">
                            <tooltip>
-                              <Tooltip fx:id="tagTooltip" styleClass="tooltip" text="Tags are keywords to organize your notes">
+                              <Tooltip fx:id="tagTooltip" styleClass="tooltip">
                                  <font>
                                     <Font name="System Italic" size="12.0" />
                                  </font>
@@ -231,13 +231,13 @@
          <children>
               <MenuBar HBox.hgrow="ALWAYS">
                   <menus>
-                      <Menu mnemonicParsing="false" fx:id="fileMenu" text="File">
+                      <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
                           <items>
-                              <MenuItem mnemonicParsing="false" onAction="#handleBackToHome" fx:id="backDashboard" text="Back to Dashboard" />
-                              <MenuItem mnemonicParsing="false" onAction="#handleClose" fx:id="closeFile" text="Close" />
+                              <MenuItem fx:id="backDashboard" mnemonicParsing="false" onAction="#handleBackToHome" text="Back to Dashboard" />
+                              <MenuItem fx:id="closeFile" mnemonicParsing="false" onAction="#handleClose" text="Close" />
                           </items>
                       </Menu>
-                      <Menu mnemonicParsing="false" fx:id="editMenu" text="Edit">
+                      <Menu fx:id="editMenu" mnemonicParsing="false" text="Edit">
                           <items>
                               <MenuItem fx:id="undoMenuItem" accelerator="Ctrl+Z" mnemonicParsing="false" onAction="#handleUndo" text="Undo" />
                               <MenuItem fx:id="redoMenuItem" accelerator="Ctrl+Y" mnemonicParsing="false" onAction="#handleRedo" text="Redo" />
@@ -254,7 +254,7 @@
                      </ImageView>
                  </graphic>
                <tooltip>
-                  <Tooltip fx:id="toggleTooltip" text="Switch Dark/Light theme">
+                  <Tooltip fx:id="toggleTooltip">
                      <font>
                         <Font name="System Italic" size="12.0" />
                      </font>
