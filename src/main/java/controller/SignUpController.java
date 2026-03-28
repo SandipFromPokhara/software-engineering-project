@@ -203,7 +203,7 @@ public class SignUpController {
                 PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
                 delay.setOnFinished(event -> {
                         skipValidation = false;
-                        NavigationUtil.replaceScene(currentStage, "/FXML/login_view.fxml", Localization.get("dashboard.window_title"), false);
+                        NavigationUtil.replaceScene(currentStage, "/FXML/login_view.fxml", "login.window_title", false);
                 });
                 delay.play();
             } else {
@@ -240,7 +240,14 @@ public class SignUpController {
                 }
 
                 var firstError = entry.getValue().get(0);
-                String message = Localization.get(firstError.key(), firstError.args().toArray());
+                String key = firstError.key();
+
+                if (key == null || key.isBlank()) {
+                    logger.warning("Validation returned empty i18n key");
+                    return;
+                }
+
+                String message = Localization.get(key, firstError.args().toArray());
 
                 ShowMessageUtil.showMessage(messageLabel, message, MessageType.ERROR);
                 return;
@@ -292,11 +299,11 @@ public class SignUpController {
         passwordStrengthBar.setProgress(progress);
 
         if (progress < 0.4) {
-            passwordStrengthLabel.setText("Weak");
+            passwordStrengthLabel.setText(Localization.get("password.weak"));
         } else if (progress < 0.7) {
-            passwordStrengthLabel.setText("Medium");
+            passwordStrengthLabel.setText(Localization.get("password.medium"));
         } else {
-            passwordStrengthLabel.setText("Strong");
+            passwordStrengthLabel.setText(Localization.get("password.strong"));
 
             strengthHideDelay = new PauseTransition(Duration.seconds(2.5));
             strengthHideDelay.setOnFinished(e -> {
@@ -328,7 +335,7 @@ public class SignUpController {
 
     private void navigateToLogin() {
         Stage stage = (Stage) loginLink.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/login_view.fxml", Localization.get("login.window_title"), false);
+        NavigationUtil.replaceScene(stage, "/FXML/login_view.fxml", "login.window_title", false);
     }
 
     @FXML
@@ -340,7 +347,7 @@ public class SignUpController {
     @FXML
     private void handleBack() {
         Stage stage = (Stage) backButton.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", Localization.get("entry.window_title"), false);
+        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "entry.window_title", false);
     }
 
     public void setUserDAO(UserDAO userDAO) {
