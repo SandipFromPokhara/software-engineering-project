@@ -21,34 +21,30 @@ import static controller.ViewDashboardController.logger;
 public class GuestDashboardController {
 
     @FXML
-    private Button home;
+    private Button home, login, register;
 
     @FXML
     private Button newFiles;
 
     @FXML
-    private Button login;
-
-    @FXML
-    private Button register;
-
-    @FXML
     private HBox topBar;
 
     @FXML
-    private Label title;
-
-    @FXML
-    private Label content;
+    private Label title, content;
 
     @FXML
     VBox centerPane;
 
     @FXML
+    public void initialize() {
+        login.textProperty().bind(Localization.bind("guest.login"));
+        register.textProperty().bind(Localization.bind("guest.register"));
+    }
+
+    @FXML
     private void handleHome() {
         Stage stage = (Stage) home.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", Localization.get("entry.window_title"), false
-        );
+        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "entry.window_title", false);
     }
 
     private void loadContent(String fxmlFile) {
@@ -68,7 +64,7 @@ public class GuestDashboardController {
 
         //logger
         } catch (Exception e) {
-            logger.log(Level.SEVERE, Localization.get("error.fxml_load") + fxmlFile, e);
+            logger.log(Level.SEVERE, "Failed to load content" + fxmlFile, e);
         }
     }
 
@@ -83,7 +79,7 @@ public class GuestDashboardController {
         NavigationUtil.replaceScene(
                 stage,
                 "/FXML/login_view.fxml",
-                Localization.get("login.window_title"),
+                "login.window_title",
                 false
         );
     }
@@ -91,15 +87,6 @@ public class GuestDashboardController {
     @FXML
     private void handleSignUp() {
         Stage stage = (Stage) register.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml",Localization.get("register.window_title"), false
-        );
-
-    }
-
-    @FXML
-    public void initialize() {
-        login.textProperty().bind(Localization.bind("guest.login"));
-        register.textProperty().bind(Localization.bind("guest.register"));
-
+        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml", "register.window_title", false);
     }
 }
