@@ -123,10 +123,12 @@ public class CreateNoteController implements Initializable {
         undoMenuItem.textProperty().bind(Localization.bind("edit.undo"));
         redoMenuItem.textProperty().bind(Localization.bind("edit.redo"));
 
+        toggleTooltip.textProperty().bind(Localization.bind("tooltip.theme_toggle"));
+        tagTooltip.textProperty().bind(Localization.bind("tooltip.tags_info"));
         noteTitleLabel.textProperty().bind(Localization.bind("create.title_label"));
         noteContentLabel.textProperty().bind(Localization.bind("create.note_content"));
         selectLabel.textProperty().bind(Localization.bind("notebook.select_label"));
-        notebookComboBox.promptTextProperty().bind(Localization.bind("create.new_notebook_label"));
+
         WordCountUtil.bind(contentArea, wordCountLabel);
 
         noteAnnotationLabel.textProperty().bind(Localization.bind("create.note_annotations"));
@@ -143,19 +145,7 @@ public class CreateNoteController implements Initializable {
         tagComboBox.promptTextProperty().bind(Localization.bind("create.placeholder_tags"));
         addTagBtn.textProperty().bind(Localization.bind("create.add_tags"));
 
-        notebookComboBox.promptTextProperty().bind(Localization.bind("notebook.create"));
-
-        WindowUtil.bindStageTitle(titleField, "create.title");
-        titleField.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null) {
-                javafx.application.Platform.runLater(() -> {
-                    if (newScene.getWindow() != null) {
-                        Stage stage = (Stage) newScene.getWindow();
-                        stage.titleProperty().bind(Localization.bind("create.title"));
-                    }
-                });
-            }
-        });
+        // notebookComboBox.promptTextProperty().bind(Localization.bind("notebook.create"));
 
         // Tooltip delay
         tagTooltip.setShowDelay(Duration.millis(100));
