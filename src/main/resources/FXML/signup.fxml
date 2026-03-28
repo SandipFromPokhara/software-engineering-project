@@ -117,7 +117,7 @@
                      </children>
                  </HBox>
                 <!-- Back Button -->
-                <Button fx:id="backButton" layoutX="5.0" layoutY="375.0" mnemonicParsing="false" onAction="#handleBack" style="-fx-background-color: transparent; -fx-cursor: hand;" text="< Back" textFill="#324326" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="261.0" AnchorPane.topAnchor="375.0">
+                <Button fx:id="backButton" layoutX="5.0" layoutY="375.0" mnemonicParsing="false" onAction="#handleBack" style="-fx-background-color: transparent; -fx-cursor: hand;" text="← Back" textFill="#324326" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="261.0" AnchorPane.topAnchor="375.0">
                     <font>
                         <Font name="System Bold" size="12.0"/>
                     </font>
