@@ -43,8 +43,6 @@ public class UserDashboardController {
 
     @FXML
     private PasswordField confirmPasswordField;
-    @FXML
-    private Label confirm;
 
     @FXML
     private Label messageLabel;
@@ -76,14 +74,12 @@ public class UserDashboardController {
         // LOCALIZATION BINDINGS
         manageAccount.textProperty().bind(Localization.bind("account.title"));
         note.textProperty().bind(Localization.bind("account.note"));
-        confirm.textProperty().bind(Localization.bind("account.confirm_password"));
 
         firstLock.textProperty().bind(Localization.bind("account.first_name"));
         lastNameLabel.textProperty().bind(Localization.bind("account.last_name"));
         usernameLabel.textProperty().bind(Localization.bind("account.username"));
         emailLock.textProperty().bind(Localization.bind("account.email"));
         newPassword.textProperty().bind(Localization.bind("account.new_password"));
-        confirm.textProperty().bind(Localization.bind("account.confirm_password"));
         passwordField.promptTextProperty().bind(Localization.bind("account.password_hint"));
         confirmPasswordField.promptTextProperty().bind(Localization.bind("account.password_repeat"));
         manageCancel.textProperty().bind(Localization.bind("account.cancel"));
@@ -113,14 +109,12 @@ public class UserDashboardController {
 
         String newLastName = lastNameField.getText() == null ? "" : lastNameField.getText().trim();
         String newUsername = usernameField.getText() == null ? "" : usernameField.getText().trim();
-        String newPassword = passwordField.getText() == null ? "" : passwordField.getText();
-        String confirmPassword = confirmPasswordField.getText() == null ? "" : confirmPasswordField.getText();
+        String newPassword = passwordField.getText() == null ? "" : passwordField.getText().trim();
+        String confirmPassword = confirmPasswordField.getText() == null ? "" : confirmPasswordField.getText().trim();
 
-        Validation.ValidationResult result = Validation.validateSignup(
-                "",                 // firstName not updated here
+        Validation.ValidationResult result = Validation.validateUpdate(
                 newLastName,
                 newUsername,
-                "",
                 newPassword,
                 confirmPassword
         );
@@ -132,14 +126,14 @@ public class UserDashboardController {
 
         UserEntity existingUserWithUsername = userDao.findByUsername(newUsername);
         if (existingUserWithUsername != null && !existingUserWithUsername.getId().equals(currentUser.getId())) {
-            ShowMessageUtil.showMessageKey(messageLabel, Localization.get("dashboard.username_exists"), MessageType.ERROR);
+            ShowMessageUtil.showMessageKey(messageLabel, "dashboard.username_exists", MessageType.ERROR);
             return;
         }
 
         if (!newPassword.isBlank()) {
 
             if (!Validation.validatePasswordMatch(newPassword, confirmPassword)) {
-                ShowMessageUtil.showMessageKey(messageLabel, "passwords.do_not_match", MessageType.ERROR);
+                ShowMessageUtil.showMessageKey(messageLabel, "account.password_no_match", MessageType.ERROR);
                 return;
             }
 
