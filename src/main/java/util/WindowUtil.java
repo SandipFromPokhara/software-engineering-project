@@ -12,16 +12,4 @@ public class WindowUtil {
             }
         }
     }
-
-    public static void bindStageTitle(Node node, String key) {
-        node.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null) {
-                javafx.application.Platform.runLater(() -> {
-                    if (newScene.getWindow() instanceof Stage stage) {
-                        stage.titleProperty().bind(Localization.bind(key));
-                    }
-                });
-            }
-        });
-    }
 }
