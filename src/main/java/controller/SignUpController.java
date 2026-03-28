@@ -34,21 +34,26 @@ public class SignUpController {
     private boolean passwordTouched = false;
     private boolean confirmPasswordTouched = false;
 
-    @FXML private TextField firstNameField;
-    @FXML private TextField lastNameField;
-    @FXML private TextField usernameField;
-    @FXML private TextField emailField;
-    @FXML private PasswordField passwordField;
-    @FXML private PasswordField confirmPasswordField;
-    @FXML private Button signUpButton;
-    @FXML private Hyperlink loginLink;
-    @FXML private Label messageLabel;
-    @FXML private Button backButton;
-    @FXML private Label createAccount;
-    @FXML private Label joinAccount;
-    @FXML private Label haveAccount;
-    @FXML private Label passwordStrengthLabel;
-    @FXML private ProgressBar passwordStrengthBar;
+    @FXML
+    private TextField firstNameField, lastNameField, usernameField, emailField;
+
+    @FXML
+    private PasswordField passwordField, confirmPasswordField;
+
+    @FXML
+    private Button signUpButton, backButton;
+
+    @FXML
+    private Hyperlink loginLink;
+
+    @FXML
+    private Label messageLabel, createAccount, joinAccount, haveAccount;
+
+    @FXML
+    private Label privacyLabel, passwordStrengthLabel;
+
+    @FXML
+    private ProgressBar passwordStrengthBar;
 
     @FXML
     public void initialize() {
@@ -70,6 +75,7 @@ public class SignUpController {
         haveAccount.textProperty().bind(Localization.bind("signup.haveAccount"));
         loginLink.textProperty().bind(Localization.bind("signup.login"));
         backButton.textProperty().bind(Localization.bind("signup.back"));
+        privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));// Text from the left image
 
         firstNameField.focusedProperty().addListener((obs, oldV, newV) -> {
             if (!newV) firstNameTouched = true;

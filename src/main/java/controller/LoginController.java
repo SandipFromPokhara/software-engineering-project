@@ -38,7 +38,6 @@ public class LoginController {
     @FXML
     private Hyperlink signupLink;
 
-
     @FXML
     private void initialize() {
         userDao = new JpaUserDao();

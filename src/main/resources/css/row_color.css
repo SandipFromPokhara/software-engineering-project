@@ -16,3 +16,54 @@
     -fx-background-color: #2196F3;
     -fx-text-fill: white;
 }
+
+/* ─── Language ComboBox ─── */
+.language-combo .combo-box-base {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+}
+
+.language-combo .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 2 0 0;
+}
+
+.language-combo .arrow-button .arrow {
+    -fx-background-color: #266973;
+    -fx-shape: "M 0 0 L 4 4 L 8 0 Z";
+}
+
+.root.dark .language-combo .arrow-button .arrow {
+    -fx-background-color: white;
+}
+
+/* ─── Dropdown popup list ─── */
+.language-combo .list-view {
+    -fx-background-color: white;
+    -fx-border-color: #266973;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0, 0, 3);
+}
+
+.language-combo .list-view .list-cell {
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 12px;
+    -fx-text-fill: #266973;
+    -fx-background-color: white;
+}
+
+.language-combo .list-view .list-cell:hover {
+    -fx-background-color: #eaf6f7;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+.language-combo .list-view .list-cell:filled:selected {
+    -fx-background-color: #266973;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}

@@ -14,24 +14,37 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.StackPane?>
 
 <BorderPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #EAF7F7;" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.SignUpController">
 
     <left>
-        <AnchorPane prefHeight="400.0" prefWidth="241.0" BorderPane.alignment="CENTER">
+        <StackPane prefHeight="400.0" prefWidth="241.0" BorderPane.alignment="CENTER">
             <children>
-                <ImageView fitHeight="400.0" fitWidth="283.0" layoutX="-1.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-4.0" AnchorPane.topAnchor="0.0">
+                <ImageView fitHeight="400.0" fitWidth="283.0" pickOnBounds="true" preserveRatio="true">
                     <image>
-                        <Image url="@../Images/left-image.png" />
+                        <Image url="@../Images/NoteVault.png"/>
                     </image>
                 </ImageView>
+                <Label fx:id="privacyLabel" alignment="CENTER"
+                       text=""
+                       textAlignment="CENTER" textFill="WHITE" wrapText="true" StackPane.alignment="CENTER">
+                    <StackPane.margin>
+                        <Insets left="15.0" right="15.0" top="40.0"/>
+                    </StackPane.margin>
+                    <font>
+                        <Font name="System Regular" size="16.0"/>
+                    </font>
+                </Label>
             </children>
-        </AnchorPane>
+        </StackPane>
     </left>
 
     <center>
-        <AnchorPane prefHeight="400.0" prefWidth="300.0" style="-fx-background-color: #ebf4f5;" BorderPane.alignment="CENTER">
+        <AnchorPane prefHeight="400.0" prefWidth="300.0" style="-fx-background-color: #ebf4f5;"
+                    BorderPane.alignment="CENTER">
             <children>
+
             <VBox alignment="CENTER" layoutX="61.0" layoutY="14.0" prefHeight="60.0" prefWidth="204.0" AnchorPane.topAnchor="14.0">
                <children>
    
@@ -91,10 +104,9 @@
                             <Font size="11.0" />
                         </font>
                     </Label>
-
                 </VBox>
 
-                       <HBox alignment="CENTER" layoutX="82.0" layoutY="375.0" spacing="2.0" AnchorPane.bottomAnchor="5.0">
+                <HBox alignment="CENTER" layoutX="82.0" layoutY="375.0" spacing="2.0" AnchorPane.bottomAnchor="5.0">
                      <children>
                          <Label fx:id="haveAccount" text="Already have an account?" textFill="#455A64">
                              <font>
@@ -105,17 +117,16 @@
                      </children>
                  </HBox>
                 <!-- Back Button -->
-                <Button fx:id="backButton" layoutX="5.0" layoutY="375.0" mnemonicParsing="false" onAction="#handleBack" style="-fx-background-color: transparent; -fx-cursor: hand;" text="&lt; Back" textFill="#324326" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="261.0" AnchorPane.topAnchor="375.0">
+                <Button fx:id="backButton" layoutX="5.0" layoutY="375.0" mnemonicParsing="false" onAction="#handleBack" style="-fx-background-color: transparent; -fx-cursor: hand;" text="< Back" textFill="#324326" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="261.0" AnchorPane.topAnchor="375.0">
                     <font>
-                        <Font name="System Bold" size="12.0" />
+                        <Font name="System Bold" size="12.0"/>
                     </font>
-               <padding>
-                  <Insets left="2.0" />
-               </padding>
+                       <padding>
+                          <Insets left="2.0" />
+                       </padding>
                 </Button>
 
             </children>
         </AnchorPane>
     </center>
-
 </BorderPane>
