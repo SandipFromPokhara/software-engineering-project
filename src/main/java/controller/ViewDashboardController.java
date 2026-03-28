@@ -161,13 +161,13 @@ public class ViewDashboardController {
         }
 
         toggleTooltip.setShowDelay(Duration.millis(100));
-        WordCountUtil.bind(noteViewArea, wordCountLabel); // not sure
+        WordCountUtil.bind(noteViewArea, wordCountLabel);
 
         rootPane.getStyleClass().add("root");
         setupTheme();
 
         editButton.setDisable(true);
-        deleteButton.setDisable(true);;
+        deleteButton.setDisable(true);
 
         setupTableColumns();
         setupHoverEffects();
@@ -176,7 +176,6 @@ public class ViewDashboardController {
         // Determine initial notebook
         activeNotebook = dashboardService.getInitialNotebook();
         if (activeNotebook != null) loadNotes();
-
 
         dbStatusLabel.setStyle("-fx-text-fill: green;");
     }
