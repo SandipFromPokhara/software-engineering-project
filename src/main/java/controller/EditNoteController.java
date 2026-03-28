@@ -34,6 +34,7 @@ public class EditNoteController {
 
     @FXML
     TextField titleField;
+
     @FXML
     private Label content;
 
@@ -115,14 +116,13 @@ public class EditNoteController {
         annotation.textProperty().bind(Localization.bind("edit.annotations"));
         editTags.textProperty().bind(Localization.bind("edit.tags"));
 
+        tagTooltip.textProperty().bind(Localization.bind("tooltip.tags_info"));
         updateButton.textProperty().bind(Localization.bind("edit.update"));
         cancelButton.textProperty().bind(Localization.bind("edit.cancel"));
 
         annotationBox.promptTextProperty().bind(Localization.bind("edit.placeholder_annotations"));
         tagComboBox.promptTextProperty().bind(Localization.bind("edit.placeholder_tags"));
         addTagBtn.textProperty().bind(Localization.bind("edit.add_tags"));
-
-        WindowUtil.bindStageTitle(titleField, "edit.window.title");
 
         WordCountUtil.bind(contentBox, wordCountLabel);
 
