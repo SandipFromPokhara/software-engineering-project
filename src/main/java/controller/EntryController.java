@@ -7,9 +7,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import util.Localization;
 import util.NavigationUtil;
 
@@ -34,6 +36,9 @@ public class EntryController {
     private Button languageButton; // world icon button
 
     @FXML
+    private Tooltip langTooltip;
+
+    @FXML
     public void initialize() {
         hello.textProperty().bind(Localization.bind("entry.hello"));
         welcome.textProperty().bind(Localization.bind("entry.welcome"));
@@ -42,6 +47,9 @@ public class EntryController {
         guestButton.textProperty().bind(Localization.bind("entry.guest"));
         faqLink.textProperty().bind(Localization.bind("entry.faq"));
         privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));
+        langTooltip.textProperty().bind(Localization.bind("tooltip.lang_info"));
+
+        langTooltip.setShowDelay(Duration.millis(100));
     }
 
     @FXML

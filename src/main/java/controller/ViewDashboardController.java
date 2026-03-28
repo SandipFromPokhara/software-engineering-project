@@ -114,7 +114,7 @@ public class ViewDashboardController {
     private Button toggleBtn;
 
     @FXML
-    private Tooltip toggleTooltip;
+    private Tooltip toggleTooltip, langTooltip;
 
     @FXML
     private ImageView tagIcon,
@@ -140,6 +140,8 @@ public class ViewDashboardController {
         closeItem.textProperty().bind(Localization.bind("menu.close"));
 
         toggleTooltip.textProperty().bind(Localization.bind("tooltip.theme_toggle"));
+        langTooltip.textProperty().bind(Localization.bind("tooltip.lang_info"));
+
         helpMenu.textProperty().bind(Localization.bind("menu.help"));
         faqItem.textProperty().bind(Localization.bind("logged.faq"));
         aboutItem.textProperty().bind(Localization.bind("menu.about"));
@@ -183,6 +185,7 @@ public class ViewDashboardController {
         setupLanguageCombo();
 
         toggleTooltip.setShowDelay(Duration.millis(100));
+        langTooltip.setShowDelay(Duration.millis(100));
 
         WordCountUtil.bind(noteViewArea, wordCountLabel);
 
