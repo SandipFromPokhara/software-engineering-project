@@ -139,6 +139,7 @@ public class ViewDashboardController {
         exportItem.textProperty().bind(Localization.bind("menu.exportPdf"));
         closeItem.textProperty().bind(Localization.bind("menu.close"));
 
+        toggleTooltip.textProperty().bind(Localization.bind("tooltip.theme_toggle"));
         helpMenu.textProperty().bind(Localization.bind("menu.help"));
         faqItem.textProperty().bind(Localization.bind("logged.faq"));
         aboutItem.textProperty().bind(Localization.bind("menu.about"));
@@ -177,16 +178,6 @@ public class ViewDashboardController {
 
         // Localize default note-title label when nothing is selected
         noteTitleLabel.textProperty().bind(Localization.bind("dashboard.selectNote"));
-
-        // Keep dashboard window title in sync with current language
-        Platform.runLater(() -> {
-            Stage stage = (Stage) rootPane.getScene().getWindow();
-            if (stage != null) {
-                stage.setTitle(Localization.get("dashboard.window_title"));
-                Localization.localeProperty().addListener((obs, oldLoc, newLoc) ->
-                        stage.setTitle(Localization.get("dashboard.window_title")));
-            }
-        });
 
         // --- Language ComboBox setup ---
         setupLanguageCombo();
@@ -448,7 +439,7 @@ public class ViewDashboardController {
             Stage owner = (Stage) rootPane.getScene().getWindow();
 
             NavigationUtil.openWindow(owner, "/FXML/manage_notebooks.fxml",
-                    Localization.get("notebook.manage_label"), false, true,
+                    "notebook.manage_label", false, true,
                     (ManageNotebookController controller) -> {
                         controller.loadNotebooks();
                         controller.setActiveNotebook(activeNotebook);
@@ -484,7 +475,7 @@ public class ViewDashboardController {
 
             Stage stage = (Stage) window;
             // Use localized window title instead of hard-coded English string
-            NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", Localization.get("entry.window_title"), false);
+            NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "entry.window_title", false);
         }
     }
 
@@ -523,7 +514,7 @@ public class ViewDashboardController {
     @FXML
     public void handleCreate() {
         Stage owner = (Stage) rootPane.getScene().getWindow();
-        NavigationUtil.openWindow(owner, "/FXML/create_note.fxml", Localization.get("create.window_title"), true, true, null);
+        NavigationUtil.openWindow(owner, "/FXML/create_note.fxml", "create.window_title", true, true, null);
     }
 
     @FXML
@@ -532,7 +523,7 @@ public class ViewDashboardController {
         if (selectedNote == null) return;
 
         Stage stage = (Stage) rootPane.getScene().getWindow();
-        NavigationUtil.openWindow(stage, "/FXML/edit.fxml",Localization.get("edit.window.title"), true, true,
+        NavigationUtil.openWindow(stage, "/FXML/edit.fxml", "edit.window.title", true, true,
                 (EditNoteController controller) -> {
                     controller.setNoteDao(new JpaNoteDao());
                     controller.setTagDao(new JpaTagDao());
@@ -556,16 +547,16 @@ public class ViewDashboardController {
     @FXML
     public void handleManageAccount() {
         Stage stage = (Stage) rootPane.getScene().getWindow();
-        NavigationUtil.openWindow(stage, "/FXML/user_dashboard.fxml", Localization.get("account.window_title"), false, true, null);
+        NavigationUtil.openWindow(stage, "/FXML/user_dashboard.fxml", "account.window_title", false, true, null);
     }
 
     @FXML
     public void handleDeleteAccount() {
         Stage stage = (Stage) rootPane.getScene().getWindow();
-        NavigationUtil.openWindow(stage, "/FXML/delete_user.fxml", Localization.get("account.delete_window_title"), false, true, null);
+        NavigationUtil.openWindow(stage, "/FXML/delete_user.fxml", "account.delete_window_title", false, true, null);
 
         if (UserSession.getUserInstance().getUser() == null) {
-            NavigationUtil.replaceScene(stage, "/FXML/entry.fxml",Localization.get("entry.window_title"), false);
+            NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "entry.window_title", false);
         }
     }
 
@@ -672,7 +663,7 @@ public class ViewDashboardController {
     @FXML
     private void handleOpenFAQ() {
         Stage stage = (Stage) rootPane.getScene().getWindow();
-        NavigationUtil.<FAQController>openWindow(stage, "/FXML/faq_view.fxml",Localization.get("faq.window_title"), true, true, controller -> controller.initFaq(false));
+        NavigationUtil.<FAQController>openWindow(stage, "/FXML/faq_view.fxml", "faq.window_title", true, true, controller -> controller.initFaq(false));
     }
 
     @FXML
