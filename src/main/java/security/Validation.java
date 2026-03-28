@@ -141,4 +141,42 @@ public class Validation {
     public static boolean validatePasswordMatch(String password, String confirmPassword) {
         return password.equals(confirmPassword);
     }
+
+    public static ValidationResult validateUpdate(String lastName, String username, String password, String confirmPassword) {
+
+        Map<String, List<ValidationError>> errors = new HashMap<>();
+
+        lastName = lastName == null ? "" : lastName.trim();
+        username = username == null ? "" : username.trim();
+        password = password == null ? "" : password;
+        confirmPassword = confirmPassword == null ? "" : confirmPassword;
+
+        // Required fields
+        if (lastName.isBlank() || username.isBlank()) {
+            addError(errors, "lastName", "signup.all_fields");
+            addError(errors, "username", "signup.all_fields");
+        }
+
+        // Last name validation
+        validateName(lastName, "lastName", errors, "Last name");
+
+        // Username validation
+        if (!validateUsername(username)) {
+            addError(errors, "username", "signup.username_chars");
+        }
+
+        // Password OPTIONAL
+        if (!password.isBlank()) {
+
+            // Match
+            if (!password.equals(confirmPassword)) {
+                addError(errors, "confirmPassword", "signup.password_mismatch");
+            }
+
+            // Strength
+            validatePassword(password, errors, "password");
+        }
+
+        return new ValidationResult(errors.isEmpty(), errors);
+    }
 }
