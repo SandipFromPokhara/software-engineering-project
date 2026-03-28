@@ -46,5 +46,11 @@ build/
 *.env
 .env.local
 
+<<<<<<< Updated upstream
 ### Personal notes ###
 MyNotes.md
+=======
+Documents/SQL_helpers/
+
+dependency-reduced-pom.xml
+>>>>>>> Stashed changes
