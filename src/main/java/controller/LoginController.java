@@ -24,7 +24,7 @@ public class LoginController {
     private PasswordHasher passwordHasher;
 
     @FXML
-    private Label loginWelcome, loginNote, statusLabel, loginNoAccount;
+    private Label loginWelcome, loginNote, statusLabel, loginNoAccount, privacyLabel;
 
     @FXML
     private TextField usernameField;
@@ -56,20 +56,19 @@ public class LoginController {
         loginNoAccount.textProperty().bind(Localization.bind("login.noAccount_label"));
         signupLink.textProperty().bind(Localization.bind("login.signup"));
         backButton.textProperty().bind(Localization.bind("login.back"));
+        privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));
 
         usernameField.textProperty().addListener((o, oldV, newV) -> checkFields());
         passwordField.textProperty().addListener((o, oldV, newV) -> checkFields());
 
         usernameField.setOnAction(this::handleLogin);
         passwordField.setOnAction(this::handleLogin);
-
-        WindowUtil.bindStageTitle(loginButton, "login.window_title");
     }
 
     @FXML
     private void handleBack() {
         Stage stage = (Stage) backButton.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", Localization.get("entry.window_title"), false);
+        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "entry.window_title", false);
     }
 
     private String getUsername() {
@@ -105,7 +104,7 @@ public class LoginController {
             if (authenticatedUser != null) {
                 UserSession.getUserInstance().setUser(authenticatedUser);
                 Stage stage = (Stage) loginButton.getScene().getWindow();
-                NavigationUtil.replaceScene(stage, "/FXML/view_dashboard.fxml", Localization.get("dashboard.window_title"), true);
+                NavigationUtil.replaceScene(stage, "/FXML/view_dashboard.fxml", "dashboard.window_title", true);
             } else {
                 loginButton.setDisable(false);
                 statusLabel.setTextFill(Color.RED);
@@ -119,6 +118,6 @@ public class LoginController {
     @FXML
     private void handleSignUp() {
         Stage stage = (Stage) signupLink.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml", Localization.get("register.window_title"), false);
+        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml", "register.window_title", false);
     }
 }
