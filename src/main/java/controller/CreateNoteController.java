@@ -145,8 +145,6 @@ public class CreateNoteController implements Initializable {
         tagComboBox.promptTextProperty().bind(Localization.bind("create.placeholder_tags"));
         addTagBtn.textProperty().bind(Localization.bind("create.add_tags"));
 
-        // notebookComboBox.promptTextProperty().bind(Localization.bind("notebook.create"));
-
         // Tooltip delay
         tagTooltip.setShowDelay(Duration.millis(100));
         toggleTooltip.setShowDelay(Duration.millis(100));
