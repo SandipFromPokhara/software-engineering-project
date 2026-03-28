@@ -9,6 +9,8 @@ import java.util.List;
 
 public class JpaUserDao implements UserDAO{
 
+    public JpaUserDao() {}
+
     @Override
     public UserEntity save(UserEntity user) {
         if (user == null) throw new IllegalArgumentException("User cannot be null");

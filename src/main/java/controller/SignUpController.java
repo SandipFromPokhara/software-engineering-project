@@ -3,15 +3,36 @@ package controller;
 import dao.user.UserDAO;
 import dao.user.JpaUserDao;
 import entity.UserEntity;
-import javafx.event.ActionEvent;
+import javafx.animation.PauseTransition;
 import javafx.stage.Stage;
-import util.BcryptPasswordHasher;
+import javafx.util.Duration;
+import security.BcryptPasswordHasher;
+import security.MessageType;
+import security.PasswordHasher;
+import util.Localization;
 import util.NavigationUtil;
-import util.Validation;
+import security.Validation;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import util.ShowMessageUtil;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SignUpController {
+
+    private static final Logger logger = Logger.getLogger(SignUpController.class.getName());
+    private PasswordHasher passwordHasher;
+    private boolean skipValidation = false;
+    private UserDAO userDAO;
+    private PauseTransition strengthHideDelay;
+
+    private boolean firstNameTouched = false;
+    private boolean lastNameTouched = false;
+    private boolean usernameTouched = false;
+    private boolean emailTouched = false;
+    private boolean passwordTouched = false;
+    private boolean confirmPasswordTouched = false;
 
     @FXML private TextField firstNameField;
     @FXML private TextField lastNameField;
@@ -22,98 +43,265 @@ public class SignUpController {
     @FXML private Button signUpButton;
     @FXML private Hyperlink loginLink;
     @FXML private Label messageLabel;
-
-    private UserDAO userDAO;
-
-    public SignUpController() {
-        this.userDAO = new JpaUserDao();
-    }
+    @FXML private Button backButton;
+    @FXML private Label createAccount;
+    @FXML private Label joinAccount;
+    @FXML private Label haveAccount;
+    @FXML private Label passwordStrengthLabel;
+    @FXML private ProgressBar passwordStrengthBar;
 
     @FXML
     public void initialize() {
+        userDAO = new JpaUserDao();
+        passwordHasher = new BcryptPasswordHasher();
+
+        // LOCALIZATION
+        createAccount.textProperty().bind(Localization.bind("signup.createAccount"));
+        joinAccount.textProperty().bind(Localization.bind("signup.joinAccount"));
+
+        firstNameField.promptTextProperty().bind(Localization.bind("signup.placeholder_firstname"));
+        lastNameField.promptTextProperty().bind(Localization.bind("signup.placeholder_lastname"));
+        usernameField.promptTextProperty().bind(Localization.bind("signup.placeholder_username"));
+        emailField.promptTextProperty().bind(Localization.bind("signup.placeholder_email"));
+        passwordField.promptTextProperty().bind(Localization.bind("signup.placeholder_password"));
+        confirmPasswordField.promptTextProperty().bind(Localization.bind("signup.placeholder_confirm_password"));
+
+        signUpButton.textProperty().bind(Localization.bind("signup.button"));
+        haveAccount.textProperty().bind(Localization.bind("signup.haveAccount"));
+        loginLink.textProperty().bind(Localization.bind("signup.login"));
+        backButton.textProperty().bind(Localization.bind("signup.back"));
+
+        firstNameField.focusedProperty().addListener((obs, oldV, newV) -> {
+            if (!newV) firstNameTouched = true;
+        });
+
+        lastNameField.focusedProperty().addListener((obs, oldV, newV) -> {
+            if (!newV) lastNameTouched = true;
+        });
+
+        usernameField.focusedProperty().addListener((obs, oldV, newV) -> {
+            if (!newV) usernameTouched = true;
+        });
+
+        emailField.focusedProperty().addListener((obs, oldV, newV) -> {
+            if (!newV) emailTouched = true;
+        });
+
+        passwordField.focusedProperty().addListener((obs, oldV, newV) -> {
+            if (!newV) passwordTouched = true;
+        });
+
+        confirmPasswordField.focusedProperty().addListener((obs, oldV, newV) -> {
+            if (!newV) confirmPasswordTouched = true;
+        });
+
+        passwordStrengthBar.setVisible(false);
+        passwordStrengthBar.setManaged(false);
+        passwordStrengthBar.setMinHeight(12);
+        passwordStrengthBar.setPrefHeight(12);
+
+        passwordStrengthLabel.setVisible(false);
+        passwordStrengthLabel.setManaged(false);
+
+        setupRealtimeValidation();
+
         signUpButton.setOnAction(event -> handleSignUp());
-        signUpButton.setDefaultButton(true);
+        signUpButton.setDisable(true);
     }
 
-    @FXML
-    public void onLogin(ActionEvent event) {
-        navigateToLogin(event);
+    // Real-Time validation
+    private void setupRealtimeValidation() {
+
+        Runnable validator = () -> {
+            if (skipValidation) return;
+
+            Validation.ValidationResult result = Validation.validateSignup(
+                    safe(firstNameField),
+                    safe(lastNameField),
+                    safe(usernameField),
+                    safe(emailField),
+                    passwordField.getText(),
+                    confirmPasswordField.getText()
+            );
+
+            showValidationErrors(result);
+            updateSignUpButtonState(result);
+        };
+
+        firstNameField.textProperty().addListener((obs, o, n) -> validator.run());
+        lastNameField.textProperty().addListener((obs, o, n) -> validator.run());
+        usernameField.textProperty().addListener((obs, o, n) -> validator.run());
+        emailField.textProperty().addListener((obs, o, n) -> validator.run());
+        passwordField.textProperty().addListener((obs, o, n) -> {
+            updatePasswordStrength(n);
+            validator.run();
+        });
+        confirmPasswordField.textProperty().addListener((obs, o, n) -> validator.run());
+    }
+
+    private String safe(TextField field) {
+        return field.getText() == null ? "" : field.getText().trim();
     }
 
     private void handleSignUp() {
-        // Hide any previous messages
-        Validation.hideMessage(messageLabel);
 
-        // Get input values
         String firstName = firstNameField.getText().trim();
         String lastName = lastNameField.getText().trim();
         String username = usernameField.getText().trim();
         String email = emailField.getText().trim();
         String password = passwordField.getText();
-        String confirmPassword = confirmPasswordField.getText();
 
-        // Validate all fields
-        if (!Validation.validateSignupFields(firstName, lastName, username, email, password, confirmPassword, messageLabel)) {
+        // Final validation
+        Validation.ValidationResult result = Validation.validateSignup(
+                safe(firstNameField),
+                safe(lastNameField),
+                safe(usernameField),
+                safe(emailField),
+                passwordField.getText(),
+                confirmPasswordField.getText()
+        );
+
+        showValidationErrors(result);
+
+        if (!result.success()) {
             return;
         }
 
         try {
-            // Check if username already exists
             UserEntity existingUserByUsername = userDAO.findByUsername(username);
             if (existingUserByUsername != null) {
-                Validation.showMessage(messageLabel, "The username is already taken.", Validation.MessageType.ERROR);
+                ShowMessageUtil.showMessageKey(messageLabel, "signup.username_taken", MessageType.ERROR);
                 return;
             }
 
-            // Check if email already exists
             UserEntity existingUserByEmail = userDAO.findByEmail(email);
             if (existingUserByEmail != null) {
-                Validation.showMessage(messageLabel, "The email already exists.", Validation.MessageType.ERROR);
+                ShowMessageUtil.showMessageKey(messageLabel, "signup.email_exists", MessageType.ERROR);
                 return;
             }
 
-            // Hash the password using BCrypt
-            String hashedPassword = BcryptPasswordHasher.hashPassword(password);
+            String hashedPassword = passwordHasher.hash(password);
 
-            // Create new user entity
             UserEntity newUser = new UserEntity(firstName, lastName, username, email);
             newUser.changePasswordHash(hashedPassword);
 
-            // Save user to database
             UserEntity savedUser = userDAO.save(newUser);
 
             if (savedUser != null && savedUser.getId() != null) {
-                Validation.showMessage(messageLabel, "Account created successfully!", Validation.MessageType.SUCCESS);
+                ShowMessageUtil.showMessageKey(messageLabel, "signup.success", MessageType.SUCCESS);
+                skipValidation = true;
                 clearFields();
 
-                // Get stage before entering the thread
                 Stage currentStage = (Stage) signUpButton.getScene().getWindow();
 
-                // Add a small delay before navigating to show success message
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(1500); // 1.5-second delay
-                        javafx.application.Platform.runLater(() -> NavigationUtil.navigateTo(currentStage, "/FXML/login_view.fxml", "Login", false));
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }).start();
+                PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
+                delay.setOnFinished(event -> {
+                        skipValidation = false;
+                        NavigationUtil.replaceScene(currentStage, "/FXML/login_view.fxml", Localization.get("dashboard.window_title"), false);
+                });
+                delay.play();
             } else {
-                Validation.showMessage(messageLabel, "Failed to create account!", Validation.MessageType.ERROR);
+                ShowMessageUtil.showMessageKey(messageLabel, "signup.failed", MessageType.ERROR);
             }
-        } catch (IllegalArgumentException e) {
-            Validation.showMessage(messageLabel, "Validation error: " + e.getMessage(), Validation.MessageType.ERROR);
-        } catch (RuntimeException e) {
-            Validation.showMessage(messageLabel, "Database error occurred. Please try again.", Validation.MessageType.ERROR);
-            e.printStackTrace();
+
         } catch (Exception e) {
-            Validation.showMessage(messageLabel, "An unexpected error occurred. Please try again.", Validation.MessageType.ERROR);
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Signup error", e);
+            ShowMessageUtil.showMessageKey(messageLabel, "signup.unexpected_error", MessageType.ERROR);
         }
     }
 
-    private void navigateToLogin(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/login_view.fxml", "Login", false);
+    private void updateSignUpButtonState(Validation.ValidationResult result) {
+        signUpButton.setDisable(!result.success());
+    }
+
+    private void showValidationErrors(Validation.ValidationResult result) {
+        ShowMessageUtil.hideMessage(messageLabel);
+
+        resetStyles();
+
+        for (var entry : result.errors().entrySet()) {
+            String field = entry.getKey();
+
+            if (!entry.getValue().isEmpty()) {
+
+                switch (field) {
+                    case "firstName" -> { if (firstNameTouched) firstNameField.setStyle("-fx-border-color: #e74c3c;"); }
+                    case "lastName" -> { if (lastNameTouched) lastNameField.setStyle("-fx-border-color: #e74c3c;"); }
+                    case "username" -> { if (usernameTouched) usernameField.setStyle("-fx-border-color: #e74c3c;"); }
+                    case "email" -> { if (emailTouched) emailField.setStyle("-fx-border-color: #e74c3c;");  }
+                    case "password" -> { if (passwordTouched) passwordField.setStyle("-fx-border-color: #e74c3c;"); }
+                    case "confirmPassword" -> { if (confirmPasswordTouched) confirmPasswordField.setStyle("-fx-border-color: #e74c3c;"); }
+                }
+
+                var firstError = entry.getValue().get(0);
+                String message = Localization.get(firstError.key(), firstError.args().toArray());
+
+                ShowMessageUtil.showMessage(messageLabel, message, MessageType.ERROR);
+                return;
+            }
+        }
+    }
+
+    private void resetStyles() {
+        firstNameField.setStyle("");
+        lastNameField.setStyle("");
+        usernameField.setStyle("");
+        emailField.setStyle("");
+        passwordField.setStyle("");
+        confirmPasswordField.setStyle("");
+    }
+
+    private void updatePasswordStrength(String password) {
+        if (strengthHideDelay != null) {
+            strengthHideDelay.stop();
+        }
+
+        if (password == null || password.isEmpty()) {
+            passwordStrengthBar.setVisible(false);
+            passwordStrengthBar.setManaged(false);
+
+            passwordStrengthLabel.setVisible(false);
+            passwordStrengthLabel.setManaged(false);
+
+            passwordStrengthBar.setProgress(0);
+            passwordStrengthLabel.setText("");
+            return;
+        }
+
+        passwordStrengthBar.setVisible(true);
+        passwordStrengthBar.setManaged(true);
+
+        passwordStrengthLabel.setVisible(true);
+        passwordStrengthLabel.setManaged(true);
+
+        int score = 0;
+
+        if (password.length() >= 6) score++;
+        if (password.matches(".*[A-Z].*")) score++;
+        if (password.matches(".*[a-z].*")) score++;
+        if (password.matches(".*\\d.*")) score++;
+        if (password.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*")) score++;
+
+        double progress = score / 5.0;
+        passwordStrengthBar.setProgress(progress);
+
+        if (progress < 0.4) {
+            passwordStrengthLabel.setText("Weak");
+        } else if (progress < 0.7) {
+            passwordStrengthLabel.setText("Medium");
+        } else {
+            passwordStrengthLabel.setText("Strong");
+
+            strengthHideDelay = new PauseTransition(Duration.seconds(2.5));
+            strengthHideDelay.setOnFinished(e -> {
+                passwordStrengthBar.setVisible(false);
+                passwordStrengthBar.setManaged(false);
+
+                passwordStrengthLabel.setVisible(false);
+                passwordStrengthLabel.setManaged(false);
+            });
+            strengthHideDelay.play();
+        }
     }
 
     private void clearFields() {
@@ -123,9 +311,37 @@ public class SignUpController {
         emailField.clear();
         passwordField.clear();
         confirmPasswordField.clear();
+
+        firstNameTouched = false;
+        lastNameTouched = false;
+        usernameTouched = false;
+        emailTouched = false;
+        passwordTouched = false;
+        confirmPasswordTouched = false;
+    }
+
+    private void navigateToLogin() {
+        Stage stage = (Stage) loginLink.getScene().getWindow();
+        NavigationUtil.replaceScene(stage, "/FXML/login_view.fxml", Localization.get("login.window_title"), false);
+    }
+
+    @FXML
+    public void onLogin() {
+        ShowMessageUtil.hideMessage(messageLabel);
+        navigateToLogin();
+    }
+
+    @FXML
+    private void handleBack() {
+        Stage stage = (Stage) backButton.getScene().getWindow();
+        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", Localization.get("entry.window_title"), false);
     }
 
     public void setUserDAO(UserDAO userDAO) {
         this.userDAO = userDAO;
+    }
+
+    public void setPasswordHasher(PasswordHasher hasher) {
+        this.passwordHasher = hasher;
     }
 }

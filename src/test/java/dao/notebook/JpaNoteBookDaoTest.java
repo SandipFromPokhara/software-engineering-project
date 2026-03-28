@@ -6,12 +6,13 @@ import entity.NoteBookEntity;
 import entity.UserEntity;
 import org.junit.jupiter.api.*;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class JpaNoteBookDaoTest {
 
     private static  JpaNoteBookDao notebookDao;
-    private static NoteBookEntity notebook;
 
     private static JpaUserDao dao;
     private static UserEntity testUser;
@@ -34,7 +35,7 @@ class JpaNoteBookDaoTest {
     }
 
     @Test
-    void saveNotebookTest() {
+    void testSaveNotebook() {
         NoteBookEntity notebook = new NoteBookEntity("JUnit 5 test", testUser);
         notebookDao.save(notebook);
 
@@ -42,21 +43,66 @@ class JpaNoteBookDaoTest {
 
         assertNotNull(retrievedNotebook);
         assertEquals("JUnit 5 test", retrievedNotebook.getTitle());
+
+        notebookDao.delete(notebook);
     }
 
     @Test
-    void findNotebookByTitleTest() {
+    void testFindNotebookByTitle() {
         NoteBookEntity notebook = new NoteBookEntity("Find By Title", testUser);
         notebookDao.save(notebook);
 
-        NoteBookEntity retrievedNotebook = notebookDao.findById(notebook.getId());
+        List<NoteBookEntity> retrievedList = notebookDao.findByTitle("Find By Title");
 
-        assertNotNull(retrievedNotebook);
-        assertEquals("Find By Title", retrievedNotebook.getTitle());
+        assertNotNull(retrievedList);
+        assertFalse(retrievedList.isEmpty());
+        boolean found = false;
+        for (NoteBookEntity n : retrievedList) {
+            if (n.getTitle().equals("Find By Title")) {
+                found = true;
+                break;
+            }
+        }
+        assertTrue(found);
+
+        notebookDao.delete(notebook);
     }
 
     @Test
-    void updateNotebookTest() {
+    void testFindByTitleWithNull() {
+        assertThrows(IllegalArgumentException.class, () -> notebookDao.findByTitle(null));
+    }
+
+    @Test
+    void testFindByUser() {
+        NoteBookEntity notebook = new NoteBookEntity("User's Notebook", testUser);
+        notebookDao.save(notebook);
+
+        List<NoteBookEntity> retrievedList = notebookDao.findByUser(testUser);
+        assertFalse(retrievedList.isEmpty());
+
+        boolean found = false;
+        for (NoteBookEntity n : retrievedList) {
+            if (n.getTitle().equals("User's Notebook")) {
+                found = true;
+                break;
+            }
+        }
+        assertTrue(found);
+
+        notebookDao.delete(notebook);
+    }
+
+    @Test
+    void testFindByUserWithNull() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            notebookDao.findByUser(null);
+        });
+    }
+
+
+    @Test
+    void testUpdateNotebook() {
         NoteBookEntity notebook = new NoteBookEntity("Test update method", testUser);
         notebookDao.save(notebook);
 
@@ -69,7 +115,12 @@ class JpaNoteBookDaoTest {
     }
 
     @Test
-    void deleteNotebookTest() {
+    void testUpdateNull() {
+        assertThrows(IllegalArgumentException.class, () -> notebookDao.update(null));
+    }
+
+    @Test
+    void testDeleteNotebook() {
         NoteBookEntity notebook = new NoteBookEntity("Testing delete method", testUser);
         notebookDao.save(notebook);
 
@@ -81,5 +132,10 @@ class JpaNoteBookDaoTest {
         NoteBookEntity deletedNotebook = notebookDao.findById(notebook.getId());
 
         assertNull(deletedNotebook);
+    }
+
+    @Test
+    void testDeleteNull() {
+        assertThrows(IllegalArgumentException.class, () -> notebookDao.delete(null));
     }
 }

@@ -9,8 +9,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import util.Localization;
 import util.NavigationUtil;
-import javafx.event.ActionEvent;
+
+import java.util.logging.Level;
+
+import static controller.ViewDashboardController.logger;
 
 
 public class GuestDashboardController {
@@ -37,15 +42,12 @@ public class GuestDashboardController {
     private Label content;
 
     @FXML
-    private VBox centerPane;
+    VBox centerPane;
 
     @FXML
-    private void handleHome(ActionEvent event) {
-        NavigationUtil.navigateTo(
-                event,
-                "/FXML/entry.fxml",
-                "Entry Page",
-                false
+    private void handleHome() {
+        Stage stage = (Stage) home.getScene().getWindow();
+        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", Localization.get("entry.window_title"), false
         );
     }
 
@@ -64,39 +66,40 @@ public class GuestDashboardController {
 
             centerPane.getChildren().setAll(wrapper);
 
+        //logger
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, Localization.get("error.fxml_load") + fxmlFile, e);
         }
     }
 
-
-
-
     @FXML
-    private void handleNewFiles() {
+    void handleNewFiles() {
         loadContent("createFilesGuest.fxml");
     }
 
     @FXML
-    private void handleLogin(ActionEvent event) {
-        NavigationUtil.navigateTo(
-                event,
+    private void handleLogin() {
+        Stage stage = (Stage) login.getScene().getWindow();
+        NavigationUtil.replaceScene(
+                stage,
                 "/FXML/login_view.fxml",
-                "login",
+                Localization.get("login.window_title"),
                 false
         );
+    }
 
+    @FXML
+    private void handleSignUp() {
+        Stage stage = (Stage) register.getScene().getWindow();
+        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml",Localization.get("register.window_title"), false
+        );
 
     }
 
     @FXML
-    private void handleSignUp(ActionEvent event) {
-        NavigationUtil.navigateTo(
-                event,
-                "/FXML/signup.fxml",
-                "Sign Up",
-                false
-        );
+    public void initialize() {
+        login.textProperty().bind(Localization.bind("guest.login"));
+        register.textProperty().bind(Localization.bind("guest.register"));
 
     }
 }

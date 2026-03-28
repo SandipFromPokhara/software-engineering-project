@@ -1,0 +1,238 @@
+
+/* Editor Container */
+.editor-container {
+    -fx-border-color: #d0d0d0;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
+}
+
+/* Toolbar Styling */
+.editor-toolbar {
+    -fx-background-color: linear-gradient(to bottom, #f8f8f8 0%, #ececec 100%);
+    -fx-border-color: #d0d0d0;
+    -fx-border-width: 0 0 1 0;
+    -fx-background-radius: 4 4 0 0;
+    -fx-padding: 3 6 3 6;
+}
+
+/* Toolbar Buttons - Base Style */
+.toolbar-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-cursor: hand;
+    -fx-padding: 5 8 5 8;
+    -fx-min-width: 32px;
+    -fx-min-height: 28px;
+    -fx-max-height: 28px;
+    -fx-text-fill: #333333;
+    -fx-font-size: 14px;
+}
+
+/* Italic Button - Actual Italic Style */
+.italic-btn {
+    -fx-font-style: italic;
+}
+
+/* Underline Button - Show underline */
+.underline-btn {
+    -fx-underline: true;
+}
+
+/* Color Button - Special styling with color indicator */
+.color-btn {
+    -fx-border-width: 0 0 3 0;
+    -fx-border-color: transparent transparent #000000 transparent;
+}
+
+.color-btn:hover {
+    -fx-border-color: transparent transparent #ff0000 transparent;
+}
+
+/* Alignment Buttons - Visual positioning */
+.align-left {
+    -fx-padding: 5 10 5 6;
+}
+
+.align-center {
+    -fx-padding: 5 8 5 8;
+}
+
+.align-right {
+    -fx-padding: 5 6 5 10;
+}
+
+/* Toolbar Button Hover Effect */
+.toolbar-btn:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.06);
+    -fx-border-color: #c0c0c0;
+}
+
+/* Toolbar Button Pressed Effect */
+.toolbar-btn:pressed {
+    -fx-background-color: rgba(0, 0, 0, 0.12);
+    -fx-border-color: #a0a0a0;
+}
+
+/* Toolbar Button Active/Selected State */
+.toolbar-btn.active {
+    -fx-background-color: rgba(66, 133, 244, 0.15);
+    -fx-border-color: #4285f4;
+}
+
+/* Toolbar Separator */
+.toolbar-separator {
+    -fx-background-color: transparent;
+}
+
+.toolbar-separator .line {
+    -fx-border-color: #d0d0d0;
+    -fx-border-width: 0 0 0 1;
+    -fx-padding: 0 3 0 3;
+}
+
+/* Text Area Styling */
+.editor-textarea {
+    -fx-background-radius: 0 0 4 4;
+    -fx-border-color: transparent;
+    -fx-border-radius: 0 0 4 4;
+    -fx-background-insets: 0;
+    -fx-padding: 10;
+}
+
+.editor-textarea .content {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 0 0 4 4;
+}
+
+.editor-textarea:focused .content {
+    -fx-background-color: #ffffff;
+}
+
+/* Remove default focus border */
+.editor-textarea:focused {
+    -fx-background-color: #ffffff;
+    -fx-border-color: transparent;
+}
+
+/* Dark Mode */
+
+/* Editor Container */
+.editor-container {
+    -fx-border-color: #d0d0d0;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
+}
+
+/* Toolbar Styling */
+.editor-toolbar {
+    -fx-background-color: linear-gradient(to bottom, #f8f8f8 0%, #ececec 100%);
+    -fx-border-color: #d0d0d0;
+    -fx-border-width: 0 0 1 0;
+    -fx-background-radius: 4 4 0 0;
+    -fx-padding: 3 6 3 6;
+}
+
+/* Toolbar Buttons - Base Style */
+.toolbar-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-cursor: hand;
+    -fx-padding: 5 8 5 8;
+    -fx-min-width: 32px;
+    -fx-min-height: 28px;
+    -fx-max-height: 28px;
+    -fx-text-fill: #333333;
+    -fx-font-size: 14px;
+}
+
+/* Italic Button - Actual Italic Style */
+.italic-btn {
+    -fx-font-style: italic;
+}
+
+/* Underline Button - Show underline */
+.underline-btn {
+    -fx-underline: true;
+}
+
+/* Color Button - Special styling with color indicator */
+.color-btn {
+    -fx-border-width: 0 0 3 0;
+    -fx-border-color: transparent transparent #000000 transparent;
+}
+
+.color-btn:hover {
+    -fx-border-color: transparent transparent #ff0000 transparent;
+}
+
+/* Alignment Buttons - Visual positioning */
+.align-left {
+    -fx-padding: 5 10 5 6;
+}
+
+.align-center {
+    -fx-padding: 5 8 5 8;
+}
+
+.align-right {
+    -fx-padding: 5 6 5 10;
+}
+
+/* Toolbar Button Hover Effect */
+.toolbar-btn:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.06);
+    -fx-border-color: #c0c0c0;
+}
+
+/* Toolbar Button Pressed Effect */
+.toolbar-btn:pressed {
+    -fx-background-color: rgba(0, 0, 0, 0.12);
+    -fx-border-color: #a0a0a0;
+}
+
+/* Toolbar Button Active/Selected State */
+.toolbar-btn.active {
+    -fx-background-color: rgba(66, 133, 244, 0.15);
+    -fx-border-color: #4285f4;
+}
+
+/* Toolbar Separator */
+.toolbar-separator {
+    -fx-background-color: transparent;
+}
+
+.toolbar-separator .line {
+    -fx-border-color: #d0d0d0;
+    -fx-border-width: 0 0 0 1;
+    -fx-padding: 0 3 0 3;
+}
+
+/* Text Area Styling */
+.editor-textarea {
+    -fx-background-radius: 0 0 4 4;
+    -fx-border-color: transparent;
+    -fx-border-radius: 0 0 4 4;
+    -fx-background-insets: 0;
+    -fx-padding: 10;
+}
+
+.editor-textarea .content {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 0 0 4 4;
+}
+
+.editor-textarea:focused .content {
+    -fx-background-color: #ffffff;
+}
+
+/* Remove default focus border */
+.editor-textarea:focused {
+    -fx-background-color: #ffffff;
+    -fx-border-color: transparent;
+}

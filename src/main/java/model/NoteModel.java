@@ -1,12 +1,16 @@
 package model;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class NoteModel {
     private int id;
     private String title;
     private String content;
     private String annotation;
+    private Set<TagModel> tags;
     private NoteBookModel notebook;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -18,20 +22,47 @@ public class NoteModel {
         this.annotation = annotation;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        this.tags = new HashSet<>();
     }
 
-    public int getId() { return id; }
+    public int getId() {
+        return id;
+    }
 
-    public String getTitle() { return title; }
+    public String getTitle() {
+        return title;
+    }
 
     public void setTitle(String title) {
         this.title = title;
         this.updatedAt = LocalDateTime.now();
     }
 
-    public String getContent() { return content; }
+    public String getContent() {
+        return content;
+    }
 
-    public void setContent(String content) { this.content = content; }
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getAnnotation() { return annotation; }
+
+    public void setAnnotation(String annotation) { this.annotation = annotation; }
+
+    public void addTag(TagModel tag) {
+        if (tag != null) {
+            tags.add(tag);
+        }
+    }
+
+    public void removeTag(TagModel tag) {
+        tags.remove(tag);
+    }
+
+    public Set<TagModel> getTags() {
+        return Collections.unmodifiableSet(tags);
+    }
 
     /**
      * Updates new content and syncs last created or modified timestamp.
@@ -43,11 +74,19 @@ public class NoteModel {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public NoteBookModel getNotebook() { return notebook; }
+    public NoteBookModel getNotebook() {
+        return notebook;
+    }
 
-    public void setNotebook(NoteBookModel notebook) { this.notebook = notebook; }
+    public void setNotebook(NoteBookModel notebook) {
+        this.notebook = notebook;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt(){ return updatedAt ;}
 
     @Override
     public String toString() {

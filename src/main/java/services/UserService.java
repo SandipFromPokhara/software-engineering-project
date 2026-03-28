@@ -2,13 +2,15 @@ package services;
 
 import dao.user.JpaUserDao;
 import entity.UserEntity;
-import util.BcryptPasswordHasher;
+import security.PasswordHasher;
 
 public class UserService {
-    private JpaUserDao userDao;
+    private final JpaUserDao userDao;
+    private final PasswordHasher passwordHasher;
 
-    public UserService(JpaUserDao userDao) {
+    public UserService(JpaUserDao userDao, PasswordHasher passwordHasher) {
         this.userDao = userDao;
+        this.passwordHasher = passwordHasher;
     }
 
     public UserEntity login(String username, String password) {
@@ -19,7 +21,7 @@ public class UserService {
         if (user == null) return null;
 
         String hashedPassword = user.getPasswordHash();
-        if (BcryptPasswordHasher.verifyPassword(password, hashedPassword)) {
+        if (passwordHasher.verify(password, hashedPassword)) {
             return user;
         } else {
             return null;

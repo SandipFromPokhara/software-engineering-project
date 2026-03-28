@@ -8,14 +8,23 @@ import javafx.concurrent.Task;
 
 import entity.UserEntity;
 import dao.user.JpaUserDao;
+import javafx.stage.Stage;
+import security.BcryptPasswordHasher;
+import security.PasswordHasher;
 import services.UserService;
+import util.Localization;
 import util.NavigationUtil;
-import util.UserSession;
+import session.UserSession;
+import util.WindowUtil;
 
 public class LoginController {
 
     private UserService userService;
-    private JpaUserDao userDao = new JpaUserDao();
+    private JpaUserDao userDao;
+    private PasswordHasher passwordHasher;
+
+    @FXML
+    private Label loginWelcome, loginNote, statusLabel, loginNoAccount;
 
     @FXML
     private TextField usernameField;
@@ -24,21 +33,45 @@ public class LoginController {
     private PasswordField passwordField;
 
     @FXML
-    private Button loginButton;
-
-    @FXML
-    private Label statusLabel;
-
-    @FXML
-    private Button backButton;
-
-    @FXML
-    private void handleBack(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/entry.fxml", "Welcome to NoteVault", false);
-    }
+    private Button loginButton, backButton;
 
     @FXML
     private Hyperlink signupLink;
+
+
+    @FXML
+    private void initialize() {
+        userDao = new JpaUserDao();
+        passwordHasher = new BcryptPasswordHasher();
+        userService = new UserService(userDao, passwordHasher);
+
+        loginButton.setDisable(true);
+        statusLabel.setVisible(false);
+
+        // LOCALIZATION BINDINGS
+        loginWelcome.textProperty().bind(Localization.bind("login.welcome_label"));
+        loginNote.textProperty().bind(Localization.bind("login.note_label"));
+        usernameField.promptTextProperty().bind(Localization.bind("login.placeholder_name"));
+        passwordField.promptTextProperty().bind(Localization.bind("login.placeholder_password"));
+        loginButton.textProperty().bind(Localization.bind("login.button"));
+        loginNoAccount.textProperty().bind(Localization.bind("login.noAccount_label"));
+        signupLink.textProperty().bind(Localization.bind("login.signup"));
+        backButton.textProperty().bind(Localization.bind("login.back"));
+
+        usernameField.textProperty().addListener((o, oldV, newV) -> checkFields());
+        passwordField.textProperty().addListener((o, oldV, newV) -> checkFields());
+
+        usernameField.setOnAction(this::handleLogin);
+        passwordField.setOnAction(this::handleLogin);
+
+        WindowUtil.bindStageTitle(loginButton, "login.window_title");
+    }
+
+    @FXML
+    private void handleBack() {
+        Stage stage = (Stage) backButton.getScene().getWindow();
+        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", Localization.get("entry.window_title"), false);
+    }
 
     private String getUsername() {
         return usernameField.getText().trim();
@@ -72,11 +105,12 @@ public class LoginController {
             UserEntity authenticatedUser = loginTask.getValue();
             if (authenticatedUser != null) {
                 UserSession.getUserInstance().setUser(authenticatedUser);
-                NavigationUtil.navigateTo(event, "/FXML/view_dashboard.fxml", "User Dashboard", true);
+                Stage stage = (Stage) loginButton.getScene().getWindow();
+                NavigationUtil.replaceScene(stage, "/FXML/view_dashboard.fxml", Localization.get("dashboard.window_title"), true);
             } else {
                 loginButton.setDisable(false);
                 statusLabel.setTextFill(Color.RED);
-                statusLabel.setText("Invalid username or password");
+                statusLabel.setText(Localization.get("login.invalid"));
                 statusLabel.setVisible(true);
             }
         });
@@ -84,18 +118,8 @@ public class LoginController {
     }
 
     @FXML
-    private void initialize() {
-        userService = new UserService(userDao);
-        loginButton.setDisable(true);
-        statusLabel.setVisible(false);
-
-        usernameField.textProperty().addListener((observable, oldValue, newValue) -> checkFields());
-
-        passwordField.textProperty().addListener((observable, oldValue, newValue) -> checkFields());
-    }
-
-    @FXML
-    private void handleSignUp(ActionEvent event) {
-        NavigationUtil.navigateTo(event, "/FXML/signup.fxml", "SignUp window", false);
+    private void handleSignUp() {
+        Stage stage = (Stage) signupLink.getScene().getWindow();
+        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml", Localization.get("register.window_title"), false);
     }
 }
