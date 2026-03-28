@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class EntryController {
+
     static final Logger logger = Logger.getLogger(EntryController.class.getName());
 
     @FXML
@@ -46,27 +47,26 @@ public class EntryController {
     @FXML
     private void onLogin() {
         Stage stage = (Stage) loginButton.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/login_view.fxml",
-                Localization.get("login.window_title"), false);
+        NavigationUtil.replaceScene(stage, "/FXML/login_view.fxml", "login.window_title", false);
     }
 
     @FXML
     private void onRegister() {
         Stage stage = (Stage) registerButton.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml", Localization.get("register.window_title"), false);
+        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml", "register.window_title", false);
     }
 
     @FXML
     private void onContinueAsGuest() {
         Stage stage = (Stage) guestButton.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/guestDashboard.fxml", Localization.get("guest.window_title"), true);
+        NavigationUtil.replaceScene(stage, "/FXML/guestDashboard.fxml", "guest.window_title", true);
     }
 
     @FXML
     private void handleOpenFAQ() {
         NavigationUtil.<FAQController>openWindow(
                 null, "/FXML/faq_view.fxml",
-                Localization.get("faq.window_title"),
+                "faq.window_title",
                 true, true,
                 controller -> controller.initFaq(true));
     }
