@@ -1,6 +1,5 @@
 package controller;
 
-
 import dao.notebook.JpaNoteBookDao;
 import dao.tag.JpaTagDao;
 import entity.NoteBookEntity;
@@ -38,7 +37,6 @@ import java.util.HashSet;
  */
 public class CreateNoteController implements Initializable {
 
-    private static final String CREATE_NEW = "Create New Notebook...";
     private NoteService noteService;
     private Set<String> selectedTags = new HashSet<>();
     private JpaNoteBookDao notebookDao;
@@ -125,12 +123,13 @@ public class CreateNoteController implements Initializable {
         undoMenuItem.textProperty().bind(Localization.bind("edit.undo"));
         redoMenuItem.textProperty().bind(Localization.bind("edit.redo"));
 
+        toggleTooltip.textProperty().bind(Localization.bind("tooltip.theme_toggle"));
+        tagTooltip.textProperty().bind(Localization.bind("tooltip.tags_info"));
         noteTitleLabel.textProperty().bind(Localization.bind("create.title_label"));
         noteContentLabel.textProperty().bind(Localization.bind("create.note_content"));
         selectLabel.textProperty().bind(Localization.bind("notebook.select_label"));
-        notebookComboBox.promptTextProperty().bind(Localization.bind("create.new_notebook_label"));
-        WordCountUtil.bind(contentArea, wordCountLabel);
 
+        WordCountUtil.bind(contentArea, wordCountLabel);
 
         noteAnnotationLabel.textProperty().bind(Localization.bind("create.note_annotations"));
         noteTagLabel.textProperty().bind(Localization.bind("create.tags"));
@@ -145,16 +144,6 @@ public class CreateNoteController implements Initializable {
 
         tagComboBox.promptTextProperty().bind(Localization.bind("create.placeholder_tags"));
         addTagBtn.textProperty().bind(Localization.bind("create.add_tags"));
-
-        notebookComboBox.promptTextProperty().bind(Localization.bind("notebook.create"));
-
-        titleField.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null) {
-                Stage stage = (Stage) newScene.getWindow();
-                stage.titleProperty().bind(Localization.bind("create.title"));
-            }
-        });
-
 
         // Tooltip delay
         tagTooltip.setShowDelay(Duration.millis(100));
@@ -172,7 +161,7 @@ public class CreateNoteController implements Initializable {
 
         notebookComboBox.getItems().setAll(notebooks);
 
-        NoteBookEntity createNewItem = new NoteBookEntity(CREATE_NEW, currentUser);
+        NoteBookEntity createNewItem = new NoteBookEntity(Localization.get("create.new_notebook"), currentUser);
         notebookComboBox.getItems().add(createNewItem);
 
         notebookComboBox.setConverter(new javafx.util.StringConverter<>() {
@@ -268,7 +257,7 @@ public class CreateNoteController implements Initializable {
             }
 
             // Handle "Create New Notebook"
-            if (CREATE_NEW.equals(selectedNotebook.getTitle())) {
+            if (Localization.get("create.new_notebook").equals(selectedNotebook.getTitle())) {
                 String name = promptForNotebookName();
                 if (name == null) {
                     showStatus(Localization.get("create.cancelled"), true);
@@ -410,7 +399,9 @@ public class CreateNoteController implements Initializable {
         dialog.setHeaderText(Localization.get("create.new_notebook"));
         dialog.setContentText(Localization.get("create.placeholder_title"));
 
-        dialog.initOwner(titleField.getScene().getWindow());
+        if (titleField.getScene() != null) {
+            dialog.initOwner(titleField.getScene().getWindow());
+        }
 
         return dialog.showAndWait()
                 .map(String::trim)
@@ -419,14 +410,16 @@ public class CreateNoteController implements Initializable {
     }
 
     private void addNotebookToComboBox(NoteBookEntity newNotebook) {
-        notebookComboBox.getItems().removeIf(nb -> CREATE_NEW.equals(nb.getTitle()));
+        notebookComboBox.getItems().removeIf(nb -> Localization.get("create.new_notebook").equals(nb.getTitle()));
         notebookComboBox.getItems().add(newNotebook);
 
-        notebookComboBox.getItems().sort((n1, n2) ->
-                n1.getCreatedAt().compareTo(n2.getCreatedAt())
-        );
+        notebookComboBox.getItems().sort((n1, n2) -> {
+            if (n1.getCreatedAt() == null) return -1;
+            if (n2.getCreatedAt() == null) return 1;
+            return n1.getCreatedAt().compareTo(n2.getCreatedAt());
+        });
 
-        notebookComboBox.getItems().add(new NoteBookEntity(CREATE_NEW, newNotebook.getUser()));
+        notebookComboBox.getItems().add(new NoteBookEntity(Localization.get("create.new_notebook"), newNotebook.getUser()));
 
         notebookComboBox.getSelectionModel().select(newNotebook);
     }

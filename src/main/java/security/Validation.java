@@ -1,7 +1,8 @@
 package security;
 
-import javafx.scene.control.Label;
-import javafx.scene.paint.Color;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Validation {
 
@@ -9,150 +10,173 @@ public class Validation {
     private Validation() {
     }
 
-    // Validates all signup fields
-    public static boolean validateSignupFields(String firstName, String lastName, String username,
-                                               String email, String password, String confirmPassword, Label messageLabel) {
-        // Validate all required fields are filled
-        if (!validateRequiredFields(firstName, lastName, username, email, password, confirmPassword, messageLabel)) {
-            return false;
+    public record ValidationError(String key, List<Object> args) {}
+
+    public record ValidationResult(boolean success, Map<String, List<ValidationError>> errors) {}
+
+    private static void addError(Map<String, List<ValidationError>> errors,
+                                 String field,
+                                 String key,
+                                 Object... args) {
+
+        errors.computeIfAbsent(field, k -> new java.util.ArrayList<>())
+                .add(new ValidationError(key, List.of(args)));
+    }
+
+    public static ValidationResult validateSignup(String firstName, String lastName,
+                                                  String username, String email,
+                                                  String password, String confirmPassword) {
+
+        Map<String, List<ValidationError>> errors = new HashMap<>();
+
+        firstName = firstName == null ? "" : firstName.trim();
+        lastName = lastName == null ? "" : lastName.trim();
+        username = username == null ? "" : username.trim();
+        email = email == null ? "" : email.trim();
+        password = password == null ? "" : password;
+        confirmPassword = confirmPassword == null ? "" : confirmPassword;
+
+        if (!validateRequiredFields(firstName, lastName, username, email, password, confirmPassword)) {
+            addError(errors, "firstName", "signup.all_fields");
+            addError(errors, "lastName", "signup.all_fields");
+            addError(errors, "username", "signup.all_fields");
+            addError(errors, "email", "signup.all_fields");
+            addError(errors, "password", "signup.all_fields");
+            addError(errors, "confirmPassword", "signup.all_fields");
         }
 
-        if (!validateName(firstName, "First name", messageLabel)) {
-            return false;
+        // First name
+        validateName(firstName, "firstName", errors, "First name");
+
+        // Last name
+        validateName(lastName, "lastName", errors, "Last name");
+
+        // Username
+        if (!username.matches("^[\\p{L}0-9_]{3,20}$")) {
+            addError(errors,"username", "signup.username_chars");
         }
 
-        if (!validateName(lastName, "Last name", messageLabel)) {
-            return false;
+        // Email
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+            addError(errors,"email", "signup.email_invalid");
         }
 
-        // Validate username format
-        if (!validateUsername(username, messageLabel)) {
-            return false;
+        // Password match
+        if (!password.equals(confirmPassword)) {
+            addError(errors,"confirmPassword", "signup.password_mismatch");
         }
 
-        // Validate email format
-        if (!validateEmailFormat(email, messageLabel)) {
-            return false;
+        // Password rules
+        if (password.length() < 6) {
+            addError(errors,"password", "signup.password_too_short");
         }
 
-        // Validate password match
-        if (!validatePasswordMatch(password, confirmPassword, messageLabel)) {
-            return false;
+        if (!password.matches(".*\\d.*")) {
+            addError(errors,"password", "signup.password_missing_number");
         }
 
-        // Validate password length
-        return validatePasswordStrength(password, messageLabel);
+        if (!password.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*")) {
+            addError(errors,"password", "signup.password_missing_special");
+        }
+
+        return new ValidationResult(errors.isEmpty(), errors);
     }
 
     // Validates that all required fields are filled
     public static boolean validateRequiredFields(String firstName, String lastName, String username,
-                                                 String email, String password, String confirmPassword, Label messageLabel) {
-        if (firstName.isEmpty() || lastName.isEmpty() || username.isEmpty() ||
-                email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-            showMessage(messageLabel, "All fields are required", MessageType.ERROR);
-            return false;
-        }
-        return true;
+                                                 String email, String password, String confirmPassword) {
+        return !(firstName.isEmpty() || lastName.isEmpty() || username.isEmpty() ||
+                email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty());
     }
 
     // Validates name format
-    public static boolean validateName(String name, String fieldName, Label messageLabel) {
-
-        String nameRegex = "^[\\p{L}\\s\\-'/]+$";
-
-        if (!name.matches(nameRegex)) {
-            showMessage(messageLabel, fieldName + " contains invalid characters", MessageType.ERROR);
-            return false;
+    public static void validateName(String value, String field, Map<String, List<ValidationError>> errors, String label) {
+        if (value == null || value.isBlank()) {
+            return;
         }
 
-        if (name.length() < 2 || name.length() > 50) {
-            showMessage(messageLabel, fieldName + " must be 2-50 characters long", MessageType.ERROR);
-            return false;
+        if (value.length() < 2 || value.length() > 50) {
+            addError(errors, field, "signup.name_length", label);
+            return;
         }
-        hideMessage(messageLabel);
-        return true;
+
+        if (!value.matches("^[\\p{L}\\s\\-'/]+$")) {
+            addError(errors, field, "signup.name_invalid", label);
+        }
     }
 
     // Validates the username format
-    public static boolean validateUsername(String username, Label messageLabel) {
+    public static boolean validateUsername(String username) {
         // Allow letters (including Nordic chars), numbers, and underscores
-        String usernameRegex = "^[\\p{L}0-9_]{3,20}$";
-        if (!username.matches(usernameRegex)) {
-            showMessage(messageLabel, "Username must be 3-20 characters", MessageType.ERROR);
-            return false;
+        return username.matches("^[\\p{L}0-9_]{3,20}$");
+    }
+
+    public static void validatePassword(String password,
+                                        Map<String, List<ValidationError>> errors,
+                                        String field) {
+
+        if (password == null || password.isBlank()) {
+            return;
         }
-        return true;
+
+        if (password.length() < 6) {
+            addError(errors, field, "signup.password_too_short");
+        }
+
+        if (!password.matches(".*\\d.*")) {
+            addError(errors, field, "signup.password_missing_number");
+        }
+
+        if (!password.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*")) {
+            addError(errors, field, "signup.password_missing_special");
+        }
     }
 
     // Validates the email format using regex pattern
-    public static boolean validateEmailFormat(String email, Label messageLabel) {
-        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-        if (!email.matches(emailRegex)) {
-            showMessage(messageLabel, "Invalid email address", MessageType.ERROR);
-            return false;
-        }
-        return true;
+    public static boolean validateEmailFormat(String email) {
+        return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     }
 
     // Validates that password and confirm password fields match
-    public static boolean validatePasswordMatch(String password, String confirmPassword, Label messageLabel) {
-        if (!password.equals(confirmPassword)) {
-            showMessage(messageLabel, "Passwords do not match", MessageType.ERROR);
-            return false;
-        }
-        return true;
+    public static boolean validatePasswordMatch(String password, String confirmPassword) {
+        return password.equals(confirmPassword);
     }
 
-    // Validates password strength
-    public static boolean validatePasswordStrength(String password, Label messageLabel) {
-        // Check minimum length
-        if (password.length() < 6) {
-            showMessage(messageLabel, "Password must be at least 6 characters long", MessageType.ERROR);
-            return false;
+    public static ValidationResult validateUpdate(String lastName, String username, String password, String confirmPassword) {
+
+        Map<String, List<ValidationError>> errors = new HashMap<>();
+
+        lastName = lastName == null ? "" : lastName.trim();
+        username = username == null ? "" : username.trim();
+        password = password == null ? "" : password;
+        confirmPassword = confirmPassword == null ? "" : confirmPassword;
+
+        // Required fields
+        if (lastName.isBlank() || username.isBlank()) {
+            addError(errors, "lastName", "signup.all_fields");
+            addError(errors, "username", "signup.all_fields");
         }
 
-        // Check for at least one number
-        if (!password.matches(".*\\d.*")) {
-            showMessage(messageLabel, "Password must contain at least 1 number", MessageType.ERROR);
-            return false;
+        // Last name validation
+        validateName(lastName, "lastName", errors, "Last name");
+
+        // Username validation
+        if (!validateUsername(username)) {
+            addError(errors, "username", "signup.username_chars");
         }
 
-        // Check for at least one special character
-        if (!password.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*")) {
-            showMessage(messageLabel, "Password must contain at least 1 special character", MessageType.ERROR);
-            return false;
+        // Password OPTIONAL
+        if (!password.isBlank()) {
+
+            // Match
+            if (!password.equals(confirmPassword)) {
+                addError(errors, "confirmPassword", "signup.password_mismatch");
+            }
+
+            // Strength
+            validatePassword(password, errors, "password");
         }
 
-        return true;
-    }
-
-    // Displays a message in the provided label
-    public static void showMessage(Label label, String message, MessageType type) {
-        label.setText(message);
-        label.setVisible(true);
-
-        // Set color based on message type
-        switch (type) {
-            case SUCCESS:
-                label.setTextFill(Color.web("#2e7d32")); // Green for success
-                break;
-            case ERROR:
-                label.setTextFill(Color.web("#d32f2f")); // Red for error
-                break;
-            case INFO:
-                label.setTextFill(Color.web("#1976d2")); // Blue for info
-                break;
-        }
-    }
-
-    // Hides the message label
-    public static void hideMessage(Label label) {
-        label.setVisible(false);
-        label.setText("");
-    }
-
-    // Enum for message types
-    public enum MessageType {
-        SUCCESS, ERROR, INFO
+        return new ValidationResult(errors.isEmpty(), errors);
     }
 }
