@@ -134,7 +134,6 @@ public class CreateNoteController implements Initializable {
         noteAnnotationLabel.textProperty().bind(Localization.bind("create.note_annotations"));
         noteTagLabel.textProperty().bind(Localization.bind("create.tags"));
 
-
         saveButton.textProperty().bind(Localization.bind("create.save"));
         clearButton.textProperty().bind(Localization.bind("create.clear"));
 
