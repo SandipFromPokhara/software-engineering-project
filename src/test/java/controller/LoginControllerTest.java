@@ -187,7 +187,7 @@ class LoginControllerTest {
 
         assertTrue(statusLabel.isVisible());
         assertFalse(loginButton.isDisabled());
-        assertEquals("Virheellinen käyttäjätunnus tai salasana", statusLabel.getText());
+        assertEquals("Invalid username or password", statusLabel.getText());
     }
 
     @Test

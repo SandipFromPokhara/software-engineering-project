@@ -33,7 +33,7 @@ public class GuestDashboardController {
     private Label title, content;
 
     @FXML
-    VBox centerPane;
+    private VBox centerPane;
 
     @FXML
     public void initialize() {
@@ -69,7 +69,7 @@ public class GuestDashboardController {
     }
 
     @FXML
-    void handleNewFiles() {
+    public void handleNewFiles() {
         loadContent("createFilesGuest.fxml");
     }
 
