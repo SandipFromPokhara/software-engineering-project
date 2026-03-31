@@ -15,6 +15,7 @@ import services.UserService;
 import util.Localization;
 import util.NavigationUtil;
 import session.UserSession;
+import util.WindowUtil;
 
 public class LoginController {
 
