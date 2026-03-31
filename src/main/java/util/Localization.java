@@ -5,14 +5,18 @@ import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 public class Localization {
 
     private static final String PREF_KEY = "app_language";
     private static final Preferences prefs = Preferences.userNodeForPackage(Localization.class);
+    static final Logger logger = Logger.getLogger(Localization.class.getName());
 
     private static final ObjectProperty<Locale> locale =
             new SimpleObjectProperty<>(getSavedLocale());
@@ -32,15 +36,21 @@ public class Localization {
         return locale.get();
     }
 
+    public static String get(String key, Object... args) {
+        ResourceBundle bundle = ResourceBundle.getBundle("i18n.MessagesBundle", getLocale());
+
+        if (!bundle.containsKey(key)) {
+            logger.log(Level.WARNING, "Missing i18n key: {0}", key);
+            return "!" + key + "!";
+        }
+
+        String value = bundle.getString(key);
+        return MessageFormat.format(value, args);
+    }
+
     // New: expose the locale property for bindings/listeners
     public static ObjectProperty<Locale> localeProperty() {
         return locale;
-    }
-
-    public static String get(String key) {
-        return ResourceBundle
-                .getBundle("MessagesBundle", getLocale())
-                .getString(key);
     }
 
     public static StringBinding bind(String key) {

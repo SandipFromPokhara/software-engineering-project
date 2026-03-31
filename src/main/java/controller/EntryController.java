@@ -7,51 +7,74 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import util.Localization;
 import util.NavigationUtil;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class EntryController {
 
-    @FXML private Label hello;
-    @FXML private Label welcome;
-    @FXML private Button guestButton;
-    @FXML private Button loginButton;
-    @FXML private Button registerButton;
-    @FXML private Hyperlink faqLink;
-    @FXML private Label privacyLabel;
-    @FXML private Button languageButton; // world icon button
+    static final Logger logger = Logger.getLogger(EntryController.class.getName());
+
+    @FXML
+    private Label hello, welcome, privacyLabel;
+
+    @FXML
+    private Button guestButton, loginButton, registerButton;
+
+    @FXML
+    private Hyperlink faqLink;
+
+    @FXML
+    private Button languageButton; // world icon button
+
+    @FXML
+    private Tooltip langTooltip;
+
+    @FXML
+    public void initialize() {
+        hello.textProperty().bind(Localization.bind("entry.hello"));
+        welcome.textProperty().bind(Localization.bind("entry.welcome"));
+        loginButton.textProperty().bind(Localization.bind("entry.login"));
+        registerButton.textProperty().bind(Localization.bind("entry.register"));
+        guestButton.textProperty().bind(Localization.bind("entry.guest"));
+        faqLink.textProperty().bind(Localization.bind("entry.faq"));
+        privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));
+        langTooltip.textProperty().bind(Localization.bind("tooltip.lang_info"));
+
+        langTooltip.setShowDelay(Duration.millis(100));
+    }
 
     @FXML
     private void onLogin() {
         Stage stage = (Stage) loginButton.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/login_view.fxml",
-                Localization.get("login.window_title"), false);
+        NavigationUtil.replaceScene(stage, "/FXML/login_view.fxml", "login.window_title", false);
     }
 
     @FXML
     private void onRegister() {
         Stage stage = (Stage) registerButton.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml",
-                Localization.get("register.window_title"), false);
+        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml", "register.window_title", false);
     }
 
     @FXML
     private void onContinueAsGuest() {
         Stage stage = (Stage) guestButton.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/guestDashboard.fxml",
-                Localization.get("guest.window_title"), true);
+        NavigationUtil.replaceScene(stage, "/FXML/guestDashboard.fxml", "guest.window_title", true);
     }
 
     @FXML
     private void handleOpenFAQ() {
         NavigationUtil.<FAQController>openWindow(
                 null, "/FXML/faq_view.fxml",
-                Localization.get("faq.window_title"),
+                "faq.window_title",
                 true, true,
                 controller -> controller.initFaq(true));
     }
@@ -86,18 +109,7 @@ public class EntryController {
             dialog.showAndWait();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Failed to select language", e);
         }
-    }
-
-    @FXML
-    public void initialize() {
-        hello.textProperty().bind(Localization.bind("entry.hello"));
-        welcome.textProperty().bind(Localization.bind("entry.welcome"));
-        loginButton.textProperty().bind(Localization.bind("entry.login"));
-        registerButton.textProperty().bind(Localization.bind("entry.register"));
-        guestButton.textProperty().bind(Localization.bind("entry.guest"));
-        faqLink.textProperty().bind(Localization.bind("entry.faq"));
-        privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));
     }
 }
