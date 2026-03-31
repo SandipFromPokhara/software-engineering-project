@@ -38,7 +38,7 @@ class WordCountUtilTest {
     }
 
     @Test
-    void testMultipleWords() {
+    void testMultipleSanat() {
         textArea.setText("Hello testing testing");
         assertEquals("Words: 3 | Chars: 21", label.getText());
     }

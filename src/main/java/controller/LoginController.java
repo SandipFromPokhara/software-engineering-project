@@ -22,6 +22,14 @@ public class LoginController {
     private JpaUserDao userDao;
     private PasswordHasher passwordHasher;
 
+    // For FXML
+    public LoginController() {}
+
+    // For test
+    public LoginController(UserService userService) {
+        this.userService = userService;
+    }
+
     @FXML
     private Label loginWelcome, loginNote, statusLabel, loginNoAccount, privacyLabel;
 
