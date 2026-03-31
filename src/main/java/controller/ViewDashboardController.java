@@ -148,13 +148,13 @@ public class ViewDashboardController {
 
         viewNotesLabel.textProperty().bind(Localization.bind("notebook.manage_label"));
         createNoteLabel.textProperty().bind(Localization.bind("note.create_label"));
-        logoutLabel.textProperty().bind(Localization.bind("note.logout_label"));
+        logoutLabel.textProperty().bind(Localization.bind("button.logout"));
 
         titleColumn.textProperty().bind(Localization.bind("note.title"));
         dateColumn.textProperty().bind(Localization.bind("note.date"));
 
         editButton.textProperty().bind(Localization.bind("note.edit"));
-        deleteButton.textProperty().bind(Localization.bind("note.delete"));
+        deleteButton.textProperty().bind(Localization.bind("button.delete"));
 
         annotation.textProperty().bind(Localization.bind("dashboard.annotations"));
 
@@ -163,7 +163,7 @@ public class ViewDashboardController {
 
         manageAccountItem.textProperty().bind(Localization.bind("user.manage_account"));
         deleteAccountItem.textProperty().bind(Localization.bind("user.delete_account"));
-        logoutItem.textProperty().bind(Localization.bind("user.logout"));
+        logoutItem.textProperty().bind(Localization.bind("button.logout"));
 
         // Localize Welcome user display
         UserEntity user = UserSession.getUserInstance().getUser();
@@ -466,7 +466,7 @@ public class ViewDashboardController {
 
         boolean confirmed = AlertUtil.showConfirmation(
                 window,
-                Localization.get("account.logout"),
+                Localization.get("button.logout"),
                 Localization.get("account.logout_warning")
         );
 
@@ -580,8 +580,8 @@ public class ViewDashboardController {
         dialog.setHeaderText(Localization.get("export.dialog.header"));
         dialog.setContentText(Localization.get("export.dialog.label"));
 
-        ButtonType ok = new ButtonType(Localization.get("account.logout_ok"), ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancel = new ButtonType(Localization.get("account.logout_cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType ok = new ButtonType(Localization.get("button.ok"), ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType(Localization.get("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
 
         dialog.getDialogPane().getButtonTypes().setAll(ok, cancel);
 
