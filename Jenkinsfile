@@ -1,149 +1,118 @@
 pipeline {
     agent any
 
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '10'))
-    }
-
     tools {
-        maven 'MAVEN_HOME'
+        maven 'Maven'
+        jdk 'JDK21'
     }
 
     environment {
+        PATH = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Docker.app/Contents/Resources/bin"
         DB_HOST = '127.0.0.1'
-        DB_PORT = '3306'
+        DB_PORT = '3307'
         DB_NAME = 'notevault_db'
-        DB_CREDENTIALS_ID = 'db-credentials'
-        DOCKERHUB_CREDENTIALS_ID = 'docker_Id'
-        DOCKERHUB_REPO = 'dinal1999/notevault'
+        DB_CREDENTIALS_ID = 'DB_CREDENTIALS'
+        DOCKERHUB_CREDENTIALS_ID = 'DockerHub_ID'
+        DOCKERHUB_REPO = '218468/notevault'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
         BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
+        JAVA_TOOL_OPTIONS = "-Dprism.order=sw -Djava.awt.headless=true"
+        DB_CONTAINER_NAME = 'notevault-db'
     }
 
     stages {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
+                git branch: 'feature-create', url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
+            }
+        }
+
+        stage('Start Test DB') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: DB_CREDENTIALS_ID, usernameVariable: 'DB_USER', passwordVariable: 'DB_PASSWORD')]) {
+                    sh '''
+                        docker rm -f $DB_CONTAINER_NAME >/dev/null 2>&1 || true
+                        docker run -d --name $DB_CONTAINER_NAME -p $DB_PORT:3306 \
+                          -e MARIADB_DATABASE=notevault_db \
+                          -e MARIADB_USER=notevaultUser \
+                          -e MARIADB_PASSWORD=password123 \
+                          -e MARIADB_ROOT_PASSWORD=password123 \
+                          mariadb:11.3
+                        # wait for MariaDB to accept connections
+                        for i in {1..30}; do
+                          docker exec $DB_CONTAINER_NAME mariadb -u$DB_USER -p$DB_PASSWORD -e "select 1" && break
+                          sleep 2
+                        done
+                    '''
+                }
             }
         }
 
         stage('Build') {
             steps {
-                script {
-                    if (isUnix()) {
-                        sh 'mvn clean compile'
-                    } else {
-                        bat 'mvn clean compile'
-                    }
-                }
+                sh 'java -version'
+                sh 'mvn clean compile'
             }
         }
 
         stage('Test') {
             steps {
-                script {
-                    withCredentials([usernamePassword(
-                            credentialsId: DB_CREDENTIALS_ID,
-                            usernameVariable: 'DB_USER',
-                            passwordVariable: 'DB_PASSWORD'
-                    )]) {
-                        if (isUnix()) {
-                            sh 'mvn test -DDB_USER=$DB_USER -DDB_PASSWORD=$DB_PASSWORD -DDB_HOST=$DB_HOST -DDB_PORT=$DB_PORT -DDB_NAME=$DB_NAME'
-                        } else {
-                            bat 'mvn test -DDB_USER=%DB_USER% -DDB_PASSWORD=%DB_PASSWORD% -DDB_HOST=%DB_HOST% -DDB_PORT=%DB_PORT% -DDB_NAME=%DB_NAME%'
-                        }
-                    }
+                withCredentials([usernamePassword(credentialsId: DB_CREDENTIALS_ID, usernameVariable: 'DB_USER', passwordVariable: 'DB_PASSWORD')]) {
+                    sh 'mvn test -DDB_USER=$DB_USER -DDB_PASSWORD=$DB_PASSWORD -DDB_HOST=$DB_HOST -DDB_PORT=$DB_PORT -DDB_NAME=$DB_NAME'
                 }
             }
         }
 
         stage('Package') {
             steps {
-                script {
-                    if (isUnix()) {
-                        sh 'mvn package -DskipTests'
-                    } else {
-                        bat 'mvn package -DskipTests'
-                    }
-                }
+                sh 'mvn package -DskipTests'
             }
         }
 
         stage('Code Coverage') {
             steps {
-                script {
-                    if (isUnix()) {
-                        sh 'mvn jacoco:report'
-                    } else {
-                        bat 'mvn jacoco:report'
-                    }
-                }
+                sh 'mvn jacoco:report'
+            }
+        }
+
+        stage('Publish Test Results') {
+            steps {
+                junit '**/target/surefire-reports/*.xml'
+            }
+        }
+
+        stage('Publish Coverage Report') {
+            steps {
+                publishHTML target: [
+                        reportDir  : 'target/site/jacoco',
+                        reportFiles: 'index.html',
+                        reportName : 'JaCoCo Coverage Report',
+                        keepAll    : true
+                ]
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    if (isUnix()) {
-                        sh '''
-                            docker build --pull -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} .
-                            docker images
-                            '''
-                    } else {
-                        bat """
-                        REM --- Build Docker image with build number tag ---
-                        docker build --pull -t %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% .
-        
-                        REM --- Verify image exists ---
-                        docker images
-                    """
-                    }
-                }
+                sh '''
+                    docker build --pull -t $DOCKERHUB_REPO:$DOCKER_IMAGE_TAG .
+                    docker images | head
+                '''
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                script {
-                    withCredentials([usernamePassword(
-                            credentialsId: DOCKERHUB_CREDENTIALS_ID,
-                            usernameVariable: 'DOCKER_USER',
-                            passwordVariable: 'DOCKER_PASS'
-
-                    )]) {
-                        if (isUnix()) {
-                            sh '''
-                                echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                                
-                                docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}
-                                
-                                docker tag ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} ${DOCKERHUB_REPO}:latest
-                        
-                                docker push ${DOCKERHUB_REPO}:latest
-                                
-                                docker image rm ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}
-                                docker image prune -f
-                                '''
-                        } else {
-                            bat """
-                                REM --- Login to Docker Hub ---
-                                echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
-                                
-                                REM --- Push image with build number tag ---
-                                echo Pushing Docker image %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG%...
-                                docker push %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG%
-                               
-                                REM --- Tag as latest and push ---
-                                docker tag %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% %DOCKERHUB_REPO%:latest
-                                docker push %DOCKERHUB_REPO%:latest
-                                
-                                REM --- Cleanup local images to save disk space ---
-                                docker image rm %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG%
-                                docker image prune -f
-                            """
-                        }
-                    }
+                withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push $DOCKERHUB_REPO:$DOCKER_IMAGE_TAG
+                        docker tag $DOCKERHUB_REPO:$DOCKER_IMAGE_TAG $DOCKERHUB_REPO:latest
+                        docker push $DOCKERHUB_REPO:latest
+                        docker image rm $DOCKERHUB_REPO:$DOCKER_IMAGE_TAG || true
+                        docker image prune -f || true
+                    '''
                 }
             }
         }
@@ -151,15 +120,7 @@ pipeline {
 
     post {
         always {
-            junit '**/target/surefire-reports/*.xml'
-            jacoco()
-            cleanWs()
-        }
-        success {
-            echo 'Build completed successfully!'
-        }
-        failure {
-            echo 'Build failed!'
+            sh 'docker rm -f $DB_CONTAINER_NAME >/dev/null 2>&1 || true'
         }
     }
 }
