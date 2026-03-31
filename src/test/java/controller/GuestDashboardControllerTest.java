@@ -1,10 +1,14 @@
 package controller;
 
 import javafx.scene.layout.VBox;
+import javafx.scene.control.Button;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import testutil.JavaFXInitializer;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,27 +22,35 @@ class GuestDashboardControllerTest {
     }
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         controller = new GuestDashboardController();
 
-        // Inject required UI components manually
-        controller.centerPane = new VBox();
+        // Inject private centerPane
+        Field centerPaneField = GuestDashboardController.class.getDeclaredField("centerPane");
+        centerPaneField.setAccessible(true);
+        centerPaneField.set(controller, new VBox());
+
+        // Inject private newFiles button
+        Field newFilesField = GuestDashboardController.class.getDeclaredField("newFiles");
+        newFilesField.setAccessible(true);
+        newFilesField.set(controller, new Button());
+    }
+
+    // Helper to call private methods
+    private void invokePrivateMethod(String methodName) throws Exception {
+        Method method = GuestDashboardController.class.getDeclaredMethod(methodName);
+        method.setAccessible(true);
+        method.invoke(controller);
     }
 
     @Test
-    void handleNewFiles_shouldNotCrash_whenFXMLMissing() {
-        // Since FXML may not exist in test environment,
-        // this should NOT throw exception (it is caught and logged)
-        assertDoesNotThrow(() -> controller.handleNewFiles());
-    }
+    void handleNewFiles_shouldNotCrash() throws Exception {
+        assertDoesNotThrow(() -> invokePrivateMethod("handleNewFiles"));
 
-    @Test
-    void handleNewFiles_shouldAttemptToModifyCenterPane() {
-        controller.handleNewFiles();
-
-        // We can't guarantee FXML loads,
-        // but we can check centerPane is still valid
-
-        assertNotNull(controller.centerPane);
+        // Ensure centerPane is still valid
+        Field centerPaneField = GuestDashboardController.class.getDeclaredField("centerPane");
+        centerPaneField.setAccessible(true);
+        VBox centerPane = (VBox) centerPaneField.get(controller);
+        assertNotNull(centerPane);
     }
 }
