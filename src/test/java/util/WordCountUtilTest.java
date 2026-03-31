@@ -28,27 +28,27 @@ class WordCountUtilTest {
     @Test
     void testEmptyText() {
         textArea.setText("");
-        assertEquals("Words: 0 | Chars: 0", label.getText());
+        assertEquals("Sanat: 0 | Merkit: 0", label.getText());
     }
 
     @Test
     void testSingleWord() {
         textArea.setText("Hello");
-        assertEquals("Words: 1 | Chars: 5", label.getText());
+        assertEquals("Sanat: 1 | Merkit: 5", label.getText());
     }
 
     @Test
-    void testMultipleWords() {
+    void testMultipleSanat() {
         textArea.setText("Hello testing testing");
-        assertEquals("Words: 3 | Chars: 21", label.getText());
+        assertEquals("Sanat: 3 | Merkit: 21", label.getText());
     }
 
     @Test
     void testUpdateTextDynamically() {
         textArea.setText("Hello");
-        assertEquals("Words: 1 | Chars: 5", label.getText());
+        assertEquals("Sanat: 1 | Merkit: 5", label.getText());
 
         textArea.setText("Hello world");
-        assertEquals("Words: 2 | Chars: 11", label.getText());
+        assertEquals("Sanat: 2 | Merkit: 11", label.getText());
     }
 }

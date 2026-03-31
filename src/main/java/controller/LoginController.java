@@ -15,13 +15,16 @@ import services.UserService;
 import util.Localization;
 import util.NavigationUtil;
 import session.UserSession;
-import util.WindowUtil;
 
 public class LoginController {
 
     private UserService userService;
     private JpaUserDao userDao;
     private PasswordHasher passwordHasher;
+
+    public LoginController(UserService userService) {
+        this.userService = userService;
+    }
 
     @FXML
     private Label loginWelcome, loginNote, statusLabel, loginNoAccount, privacyLabel;

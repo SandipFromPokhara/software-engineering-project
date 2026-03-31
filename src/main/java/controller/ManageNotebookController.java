@@ -49,7 +49,7 @@ public class ManageNotebookController {
         manageTitle.textProperty().bind(Localization.bind("notebooks.title"));
         openBtn.textProperty().bind(Localization.bind("notebooks.open"));
         renameBtn.textProperty().bind(Localization.bind("notebooks.rename"));
-        deleteBtn.textProperty().bind(Localization.bind("notebooks.delete"));
+        deleteBtn.textProperty().bind(Localization.bind("button.delete"));
         closeBtn.textProperty().bind(Localization.bind("notebooks.close"));
 
         // Disable buttons initially
@@ -148,8 +148,8 @@ public class ManageNotebookController {
         dialog.setContentText(Localization.get("notebooks.new_name"));
 
         // Localize OK and Cancel buttons
-        ButtonType okButton = new ButtonType(Localization.get("notebooks.rename_ok"), ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancelButton = new ButtonType(Localization.get("notebooks.rename_cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType okButton = new ButtonType(Localization.get("button.ok"), ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType(Localization.get("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
 
         dialog.getDialogPane().getButtonTypes().setAll(okButton, cancelButton);
 
@@ -179,7 +179,7 @@ public class ManageNotebookController {
 
         boolean confirmed = AlertUtil.showConfirmation(
                 notebookListView.getScene().getWindow(),
-                Localization.get("notebooks.delete"),
+                Localization.get("button.delete"),
                 Localization.get("notebooks.delete_confirm", selected.getTitle())
         );
 
