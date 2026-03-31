@@ -41,8 +41,8 @@ public class DeleteUserController {
 
         passwordField.promptTextProperty().bind(Localization.bind("account.confirm_password_placeholder"));
 
-        deleteButton.textProperty().bind(Localization.bind("account.delete_confirm_button"));
-        cancelButton.textProperty().bind(Localization.bind("account.delete_cancel"));
+        deleteButton.textProperty().bind(Localization.bind("button.delete"));
+        cancelButton.textProperty().bind(Localization.bind("button.cancel"));
 
         ShowMessageUtil.hideMessage(messageLabel);
         passwordHasher = new BcryptPasswordHasher();

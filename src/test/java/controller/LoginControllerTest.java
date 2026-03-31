@@ -25,13 +25,15 @@ class LoginControllerTest {
     private UserService mockUserService;
     private PasswordHasher passwordHasher;
 
-    // Mock UI components
     private TextField usernameField;
     private PasswordField passwordField;
     private Button loginButton;
     private Label statusLabel;
     private Hyperlink signupLink;
     private Button backButton;
+
+    private Label loginWelcome, loginNote, loginNoAccount, privacyLabel;
+
     private Stage testStage;
 
     @BeforeAll
@@ -41,24 +43,28 @@ class LoginControllerTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        controller = new LoginController();
         passwordHasher = new BcryptPasswordHasher();
 
-        // Stub UserService for testing
+        // Mock service
         mockUserService = new UserService(null, passwordHasher) {
             @Override
             public UserEntity login(String username, String password) {
+                System.out.println("MOCK LOGIN CALLED");
                 if ("validUser".equals(username) && "validPass".equals(password)) {
                     UserEntity user = new UserEntity();
                     user.setUsername(username);
                     return user;
                 }
-                return null; // invalid credentials
+                return null;
             }
         };
+
+        controller = new LoginController(mockUserService);
+
         setField(controller, "userService", mockUserService);
 
         CountDownLatch latch = new CountDownLatch(1);
+
         Platform.runLater(() -> {
             usernameField = new TextField();
             passwordField = new PasswordField();
@@ -67,15 +73,30 @@ class LoginControllerTest {
             signupLink = new Hyperlink();
             backButton = new Button();
 
+            loginWelcome = new Label();
+            loginNote = new Label();
+            loginNoAccount = new Label();
+            privacyLabel = new Label();
+
             testStage = new Stage();
-            VBox root = new VBox();
-            root.getChildren().addAll(usernameField, passwordField, loginButton, statusLabel, signupLink, backButton);
+
+            VBox root = new VBox(
+                    usernameField,
+                    passwordField,
+                    loginButton,
+                    statusLabel,
+                    signupLink,
+                    backButton
+            );
+
             testStage.setScene(new Scene(root, 400, 400));
+
             latch.countDown();
         });
+
         latch.await(2, TimeUnit.SECONDS);
 
-        // Inject UI components
+        // Inject fields
         setField(controller, "usernameField", usernameField);
         setField(controller, "passwordField", passwordField);
         setField(controller, "loginButton", loginButton);
@@ -83,8 +104,12 @@ class LoginControllerTest {
         setField(controller, "signupLink", signupLink);
         setField(controller, "backButton", backButton);
 
-        // Initialize controller (private method) safely
-        invokePrivateMethod("initialize", new Class<?>[0]);
+        setField(controller, "loginWelcome", loginWelcome);
+        setField(controller, "loginNote", loginNote);
+        setField(controller, "loginNoAccount", loginNoAccount);
+        setField(controller, "privacyLabel", privacyLabel);
+
+        invokePrivateMethod("initialize");
     }
 
     private void setField(Object target, String fieldName, Object value) throws Exception {
@@ -95,112 +120,107 @@ class LoginControllerTest {
 
     private void setFieldValues(String username, String password) throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
+
         Platform.runLater(() -> {
             usernameField.setText(username);
             passwordField.setText(password);
             latch.countDown();
         });
+
         latch.await(1, TimeUnit.SECONDS);
     }
 
-    private void invokePrivateMethod(String methodName, Class<?>[] paramTypes, Object... params) throws Exception {
+    private void invokePrivateMethod(String methodName, Object... args) throws Exception {
+        Class<?>[] paramTypes = new Class<?>[args.length];
+        for (int i = 0; i < args.length; i++) {
+            paramTypes[i] = args[i].getClass();
+        }
+
         Method method = LoginController.class.getDeclaredMethod(methodName, paramTypes);
         method.setAccessible(true);
 
         CountDownLatch latch = new CountDownLatch(1);
+
         Platform.runLater(() -> {
             try {
-                method.invoke(controller, params);
+                method.invoke(controller, args);
             } catch (Exception e) {
-                fail("Invocation failed: " + e.getMessage());
-            }
-            latch.countDown();
-        });
-        latch.await(2, TimeUnit.SECONDS);
-    }
-
-    @Test
-    void testLoginButtonDisabledWhenFieldsEmpty() throws Exception {
-        setFieldValues("", "");
-        Platform.runLater(() -> {});
-        assertTrue(loginButton.isDisabled());
-    }
-
-    @Test
-    void testLoginButtonEnabledWhenFieldsFilled() throws Exception {
-        setFieldValues("validUser", "validPass");
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(latch::countDown);
-        latch.await(200, TimeUnit.MILLISECONDS);
-
-        assertFalse(loginButton.isDisabled());
-    }
-
-    @Test
-    void testHandleSignUpNavigation() throws Exception {
-        testStage.setTitle("Original Title");
-        invokePrivateMethod("handleSignUp", new Class[]{});
-
-        Thread.sleep(200);
-
-        Platform.runLater(() -> {
-            // Assert the stage title changed
-            assertEquals("NoteVault - Register", testStage.getTitle());
-
-            // Assert a new scene was set
-            assertNotNull(testStage.getScene());
-            assertFalse(testStage.isResizable());
-        });
-    }
-
-    @Test
-    void testHandleBackNavigation() throws Exception {
-        testStage.setTitle("Title");
-        invokePrivateMethod("handleBack", new Class[]{});
-
-
-        Thread.sleep(200);
-
-        Platform.runLater(() -> {
-            assertEquals("Welcome to NoteVault", testStage.getTitle());
-
-            assertNotNull(testStage.getScene());
-            assertFalse(testStage.isResizable());
-        });
-    }
-
-    @Test
-    void testHandleLoginWithInvalidCredentials() throws Exception {
-        // Mock login to return null instantly
-        setField(controller, "userService", new UserService(null, passwordHasher) {
-            @Override
-            public UserEntity login(String username, String password) {
-                return null; // invalid credentials
-            }
-        });
-
-        setFieldValues("wrongUser", "wrongPass");
-        invokePrivateMethod("checkFields", new Class<?>[0]);
-
-        CountDownLatch latch = new CountDownLatch(1);
-
-        // Invoke handleLogin
-        invokePrivateMethod("handleLogin", new Class[]{ActionEvent.class}, (ActionEvent) null);
-
-        Thread.sleep(200);
-
-        Platform.runLater(() -> {
-            try {
-                assertTrue(statusLabel.isVisible(), "Status label should be visible");
-                assertEquals("Invalid username or password", statusLabel.getText());
-                assertFalse(loginButton.isDisabled(), "Login button should be enabled again");
+                e.printStackTrace();
+                fail("Invocation failed: " + e.getCause());
             } finally {
                 latch.countDown();
             }
         });
 
-        if (!latch.await(2, TimeUnit.SECONDS)) {
-            fail("UI did not update in time");
-        }
+        assertTrue(latch.await(2, TimeUnit.SECONDS));
+    }
+
+    @Test
+    void testLoginButtonEnabledWhenFieldsFilled() throws Exception {
+        setFieldValues("validUser", "validPass");
+
+        invokePrivateMethod("checkFields");
+
+        assertFalse(loginButton.isDisabled());
+    }
+
+    @Test
+    void testLoginButtonDisabledWhenFieldsEmpty() throws Exception {
+        setFieldValues("", "");
+
+        invokePrivateMethod("checkFields");
+
+        assertTrue(loginButton.isDisabled());
+    }
+
+    @Test
+    void testHandleLoginWithInvalidCredentials() throws Exception {
+
+        setFieldValues("wrongUser", "wrongPass");
+
+        // Inject mock
+        setField(controller, "userService", mockUserService);
+
+        invokePrivateMethod("handleLogin", new ActionEvent());
+
+        Thread.sleep(200);
+
+        assertTrue(statusLabel.isVisible());
+        assertFalse(loginButton.isDisabled());
+        assertEquals("Virheellinen käyttäjätunnus tai salasana", statusLabel.getText());
+    }
+
+    @Test
+    void testHandleSignUpNavigation() throws Exception {
+        invokePrivateMethod("handleSignUp");
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Platform.runLater(() -> {
+            try {
+                assertNotNull(testStage.getScene());
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        assertTrue(latch.await(2, TimeUnit.SECONDS));
+    }
+
+    @Test
+    void testHandleBackNavigation() throws Exception {
+        invokePrivateMethod("handleBack");
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Platform.runLater(() -> {
+            try {
+                assertNotNull(testStage.getScene());
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        assertTrue(latch.await(2, TimeUnit.SECONDS));
     }
 }

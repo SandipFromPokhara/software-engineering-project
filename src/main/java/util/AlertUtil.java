@@ -50,8 +50,8 @@ public class AlertUtil {
         }
 
         // Localized buttons
-        ButtonType okButton = new ButtonType(Localization.get("account.logout_ok"), ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancelButton = new ButtonType(Localization.get("account.logout_cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType okButton = new ButtonType(Localization.get("button.ok"), ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType(Localization.get("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
 
         alert.getButtonTypes().setAll(okButton, cancelButton);
 
