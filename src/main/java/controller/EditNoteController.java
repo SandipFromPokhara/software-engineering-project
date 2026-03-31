@@ -118,7 +118,7 @@ public class EditNoteController {
 
         tagTooltip.textProperty().bind(Localization.bind("tooltip.tags_info"));
         updateButton.textProperty().bind(Localization.bind("edit.update"));
-        cancelButton.textProperty().bind(Localization.bind("edit.cancel"));
+        cancelButton.textProperty().bind(Localization.bind("button.cancel"));
 
         annotationBox.promptTextProperty().bind(Localization.bind("edit.placeholder_annotations"));
         tagComboBox.promptTextProperty().bind(Localization.bind("edit.placeholder_tags"));
