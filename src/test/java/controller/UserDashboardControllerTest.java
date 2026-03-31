@@ -4,6 +4,7 @@ import dao.user.UserDAO;
 import entity.UserEntity;
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -16,9 +17,11 @@ import security.BcryptPasswordHasher;
 import security.PasswordHasher;
 import session.UserSession;
 import testutil.JavaFXInitializer;
+import util.Localization;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -38,6 +41,15 @@ class UserDashboardControllerTest {
     private PasswordField passwordField;
     private PasswordField confirmPasswordField;
     private Label messageLabel;
+    private Label manageAccount;
+    private Label note;
+    private Label firstLock;
+    private Label lastNameLabel;
+    private Label usernameLabel;
+    private Label emailLock;
+    private Label newPassword;
+    private Button manageCancel;
+    private Button manageUpdate;
     private Stage testStage;
 
     private static class MockUserDAO implements UserDAO {
@@ -99,6 +111,7 @@ class UserDashboardControllerTest {
     @BeforeEach
     void setUp() throws Exception {
         UserSession.getUserInstance().setUser(null);
+        Localization.setLocale(Locale.ENGLISH);
 
         controller = new UserDashboardController();
         mockUserDAO = new MockUserDAO();
@@ -116,11 +129,21 @@ class UserDashboardControllerTest {
             passwordField = new PasswordField();
             confirmPasswordField = new PasswordField();
             messageLabel = new Label();
+            manageAccount = new Label();
+            note = new Label();
+            firstLock = new Label();
+            lastNameLabel = new Label();
+            usernameLabel = new Label();
+            emailLock = new Label();
+            newPassword = new Label();
+            manageCancel = new Button();
+            manageUpdate = new Button();
 
             testStage = new Stage();
             VBox root = new VBox();
             root.getChildren().addAll(firstNameField, lastNameField, usernameField,
-                    emailField, passwordField, confirmPasswordField, messageLabel);
+                    emailField, passwordField, confirmPasswordField, messageLabel, manageAccount, note,
+                    firstLock, lastNameLabel, usernameLabel, emailLock, newPassword, manageCancel, manageUpdate);
             Scene scene = new Scene(root, 400, 600);
             testStage.setScene(scene);
             latch.countDown();
@@ -134,6 +157,15 @@ class UserDashboardControllerTest {
         injectField("passwordField", passwordField);
         injectField("confirmPasswordField", confirmPasswordField);
         injectField("messageLabel", messageLabel);
+        injectField("manageAccount", manageAccount);
+        injectField("note", note);
+        injectField("firstLock", firstLock);
+        injectField("lastNameLabel", lastNameLabel);
+        injectField("usernameLabel", usernameLabel);
+        injectField("emailLock", emailLock);
+        injectField("newPassword", newPassword);
+        injectField("manageCancel", manageCancel);
+        injectField("manageUpdate", manageUpdate);
 
         mockUserDAO.reset();
     }
@@ -221,7 +253,7 @@ class UserDashboardControllerTest {
         });
         latch.await(1, TimeUnit.SECONDS);
 
-        assertEquals("No active user session found", message.get());
+        assertEquals(Localization.get("dashboard.no_session"), message.get());
     }
 
     @Test
@@ -269,7 +301,7 @@ class UserDashboardControllerTest {
         });
         latch.await(1, TimeUnit.SECONDS);
 
-        assertEquals("Last name and username are required", message.get());
+        assertEquals(Localization.get("dashboard.validation_error"), message.get());
         assertNull(mockUserDAO.updatedUser);
     }
 
@@ -290,7 +322,7 @@ class UserDashboardControllerTest {
         });
         latch.await(1, TimeUnit.SECONDS);
 
-        assertEquals("Last name and username are required", message.get());
+        assertEquals(Localization.get("dashboard.validation_error"), message.get());
         assertNull(mockUserDAO.updatedUser);
     }
 
@@ -311,7 +343,7 @@ class UserDashboardControllerTest {
         });
         latch.await(1, TimeUnit.SECONDS);
 
-        assertTrue(message.get().contains("Passwords do not match"));
+        assertEquals(Localization.get("dashboard.validation_error"), message.get());
         assertNull(mockUserDAO.updatedUser);
     }
 
@@ -332,7 +364,7 @@ class UserDashboardControllerTest {
         });
         latch.await(1, TimeUnit.SECONDS);
 
-        assertTrue(message.get().contains("Password must be at least"));
+        assertEquals(Localization.get("dashboard.validation_error"), message.get());
         assertNull(mockUserDAO.updatedUser);
     }
 
@@ -357,7 +389,7 @@ class UserDashboardControllerTest {
         });
         latch.await(1, TimeUnit.SECONDS);
 
-        assertEquals("Username already exists", message.get());
+        assertEquals(Localization.get("dashboard.username_exists"), message.get());
         assertNull(mockUserDAO.updatedUser);
     }
 
@@ -392,7 +424,7 @@ class UserDashboardControllerTest {
         });
         latch.await(1, TimeUnit.SECONDS);
 
-        assertTrue(message.get().contains("contains invalid characters"));
+        assertEquals(Localization.get("dashboard.validation_error"), message.get());
         assertNull(mockUserDAO.updatedUser);
     }
 
@@ -413,7 +445,7 @@ class UserDashboardControllerTest {
         });
         latch.await(1, TimeUnit.SECONDS);
 
-        assertTrue(message.get().contains("Username must be 3-20 characters"));
+        assertEquals(Localization.get("dashboard.validation_error"), message.get());
         assertNull(mockUserDAO.updatedUser);
     }
 
@@ -432,7 +464,7 @@ class UserDashboardControllerTest {
         });
         latch.await(1, TimeUnit.SECONDS);
 
-        assertEquals("No active user session found", message.get());
+        assertEquals(Localization.get("dashboard.no_session"), message.get());
         assertNull(mockUserDAO.updatedUser);
     }
 
@@ -480,7 +512,7 @@ class UserDashboardControllerTest {
         });
         latch.await(1, TimeUnit.SECONDS);
 
-        assertEquals("Account updated successfully", message.get());
+        assertEquals(Localization.get("dashboard.update_success"), message.get());
     }
 
     @Test
@@ -541,3 +573,4 @@ class UserDashboardControllerTest {
         }
     }
 }
+
