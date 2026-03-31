@@ -22,11 +22,13 @@ import session.NoteSession;
 import session.NotebookSession;
 import session.UserSession;
 import testutil.JavaFxTestExtension;
+import util.Localization;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -52,6 +54,15 @@ class CreateNoteControllerTest {
     private FlowPane tagFlowpane;
     private ComboBox<String> tagComboBox;
     private Button addTagBtn;
+    private Menu fileMenu;
+    private Menu editMenu;
+    private MenuItem backDashboard;
+    private MenuItem closeFile;
+    private Label noteTitleLabel;
+    private Label noteContentLabel;
+    private Label noteAnnotationLabel;
+    private Label noteTagLabel;
+    private Label selectLabel;
     private MenuItem undoMenuItem;
     private MenuItem redoMenuItem;
     private Label wordCountLabel;
@@ -194,6 +205,7 @@ class CreateNoteControllerTest {
         UserSession.getUserInstance().setUser(null);
         NoteSession.setLastCreatedNote(null);
         NotebookSession.setLastCreatedNotebook(null);
+        Localization.setLocale(Locale.ENGLISH);
 
         controller = new CreateNoteController();
         mockNotebookDao = new MockNotebookDao();
@@ -216,6 +228,15 @@ class CreateNoteControllerTest {
             tagFlowpane = new FlowPane();
             tagComboBox = new ComboBox<>();
             addTagBtn = new Button();
+            fileMenu = new Menu();
+            editMenu = new Menu();
+            backDashboard = new MenuItem();
+            closeFile = new MenuItem();
+            noteTitleLabel = new Label();
+            noteContentLabel = new Label();
+            noteAnnotationLabel = new Label();
+            noteTagLabel = new Label();
+            selectLabel = new Label();
             undoMenuItem = new MenuItem();
             redoMenuItem = new MenuItem();
             wordCountLabel = new Label();
@@ -249,6 +270,15 @@ class CreateNoteControllerTest {
         injectField("tagFlowpane", tagFlowpane);
         injectField("tagComboBox", tagComboBox);
         injectField("addTagBtn", addTagBtn);
+        injectField("fileMenu", fileMenu);
+        injectField("editMenu", editMenu);
+        injectField("backDashboard", backDashboard);
+        injectField("closeFile", closeFile);
+        injectField("noteTitleLabel", noteTitleLabel);
+        injectField("noteContentLabel", noteContentLabel);
+        injectField("noteAnnotationLabel", noteAnnotationLabel);
+        injectField("noteTagLabel", noteTagLabel);
+        injectField("selectLabel", selectLabel);
         injectField("undoMenuItem", undoMenuItem);
         injectField("redoMenuItem", redoMenuItem);
         injectField("wordCountLabel", wordCountLabel);
@@ -480,7 +510,7 @@ class CreateNoteControllerTest {
         });
         checkLatch.await(1, TimeUnit.SECONDS);
 
-        assertTrue(message.get().contains("title"));
+        assertTrue(message.get().contains(Localization.get("create.error_no_title")));
         assertNull(mockNoteService.savedNote);
     }
 
@@ -507,7 +537,7 @@ class CreateNoteControllerTest {
         });
         checkLatch.await(1, TimeUnit.SECONDS);
 
-        assertTrue(message.get().contains("notebook"));
+        assertTrue(message.get().contains(Localization.get("create.error_no_notebook")));
         assertNull(mockNoteService.savedNote);
     }
 
@@ -708,7 +738,7 @@ class CreateNoteControllerTest {
         });
         checkLatch.await(1, TimeUnit.SECONDS);
 
-        assertTrue(message.get().contains("success"));
+        assertTrue(message.get().contains(Localization.get("create.success")));
     }
 }
 
