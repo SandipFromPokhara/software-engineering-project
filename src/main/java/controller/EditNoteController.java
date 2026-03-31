@@ -202,7 +202,7 @@ public class EditNoteController {
     @FXML
     void handleUpdate() {
         if (noteDao == null || tagDao == null || note == null) {
-            showStatus("Internal error. Please reopen edit window", true);
+            showStatus(Localization.get("edit.update_fail_status"), true);
             return;
         }
 
