@@ -82,7 +82,7 @@ public class UserDashboardController {
         newPassword.textProperty().bind(Localization.bind("account.new_password"));
         passwordField.promptTextProperty().bind(Localization.bind("account.password_hint"));
         confirmPasswordField.promptTextProperty().bind(Localization.bind("account.password_repeat"));
-        manageCancel.textProperty().bind(Localization.bind("account.cancel"));
+        manageCancel.textProperty().bind(Localization.bind("button.cancel"));
         manageUpdate.textProperty().bind(Localization.bind("account.update"));
 
         // Load user data
@@ -96,7 +96,6 @@ public class UserDashboardController {
         lastNameField.setText(currentUser.getLastName());
         usernameField.setText(currentUser.getUsername());
         emailField.setText(currentUser.getEmail());
-
     }
 
     @FXML
