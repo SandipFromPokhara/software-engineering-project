@@ -12,7 +12,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 import util.*;
 import util.bulletList.BulletListStrategy;
@@ -39,28 +38,28 @@ public class EditNoteController {
     private Label content;
 
     @FXML
-    TextArea contentBox;
+    private TextArea contentBox;
 
     @FXML
     private Label annotation;
 
     @FXML
-    TextField annotationBox;
+    private TextField annotationBox;
 
     @FXML
-    Button updateButton;
+    private Button updateButton;
 
     @FXML
     private Button cancelButton;
 
     @FXML
-    Label statusLabel;
+    private Label statusLabel;
 
     @FXML
-    FlowPane tagFlowpane;
+    private FlowPane tagFlowpane;
 
     @FXML
-    ComboBox<String> tagComboBox;
+    private ComboBox<String> tagComboBox;
 
     @FXML
     private Button addTagBtn;
@@ -200,7 +199,7 @@ public class EditNoteController {
     }
 
     @FXML
-    void handleUpdate() {
+    public void handleUpdate() {
         if (noteDao == null || tagDao == null || note == null) {
             showStatus(Localization.get("edit.update_fail_status"), true);
             return;
@@ -245,7 +244,7 @@ public class EditNoteController {
     }
 
     @FXML
-    void handleAddTag() {
+   public  void handleAddTag() {
         String tagName = tagComboBox.getEditor().getText();
         TagUtil.addTagToUI(selectedTags, tagFlowpane, tagComboBox, tagName);
     }

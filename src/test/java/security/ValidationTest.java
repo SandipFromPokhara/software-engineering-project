@@ -1,144 +1,161 @@
 package security;
 
-import javafx.embed.swing.JFXPanel;
-import javafx.scene.control.Label;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ValidationTest {
 
-    private static Label messageLabel;
+    // ---------- validateSignup ----------
+    @Test
+    void validateSignup_shouldPass_whenAllValid() {
+        Validation.ValidationResult result =
+                Validation.validateSignup("John", "Doe", "User123",
+                        "user@example.com", "Abc123!", "Abc123!");
 
-    @BeforeAll
-    static void setup() {
-        // Initializes JavaFX toolkit
-        new JFXPanel();
-        messageLabel = new Label();
+        assertTrue(result.success());
+        assertTrue(result.errors().isEmpty());
     }
 
     @Test
-    void testValidateName() {
-        // Valid
-        assertTrue(Validation.validateName("John", "First Name", messageLabel));
-        assertFalse(messageLabel.isVisible());
+    void validateSignup_shouldFail_whenFieldsEmpty() {
+        Validation.ValidationResult result =
+                Validation.validateSignup("", "", "", "", "", "");
 
-        // Invalid chars
-        assertFalse(Validation.validateName("John123", "First Name", messageLabel));
-        assertTrue(messageLabel.isVisible());
-        assertEquals("First Name contains invalid characters", messageLabel.getText());
-
-        // Too short
-        assertFalse(Validation.validateName("J", "First Name", messageLabel));
-        assertTrue(messageLabel.isVisible());
-        assertEquals("First Name must be 2-50 characters long", messageLabel.getText());
-
-        // Too long
-        String longName = "A".repeat(51);
-        assertFalse(Validation.validateName(longName, "First Name", messageLabel));
-        assertTrue(messageLabel.isVisible());
-        assertEquals("First Name must be 2-50 characters long", messageLabel.getText());
+        assertFalse(result.success());
+        assertTrue(result.errors().containsKey("firstName"));
+        assertTrue(result.errors().containsKey("password"));
     }
 
     @Test
-    void testValidateRequiredFields() {
-        // All filled
-        assertTrue(Validation.validateRequiredFields("a","b","c","d","e","f", messageLabel));
+    void validateSignup_shouldFail_invalidEmail() {
+        Validation.ValidationResult result =
+                Validation.validateSignup("John", "Doe", "User123",
+                        "invalid-email", "Abc123!", "Abc123!");
 
-        // One empty
-        assertFalse(Validation.validateRequiredFields("","b","c","d","e","f", messageLabel));
-        assertEquals("All fields are required", messageLabel.getText());
+        assertFalse(result.success());
+        assertTrue(result.errors().containsKey("email"));
     }
 
     @Test
-    void testValidateUsername() {
-        assertTrue(Validation.validateUsername("User_123", messageLabel));
-        assertFalse(Validation.validateUsername("Us", messageLabel));
-        assertEquals("Username must be 3-20 characters", messageLabel.getText());
-        assertFalse(Validation.validateUsername("Invalid!", messageLabel));
-        assertEquals("Username must be 3-20 characters", messageLabel.getText());
+    void validateSignup_shouldFail_passwordMismatch() {
+        Validation.ValidationResult result =
+                Validation.validateSignup("John", "Doe", "User123",
+                        "user@example.com", "Abc123!", "Different!");
+
+        assertFalse(result.success());
+        assertTrue(result.errors().containsKey("confirmPassword"));
     }
 
     @Test
-    void testValidateEmailFormat() {
-        assertTrue(Validation.validateEmailFormat("test@example.com", messageLabel));
-        assertFalse(Validation.validateEmailFormat("invalid-email", messageLabel));
-        assertEquals("Invalid email address", messageLabel.getText());
+    void validateSignup_shouldFail_weakPassword() {
+        Validation.ValidationResult result =
+                Validation.validateSignup("John", "Doe", "User123",
+                        "user@example.com", "abc", "abc");
+
+        assertFalse(result.success());
+        assertTrue(result.errors().containsKey("password"));
+    }
+
+    // ---------- validateRequiredFields ----------
+    @Test
+    void validateRequiredFields_shouldPass() {
+        assertTrue(Validation.validateRequiredFields("a","b","c","d","e","f"));
     }
 
     @Test
-    void testValidatePasswordMatch() {
-        assertTrue(Validation.validatePasswordMatch("pass123!", "pass123!", messageLabel));
-        assertFalse(Validation.validatePasswordMatch("pass123!", "pass124!", messageLabel));
-        assertEquals("Passwords do not match", messageLabel.getText());
+    void validateRequiredFields_shouldFail() {
+        assertFalse(Validation.validateRequiredFields("","b","c","d","e","f"));
+    }
+
+    // ---------- validateName ----------
+    @Test
+    void validateName_shouldAddError_forInvalidName() {
+        Map<String, java.util.List<Validation.ValidationError>> errors = new java.util.HashMap<>();
+
+        Validation.validateName("J", "firstName", errors, "First name");
+
+        assertTrue(errors.containsKey("firstName"));
     }
 
     @Test
-    void testValidatePasswordStrength() {
-        // Valid
-        assertTrue(Validation.validatePasswordStrength("Abc123!", messageLabel));
+    void validateName_shouldPass_forValidName() {
+        Map<String, java.util.List<Validation.ValidationError>> errors = new java.util.HashMap<>();
 
-        // Too short
-        assertFalse(Validation.validatePasswordStrength("Ab1!", messageLabel));
-        assertEquals("Password must be at least 6 characters long", messageLabel.getText());
+        Validation.validateName("John", "firstName", errors, "First name");
 
-        // Missing number
-        assertFalse(Validation.validatePasswordStrength("Abcdef!", messageLabel));
-        assertEquals("Password must contain at least 1 number", messageLabel.getText());
+        assertTrue(errors.isEmpty());
+    }
 
-        // Missing special char
-        assertFalse(Validation.validatePasswordStrength("Abc1234", messageLabel));
-        assertEquals("Password must contain at least 1 special character", messageLabel.getText());
+    // ---------- validateUsername ----------
+    @Test
+    void validateUsername_shouldPass() {
+        assertTrue(Validation.validateUsername("User_123"));
     }
 
     @Test
-    void testValidateSignupFields() {
-        // Everything valid
-        assertTrue(Validation.validateSignupFields(
-                "John", "Doe", "User123", "user@example.com", "Abc123!", "Abc123!", messageLabel));
+    void validateUsername_shouldFail() {
+        assertFalse(Validation.validateUsername("Us"));
+        assertFalse(Validation.validateUsername("Invalid!"));
+    }
 
-        // Missing required field
-        assertFalse(Validation.validateSignupFields(
-                "", "Doe", "User123", "user@example.com", "Abc123!", "Abc123!", messageLabel));
-
-        // Invalid username
-        assertFalse(Validation.validateSignupFields(
-                "John", "Doe", "Us", "user@example.com", "Abc123!", "Abc123!", messageLabel));
-
-        // Invalid email
-        assertFalse(Validation.validateSignupFields(
-                "John", "Doe", "User123", "userexample.com", "Abc123!", "Abc123!", messageLabel));
-
-        // Password mismatch
-        assertFalse(Validation.validateSignupFields(
-                "John", "Doe", "User123", "user@example.com", "Abc123!", "Abc1234!", messageLabel));
-
-        // Weak password
-        assertFalse(Validation.validateSignupFields(
-                "John", "Doe", "User123", "user@example.com", "abc", "abc", messageLabel));
+    // ---------- validateEmailFormat ----------
+    @Test
+    void validateEmail_shouldPass() {
+        assertTrue(Validation.validateEmailFormat("test@example.com"));
     }
 
     @Test
-    void testShowAndHideMessage() {
-        // Show error
-        Validation.showMessage(messageLabel, "Error!", Validation.MessageType.ERROR);
-        assertTrue(messageLabel.isVisible());
-        assertEquals("Error!", messageLabel.getText());
+    void validateEmail_shouldFail() {
+        assertFalse(Validation.validateEmailFormat("invalid-email"));
+    }
 
-        // Hide
-        Validation.hideMessage(messageLabel);
-        assertFalse(messageLabel.isVisible());
-        assertEquals("", messageLabel.getText());
+    // ---------- validatePasswordMatch ----------
+    @Test
+    void validatePasswordMatch_shouldPass() {
+        assertTrue(Validation.validatePasswordMatch("pass123!", "pass123!"));
+    }
 
-        // Show success
-        Validation.showMessage(messageLabel, "Success!", Validation.MessageType.SUCCESS);
-        assertTrue(messageLabel.isVisible());
-        assertEquals("Success!", messageLabel.getText());
+    @Test
+    void validatePasswordMatch_shouldFail() {
+        assertFalse(Validation.validatePasswordMatch("pass123!", "pass124!"));
+    }
 
-        // Show info
-        Validation.showMessage(messageLabel, "Info!", Validation.MessageType.INFO);
-        assertTrue(messageLabel.isVisible());
-        assertEquals("Info!", messageLabel.getText());
+    // ---------- validateUpdate ----------
+    @Test
+    void validateUpdate_shouldPass_whenValid() {
+        Validation.ValidationResult result =
+                Validation.validateUpdate("Doe", "User123", "Abc123!", "Abc123!");
+
+        assertTrue(result.success());
+    }
+
+    @Test
+    void validateUpdate_shouldFail_missingFields() {
+        Validation.ValidationResult result =
+                Validation.validateUpdate("", "", "", "");
+
+        assertFalse(result.success());
+        assertTrue(result.errors().containsKey("lastName"));
+        assertTrue(result.errors().containsKey("username"));
+    }
+
+    @Test
+    void validateUpdate_shouldFail_passwordMismatch() {
+        Validation.ValidationResult result =
+                Validation.validateUpdate("Doe", "User123", "Abc123!", "wrong");
+
+        assertFalse(result.success());
+        assertTrue(result.errors().containsKey("confirmPassword"));
+    }
+
+    @Test
+    void validateUpdate_shouldAllow_emptyPassword() {
+        Validation.ValidationResult result =
+                Validation.validateUpdate("Doe", "User123", "", "");
+
+        assertTrue(result.success());
     }
 }
