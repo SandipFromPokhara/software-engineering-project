@@ -15,7 +15,7 @@ pipeline {
         DB_NAME = 'notevault_db'
         DB_CREDENTIALS_ID = 'DB_CREDENTIALS'
         DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
-        DOCKERHUB_REPO = 'sandipranjit/notevault'
+        DOCKERHUB_REPO = 'sandipranjit/notevault-branchtest'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
         BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
     }
@@ -24,7 +24,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
+                git branch: 'feature-dashboard2', url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
             }
         }
 
