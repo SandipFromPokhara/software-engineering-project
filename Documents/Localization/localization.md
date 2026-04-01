@@ -14,7 +14,7 @@ NoteVault currently supports the following languages:
 
 - Burmese (my) 🇲🇲
 - English (en) 🇬🇧
-- Finnish (fi) 
+- Finnish (fi) 🇫🇮
 - Nepali (np) 🇳🇵
 - Sinhala (si) 🇱🇰
 
