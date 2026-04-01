@@ -135,9 +135,9 @@ This sprint represents the **completion of all core application features** and e
 | Team Member            | Assigned Tasks                                                                                                                                                                                         | Time Spent (hrs) | In-class Tasks |
 |-----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|----------------|
 | Twe He Gam Aung       | Scrum Master, sprint planning, UI refactoring for localization, Burmese language implementation, localization testing, deployment updates, README and documentation updates                         | 42               | Submitted      |
-| Sandip Ranjit         | Localization integration, pull request management, Nepali language implementation, deployment updates, localization testing                                                                          |                  | Submitted      |
-| Dinal Maha Vidanelage | Language selector UI implementation, Sinhala language implementation, localization testing                                                                                                           |                  | Submitted      |
-| Swostika Lama         | Localization resource preparation and translation planning, English/base localization setup, Finnish language implementation, localization testing                                                   |                  | Submitted      |
+| Sandip Ranjit         | Localization integration, pull request management, Nepali language implementation, deployment updates, localization testing                                                                          | 40               | Submitted      |
+| Dinal Maha Vidanelage | Language selector UI implementation, Sinhala language implementation, localization testing                                                                                                           | 39               | Submitted      |
+| Swostika Lama         | Localization resource preparation and translation planning, English/base localization setup, Finnish language implementation, localization testing                                                   | 41               | Submitted      |
 
 ---
 
