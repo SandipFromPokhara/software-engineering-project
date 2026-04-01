@@ -47,6 +47,4 @@ build/
 .env.local
 
 
-.env.example
-
 DockerRun.md
