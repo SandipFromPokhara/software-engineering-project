@@ -24,7 +24,7 @@ While the application provides secure notebook and note management, the primary 
   1. Launch the app (e.g., `mvn clean javafx:run` or run the packaged JAR).
   2. In the dashboard toolbar use the language dropdown (shows codes like EN/FI/NP/MY/SI) or open the language dialog ("Change language" action).
   3. Pick a language and confirm — UI text updates immediately and the choice is saved in user preferences for the next run.
-- To add a new language: create `MessagesBundle_<lang>.properties`, fill all keys (use `MessagesBundle.properties` as the baseline), and register it in `LanguageModel` with a locale code.
+- To add a new language: create `MessagesBundle_<lang>.properties`, fill all keys (use `MessagesBundle_en.properties` as the baseline), and register it in `LanguageModel` with a locale code.
 - Essential localization resources: translation files in `src/main/resources/i18n/`, locale helper `util.Localization`, language registry `model.LanguageModel`, and the selection UI in `controller.ViewDashboardController` / `controller.LanguageDialogController`. Human translators or a lightweight localization tool (e.g., POEditor/Weblate) can manage the property files.
 
 ---
