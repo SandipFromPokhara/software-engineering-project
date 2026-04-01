@@ -183,9 +183,17 @@ class LoginControllerTest {
 
         invokePrivateMethod("handleLogin", new ActionEvent());
 
-        Thread.sleep(200);
+        boolean visible = false;
 
-        assertTrue(statusLabel.isVisible());
+        for (int i = 0; i < 10; i++) {
+            Thread.sleep(100);
+            if (statusLabel.isVisible()) {
+                visible = true;
+                break;
+            }
+        }
+
+        assertTrue(visible);
         assertFalse(loginButton.isDisabled());
         assertEquals("Invalid username or password", statusLabel.getText());
     }
