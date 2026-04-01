@@ -46,6 +46,6 @@ build/
 *.env
 .env.local
 
-docker-compose.yml
-Dockerfile
-Jenkinsfile
+#docker-compose.yml
+#Dockerfile
+#Jenkinsfile
