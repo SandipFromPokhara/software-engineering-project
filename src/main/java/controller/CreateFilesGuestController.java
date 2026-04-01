@@ -43,7 +43,6 @@ public class CreateFilesGuestController {
         if (annotationBox != null) {
             annotationBox.clear();
         }
-
     }
 
     @FXML
@@ -57,5 +56,4 @@ public class CreateFilesGuestController {
         cancelButton.textProperty().bind(Localization.bind("note.cancel"));
 
     }
-
 }

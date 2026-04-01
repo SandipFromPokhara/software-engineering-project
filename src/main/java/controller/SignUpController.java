@@ -202,8 +202,8 @@ public class SignUpController {
 
                 PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
                 delay.setOnFinished(event -> {
-                        skipValidation = false;
-                        NavigationUtil.replaceScene(currentStage, "/FXML/login_view.fxml", "login.window_title", false);
+                    skipValidation = false;
+                    NavigationUtil.replaceScene(currentStage, "/FXML/login_view.fxml", "login.window_title", false);
                 });
                 delay.play();
             } else {

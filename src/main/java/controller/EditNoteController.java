@@ -112,12 +112,13 @@ public class EditNoteController {
         redoMenuItem.textProperty().bind(Localization.bind("edit.redo"));
 
         content.textProperty().bind(Localization.bind("edit.content_label"));
+        contentBox.promptTextProperty().bind(Localization.bind("edit.content_box"));
         annotation.textProperty().bind(Localization.bind("edit.annotations"));
         editTags.textProperty().bind(Localization.bind("edit.tags"));
 
         tagTooltip.textProperty().bind(Localization.bind("tooltip.tags_info"));
         updateButton.textProperty().bind(Localization.bind("edit.update"));
-        cancelButton.textProperty().bind(Localization.bind("edit.cancel"));
+        cancelButton.textProperty().bind(Localization.bind("button.cancel"));
 
         annotationBox.promptTextProperty().bind(Localization.bind("edit.placeholder_annotations"));
         tagComboBox.promptTextProperty().bind(Localization.bind("edit.placeholder_tags"));
