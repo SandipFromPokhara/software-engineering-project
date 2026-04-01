@@ -141,20 +141,21 @@ This sprint represents the **completion of all core application features** and e
 
 ---
 
-## **Next Sprint Focus (Sprint 6)**
+### **Next Sprint Focus (Sprint 6)**
 
-- Implement database-level localization support
-- Update database schema for multilingual content storage
-- Enable storing and retrieving localized data dynamically
-- Improve translation management and maintainability
-- Enhance system performance and scalability
+- Choose scrum master for Sprint 6 (Sandip Ranjit).
+- Review Sprint 5 accomplishments and lessons learned.
+- Plan product backlog for Sprint 6.
+- Implement database-driven localization for multilingual support.
+- Design and update database schema for storing localized content.
+- Migrate localization from resource bundles to database.
+- Test database localization functionality and ensure system stability.
+- Prepare final demonstration and documentation for database localization.
 
 ---
 
 ## **Conclusion**
 
-Sprint 5 was a **major milestone** in the development of NoteVault, successfully transforming the application into a fully multilingual system.
+Sprint 5 successfully implemented UI localization and dynamic language switching in the NoteVault application.
 
-The implementation of UI localization, combined with dynamic language switching and robust deployment support, has significantly improved the system’s usability, scalability, and readiness for real-world applications.
-
-The project is now well-prepared for the next phase, focusing on **database localization and advanced internationalization features**.
+The system is now prepared for the next phase, focusing on database-driven localization and further scalability improvements.
