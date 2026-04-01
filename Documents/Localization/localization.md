@@ -22,7 +22,7 @@ NoteVault currently supports the following languages:
 
 ---
 
-## 🧩 Localization Approach
+## Localization Approach
 
 Localization is implemented using **Java ResourceBundle**, which allows the application to load language-specific resources at runtime.
 
@@ -35,7 +35,7 @@ Localization is implemented using **Java ResourceBundle**, which allows the appl
 
 ---
 
-## 📁 Resource File Structure
+## Resource File Structure
 
 MessagesBundle_en.properties
 MessagesBundle_fi.properties
