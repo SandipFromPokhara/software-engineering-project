@@ -40,7 +40,7 @@
         <AnchorPane prefHeight="400.0" prefWidth="300.0" style="-fx-background-color: #ebf4f5;" BorderPane.alignment="CENTER">
             <children>
 
-                <HBox fx:id="languageSwitcher" alignment="CENTER" spacing="4" AnchorPane.topAnchor="8.0" AnchorPane.rightAnchor="8.0" styleClass="language-switcher">
+                <HBox fx:id="languageSwitcher" alignment="CENTER" spacing="4" AnchorPane.topAnchor="8.0" AnchorPane.rightAnchor="15.0" styleClass="language-switcher">
                     <children>
                         <!-- Globe icon -->
                         <Label text="🌐"/>
