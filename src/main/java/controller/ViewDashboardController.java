@@ -78,11 +78,6 @@ public class ViewDashboardController {
             logoutBtn;
 
     @FXML
-    private Label viewNotesLabel,
-            createNoteLabel,
-            logoutLabel;
-
-    @FXML
     private Button deleteButton,
             editButton;
 
@@ -114,7 +109,7 @@ public class ViewDashboardController {
     private Button toggleBtn;
 
     @FXML
-    private Tooltip toggleTooltip, langTooltip;
+    private Tooltip toggleTooltip, langTooltip, manageTooltip, createTooltip, logoutTooltip;
 
     @FXML
     private ImageView tagIcon,
@@ -146,9 +141,9 @@ public class ViewDashboardController {
         faqItem.textProperty().bind(Localization.bind("logged.faq"));
         aboutItem.textProperty().bind(Localization.bind("menu.about"));
 
-        viewNotesLabel.textProperty().bind(Localization.bind("notebook.manage_label"));
-        createNoteLabel.textProperty().bind(Localization.bind("note.create_label"));
-        logoutLabel.textProperty().bind(Localization.bind("button.logout"));
+        manageTooltip.textProperty().bind(Localization.bind("notebook.manage_label"));
+        createTooltip.textProperty().bind(Localization.bind("note.create_label"));
+        logoutTooltip.textProperty().bind(Localization.bind("button.logout"));
 
         titleColumn.textProperty().bind(Localization.bind("note.title"));
         dateColumn.textProperty().bind(Localization.bind("note.date"));
@@ -186,6 +181,9 @@ public class ViewDashboardController {
 
         toggleTooltip.setShowDelay(Duration.millis(100));
         langTooltip.setShowDelay(Duration.millis(100));
+        manageTooltip.setShowDelay(Duration.millis(100));
+        createTooltip.setShowDelay(Duration.millis(100));
+        logoutTooltip.setShowDelay(Duration.millis(100));
 
         WordCountUtil.bind(noteViewArea, wordCountLabel);
 
@@ -196,14 +194,11 @@ public class ViewDashboardController {
         deleteButton.setDisable(true);
 
         setupTableColumns();
-        setupHoverEffects();
         setupEventBusSubscription();
 
         // Determine initial notebook
         activeNotebook = dashboardService.getInitialNotebook();
         if (activeNotebook != null) loadNotes();
-
-        dbStatusLabel.setStyle("-fx-text-fill: green;");
     }
 
     private void setupLanguageCombo() {
@@ -394,18 +389,6 @@ public class ViewDashboardController {
                     "-fx-text-fill: " + textColor + "; -fx-font-weight: bold; " +
                             "-fx-font-size: 11px; -fx-background-color: transparent;");
         }
-    }
-
-    private void setupHover(Button button, Label label) {
-        button.setOnMouseEntered(e -> label.setVisible(true));
-
-        button.setOnMouseExited(e -> label.setVisible(false));
-    }
-
-    private void setupHoverEffects() {
-        setupHover(viewNotesBtn, viewNotesLabel);
-        setupHover(createNoteBtn, createNoteLabel);
-        setupHover(logoutBtn, logoutLabel);
     }
 
     @FXML
@@ -683,7 +666,12 @@ public class ViewDashboardController {
                 String userHome = System.getProperty("user.home");
                 File dataDir = new File(userHome, ".NoteVault/data");
                 if (!dataDir.exists()) {
-                    dataDir.mkdirs();
+                    boolean created = dataDir.mkdirs();
+                    if (!created) {
+                        logger.warning("Failed to create data directory: " + dataDir.getAbsolutePath());
+                        AlertUtil.showError(owner, Localization.get("dashboard.folder.error_create"));
+                        return;
+                    }
                 }
                 if (java.awt.Desktop.isDesktopSupported()) {
                     java.awt.Desktop.getDesktop().open(dataDir);
