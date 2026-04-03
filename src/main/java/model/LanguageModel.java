@@ -13,7 +13,7 @@ public class LanguageModel {
     static {
         LANGUAGES.put("EN", new Language("EN", "English",   "Default",    Locale.ENGLISH));
         LANGUAGES.put("FI", new Language("FI", "Finnish",   "Suomi",      new Locale("fi")));
-        LANGUAGES.put("NP", new Language("NP", "Nepali",    "नेपाली",      new Locale("np_NP")));
+        LANGUAGES.put("NP", new Language("NP", "Nepali",    "नेपाली",      new Locale("np")));
         LANGUAGES.put("MY", new Language("MY", "Burmese",   "မြန်မာဘာသာ", new Locale("my")));
         LANGUAGES.put("SI", new Language("SI", "Sinhalese", "සිංහල",      new Locale("si")));
     }
