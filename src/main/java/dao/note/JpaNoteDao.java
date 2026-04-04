@@ -1,14 +1,14 @@
 package dao.note;
 
-import datasource.MariaDbJpaConnection;
-import entity.NoteBookEntity;
+import dao.basedao.GenericAbstractDAO;
+import entity.NotebookEntity;
 import entity.NoteEntity;
-import jakarta.persistence.EntityManager;
+import entity.NoteTranslationEntity;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
-public class JpaNoteDao implements NoteDAO{
+public class JpaNoteDao extends GenericAbstractDAO<NoteEntity, Long> implements NoteDAO{
 
     public JpaNoteDao() {}
 
@@ -16,64 +16,43 @@ public class JpaNoteDao implements NoteDAO{
     public NoteEntity save(NoteEntity note) {
         if (note == null) throw new IllegalArgumentException("Note cannot be null");
 
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        try {
-            em.getTransaction().begin();
-            NoteEntity managedNote;
-
+        return executeInTransaction(em -> {
             if (note.getId() == null) {
                 em.persist(note);
-                managedNote = note;
+                return note;
             } else {
-                managedNote = em.merge(note);
+                return em.merge(note);
             }
-            em.getTransaction().commit();
-            return managedNote;
-
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
-            throw new RuntimeException("Failed to save note.", e);
-        } finally {
-            em.close();
-        }
+        });
     }
 
     @Override
     public NoteEntity findById(Long id) {
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        try {
-            return em.find(NoteEntity.class, id);
-        } finally {
-            em.close();
-        }
+        return executeInTransaction(em -> em.find(NoteEntity.class, id));
     }
 
     @Override
-    public List<NoteEntity> findByTitle(String title) {
+    public List<NoteTranslationEntity> findByTitle(String title) {
         if (title == null) throw new IllegalArgumentException("Title cannot be null");
 
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        try {
-            TypedQuery<NoteEntity> query = em.createQuery("Select n from NoteEntity n where n.title = :title", NoteEntity.class);
+        return executeInTransaction(em -> {
+            TypedQuery<NoteTranslationEntity> query = em.createQuery("SELECT t FROM NoteTranslationEntity t WHERE LOWER (t.title) = LOWER(:title)", NoteTranslationEntity.class);
             query.setParameter("title", title);
+
             return query.getResultList();
-        } finally {
-            em.close();
-        }
+        });
     }
 
     @Override
-    public List<NoteEntity> findByNotebook(NoteBookEntity notebook) {
-
+    public List<NoteEntity> findByNotebook(NotebookEntity notebook) {
         if (notebook == null) throw new IllegalArgumentException("Notebook cannot be null");
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        try {
+
+        return executeInTransaction(em -> {
             TypedQuery<NoteEntity> query = em.createQuery("Select n from NoteEntity n where n.notebook = :notebook", NoteEntity.class);
             query.setParameter("notebook", notebook);
+
             return query.getResultList();
-        } finally {
-            em.close();
-        }
+        });
     }
 
     @Override
@@ -81,40 +60,22 @@ public class JpaNoteDao implements NoteDAO{
         if (note == null || note.getId() == null)
             throw new IllegalArgumentException("Note or ID is null");
 
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        try {
-            em.getTransaction().begin();
-
-            NoteEntity managed =
-                    em.find(NoteEntity.class, note.getId());
-
+        executeInTransaction(em -> {
+            NoteEntity managed = em.find(NoteEntity.class, note.getId());
             if (managed != null) {
                 em.remove(managed);
             }
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            if (em.getTransaction().isActive())
-                em.getTransaction().rollback();
-            throw new RuntimeException("Failed to delete note", e);
-        } finally {
-            em.close();
-        }
+            return null;
+        });
     }
 
     @Override
     public void update(NoteEntity note) {
         if (note == null) throw new IllegalArgumentException("Note cannot be null");
 
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        try {
-            em.getTransaction().begin();
+        executeInTransaction(em -> {
             em.merge(note);
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
-            throw new RuntimeException("Failed to update note", e);
-        } finally {
-            em.close();
-        }
+            return null;
+        });
     }
 }
