@@ -3,9 +3,7 @@ package entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name="notes")
@@ -14,16 +12,6 @@ public class NoteEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name="title")
-    private String title;
-
-    @Lob
-    @Column(name="content", columnDefinition = "TEXT")
-    private String content;
-
-    @Column(name="annotation")
-    private String annotation;
 
     @Column(name="createdAt")
     private LocalDateTime createdAt;
@@ -41,8 +29,11 @@ public class NoteEntity {
             joinColumns = @JoinColumn(name = "note_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-
     private Set<TagEntity> tags = new HashSet<>();
+
+    @OneToMany(mappedBy="note", cascade=CascadeType.ALL, orphanRemoval=true, fetch=FetchType.LAZY)
+    @MapKey(name="langCode")
+    private Map<String, NoteTranslationEntity> translations = new HashMap<>();
 
     @PrePersist
     protected void onCreate() {
@@ -55,27 +46,15 @@ public class NoteEntity {
         updatedAt = LocalDateTime.now();
     }
 
-    public NoteEntity(String title, String content, String annotation) {
-        this.title = title;
-        this.content = content;
-        this.annotation = annotation;
-    }
-
     public NoteEntity() {}
 
     public Long getId() { return id; }
 
-    public String getTitle() { return title; }
-
-    public String getContent() { return content; }
-
-    public String getAnnotation() { return annotation; }
-
     public NoteBookEntity getNotebook() { return notebook; }
 
-    public LocalDateTime getCreatedTime() { return createdAt; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 
-    public LocalDateTime getUpdatedTime() { return updatedAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 
     public void addTag(TagEntity tag) {
         tags.add(tag);
@@ -89,21 +68,21 @@ public class NoteEntity {
         return Collections.unmodifiableSet(tags);
     }
 
-    public void setTitle(String newTitle) {
-        this.title = newTitle;
-    }
-
-    public void setContent(String newContent) {
-        this.content = newContent;
-    }
-
-    public void setAnnotation(String newAnnotation) { this.annotation = newAnnotation; }
-
     public void setNotebook(NoteBookEntity notebook) { this.notebook = notebook; }
 
-    @Override
-    public String toString() {
-        return title;
+    public void addTranslation(NoteTranslationEntity nt) {
+        if (nt != null) {
+            String langCode = nt.getLangCode();
+            nt.setNote(this);
+            translations.put(langCode, nt);
+        }
+    }
+
+    public void removeTranslation(String langCode) {
+        NoteTranslationEntity nt = translations.remove(langCode);
+        if (nt != null) {
+            nt.setNote(null);
+        }
     }
 
     public String getFormattedCreatedTime() {
