@@ -10,6 +10,4 @@ import java.util.List;
 public interface NoteDAO extends GenericDAO <NoteEntity, Long> {
     List<NoteTranslationEntity> findByTitle(String title);
     List<NoteEntity> findByNotebook(NotebookEntity notebook);
-
-    NoteEntity findById(Long id, String language);
 }
