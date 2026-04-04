@@ -56,8 +56,8 @@ public class DashboardService {
 
         List<NoteEntity> notes = noteDao.findByNotebook(notebook);
         notes.sort((n1, n2) -> {
-            LocalDateTime t1 = Optional.ofNullable(n1.getUpdatedTime()).orElse(LocalDateTime.MIN);
-            LocalDateTime t2 = Optional.ofNullable(n2.getUpdatedTime()).orElse(LocalDateTime.MIN);
+            LocalDateTime t1 = Optional.ofNullable(n1.getUpdatedAt()).orElse(LocalDateTime.MIN);
+            LocalDateTime t2 = Optional.ofNullable(n2.getUpdatedAt()).orElse(LocalDateTime.MIN);
             return t2.compareTo(t1);        // descending order
         });
         return notes;
