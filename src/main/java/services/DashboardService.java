@@ -3,7 +3,7 @@ package services;
 import dao.note.NoteDAO;
 import dao.notebook.NoteBookDAO;
 import dao.tag.TagDAO;
-import entity.NoteBookEntity;
+import entity.NotebookEntity;
 import entity.NoteEntity;
 import session.NotebookSession;
 import session.UserSession;
@@ -32,26 +32,26 @@ public class DashboardService {
     }
 
     /** Load all notebooks for current user, sorted by creation time */
-    public List<NoteBookEntity> loadNotebooks() {
+    public List<NotebookEntity> loadNotebooks() {
         var user = UserSession.getUserInstance().getUser();
-        List<NoteBookEntity> notebooks = notebookDao.findByUser(user);
+        List<NotebookEntity> notebooks = notebookDao.findByUser(user);
         notebooks.sort(Comparator.comparing(nb -> Optional.ofNullable(nb.getCreatedAt()).orElse(LocalDateTime.MIN)));
         return notebooks;
     }
 
     /** Determine initial notebook to select */
-    public NoteBookEntity getInitialNotebook() {
-        NoteBookEntity lastCreated = NotebookSession.getLastCreatedNotebook();
+    public NotebookEntity getInitialNotebook() {
+        NotebookEntity lastCreated = NotebookSession.getLastCreatedNotebook();
         if (lastCreated != null) {
             NotebookSession.clear();
             return lastCreated;
         }
-        List<NoteBookEntity> notebooks = loadNotebooks();
+        List<NotebookEntity> notebooks = loadNotebooks();
         return notebooks.isEmpty() ? null : notebooks.get(0);
     }
 
     /** Load all notes for a notebook, sorted by updated time descending */
-    public List<NoteEntity> loadNotes(NoteBookEntity notebook) {
+    public List<NoteEntity> loadNotes(NotebookEntity notebook) {
         if (notebook == null) return List.of();
 
         List<NoteEntity> notes = noteDao.findByNotebook(notebook);

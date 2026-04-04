@@ -33,7 +33,7 @@ public class NoteService {
     /**
      * Creates a new note with title, content, and annotation
      */
-    public NoteEntity createNote(String title, String content, String annotation, NoteBookEntity notebookParameter, Set<String> tagNames) {
+    public NoteEntity createNote(String title, String content, String annotation, NotebookEntity notebookParameter, Set<String> tagNames) {
 
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("Title cannot be empty");
@@ -45,7 +45,7 @@ public class NoteService {
         }
 
         // Get or create notebook for current user
-        NoteBookEntity notebookToUse = (notebookParameter != null) ? notebookParameter : getOrCreatePersonalNotebook(currentUser);
+        NotebookEntity notebookToUse = (notebookParameter != null) ? notebookParameter : getOrCreatePersonalNotebook(currentUser);
 
         // Create and save note - separate content and annotation
         NoteEntity note = new NoteEntity(title.trim(), content != null ? content : "", annotation != null ? annotation: "");
@@ -68,24 +68,24 @@ public class NoteService {
         return noteDao.save(note);
     }
 
-    public NoteBookEntity createNotebook(String name) {
+    public NotebookEntity createNotebook(String name) {
         UserEntity user = UserSession.getUserInstance().getUser();
 
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Notebook name cannot be empty");
         }
 
-        NoteBookEntity notebook = new NoteBookEntity(name.trim(), user);
+        NotebookEntity notebook = new NotebookEntity(name.trim(), user);
         return notebookDao.save(notebook);
     }
 
     /**
      * Gets or creates a notebook for the logged-in user
      */
-    private NoteBookEntity getOrCreatePersonalNotebook(UserEntity user) {
+    private NotebookEntity getOrCreatePersonalNotebook(UserEntity user) {
 
         // Find existing notebook for this user
-        List<NoteBookEntity> notebooks = notebookDao.findByUser(user);
+        List<NotebookEntity> notebooks = notebookDao.findByUser(user);
 
         if (!notebooks.isEmpty()) {
             return notebooks.get(0);
@@ -93,7 +93,7 @@ public class NoteService {
 
         // Create personal notebook for user (e.g., "John's Notebook")
         String notebookName = user.getFirstName() + "'s Notebook";
-        NoteBookEntity unsavedNotebook  = new NoteBookEntity(notebookName, user);
+        NotebookEntity unsavedNotebook  = new NotebookEntity(notebookName, user);
         return notebookDao.save(unsavedNotebook);
     }
 

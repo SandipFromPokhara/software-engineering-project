@@ -3,7 +3,7 @@ package dao.note;
 import dao.notebook.JpaNoteBookDao;
 import dao.user.JpaUserDao;
 import datasource.MariaDbJpaConnection;
-import entity.NoteBookEntity;
+import entity.NotebookEntity;
 import entity.NoteEntity;
 import entity.UserEntity;
 import org.junit.jupiter.api.AfterAll;
@@ -19,7 +19,7 @@ class JpaNoteDaoTest {
     private static JpaUserDao userDao;
 
     private static UserEntity testUser;
-    private static NoteBookEntity testNotebook;
+    private static NotebookEntity testNotebook;
 
     @BeforeAll
     static void setup() {
@@ -32,7 +32,7 @@ class JpaNoteDaoTest {
         testUser = new UserEntity("Test","User","user"+unique,"mail"+unique+"@test.com");
         userDao.save(testUser);
 
-        testNotebook = new NoteBookEntity("TestNotebook", testUser);
+        testNotebook = new NotebookEntity("TestNotebook", testUser);
         notebookDao.save(testNotebook);
     }
 

@@ -3,9 +3,8 @@ package services;
 import dao.note.JpaNoteDao;
 import dao.notebook.JpaNoteBookDao;
 import dao.tag.JpaTagDao;
-import entity.NoteBookEntity;
+import entity.NotebookEntity;
 import entity.NoteEntity;
-import entity.TagEntity;
 import entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -80,7 +79,7 @@ class NoteServiceTest {
     void createNoteWithNotebookTest() {
         UserEntity user = new UserEntity();
         user.setFirstName("Test");
-        NoteBookEntity notebook = new NoteBookEntity("Test Notebook", user);
+        NotebookEntity notebook = new NotebookEntity("Test Notebook", user);
         Set<String> tags = Set.of("NotNull");
         NoteEntity expectedNote = new NoteEntity("Test Title", "content", "annotation");
 
@@ -101,7 +100,7 @@ class NoteServiceTest {
     void createNoteNullNotebookCreatesPersonalNotebookTest() {
         UserEntity user = new UserEntity();
         user.setFirstName("Test");
-        NoteBookEntity personalNotebook = new NoteBookEntity("Test's Notebook", user);
+        NotebookEntity personalNotebook = new NotebookEntity("Test's Notebook", user);
         NoteEntity expectedNote = new NoteEntity("Test Title", "content", "annotation");
 
         try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
@@ -109,14 +108,14 @@ class NoteServiceTest {
             when(session.getUser()).thenReturn(user);
             mockedSession.when(UserSession::getUserInstance).thenReturn(session);
             when(notebookDao.findByUser(user)).thenReturn(new ArrayList<>());
-            when(notebookDao.save(any(NoteBookEntity.class))).thenReturn(personalNotebook);
+            when(notebookDao.save(any(NotebookEntity.class))).thenReturn(personalNotebook);
             when(noteDao.save(any(NoteEntity.class))).thenReturn(expectedNote);
 
             NoteEntity result = noteService.createNote("Test Title", "content", "annotation", null, null);
 
             assertNotNull(result);
             verify(notebookDao, times(1)).findByUser(user);
-            verify(notebookDao, times(1)).save(any(NoteBookEntity.class));
+            verify(notebookDao, times(1)).save(any(NotebookEntity.class));
             verify(noteDao, times(1)).save(any(NoteEntity.class));
         }
     }
@@ -125,7 +124,7 @@ class NoteServiceTest {
     void createNoteNullContentUsesEmptyStringTest() {
         UserEntity user = new UserEntity();
         user.setFirstName("Test");
-        NoteBookEntity notebook = new NoteBookEntity("Content Notebook", user);
+        NotebookEntity notebook = new NotebookEntity("Content Notebook", user);
         Set<String> tags = Set.of("NotNull");
         NoteEntity expectedNote = new NoteEntity("Test Title", "", "annotation");
 
@@ -146,7 +145,7 @@ class NoteServiceTest {
     void createNoteNullAnnotationUsesEmptyStringTest() {
         UserEntity user = new UserEntity();
         user.setFirstName("Test");
-        NoteBookEntity notebook = new NoteBookEntity("Annotation Notebook", user);
+        NotebookEntity notebook = new NotebookEntity("Annotation Notebook", user);
         Set<String> tags = Set.of("NotNull");
         NoteEntity expectedNote = new NoteEntity("Test Title", "content", "");
 

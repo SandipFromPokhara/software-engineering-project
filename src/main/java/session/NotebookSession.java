@@ -1,16 +1,16 @@
 package session;
 
-import entity.NoteBookEntity;
+import entity.NotebookEntity;
 
 public class NotebookSession {
 
-    private static NoteBookEntity lastCreatedNotebook;
+    private static NotebookEntity lastCreatedNotebook;
 
-    public static void setLastCreatedNotebook(NoteBookEntity notebook) {
+    public static void setLastCreatedNotebook(NotebookEntity notebook) {
         lastCreatedNotebook = notebook;
     }
 
-    public static NoteBookEntity getLastCreatedNotebook() {
+    public static NotebookEntity getLastCreatedNotebook() {
         return lastCreatedNotebook;
     }
 

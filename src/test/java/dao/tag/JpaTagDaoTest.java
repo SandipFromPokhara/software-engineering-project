@@ -1,7 +1,7 @@
 package dao.tag;
 
 import datasource.MariaDbJpaConnection;
-import entity.NoteBookEntity;
+import entity.NotebookEntity;
 import entity.NoteEntity;
 import entity.TagEntity;
 import entity.UserEntity;
@@ -188,7 +188,7 @@ class JpaTagDaoTest {
         user.changePasswordHash("Test@123");
         em.persist(user);
 
-        NoteBookEntity notebook = new NoteBookEntity("Test Notebook", user);
+        NotebookEntity notebook = new NotebookEntity("Test Notebook", user);
         em.persist(notebook);
 
         NoteEntity note = new NoteEntity("Title", "Content", "Annotation");

@@ -2,7 +2,7 @@ package dao.notebook;
 
 import dao.user.JpaUserDao;
 import datasource.MariaDbJpaConnection;
-import entity.NoteBookEntity;
+import entity.NotebookEntity;
 import entity.UserEntity;
 import org.junit.jupiter.api.*;
 
@@ -36,10 +36,10 @@ class JpaNoteBookDaoTest {
 
     @Test
     void testSaveNotebook() {
-        NoteBookEntity notebook = new NoteBookEntity("JUnit 5 test", testUser);
+        NotebookEntity notebook = new NotebookEntity("JUnit 5 test", testUser);
         notebookDao.save(notebook);
 
-        NoteBookEntity retrievedNotebook = notebookDao.findById(notebook.getId());
+        NotebookEntity retrievedNotebook = notebookDao.findById(notebook.getId());
 
         assertNotNull(retrievedNotebook);
         assertEquals("JUnit 5 test", retrievedNotebook.getTitle());
@@ -49,15 +49,15 @@ class JpaNoteBookDaoTest {
 
     @Test
     void testFindNotebookByTitle() {
-        NoteBookEntity notebook = new NoteBookEntity("Find By Title", testUser);
+        NotebookEntity notebook = new NotebookEntity("Find By Title", testUser);
         notebookDao.save(notebook);
 
-        List<NoteBookEntity> retrievedList = notebookDao.findByTitle("Find By Title");
+        List<NotebookEntity> retrievedList = notebookDao.findByTitle("Find By Title");
 
         assertNotNull(retrievedList);
         assertFalse(retrievedList.isEmpty());
         boolean found = false;
-        for (NoteBookEntity n : retrievedList) {
+        for (NotebookEntity n : retrievedList) {
             if (n.getTitle().equals("Find By Title")) {
                 found = true;
                 break;
@@ -75,14 +75,14 @@ class JpaNoteBookDaoTest {
 
     @Test
     void testFindByUser() {
-        NoteBookEntity notebook = new NoteBookEntity("User's Notebook", testUser);
+        NotebookEntity notebook = new NotebookEntity("User's Notebook", testUser);
         notebookDao.save(notebook);
 
-        List<NoteBookEntity> retrievedList = notebookDao.findByUser(testUser);
+        List<NotebookEntity> retrievedList = notebookDao.findByUser(testUser);
         assertFalse(retrievedList.isEmpty());
 
         boolean found = false;
-        for (NoteBookEntity n : retrievedList) {
+        for (NotebookEntity n : retrievedList) {
             if (n.getTitle().equals("User's Notebook")) {
                 found = true;
                 break;
@@ -103,10 +103,10 @@ class JpaNoteBookDaoTest {
 
     @Test
     void testUpdateNotebook() {
-        NoteBookEntity notebook = new NoteBookEntity("Test update method", testUser);
+        NotebookEntity notebook = new NotebookEntity("Test update method", testUser);
         notebookDao.save(notebook);
 
-        NoteBookEntity retrievedNotebook = notebookDao.findById(notebook.getId());
+        NotebookEntity retrievedNotebook = notebookDao.findById(notebook.getId());
         retrievedNotebook.setTitle("Test update method for NoteBook entity");
         notebookDao.update(retrievedNotebook);
 
@@ -121,15 +121,15 @@ class JpaNoteBookDaoTest {
 
     @Test
     void testDeleteNotebook() {
-        NoteBookEntity notebook = new NoteBookEntity("Testing delete method", testUser);
+        NotebookEntity notebook = new NotebookEntity("Testing delete method", testUser);
         notebookDao.save(notebook);
 
-        NoteBookEntity managedNotebook = notebookDao.findById(notebook.getId());
+        NotebookEntity managedNotebook = notebookDao.findById(notebook.getId());
         assertNotNull(managedNotebook);
 
         notebookDao.delete(managedNotebook);
 
-        NoteBookEntity deletedNotebook = notebookDao.findById(notebook.getId());
+        NotebookEntity deletedNotebook = notebookDao.findById(notebook.getId());
 
         assertNull(deletedNotebook);
     }
