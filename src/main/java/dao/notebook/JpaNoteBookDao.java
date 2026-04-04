@@ -1,7 +1,7 @@
 package dao.notebook;
 
 import datasource.MariaDbJpaConnection;
-import entity.NoteBookEntity;
+import entity.NotebookEntity;
 import entity.UserEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -13,12 +13,12 @@ public class JpaNoteBookDao implements NoteBookDAO{
     public JpaNoteBookDao() {}
 
     @Override
-    public NoteBookEntity save(NoteBookEntity noteBook) {
+    public NotebookEntity save(NotebookEntity noteBook) {
         if (noteBook == null) throw new IllegalArgumentException("Notebook cannot be null");
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
             em.getTransaction().begin();
-            NoteBookEntity managedNoteBook;
+            NotebookEntity managedNoteBook;
             if (noteBook.getId() == null) {
                 em.persist(noteBook);
                 managedNoteBook = noteBook;
@@ -37,22 +37,22 @@ public class JpaNoteBookDao implements NoteBookDAO{
     }
 
     @Override
-    public NoteBookEntity findById(Long id) {
+    public NotebookEntity findById(Long id) {
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
-            return em.find(NoteBookEntity.class, id);
+            return em.find(NotebookEntity.class, id);
         } finally {
             em.close();
         }
     }
 
     @Override
-    public List<NoteBookEntity> findByUser(UserEntity user) {
+    public List<NotebookEntity> findByUser(UserEntity user) {
         if (user == null) throw new IllegalArgumentException("User cannot be null");
 
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
-            TypedQuery<NoteBookEntity> query = em.createQuery("Select n from NoteBookEntity n where n.user = :user", NoteBookEntity.class);
+            TypedQuery<NotebookEntity> query = em.createQuery("Select n from NotebookEntity n where n.user = :user", NotebookEntity.class);
             query.setParameter("user", user);
             return query.getResultList();
         } finally {
@@ -61,12 +61,12 @@ public class JpaNoteBookDao implements NoteBookDAO{
     }
 
     @Override
-    public List<NoteBookEntity> findByTitle(String title) {
+    public List<NotebookEntity> findByTitle(String title) {
         if (title == null) throw new IllegalArgumentException("Title cannot be null");
 
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
-            TypedQuery<NoteBookEntity> query = em.createQuery("Select n from NoteBookEntity n where n.title = :title", NoteBookEntity.class);
+            TypedQuery<NotebookEntity> query = em.createQuery("Select n from NotebookEntity n where n.title = :title", NotebookEntity.class);
             query.setParameter("title", title);
             return query.getResultList();
         } finally {
@@ -75,7 +75,7 @@ public class JpaNoteBookDao implements NoteBookDAO{
     }
 
     @Override
-    public void update(NoteBookEntity noteBook) {
+    public void update(NotebookEntity noteBook) {
         if  (noteBook == null) throw new IllegalArgumentException("Notebook cannot be null");
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
@@ -91,12 +91,12 @@ public class JpaNoteBookDao implements NoteBookDAO{
     }
 
     @Override
-    public void delete(NoteBookEntity noteBook) {
+    public void delete(NotebookEntity noteBook) {
         if  (noteBook == null) throw new IllegalArgumentException("Notebook cannot be null");
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         try {
             em.getTransaction().begin();
-            NoteBookEntity managedNoteBook = em.find(NoteBookEntity.class, noteBook.getId());
+            NotebookEntity managedNoteBook = em.find(NotebookEntity.class, noteBook.getId());
 
             if (managedNoteBook != null) {
                 managedNoteBook.setUser(null);

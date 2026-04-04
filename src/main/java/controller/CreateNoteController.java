@@ -2,7 +2,7 @@ package controller;
 
 import dao.notebook.JpaNoteBookDao;
 import dao.tag.JpaTagDao;
-import entity.NoteBookEntity;
+import entity.NotebookEntity;
 import entity.TagEntity;
 import entity.UserEntity;
 import javafx.event.ActionEvent;
@@ -75,7 +75,7 @@ public class CreateNoteController implements Initializable {
     @FXML
     private Label statusLabel;
     @FXML
-    private ComboBox<NoteBookEntity> notebookComboBox;
+    private ComboBox<NotebookEntity> notebookComboBox;
     @FXML
     private FlowPane tagFlowpane;
     @FXML
@@ -150,7 +150,7 @@ public class CreateNoteController implements Initializable {
 
         // Load current user and notebooks
         UserEntity currentUser = UserSession.getUserInstance().getUser();
-        List<NoteBookEntity> notebooks = (notebookDao != null ? notebookDao : new JpaNoteBookDao()).findByUser(currentUser);
+        List<NotebookEntity> notebooks = (notebookDao != null ? notebookDao : new JpaNoteBookDao()).findByUser(currentUser);
 
         notebooks.sort((n1, n2) -> {
             if (n1.getCreatedAt() == null) return -1;
@@ -160,12 +160,12 @@ public class CreateNoteController implements Initializable {
 
         notebookComboBox.getItems().setAll(notebooks);
 
-        NoteBookEntity createNewItem = new NoteBookEntity(Localization.get("create.new_notebook"), currentUser);
+        NotebookEntity createNewItem = new NotebookEntity(Localization.get("create.new_notebook"), currentUser);
         notebookComboBox.getItems().add(createNewItem);
 
         notebookComboBox.setConverter(new javafx.util.StringConverter<>() {
             @Override
-            public String toString(NoteBookEntity notebook) {
+            public String toString(NotebookEntity notebook) {
                 if (notebook == null) {
                     return "";
                 }
@@ -173,7 +173,7 @@ public class CreateNoteController implements Initializable {
             }
 
             @Override
-            public NoteBookEntity fromString(String string) {
+            public NotebookEntity fromString(String string) {
                 return null;
             }
         });
@@ -231,7 +231,7 @@ public class CreateNoteController implements Initializable {
     }
 
     private void updateSaveButton() {
-        NoteBookEntity selected = notebookComboBox.getSelectionModel().getSelectedItem();
+        NotebookEntity selected = notebookComboBox.getSelectionModel().getSelectedItem();
         boolean disable = titleField.getText() == null || titleField.getText().isBlank() || selected == null;
         saveButton.setDisable(disable);
     }
@@ -243,7 +243,7 @@ public class CreateNoteController implements Initializable {
             String content = contentArea.getText() == null ? "" : contentArea.getText();
             String annotation = annotationArea.getText() == null ? "" : annotationArea.getText();
 
-            NoteBookEntity selectedNotebook = notebookComboBox.getSelectionModel().getSelectedItem();
+            NotebookEntity selectedNotebook = notebookComboBox.getSelectionModel().getSelectedItem();
 
             if (selectedNotebook == null) {
                 showStatus(Localization.get("create.error_no_notebook"), true);
@@ -408,7 +408,7 @@ public class CreateNoteController implements Initializable {
                 .orElse(null);
     }
 
-    private void addNotebookToComboBox(NoteBookEntity newNotebook) {
+    private void addNotebookToComboBox(NotebookEntity newNotebook) {
         notebookComboBox.getItems().removeIf(nb -> Localization.get("create.new_notebook").equals(nb.getTitle()));
         notebookComboBox.getItems().add(newNotebook);
 
@@ -418,7 +418,7 @@ public class CreateNoteController implements Initializable {
             return n1.getCreatedAt().compareTo(n2.getCreatedAt());
         });
 
-        notebookComboBox.getItems().add(new NoteBookEntity(Localization.get("create.new_notebook"), newNotebook.getUser()));
+        notebookComboBox.getItems().add(new NotebookEntity(Localization.get("create.new_notebook"), newNotebook.getUser()));
 
         notebookComboBox.getSelectionModel().select(newNotebook);
     }

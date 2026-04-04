@@ -46,7 +46,7 @@ public class ViewDashboardController {
 
     static final Logger logger = Logger.getLogger(ViewDashboardController.class.getName());
 
-    private NoteBookEntity activeNotebook;
+    private NotebookEntity activeNotebook;
     private DashboardService dashboardService = new DashboardService();
 
     @FXML
@@ -431,7 +431,7 @@ public class ViewDashboardController {
                         controller.setActiveNotebook(activeNotebook);
                     });
 
-            NoteBookEntity lastNotebook = NotebookSession.getLastCreatedNotebook();
+            NotebookEntity lastNotebook = NotebookSession.getLastCreatedNotebook();
             if (lastNotebook != null) {
                 activeNotebook = lastNotebook;
                 NotebookSession.clear();
