@@ -21,7 +21,7 @@ public class NoteEntity {
 
     @ManyToOne
     @JoinColumn(name = "notebook_id", nullable = false)
-    private NoteBookEntity notebook;
+    private NotebookEntity notebook;
 
     @ManyToMany(fetch=FetchType.EAGER)
     @JoinTable(
@@ -50,11 +50,15 @@ public class NoteEntity {
 
     public Long getId() { return id; }
 
-    public NoteBookEntity getNotebook() { return notebook; }
+    public NotebookEntity getNotebook() { return notebook; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    public Map<String, NoteTranslationEntity> getTranslations() {
+        return translations;
+    }
 
     public void addTag(TagEntity tag) {
         tags.add(tag);
@@ -68,7 +72,7 @@ public class NoteEntity {
         return Collections.unmodifiableSet(tags);
     }
 
-    public void setNotebook(NoteBookEntity notebook) { this.notebook = notebook; }
+    public void setNotebook(NotebookEntity notebook) { this.notebook = notebook; }
 
     public void addTranslation(NoteTranslationEntity nt) {
         if (nt != null) {
@@ -78,9 +82,19 @@ public class NoteEntity {
         }
     }
 
+    public NoteTranslationEntity createTranslation(String langCode) {
+        NoteTranslationEntity nt = new NoteTranslationEntity();
+        nt.setLangCode(langCode);
+        addTranslation(nt);
+        return nt;
+    }
+
     public void removeTranslation(String langCode) {
+        if (langCode == null || langCode.isBlank()) return;
+
         NoteTranslationEntity nt = translations.remove(langCode);
-        if (nt != null) {
+
+        if (nt != null && nt.getNote() == this) {
             nt.setNote(null);
         }
     }
