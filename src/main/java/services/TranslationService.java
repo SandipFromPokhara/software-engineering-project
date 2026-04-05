@@ -1,37 +1,40 @@
 package services;
 
-import entity.entities.NoteEntity;
-import entity.translationentities.NoteTranslationEntity;
+import entity.base.Translatable;
 
-import static model.LanguageModel.DEFAULT_LANGUAGE_CODE;
+public class TranslationService {
+    public <T> T getTranslation(Translatable<T> entity, String langCode, String defaultLang) {
+        if (entity == null) return null;
 
-public class NoteTranslationService {
-    public NoteTranslationEntity getTranslation(NoteEntity note, String langCode) {
-        if (note == null) return null;
-
-        var translations = note.getTranslations();
-        if (translations == null || translations.isEmpty()) return null;
+        if (defaultLang == null || defaultLang.isBlank()) {
+            throw new IllegalArgumentException("Default language must not be null or blank");
+        }
 
         if (langCode == null || langCode.isBlank()) {
-            langCode = DEFAULT_LANGUAGE_CODE;
+            langCode = defaultLang;
         }
 
-        NoteTranslationEntity translation = note.getTranslations().get(langCode);
+        var translations = entity.getTranslations();
+        if (translations == null || translations.isEmpty()) {
+            return null;
+        }
+
+        T translation = translations.get(langCode.toUpperCase());
 
         if (translation == null) {
-            translation = translations.get(DEFAULT_LANGUAGE_CODE);
-        }
-
-        if (translation == null && !translations.isEmpty()) {
-            translation = translations.values().iterator().next(); // fallback to any available
+            translation = translations.get(defaultLang);
         }
 
         return translation;
     }
 
-    public NoteTranslationEntity createTranslation(NoteEntity note, String langCode) {
-        if (note == null || langCode == null) return null;
+    public <T> T createTranslation(Translatable<T> entity, String langCode) {
+        if (entity == null) return null;
 
-        return note.createTranslation(langCode);
+        if (langCode == null || langCode.isBlank()) {
+            throw new IllegalArgumentException("Language code cannot be null or blank");
+        }
+
+        return entity.createTranslation(langCode);
     }
 }
