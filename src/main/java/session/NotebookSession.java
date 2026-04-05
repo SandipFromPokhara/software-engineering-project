@@ -1,6 +1,6 @@
 package session;
 
-import entity.NotebookEntity;
+import entity.entities.NotebookEntity;
 
 public class NotebookSession {
 

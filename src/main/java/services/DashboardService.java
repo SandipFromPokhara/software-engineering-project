@@ -1,34 +1,44 @@
 package services;
 
+import dao.note.JpaNoteDao;
 import dao.note.NoteDAO;
-import dao.notebook.NoteBookDAO;
+import dao.notebook.JpaNotebookDao;
+import dao.notebook.NotebookDAO;
+import dao.tag.JpaTagDao;
 import dao.tag.TagDAO;
-import entity.NotebookEntity;
-import entity.NoteEntity;
+import entity.translationentities.NoteTranslationEntity;
+import entity.entities.NotebookEntity;
+import entity.entities.NoteEntity;
 import session.NotebookSession;
 import session.UserSession;
+import util.Localization;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import static model.LanguageModel.DEFAULT_LANGUAGE_CODE;
+
 public class DashboardService {
 
     private final NoteDAO noteDao;
-    private final NoteBookDAO notebookDao;
+    private final NotebookDAO notebookDao;
     private final TagDAO tagDao;
+    private final TranslationService translationService;
 
-    public DashboardService(NoteDAO noteDao, NoteBookDAO notebookDao, TagDAO tagDao) {
+    public DashboardService(NoteDAO noteDao, NotebookDAO notebookDao, TagDAO tagDao, TranslationService translationService) {
         this.noteDao = noteDao;
         this.notebookDao = notebookDao;
         this.tagDao = tagDao;
+        this.translationService = translationService;
     }
 
     public DashboardService() {
-        this.noteDao = new dao.note.JpaNoteDao();
-        this.notebookDao = new dao.notebook.JpaNoteBookDao();
-        this.tagDao = new dao.tag.JpaTagDao();
+        this.noteDao = new JpaNoteDao();
+        this.notebookDao = new JpaNotebookDao();
+        this.tagDao = new JpaTagDao();
+        this.translationService = new TranslationService();
     }
 
     /** Load all notebooks for current user, sorted by creation time */
@@ -54,7 +64,7 @@ public class DashboardService {
     public List<NoteEntity> loadNotes(NotebookEntity notebook) {
         if (notebook == null) return List.of();
 
-        List<NoteEntity> notes = noteDao.findByNotebook(notebook);
+        List<NoteEntity> notes = noteDao.findByNotebookWithTranslations(notebook);
         notes.sort((n1, n2) -> {
             LocalDateTime t1 = Optional.ofNullable(n1.getUpdatedAt()).orElse(LocalDateTime.MIN);
             LocalDateTime t2 = Optional.ofNullable(n2.getUpdatedAt()).orElse(LocalDateTime.MIN);
@@ -65,6 +75,14 @@ public class DashboardService {
 
     /** Delete a note */
     public void deleteNote(NoteEntity note) {
+        if (note == null || note.getId() == null) {
+            throw new IllegalArgumentException("Note cannot be null or unsaved");
+        }
         noteDao.delete(note);
+    }
+
+    public NoteTranslationEntity getDisplayTranslation(NoteEntity note) {
+        String langCode = Localization.getCurrentLanguageCode().toUpperCase();
+        return translationService.getTranslation(note, langCode, DEFAULT_LANGUAGE_CODE);
     }
 }
