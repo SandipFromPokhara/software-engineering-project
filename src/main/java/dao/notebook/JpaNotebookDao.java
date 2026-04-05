@@ -1,14 +1,13 @@
 package dao.notebook;
 
-import entity.NoteEntity;
-import entity.NotebookEntity;
-import entity.UserEntity;
+import entity.entities.NotebookEntity;
+import entity.entities.UserEntity;
 import jakarta.persistence.TypedQuery;
 import dao.basedao.GenericAbstractDAO;
 
 import java.util.List;
 
-public class JpaNotebookDao extends GenericAbstractDAO<NoteEntity, Long> implements NotebookDAO {
+public class JpaNotebookDao extends GenericAbstractDAO<NotebookEntity, Long> implements NotebookDAO {
 
     public JpaNotebookDao() {}
 
@@ -28,14 +27,16 @@ public class JpaNotebookDao extends GenericAbstractDAO<NoteEntity, Long> impleme
 
     @Override
     public NotebookEntity findById(Long id) {
-        return executeInTransaction(em -> em.find(NotebookEntity.class, id));
+        if (id == null) throw new IllegalArgumentException("ID cannot be null");
+
+        return execute(em -> em.find(NotebookEntity.class, id));
     }
 
     @Override
     public List<NotebookEntity> findByUser(UserEntity user) {
         if (user == null) throw new IllegalArgumentException("User cannot be null");
 
-        return executeInTransaction(em -> {
+        return execute(em -> {
             TypedQuery<NotebookEntity> query = em.createQuery("SELECT n FROM NotebookEntity n WHERE n.user = :user", NotebookEntity.class);
             query.setParameter("user", user);
             return query.getResultList();
@@ -46,7 +47,7 @@ public class JpaNotebookDao extends GenericAbstractDAO<NoteEntity, Long> impleme
     public List<NotebookEntity> findByTitle(String title) {
         if (title == null) throw new IllegalArgumentException("Title cannot be null");
 
-        return executeInTransaction(em -> {
+        return execute(em -> {
             TypedQuery<NotebookEntity> query = em.createQuery("SELECT n FROM NotebookEntity n WHERE n.title = :title", NotebookEntity.class);
             query.setParameter("title", title);
             return query.getResultList();
