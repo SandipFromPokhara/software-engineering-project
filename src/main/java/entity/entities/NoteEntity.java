@@ -19,11 +19,11 @@ public class NoteEntity {
     @Column(name="updatedAt")
     private LocalDateTime updatedAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "notebook_id", nullable = false)
     private NotebookEntity notebook;
 
-    @ManyToMany(fetch=FetchType.EAGER)
+    @ManyToMany(fetch=FetchType.LAZY)
     @JoinTable(
             name = "note_tags",
             joinColumns = @JoinColumn(name = "note_id"),
@@ -61,7 +61,9 @@ public class NoteEntity {
     }
 
     public void addTag(TagEntity tag) {
-        tags.add(tag);
+        if (tag != null) {
+            tags.add(tag);
+        }
     }
 
     public void removeTag(TagEntity tag) {
@@ -78,6 +80,11 @@ public class NoteEntity {
         if (nt != null) {
             String langCode = nt.getLangCode();
             nt.setNote(this);
+
+            if (translations.containsKey(langCode)) {
+                throw new IllegalArgumentException("Translation already exists for language: " + langCode);
+            }
+
             translations.put(langCode, nt);
         }
     }
@@ -102,5 +109,24 @@ public class NoteEntity {
     public String getFormattedCreatedTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         return createdAt != null ? createdAt.format(formatter) : "";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NoteEntity)) return false;
+
+        NoteEntity that = (NoteEntity) o;
+
+        if (id == null || that.id == null) {
+            return false;
+        }
+
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

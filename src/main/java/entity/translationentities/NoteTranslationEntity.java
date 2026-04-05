@@ -2,6 +2,8 @@ package entity;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name="note_translation", uniqueConstraints = { @UniqueConstraint(columnNames = {"note_id", "language_code"}) })
 public class NoteTranslationEntity extends BaseTranslationEntity {
@@ -57,13 +59,13 @@ public class NoteTranslationEntity extends BaseTranslationEntity {
         if (getLangCode() == null || that.getLangCode() == null) return false;
         if (getNote() == null || that.getNote() == null) return false;
 
-        return getLangCode().equals(that.getLangCode()) && getNote().equals(that.getNote());
+        return Objects.equals(getLangCode(), that.getLangCode())
+                && Objects.equals(note != null ? note.getId() : null,
+                that.note != null ? that.note.getId() : null);
     }
 
     @Override
     public int hashCode() {
-        int result = (getNote() != null ? getNote().hashCode() : 0);
-        result = 31 * result + (getLangCode() != null ? getLangCode().hashCode() : 0);
-        return result;
+        return Objects.hash(getLangCode(), note != null ? note.getId() : null);
     }
 }

@@ -1,13 +1,16 @@
 package services;
 
-import entity.NoteEntity;
-import entity.NoteTranslationEntity;
+import entity.entities.NoteEntity;
+import entity.translationentities.NoteTranslationEntity;
 
 import static model.LanguageModel.DEFAULT_LANGUAGE_CODE;
 
 public class NoteTranslationService {
     public NoteTranslationEntity getTranslation(NoteEntity note, String langCode) {
         if (note == null) return null;
+
+        var translations = note.getTranslations();
+        if (translations == null || translations.isEmpty()) return null;
 
         if (langCode == null || langCode.isBlank()) {
             langCode = DEFAULT_LANGUAGE_CODE;
@@ -16,7 +19,11 @@ public class NoteTranslationService {
         NoteTranslationEntity translation = note.getTranslations().get(langCode);
 
         if (translation == null) {
-            translation = note.getTranslations().get(DEFAULT_LANGUAGE_CODE);
+            translation = translations.get(DEFAULT_LANGUAGE_CODE);
+        }
+
+        if (translation == null && !translations.isEmpty()) {
+            translation = translations.values().iterator().next(); // fallback to any available
         }
 
         return translation;

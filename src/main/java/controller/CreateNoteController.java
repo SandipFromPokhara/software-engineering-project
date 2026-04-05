@@ -1,10 +1,10 @@
 package controller;
 
-import dao.notebook.JpaNoteBookDao;
+import dao.notebook.JpaNotebookDao;
 import dao.tag.JpaTagDao;
-import entity.NotebookEntity;
-import entity.TagEntity;
-import entity.UserEntity;
+import entity.entities.NotebookEntity;
+import entity.entities.TagEntity;
+import entity.entities.UserEntity;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -17,7 +17,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import services.NoteService;
-import entity.NoteEntity;
+import entity.entities.NoteEntity;
 import session.UserSession;
 import util.*;
 import util.bulletList.BulletListStrategy;
@@ -39,7 +39,7 @@ public class CreateNoteController implements Initializable {
 
     private NoteService noteService;
     private Set<String> selectedTags = new HashSet<>();
-    private JpaNoteBookDao notebookDao;
+    private JpaNotebookDao notebookDao;
     private JpaTagDao tagDao;
 
     @FXML
@@ -150,7 +150,7 @@ public class CreateNoteController implements Initializable {
 
         // Load current user and notebooks
         UserEntity currentUser = UserSession.getUserInstance().getUser();
-        List<NotebookEntity> notebooks = (notebookDao != null ? notebookDao : new JpaNoteBookDao()).findByUser(currentUser);
+        List<NotebookEntity> notebooks = (notebookDao != null ? notebookDao : new JpaNotebookDao()).findByUser(currentUser);
 
         notebooks.sort((n1, n2) -> {
             if (n1.getCreatedAt() == null) return -1;
@@ -384,7 +384,7 @@ public class CreateNoteController implements Initializable {
         this.noteService = noteService;
     }
 
-    public void setNotebookDao(JpaNoteBookDao notebookDao) {
+    public void setNotebookDao(JpaNotebookDao notebookDao) {
         this.notebookDao = notebookDao;
     }
 
