@@ -16,10 +16,23 @@ public class Localization {
 
     private static final String PREF_KEY = "app_language";
     private static final Preferences prefs = Preferences.userNodeForPackage(Localization.class);
-    static final Logger logger = Logger.getLogger(Localization.class.getName());
+    private static final Logger logger = Logger.getLogger(Localization.class.getName());
+    private static final String BUNDLE_PATH = "i18n.MessagesBundle";
 
     private static final ObjectProperty<Locale> locale =
             new SimpleObjectProperty<>(getSavedLocale());
+
+    // static initialization
+    private static volatile ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_PATH, getSavedLocale());
+
+    // cache bundle per locale
+    static {
+        locale.addListener((obs, oldLocale, newLocale) -> {
+            ResourceBundle.clearCache();
+            bundle = ResourceBundle.getBundle(BUNDLE_PATH, newLocale);
+            prefs.put(PREF_KEY, newLocale.toLanguageTag());    // persist
+        });
+    }
 
     private static Locale getSavedLocale() {
         String tag = prefs.get(PREF_KEY, Locale.ENGLISH.toLanguageTag());
@@ -27,9 +40,7 @@ public class Localization {
     }
 
     public static void setLocale(Locale newLocale) {
-        ResourceBundle.clearCache();
         locale.set(newLocale);
-        prefs.put(PREF_KEY, newLocale.toLanguageTag()); // persist
     }
 
     public static Locale getLocale() {
@@ -37,15 +48,17 @@ public class Localization {
     }
 
     public static String get(String key, Object... args) {
-        ResourceBundle bundle = ResourceBundle.getBundle("i18n.MessagesBundle", getLocale());
+        if (key == null) {
+            throw new IllegalArgumentException("Key cannot be null");
+        }
 
-        if (!bundle.containsKey(key)) {
+        try {
+            String value = bundle.getString(key);
+            return MessageFormat.format(value, args);
+        } catch (Exception e) {
             logger.log(Level.WARNING, "Missing i18n key: {0}", key);
             return "!" + key + "!";
         }
-
-        String value = bundle.getString(key);
-        return MessageFormat.format(value, args);
     }
 
     // New: expose the locale property for bindings/listeners
@@ -55,5 +68,9 @@ public class Localization {
 
     public static StringBinding bind(String key) {
         return Bindings.createStringBinding(() -> get(key), locale);
+    }
+
+    public static String getCurrentLanguageCode() {
+        return getLocale().getLanguage();
     }
 }
