@@ -1,4 +1,4 @@
-package entity;
+package entity.base;
 
 import jakarta.persistence.*;
 
@@ -10,7 +10,7 @@ public class BaseTranslationEntity {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="language_code", nullable = false)
+    @Column(name="language_code", nullable = false, length = 6)
     private String langCode;
 
     @Column(name="createdAt")
@@ -38,5 +38,9 @@ public class BaseTranslationEntity {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 
-    public void setLangCode(String langCode) { this.langCode = langCode; }
+    public void setLangCode(String langCode) {
+        if (this.langCode != null) {
+            throw new IllegalStateException("Language code is immutable");
+        }
+        this.langCode = langCode; }
 }
