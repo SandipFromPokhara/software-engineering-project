@@ -1,11 +1,14 @@
 package dao.note;
 
 import dao.basedao.GenericDAO;
-import entity.NoteBookEntity;
-import entity.NoteEntity;
+import entity.entities.NotebookEntity;
+import entity.entities.NoteEntity;
+import entity.translationentities.NoteTranslationEntity;
+
 import java.util.List;
 
 public interface NoteDAO extends GenericDAO <NoteEntity, Long> {
-    List<NoteEntity> findByTitle(String title);
-    List<NoteEntity> findByNotebook(NoteBookEntity notebook);
+    List<NoteTranslationEntity> findByTitle(String title);
+    List<NoteEntity> findByNotebook(NotebookEntity notebook);
+    List<NoteEntity> findByNotebookWithTranslations(NotebookEntity notebook);
 }

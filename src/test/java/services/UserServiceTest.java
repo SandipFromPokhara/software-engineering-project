@@ -1,7 +1,7 @@
 package services;
 
 import dao.user.JpaUserDao;
-import entity.UserEntity;
+import entity.entities.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import security.PasswordHasher;

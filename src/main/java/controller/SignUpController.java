@@ -2,7 +2,7 @@ package controller;
 
 import dao.user.UserDAO;
 import dao.user.JpaUserDao;
-import entity.UserEntity;
+import entity.entities.UserEntity;
 import javafx.animation.PauseTransition;
 import javafx.stage.Stage;
 import javafx.util.Duration;

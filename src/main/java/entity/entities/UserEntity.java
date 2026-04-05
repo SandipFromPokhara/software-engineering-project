@@ -1,4 +1,4 @@
-package entity;
+package entity.entities;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -35,7 +35,7 @@ public class UserEntity {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<NoteBookEntity> notebooks = new ArrayList<>();
+    private List<NotebookEntity> notebooks = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
@@ -95,14 +95,14 @@ public class UserEntity {
         }
     }
 
-    public List<NoteBookEntity> getNoteBooks() { return notebooks; }
+    public List<NotebookEntity> getNoteBooks() { return notebooks; }
 
-    public void removeNotebook(NoteBookEntity notebook) {
+    public void removeNotebook(NotebookEntity notebook) {
         notebooks.remove(notebook);
         notebook.setUser(null);
     }
 
-    public void addNotebook(NoteBookEntity notebook) {
+    public void addNotebook(NotebookEntity notebook) {
         notebooks.add(notebook);
         notebook.setUser(this);
     }

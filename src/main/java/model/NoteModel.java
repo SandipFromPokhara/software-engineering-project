@@ -11,11 +11,11 @@ public class NoteModel {
     private String content;
     private String annotation;
     private Set<TagModel> tags;
-    private NoteBookModel notebook;
+    private NotebookModel notebook;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public NoteModel(String title, String content, String annotation, NoteBookModel notebook) {
+    public NoteModel(String title, String content, String annotation, NotebookModel notebook) {
         this.title = title;
         this.content = content;
         this.notebook = notebook;
@@ -74,11 +74,11 @@ public class NoteModel {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public NoteBookModel getNotebook() {
+    public NotebookModel getNotebook() {
         return notebook;
     }
 
-    public void setNotebook(NoteBookModel notebook) {
+    public void setNotebook(NotebookModel notebook) {
         this.notebook = notebook;
     }
 
