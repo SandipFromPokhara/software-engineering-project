@@ -267,7 +267,8 @@ public class CreateNoteController implements Initializable {
                 addNotebookToComboBox(selectedNotebook);
             }
 
-            NoteEntity createdNote = noteService.createNote(title, content, annotation, selectedNotebook, selectedTags);
+            String lang = Localization.getCurrentLanguageCode();
+            NoteEntity createdNote = noteService.createNote(title, content, annotation, selectedNotebook, selectedTags, lang);
 
             EventBus.publish(new NoteCreatedEvent(createdNote));
 
