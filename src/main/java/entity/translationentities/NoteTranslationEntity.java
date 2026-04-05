@@ -1,5 +1,7 @@
-package entity;
+package entity.translationentities;
 
+import entity.base.BaseTranslationEntity;
+import entity.entities.NoteEntity;
 import jakarta.persistence.*;
 
 import java.util.Objects;
