@@ -1,5 +1,7 @@
-package entity;
+package entity.entities;
 
+import entity.base.Translatable;
+import entity.translationentities.NoteTranslationEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -7,7 +9,7 @@ import java.util.*;
 
 @Entity
 @Table(name="notes")
-public class NoteEntity {
+public class NoteEntity implements Translatable<NoteTranslationEntity> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
