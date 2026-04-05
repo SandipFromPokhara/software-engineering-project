@@ -26,4 +26,27 @@ public abstract class GenericAbstractDAO<T, ID> {
             em.close();
         }
     }
+
+    protected <R> R execute(Function<EntityManager, R> action) {
+        EntityManager em = MariaDbJpaConnection.createEntityManager();
+        try {
+            return action.apply(em);
+        } finally {
+            em.close();
+        }
+    }
+
+    // Detect unique constraint violation
+    protected boolean isUniqueConstraintViolation(Exception e) {
+        Throwable cause = e;
+
+        while (cause != null) {
+            String message = cause.getMessage();
+            if (message != null && message.toLowerCase().contains("unique")) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
+    }
 }
