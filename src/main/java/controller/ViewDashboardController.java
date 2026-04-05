@@ -6,10 +6,16 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Paragraph;
 import dao.note.JpaNoteDao;
+import dao.note.NoteDAO;
 import dao.tag.JpaTagDao;
-import entity.*;
+import dao.tag.TagDAO;
+import entity.entities.NoteEntity;
+import entity.entities.NotebookEntity;
+import entity.entities.UserEntity;
+import entity.translationentities.NoteTranslationEntity;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.control.TableView;
@@ -24,6 +30,8 @@ import javafx.util.StringConverter;
 import model.LanguageModel;
 import model.LanguageModel.Language;
 import services.DashboardService;
+import services.NoteService;
+import services.TranslationService;
 import session.NotebookSession;
 import util.*;
 import session.UserSession;
@@ -46,8 +54,14 @@ public class ViewDashboardController {
 
     static final Logger logger = Logger.getLogger(ViewDashboardController.class.getName());
 
-    private NoteBookEntity activeNotebook;
+    private NotebookEntity activeNotebook;
+
+    // shared instances
     private DashboardService dashboardService = new DashboardService();
+    private final NoteService noteService = new NoteService();
+    private final TranslationService translationService = new TranslationService();
+    private final NoteDAO noteDao = new JpaNoteDao();
+    private final TagDAO tagDao = new JpaTagDao();
 
     @FXML
     private BorderPane rootPane;
@@ -276,7 +290,13 @@ public class ViewDashboardController {
     // ---------- TABLE & NOTES ----------
 
     private void setupTableColumns() {
-        titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        titleColumn.setCellValueFactory(cellData -> {
+            NoteTranslationEntity t = dashboardService.getDisplayTranslation(cellData.getValue());
+
+            return new SimpleStringProperty(
+                    t != null ? t.getTitle() : ""
+            );
+        });
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("formattedCreatedTime"));
         notesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
@@ -310,9 +330,22 @@ public class ViewDashboardController {
 
     private void displayNote(NoteEntity note) {
         noteTitleLabel.textProperty().unbind(); // important so we can show the concrete title
-        noteTitleLabel.setText(note.getTitle());
-        noteViewArea.setText(note.getContent());
-        annotationViewArea.setText(note.getAnnotation());
+
+        NoteTranslationEntity t = dashboardService.getDisplayTranslation(note);
+
+        if (t == null) {
+            logger.warning("Missing translation for note: " + note.getId());
+
+            noteTitleLabel.setText("");
+            noteViewArea.clear();
+            annotationViewArea.clear();
+
+            return;
+        }
+
+        noteTitleLabel.setText(t.getTitle());
+        noteViewArea.setText(t.getContent());
+        annotationViewArea.setText(t.getAnnotation());
         refreshTagView(note);
         editButton.setDisable(false);
         deleteButton.setDisable(false);
@@ -431,7 +464,7 @@ public class ViewDashboardController {
                         controller.setActiveNotebook(activeNotebook);
                     });
 
-            NoteBookEntity lastNotebook = NotebookSession.getLastCreatedNotebook();
+            NotebookEntity lastNotebook = NotebookSession.getLastCreatedNotebook();
             if (lastNotebook != null) {
                 activeNotebook = lastNotebook;
                 NotebookSession.clear();
@@ -511,8 +544,10 @@ public class ViewDashboardController {
         Stage stage = (Stage) rootPane.getScene().getWindow();
         NavigationUtil.openWindow(stage, "/FXML/edit.fxml", "edit.window.title", true, true,
                 (EditNoteController controller) -> {
-                    controller.setNoteDao(new JpaNoteDao());
-                    controller.setTagDao(new JpaTagDao());
+                    controller.setNoteDao(noteDao);
+                    controller.setTagDao(tagDao);
+                    controller.setTranslationService(translationService);
+                    controller.setNoteService(noteService);
                     controller.setNote(selectedNote);
                 }
         );
@@ -586,7 +621,10 @@ public class ViewDashboardController {
             return;
         }
         List<NoteEntity> singleNoteList = List.of(selectedNote);
-        exportNotesToPdf(singleNoteList, selectedNote.getTitle());
+
+        NoteTranslationEntity t = dashboardService.getDisplayTranslation(selectedNote);
+
+        exportNotesToPdf(singleNoteList, t.getTitle());
     }
 
     private void exportEntireNotebook() {
@@ -618,18 +656,20 @@ public class ViewDashboardController {
 
             for (int i = 0; i < notes.size(); i++) {
                 NoteEntity note = notes.get(i);
-                document.add(new Paragraph(note.getTitle())
+                NoteTranslationEntity t = dashboardService.getDisplayTranslation(note);
+
+                document.add(new Paragraph(t.getTitle())
                         .setBold()
                         .setFontSize(18));
-                document.add(new Paragraph(note.getContent()));
+                document.add(new Paragraph(t.getContent()));
 
-                if (note.getAnnotation() != null &&
-                        !note.getAnnotation().isEmpty()) {
+                if (t.getAnnotation() != null &&
+                        !t.getAnnotation().isEmpty()) {
 
                     document.add(new Paragraph("\nAnnotation:")
                             .setBold());
 
-                    document.add(new Paragraph(note.getAnnotation()));
+                    document.add(new Paragraph(t.getAnnotation()));
                 }
 
                 if (i < notes.size() - 1) {

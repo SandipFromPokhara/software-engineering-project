@@ -6,7 +6,7 @@ import javafx.scene.paint.Color;
 import javafx.event.ActionEvent;
 import javafx.concurrent.Task;
 
-import entity.UserEntity;
+import entity.entities.UserEntity;
 import dao.user.JpaUserDao;
 import javafx.stage.Stage;
 import security.BcryptPasswordHasher;

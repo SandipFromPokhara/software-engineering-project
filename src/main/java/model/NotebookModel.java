@@ -2,7 +2,7 @@ package model;
 
 import java.time.LocalDateTime;
 
-public class NoteBookModel {
+public class NotebookModel {
 
     private int id;
     private String title;
@@ -10,7 +10,7 @@ public class NoteBookModel {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public NoteBookModel(String title, UserModel user) {
+    public NotebookModel(String title, UserModel user) {
         this.title = title;
         this.user = user;
         this.createdAt = LocalDateTime.now();

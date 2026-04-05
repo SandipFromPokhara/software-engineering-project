@@ -1,4 +1,4 @@
-package entity;
+package entity.entities;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -7,7 +7,7 @@ import java.util.List;
 
 @Entity
 @Table(name="notebooks")
-public class NoteBookEntity {
+public class NotebookEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,12 +40,12 @@ public class NoteBookEntity {
         updatedAt = LocalDateTime.now();
     }
 
-    public NoteBookEntity(String title, UserEntity user) {
+    public NotebookEntity(String title, UserEntity user) {
         this.title = title;
         this.user = user;
     }
 
-    public NoteBookEntity() {}
+    public NotebookEntity() {}
 
     public Long getId() { return id; }
 
