@@ -25,6 +25,11 @@ public class TranslationService {
             translation = translations.get(defaultLang);
         }
 
+        // final fallback → ANY available translation
+        if (translation == null) {
+            return translations.values().stream().findFirst().orElse(null);
+        }
+
         return translation;
     }
 

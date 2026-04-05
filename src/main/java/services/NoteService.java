@@ -47,7 +47,7 @@ public class NoteService {
     /**
      * Creates a new note with title, content, and annotation
      */
-    public NoteEntity createNote(String title, String content, String annotation, NotebookEntity notebookParameter, Set<String> tagNames) {
+    public NoteEntity createNote(String title, String content, String annotation, NotebookEntity notebookParameter, Set<String> tagNames, String langCode) {
 
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("Title cannot be empty");
@@ -65,8 +65,9 @@ public class NoteService {
         NoteEntity note = new NoteEntity();
         note.setNotebook(notebookToUse);
 
-        // create translation
-        NoteTranslationEntity translation = translationService.createTranslation(note, DEFAULT_LANGUAGE_CODE);
+        // create translations
+        NoteTranslationEntity translation = translationService.createTranslation(note, langCode);
+        note.getTranslations().put(langCode, translation);
 
         translation.setTitle(title.trim());
         translation.setContent(content != null ? content : "");
@@ -85,10 +86,6 @@ public class NoteService {
         }
 
         NoteTranslationEntity translation = translationService.getTranslation(note, langCode, DEFAULT_LANGUAGE_CODE);
-
-        if (translation == null) {
-            translation = translationService.getTranslation(note, langCode, DEFAULT_LANGUAGE_CODE);
-        }
 
         if (translation == null) {
             throw new IllegalStateException("No translation available");

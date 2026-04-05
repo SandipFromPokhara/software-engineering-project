@@ -42,5 +42,5 @@ public class BaseTranslationEntity {
         if (this.langCode != null) {
             throw new IllegalStateException("Language code is immutable");
         }
-        this.langCode = langCode; }
+        this.langCode = langCode.toUpperCase(); }
 }

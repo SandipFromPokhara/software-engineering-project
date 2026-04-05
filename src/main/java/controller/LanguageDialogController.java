@@ -8,6 +8,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+
 import model.LanguageModel;
 import model.LanguageModel.Language;
 import util.Localization;
@@ -105,6 +106,7 @@ public class LanguageDialogController {
         if (selectedLanguage != null) {
             Localization.setLocale(selectedLanguage.locale());
         }
+
         Stage stage = (Stage) confirmButton.getScene().getWindow();
         stage.close();
     }
