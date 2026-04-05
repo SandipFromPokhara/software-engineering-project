@@ -56,4 +56,8 @@ public class Localization {
     public static StringBinding bind(String key) {
         return Bindings.createStringBinding(() -> get(key), locale);
     }
+
+    public static String getCurrentLanguageCode() {
+        return getLocale().getLanguage();
+    }
 }

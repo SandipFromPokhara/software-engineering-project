@@ -3,6 +3,22 @@
     -fx-font-family: "System";
 }
 
+.root.light .menu-bar {
+    -fx-background-color: #f0f0f0;
+}
+
+.root.light .menu {
+    -fx-text-fill: #000000;
+}
+
+.root.light .menu-item {
+    -fx-text-fill: #000000;
+}
+
+.root.light .menu-item:hover {
+    -fx-background-color: #d6d6d6;
+}
+
 .button {
     -fx-background-radius: 6;
     -fx-cursor: hand;
@@ -150,11 +166,44 @@
     -fx-background: #f8f8f8;
 }
 
+.root.light .status-bar {
+    -fx-background-color: #f0f0f0;
+}
+
+.root.light .dialog-pane {
+    -fx-background-color: #ffffff;
+}
+
+.root.light .dialog-pane .label {
+    -fx-text-fill: #000000;
+}
+
+.root.light .success-status {
+    -fx-text-fill: #2e7d32;
+}
+
 /* DARK MODE */
 .root.dark {
     -fx-base: #303030;
     -fx-background: #303030;
     -fx-text-fill: #e6e6e6;
+}
+
+.root.dark .menu-bar {
+    -fx-background-color: #2b2b2b;
+}
+
+.root.dark .menu {
+    -fx-text-fill: #e6e6e6;
+}
+
+.root.dark .menu-item {
+    -fx-background-color: #2b2b2b;
+    -fx-text-fill: #e6e6e6;
+}
+
+.root.dark .menu-item:hover {
+    -fx-background-color: #3a3a3a;
 }
 
 .root.dark .side-panel {
@@ -307,4 +356,39 @@
 /* ScrollPane */
 .root.dark .scroll-pane {
     -fx-background: #1e1e1e;
+}
+
+.root.dark .status-bar {
+    -fx-background-color: #2b2b2b;
+}
+
+/* Dialog base */
+.dialog-pane {
+    -fx-background-color: white;
+}
+
+.root.dark .dialog-pane {
+    -fx-background-color: #2d2d2d;
+}
+
+.root.dark .dialog-pane .label {
+    -fx-text-fill: #e6e6e6;
+}
+
+.root.dark .status-bar .label {
+    -fx-text-fill: #e6e6e6;
+}
+
+.root.light .status-bar .label {
+    -fx-text-fill: #000000;
+}
+
+.root.dark .success-status {
+    -fx-text-fill: #81c784;
+}
+
+.language-switcher:focused {
+    -fx-border-color: #4fc3f7;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
 }

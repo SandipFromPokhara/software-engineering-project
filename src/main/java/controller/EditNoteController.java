@@ -2,8 +2,10 @@ package controller;
 
 import dao.note.NoteDAO;
 import dao.tag.TagDAO;
-import entity.NoteEntity;
-import entity.TagEntity;
+import entity.entities.NoteEntity;
+import entity.entities.TagEntity;
+import entity.translationentities.NoteTranslationEntity;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -12,8 +14,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 import javafx.util.Duration;
+import services.NoteService;
+import services.TranslationService;
 import util.*;
 import util.bulletList.BulletListStrategy;
 import util.bulletList.NumberedListStrategy;
@@ -22,45 +25,49 @@ import util.bulletList.TextFormattingUtil;
 import java.util.HashSet;
 import java.util.Set;
 
+import static model.LanguageModel.DEFAULT_LANGUAGE_CODE;
+
 public class EditNoteController {
 
     private NoteDAO noteDao;
     private TagDAO tagDao;
     private NoteEntity note;
     Set<String> selectedTags = new HashSet<>();
+    private TranslationService translationService;
+    private NoteService noteService;
 
     @FXML
     private Label title;
 
     @FXML
-    TextField titleField;
+    private TextField titleField;
 
     @FXML
     private Label content;
 
     @FXML
-    TextArea contentBox;
+    private TextArea contentBox;
 
     @FXML
     private Label annotation;
 
     @FXML
-    TextField annotationBox;
+    private TextField annotationBox;
 
     @FXML
-    Button updateButton;
+    private Button updateButton;
 
     @FXML
     private Button cancelButton;
 
     @FXML
-    Label statusLabel;
+    private Label statusLabel;
 
     @FXML
-    FlowPane tagFlowpane;
+    private FlowPane tagFlowpane;
 
     @FXML
-    ComboBox<String> tagComboBox;
+    private ComboBox<String> tagComboBox;
 
     @FXML
     private Button addTagBtn;
@@ -105,6 +112,15 @@ public class EditNoteController {
         loadTags();
     }
 
+    // set translationService
+    public void setTranslationService(TranslationService translationService) {
+        this.translationService = translationService;
+    }
+
+    public void setNoteService(NoteService noteService) {
+        this.noteService = noteService;
+    }
+
     public void initialize() {
         // LOCALIZATION BINDINGS
         title.textProperty().bind(Localization.bind("edit.title_label"));
@@ -137,7 +153,7 @@ public class EditNoteController {
         undoRedoManager.registerField("annotation", annotationBox);
 
         // Apply theme once scene is ready
-        javafx.application.Platform.runLater(() -> {
+        Platform.runLater(() -> {
             Scene scene = titleField.getScene();
             if (scene != null) {
                 ToggleUtil.applyTheme(scene);
@@ -191,43 +207,27 @@ public class EditNoteController {
 
     public void setNote(NoteEntity note) {
         this.note = note;
-        titleField.setText(note.getTitle());
-        contentBox.setText(note.getContent());
-        annotationBox.setText(note.getAnnotation());
+
+        String langCode = Localization.getCurrentLanguageCode();
+
+        NoteTranslationEntity translation =
+                translationService.getTranslation(note, langCode, DEFAULT_LANGUAGE_CODE);
+
+        if (translation != null) {
+            titleField.setText(translation.getTitle());
+            contentBox.setText(translation.getContent());
+            annotationBox.setText(translation.getAnnotation());
+        } else {
+            titleField.clear();
+            contentBox.clear();
+            annotationBox.clear();
+        }
 
         selectedTags.clear();
-        note.getTags().forEach(tag -> selectedTags.add(tag.getTagName()));
+        if (note.getTags() != null) {
+            note.getTags().forEach(tag -> selectedTags.add(tag.getTagName()));
+        }
         refreshTagFlowPane();
-    }
-
-    @FXML
-    void handleUpdate() {
-        if (noteDao == null || tagDao == null || note == null) {
-            showStatus(Localization.get("edit.update_fail_status"), true);
-            return;
-        }
-
-        note.setTitle(titleField.getText());
-        note.setContent(contentBox.getText());
-        note.setAnnotation(annotationBox.getText());
-
-        // Clear old tags first
-        for (TagEntity tag : new HashSet<>(note.getTags())) {
-            note.removeTag(tag);
-        }
-
-        // Add current selected tags
-        for (String tagName : selectedTags) {
-            TagEntity tag = tagDao.findByName(tagName);
-            if (tag == null) {
-                tag = new TagEntity(tagName);
-                tag = tagDao.save(tag);
-            }
-            note.addTag(tag);
-        }
-
-        noteDao.save(note);
-        handleCancel();
     }
 
     @FXML
@@ -235,6 +235,21 @@ public class EditNoteController {
         WindowUtil.closeWindow(updateButton);
     }
 
+    @FXML
+    public void handleUpdate() {
+        String langCode = Localization.getCurrentLanguageCode();
+
+        noteService.updateNote(
+                note,
+                langCode,
+                titleField.getText(),
+                contentBox.getText(),
+                annotationBox.getText(),
+                selectedTags
+        );
+
+        handleCancel();
+    }
     private void showStatus(String msg, boolean isError) {
         statusLabel.setText(msg);
         statusLabel.setTextFill(isError ? Color.RED : Color.GREEN);
@@ -246,7 +261,7 @@ public class EditNoteController {
     }
 
     @FXML
-    void handleAddTag() {
+   public  void handleAddTag() {
         String tagName = tagComboBox.getEditor().getText();
         TagUtil.addTagToUI(selectedTags, tagFlowpane, tagComboBox, tagName);
     }

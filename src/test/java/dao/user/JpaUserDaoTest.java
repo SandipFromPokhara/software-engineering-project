@@ -1,7 +1,7 @@
 package dao.user;
 
 import datasource.MariaDbJpaConnection;
-import entity.UserEntity;
+import entity.entities.UserEntity;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 

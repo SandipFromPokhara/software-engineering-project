@@ -109,6 +109,27 @@ notevault_db
 
 ---
 
+## Entity Relationships
+```
+User (0..N) ────── (1) Notebook
+Notebook (0..N) ── (1) Note
+Note (0..N) ────── (0..N) Tag
+```
+
+---
+
+## Cascading Rules
+
+- Deleting a User → Deletes associated Notebooks
+
+- Deleting a Notebook → Deletes associated Notes
+
+- Deleting a Note → Deletes entries in note_tags, Tags remain
+
+- Deleting a Tag → Deletes entries in note_tags, Notes remain
+
+---
+
 ## Notes
 This schema represents the design of NoteVault.
 

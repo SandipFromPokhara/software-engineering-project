@@ -1,9 +1,9 @@
 package controller;
 
-import dao.notebook.JpaNoteBookDao;
-import dao.notebook.NoteBookDAO;
-import entity.NoteBookEntity;
-import entity.UserEntity;
+import dao.notebook.JpaNotebookDao;
+import dao.notebook.NotebookDAO;
+import entity.entities.NotebookEntity;
+import entity.entities.UserEntity;
 import javafx.concurrent.Task;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldListCell;
@@ -25,25 +25,25 @@ import java.util.logging.Logger;
 public class ManageNotebookController {
     private static final Logger logger = Logger.getLogger(ManageNotebookController.class.getName());
 
-    private NoteBookDAO notebookDao;
-    private NoteBookEntity activeNotebook;
+    private NotebookDAO notebookDao;
+    private NotebookEntity activeNotebook;
 
     @FXML
     private Label manageTitle;
 
     @FXML
-    private ListView<NoteBookEntity> notebookListView;
+    private ListView<NotebookEntity> notebookListView;
 
     @FXML
     private Button openBtn, renameBtn, deleteBtn, closeBtn;
 
-    public void setActiveNotebook(NoteBookEntity notebook) {
+    public void setActiveNotebook(NotebookEntity notebook) {
         this.activeNotebook = notebook;
     }
 
     @FXML
     private void initialize() {
-        notebookDao = new JpaNoteBookDao();
+        notebookDao = new JpaNotebookDao();
 
         // LOCALIZATION BINDINGS
         manageTitle.textProperty().bind(Localization.bind("notebooks.title"));
@@ -71,12 +71,12 @@ public class ManageNotebookController {
 
         notebookListView.setCellFactory(TextFieldListCell.forListView(new StringConverter<>() {
             @Override
-            public String toString(NoteBookEntity nb) {
+            public String toString(NotebookEntity nb) {
                 return nb.getTitle();
             }
 
             @Override
-            public NoteBookEntity fromString(String string) {
+            public NotebookEntity fromString(String string) {
                 return notebookListView.getSelectionModel().getSelectedItem();
             }
         }));
@@ -84,12 +84,12 @@ public class ManageNotebookController {
 
         notebookListView.setCellFactory(TextFieldListCell.forListView(new StringConverter<>() {
             @Override
-            public String toString(NoteBookEntity nb) {
+            public String toString(NotebookEntity nb) {
                 return nb.getTitle();
             }
 
             @Override
-            public NoteBookEntity fromString(String string) {
+            public NotebookEntity fromString(String string) {
                 return notebookListView.getSelectionModel().getSelectedItem();
             }
         }));
@@ -99,15 +99,15 @@ public class ManageNotebookController {
         try {
             UserEntity user = UserSession.getUserInstance().getUser();
 
-            Task<List<NoteBookEntity>> loadNotebooksTask = new Task<>() {
+            Task<List<NotebookEntity>> loadNotebooksTask = new Task<>() {
                 @Override
-                protected List<NoteBookEntity> call() {
+                protected List<NotebookEntity> call() {
                     return notebookDao.findByUser(user);
                 }
             };
             loadNotebooksTask.setOnSucceeded(e -> {
-                List<NoteBookEntity> notebooks = loadNotebooksTask.getValue();
-                notebooks.sort(Comparator.comparing(NoteBookEntity::getTitle, String.CASE_INSENSITIVE_ORDER));
+                List<NotebookEntity> notebooks = loadNotebooksTask.getValue();
+                notebooks.sort(Comparator.comparing(NotebookEntity::getTitle, String.CASE_INSENSITIVE_ORDER));
                 notebookListView.getItems().setAll(notebooks);
 
                 // Select active notebook if available
@@ -128,7 +128,7 @@ public class ManageNotebookController {
 
     @FXML
     private void handleOpen() {
-        NoteBookEntity selected = notebookListView.getSelectionModel().getSelectedItem();
+        NotebookEntity selected = notebookListView.getSelectionModel().getSelectedItem();
         if (selected == null) return;
 
         NotebookSession.setLastCreatedNotebook(selected);
@@ -139,7 +139,7 @@ public class ManageNotebookController {
 
     @FXML
     private void handleRename() {
-        NoteBookEntity selected = notebookListView.getSelectionModel().getSelectedItem();
+        NotebookEntity selected = notebookListView.getSelectionModel().getSelectedItem();
         if (selected == null) return;
 
         TextInputDialog dialog = new TextInputDialog(selected.getTitle());
@@ -160,7 +160,7 @@ public class ManageNotebookController {
             try {
                 selected.setTitle(newName.trim());
                 notebookDao.save(selected);
-                notebookListView.getItems().sort(Comparator.comparing(NoteBookEntity::getTitle, String.CASE_INSENSITIVE_ORDER));
+                notebookListView.getItems().sort(Comparator.comparing(NotebookEntity::getTitle, String.CASE_INSENSITIVE_ORDER));
                 notebookListView.refresh();
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Failed to rename notebook: " + selected.getTitle(), e);
@@ -174,7 +174,7 @@ public class ManageNotebookController {
 
     @FXML
     private void handleDelete() {
-        NoteBookEntity selected = notebookListView.getSelectionModel().getSelectedItem();
+        NotebookEntity selected = notebookListView.getSelectionModel().getSelectedItem();
         if (selected == null) return;
 
         boolean confirmed = AlertUtil.showConfirmation(
@@ -189,7 +189,7 @@ public class ManageNotebookController {
                 notebookListView.getItems().remove(selected);
 
                 // If deleted notebook was active, clear session
-                NoteBookEntity active = NotebookSession.getLastCreatedNotebook();
+                NotebookEntity active = NotebookSession.getLastCreatedNotebook();
                 if (active != null && active.getId().equals(selected.getId())) {
                     NotebookSession.clear();
                 }

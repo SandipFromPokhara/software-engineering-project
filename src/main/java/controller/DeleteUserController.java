@@ -1,7 +1,7 @@
 package controller;
 
 import dao.user.JpaUserDao;
-import entity.UserEntity;
+import entity.entities.UserEntity;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;

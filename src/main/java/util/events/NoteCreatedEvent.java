@@ -1,6 +1,6 @@
 package util.events;
 
-import entity.NoteEntity;
+import entity.entities.NoteEntity;
 
 public class NoteCreatedEvent {
     private final NoteEntity note;

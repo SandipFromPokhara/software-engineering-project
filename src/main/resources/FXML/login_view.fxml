@@ -73,7 +73,16 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                     </padding>
                 </VBox>
-                <Label fx:id="statusLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="50.0" layoutY="313.0" prefHeight="18.0" AnchorPane.bottomAnchor="74.0" />
+                <Label fx:id="statusLabel"
+                       alignment="CENTER"
+                       contentDisplay="CENTER"
+                       AnchorPane.leftAnchor="0.0"
+                       AnchorPane.rightAnchor="0.0"
+                       AnchorPane.bottomAnchor="74.0">
+                    <font>
+                        <Font size="12" />
+                    </font>
+                </Label>
                 <HBox alignment="CENTER" layoutX="52.0" layoutY="339.0" spacing="2.0" AnchorPane.leftAnchor="52.0" AnchorPane.rightAnchor="53.0" AnchorPane.topAnchor="339.0">
                     <children>
                         <Label fx:id="loginNoAccount" text="Don't have an account?" textFill="#455a64">

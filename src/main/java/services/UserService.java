@@ -1,7 +1,7 @@
 package services;
 
 import dao.user.JpaUserDao;
-import entity.UserEntity;
+import entity.entities.UserEntity;
 import security.PasswordHasher;
 
 public class UserService {

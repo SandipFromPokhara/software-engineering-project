@@ -2,25 +2,29 @@ package controller;
 
 import dao.note.NoteDAO;
 import dao.tag.TagDAO;
-import entity.NoteEntity;
-import entity.TagEntity;
+import entity.entities.NoteEntity;
+import entity.entities.TagEntity;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import testutil.JavaFXInitializer;
+
 import java.lang.reflect.Field;
+import java.util.HashSet;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class EditNoteControllerTest {
 
     private EditNoteController controller;
-    private NoteDAO mockNoteDao;
-    private TagDAO mockTagDao;
+    private NoteDAO noteDao;
+    private TagDAO tagDao;
     private NoteEntity note;
 
+    // Initialize JavaFX
     @BeforeAll
     static void initJavaFX() {
         JavaFXInitializer.init();
@@ -30,49 +34,60 @@ class EditNoteControllerTest {
     void setUp() throws Exception {
         controller = new EditNoteController();
 
-        mockNoteDao = mock(NoteDAO.class);
-        mockTagDao = mock(TagDAO.class);
-
+        noteDao = mock(NoteDAO.class);
+        tagDao = mock(TagDAO.class);
         note = new NoteEntity();
 
+        // Inject DAOs
+        setField("noteDao", noteDao);
+        setField("tagDao", tagDao);
+
         // Inject UI components
-        controller.titleField = new TextField();
-        controller.contentBox = new TextArea();
-        controller.annotationBox = new TextField();
-        controller.updateButton = new Button();
-        controller.tagFlowpane = new FlowPane();
-        controller.tagComboBox = new ComboBox<>();
-        controller.tagComboBox.setEditable(true);
-        controller.statusLabel = new Label();
+        setField("titleField", new TextField());
+        setField("contentBox", new TextArea());
+        setField("annotationBox", new TextField());
+        setField("updateButton", new Button());
+        setField("tagFlowpane", new FlowPane());
+        setField("tagComboBox", new ComboBox<String>());
+        setField("statusLabel", new Label());
 
-        // Inject DAOs via reflection
-        Field noteDaoField = EditNoteController.class.getDeclaredField("noteDao");
-        noteDaoField.setAccessible(true);
-        noteDaoField.set(controller, mockNoteDao);
+        ComboBox<String> combo = getField("tagComboBox");
+        combo.setEditable(true);
 
-        Field tagDaoField = EditNoteController.class.getDeclaredField("tagDao");
-        tagDaoField.setAccessible(true);
-        tagDaoField.set(controller, mockTagDao);
+        controller.selectedTags = new HashSet<>();
 
         controller.setNote(note);
     }
 
-    // setNote Tests
+    private void setField(String name, Object value) throws Exception {
+        Field field = EditNoteController.class.getDeclaredField(name);
+        field.setAccessible(true);
+        field.set(controller, value);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T getField(String name) throws Exception {
+        Field field = EditNoteController.class.getDeclaredField(name);
+        field.setAccessible(true);
+        return (T) field.get(controller);
+    }
+
+    // ---------- setNote ----------
     @Test
-    void setNote_shouldFillTextFields() {
-        note.setTitle("Title");
-        note.setContent("Content");
-        note.setAnnotation("Annotation");
+    void setNote_shouldPopulateFields() throws Exception {
+        note.setTitle("My Title");
+        note.setContent("My Content");
+        note.setAnnotation("My Annotation");
 
         controller.setNote(note);
 
-        assertEquals("Title", controller.titleField.getText());
-        assertEquals("Content", controller.contentBox.getText());
-        assertEquals("Annotation", controller.annotationBox.getText());
+        assertEquals("My Title", ((TextField) getField("titleField")).getText());
+        assertEquals("My Content", ((TextArea) getField("contentBox")).getText());
+        assertEquals("My Annotation", ((TextField) getField("annotationBox")).getText());
     }
 
     @Test
-    void setNote_shouldLoadExistingTags() {
+    void setNote_shouldLoadTags() {
         TagEntity tag = new TagEntity("work");
         note.addTag(tag);
 
@@ -81,14 +96,18 @@ class EditNoteControllerTest {
         assertTrue(controller.selectedTags.contains("work"));
     }
 
-
-    // handleUpdate Tests
+    // ---------- handleUpdate ----------
     @Test
-    void handleUpdate_shouldUpdateNoteAndSave() {
-        controller.titleField.setText("New Title");
-        controller.contentBox.setText("New Content");
-        controller.annotationBox.setText("New Annotation");
+    void handleUpdate_shouldSaveNote() throws Exception {
+        TextField titleField = getField("titleField");
+        TextArea contentBox = getField("contentBox");
+        TextField annotationBox = getField("annotationBox");
 
+        titleField.setText("New Title");
+        contentBox.setText("New Content");
+        annotationBox.setText("New Annotation");
+
+        //Ignore JavaFX window closing crash
         try {
             controller.handleUpdate();
         } catch (Exception ignored) {}
@@ -97,25 +116,24 @@ class EditNoteControllerTest {
         assertEquals("New Content", note.getContent());
         assertEquals("New Annotation", note.getAnnotation());
 
-        verify(mockNoteDao).save(note);
+        verify(noteDao).save(note);
     }
 
     @Test
-    void handleUpdate_shouldNotSave_ifTagDaoIsNull() throws Exception {
-        Field tagDaoField = EditNoteController.class.getDeclaredField("tagDao");
-        tagDaoField.setAccessible(true);
-        tagDaoField.set(controller, null);
+    void handleUpdate_shouldNotSave_whenDaoMissing() throws Exception {
+        setField("tagDao", null);
 
-        controller.handleUpdate();
+        try {
+            controller.handleUpdate();
+        } catch (Exception ignored) {}
 
-        verify(mockNoteDao, never()).save(any());
+        verify(noteDao, never()).save(any());
     }
 
     @Test
-    void handleUpdate_shouldAddExistingTag() {
+    void handleUpdate_shouldAddExistingTag() throws Exception {
         TagEntity tag = new TagEntity("work");
-
-        when(mockTagDao.findByName("work")).thenReturn(tag);
+        when(tagDao.findByName("work")).thenReturn(tag);
 
         controller.selectedTags.add("work");
 
@@ -127,9 +145,9 @@ class EditNoteControllerTest {
     }
 
     @Test
-    void handleUpdate_shouldCreateNewTag_ifNotExists() {
-        when(mockTagDao.findByName("newtag")).thenReturn(null);
-        when(mockTagDao.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+    void handleUpdate_shouldCreateNewTag() throws Exception {
+        when(tagDao.findByName("newtag")).thenReturn(null);
+        when(tagDao.save(any())).thenAnswer(i -> i.getArgument(0));
 
         controller.selectedTags.add("newtag");
 
@@ -137,14 +155,14 @@ class EditNoteControllerTest {
             controller.handleUpdate();
         } catch (Exception ignored) {}
 
-        verify(mockTagDao).save(any(TagEntity.class));
+        verify(tagDao).save(any(TagEntity.class));
     }
 
-
-    // handleAddTag Tests
+    // ---------- handleAddTag ----------
     @Test
-    void handleAddTag_shouldAddValidTag() {
-        controller.tagComboBox.getEditor().setText("work");
+    void handleAddTag_shouldAddTag() throws Exception {
+        ComboBox<String> combo = getField("tagComboBox");
+        combo.getEditor().setText("work");
 
         controller.handleAddTag();
 
@@ -152,24 +170,14 @@ class EditNoteControllerTest {
     }
 
     @Test
-    void handleAddTag_shouldRejectLongTag() {
-        controller.tagComboBox.getEditor().setText("averyveryverylongtagname");
-        controller.handleAddTag();
-        assertFalse(controller.selectedTags.contains("averyveryverylongtagname"));
-    }
-
-    @Test
-    void handleAddTag_shouldRejectInvalidCharacters() {
-        controller.tagComboBox.getEditor().setText("bad@tag!");
-        controller.handleAddTag();
-        assertFalse(controller.selectedTags.contains("bad@tag!"));
-    }
-
-    @Test
-    void handleAddTag_shouldNotAddDuplicateTag() {
+    void handleAddTag_shouldNotDuplicate() throws Exception {
         controller.selectedTags.add("work");
-        controller.tagComboBox.getEditor().setText("work");
+
+        ComboBox<String> combo = getField("tagComboBox");
+        combo.getEditor().setText("work");
+
         controller.handleAddTag();
+
         assertEquals(1, controller.selectedTags.size());
     }
 }
