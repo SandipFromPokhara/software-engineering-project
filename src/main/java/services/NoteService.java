@@ -1,9 +1,16 @@
 package services;
 
 import dao.note.JpaNoteDao;
-import dao.notebook.JpaNoteBookDao;
+import dao.note.NoteDAO;
+import dao.notebook.JpaNotebookDao;
+import dao.notebook.NotebookDAO;
 import dao.tag.JpaTagDao;
-import entity.*;
+import dao.tag.TagDAO;
+import entity.entities.NoteEntity;
+import entity.entities.NotebookEntity;
+import entity.entities.TagEntity;
+import entity.entities.UserEntity;
+import entity.translationentities.NoteTranslationEntity;
 import session.UserSession;
 
 import java.util.HashSet;
@@ -17,20 +24,20 @@ import static model.LanguageModel.DEFAULT_LANGUAGE_CODE;
  */
 public class NoteService {
 
-    private final JpaNoteDao noteDao;
-    private final JpaNoteBookDao notebookDao;
-    private final JpaTagDao tagDao;
-    private final NoteTranslationService translationService;
+    private final NoteDAO noteDao;
+    private final NotebookDAO notebookDao;
+    private final TagDAO tagDao;
+    private final TranslationService translationService;
 
     public NoteService() {
         this.noteDao = new JpaNoteDao();
-        this.notebookDao = new JpaNoteBookDao();
+        this.notebookDao = new JpaNotebookDao();
         this.tagDao = new JpaTagDao();
-        this.translationService = new NoteTranslationService();
+        this.translationService = new TranslationService();
     }
 
     // constructor overriding for unit test
-    public NoteService(JpaNoteDao noteDao, JpaNoteBookDao notebookDao, JpaTagDao tagDao, NoteTranslationService translationService) {
+    public NoteService(NoteDAO noteDao, NotebookDAO notebookDao, TagDAO tagDao, TranslationService translationService) {
         this.noteDao = noteDao;
         this.notebookDao = notebookDao;
         this.tagDao = tagDao;
@@ -65,19 +72,8 @@ public class NoteService {
         translation.setContent(content != null ? content : "");
         translation.setAnnotation(annotation != null ? annotation : "");
 
-        // Shift tag handling logic from controller
-        if (tagNames != null) {
-            for (String tagName : tagNames) {
-                String normalized = tagName.trim().toLowerCase();
-                TagEntity tag = tagDao.findByName(normalized);
-
-                if (tag == null) {
-                    tag = tagDao.save(new TagEntity(normalized));
-                }
-
-                note.addTag(tag);
-            }
-        }
+        // Shift tag handling logic from create controller
+        applyTags(note, tagNames);
 
         return noteDao.save(note);
     }
@@ -88,29 +84,22 @@ public class NoteService {
             throw new IllegalArgumentException("Note cannot be null");
         }
 
-        NoteTranslationEntity translation = translationService.getTranslation(note, langCode);
+        NoteTranslationEntity translation = translationService.getTranslation(note, langCode, DEFAULT_LANGUAGE_CODE);
 
         if (translation == null) {
-            throw new IllegalStateException("Translation does not exist for language: " + langCode);
-        }
-        translation.setTitle(title);
-        translation.setContent(content);
-        translation.setAnnotation(annotation);
-
-        // Clear old tags first
-        for (TagEntity tag : new HashSet<>(note.getTags())) {
-            note.removeTag(tag);
+            translation = translationService.getTranslation(note, langCode, DEFAULT_LANGUAGE_CODE);
         }
 
-        // Add current selected tags
-        for (String tagName : tagNames) {
-            TagEntity tag = tagDao.findByName(tagName);
-            if (tag == null) {
-                tag = new TagEntity(tagName);
-                tag = tagDao.save(tag);
-            }
-            note.addTag(tag);
+        if (translation == null) {
+            throw new IllegalStateException("No translation available");
         }
+
+        translation.setTitle(title != null ? title.trim() : "");
+        translation.setContent(content != null ? content.trim() : "");
+        translation.setAnnotation(annotation != null ? annotation.trim() : "");
+
+        // Shift tag handling logic from edit controller and apply current selected tags
+        applyTags(note, tagNames);
 
         return noteDao.save(note);
     }
@@ -146,5 +135,25 @@ public class NoteService {
 
     public NoteEntity save(NoteEntity note) {
         return noteDao.save(note);
+    }
+
+    private void applyTags(NoteEntity note, Set<String> tagNames) {
+        // Clear old tags first
+        for (TagEntity tag : new HashSet<>(note.getTags())) {
+            note.removeTag(tag);
+        }
+
+        if (tagNames == null) return;
+
+        for (String tagName : tagNames) {
+            String normalized = tagName.trim().toLowerCase();
+
+            TagEntity tag = tagDao.findByName(normalized);
+            if (tag == null) {
+                tag = tagDao.save(new TagEntity(normalized));
+            }
+
+            note.addTag(tag);
+        }
     }
 }
