@@ -22,7 +22,7 @@ public class LanguageModel {
 
     public static Language getByLocale(Locale locale) {
         return LANGUAGES.values().stream()
-                .filter(l -> l.locale().getLanguage().equals(locale.getLanguage()))
+                .filter(l -> l.locale().getLanguage().equalsIgnoreCase(locale.getLanguage()))
                 .findFirst()
                 .orElse(LANGUAGES.get(DEFAULT_LANGUAGE_CODE));
     }
