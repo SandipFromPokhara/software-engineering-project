@@ -1,11 +1,11 @@
 package controller;
 
-import dao.notebook.JpaNoteBookDao;
+import dao.notebook.JpaNotebookDao;
 import dao.tag.JpaTagDao;
-import entity.NotebookEntity;
-import entity.NoteEntity;
-import entity.TagEntity;
-import entity.UserEntity;
+import entity.entities.NotebookEntity;
+import entity.entities.NoteEntity;
+import entity.entities.TagEntity;
+import entity.entities.UserEntity;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -130,7 +130,7 @@ class CreateNoteControllerTest {
         }
     }
 
-    private static class MockNotebookDao extends JpaNoteBookDao {
+    private static class MockNotebookDao extends JpaNotebookDao {
         private List<NotebookEntity> notebooks = new ArrayList<>();
 
         @Override

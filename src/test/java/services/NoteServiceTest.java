@@ -1,11 +1,11 @@
 package services;
 
 import dao.note.JpaNoteDao;
-import dao.notebook.JpaNoteBookDao;
+import dao.notebook.JpaNotebookDao;
 import dao.tag.JpaTagDao;
-import entity.NotebookEntity;
-import entity.NoteEntity;
-import entity.UserEntity;
+import entity.entities.NotebookEntity;
+import entity.entities.NoteEntity;
+import entity.entities.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -21,16 +21,17 @@ import static org.mockito.Mockito.*;
 class NoteServiceTest {
 
     private JpaNoteDao noteDao;
-    private JpaNoteBookDao notebookDao;
+    private JpaNotebookDao notebookDao;
     private NoteService noteService;
     private JpaTagDao tagDao;
+    private TranslationService translationService;
 
     @BeforeEach
     void setUp() {
         noteDao = mock(JpaNoteDao.class);
-        notebookDao = mock(JpaNoteBookDao.class);
+        notebookDao = mock(JpaNotebookDao.class);
         tagDao = mock(JpaTagDao.class);
-        noteService = new NoteService(noteDao, notebookDao, tagDao);
+        noteService = new NoteService(noteDao, notebookDao, tagDao, translationService);
     }
 
     @Test
@@ -81,7 +82,7 @@ class NoteServiceTest {
         user.setFirstName("Test");
         NotebookEntity notebook = new NotebookEntity("Test Notebook", user);
         Set<String> tags = Set.of("NotNull");
-        NoteEntity expectedNote = new NoteEntity("Test Title", "content", "annotation");
+        NoteEntity expectedNote = new NoteEntity();
 
         try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
             UserSession session = mock(UserSession.class);
@@ -101,7 +102,7 @@ class NoteServiceTest {
         UserEntity user = new UserEntity();
         user.setFirstName("Test");
         NotebookEntity personalNotebook = new NotebookEntity("Test's Notebook", user);
-        NoteEntity expectedNote = new NoteEntity("Test Title", "content", "annotation");
+        NoteEntity expectedNote = new NoteEntity();
 
         try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
             UserSession session = mock(UserSession.class);
@@ -126,7 +127,7 @@ class NoteServiceTest {
         user.setFirstName("Test");
         NotebookEntity notebook = new NotebookEntity("Content Notebook", user);
         Set<String> tags = Set.of("NotNull");
-        NoteEntity expectedNote = new NoteEntity("Test Title", "", "annotation");
+        NoteEntity expectedNote = new NoteEntity();
 
         try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
             UserSession session = mock(UserSession.class);
@@ -147,7 +148,7 @@ class NoteServiceTest {
         user.setFirstName("Test");
         NotebookEntity notebook = new NotebookEntity("Annotation Notebook", user);
         Set<String> tags = Set.of("NotNull");
-        NoteEntity expectedNote = new NoteEntity("Test Title", "content", "");
+        NoteEntity expectedNote = new NoteEntity();
 
         try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
             UserSession session = mock(UserSession.class);

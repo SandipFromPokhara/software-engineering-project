@@ -1,11 +1,11 @@
 package dao.note;
 
-import dao.notebook.JpaNoteBookDao;
+import dao.notebook.JpaNotebookDao;
 import dao.user.JpaUserDao;
 import datasource.MariaDbJpaConnection;
-import entity.NotebookEntity;
-import entity.NoteEntity;
-import entity.UserEntity;
+import entity.entities.NotebookEntity;
+import entity.entities.NoteEntity;
+import entity.entities.UserEntity;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class JpaNoteDaoTest {
 
     private static JpaNoteDao noteDao;
-    private static JpaNoteBookDao notebookDao;
+    private static JpaNotebookDao notebookDao;
     private static JpaUserDao userDao;
 
     private static UserEntity testUser;
@@ -24,7 +24,7 @@ class JpaNoteDaoTest {
     @BeforeAll
     static void setup() {
         userDao = new JpaUserDao();
-        notebookDao = new JpaNoteBookDao();
+        notebookDao = new JpaNotebookDao();
         noteDao = new JpaNoteDao();
 
         String unique = String.valueOf(System.currentTimeMillis());

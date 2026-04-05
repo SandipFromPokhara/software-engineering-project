@@ -1,7 +1,7 @@
 package controller;
 
 import dao.user.UserDAO;
-import entity.UserEntity;
+import entity.entities.UserEntity;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.*;

@@ -1,6 +1,6 @@
 package controller;
 
-import entity.UserEntity;
+import entity.entities.UserEntity;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;

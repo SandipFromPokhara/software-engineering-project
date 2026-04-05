@@ -2,8 +2,8 @@ package controller;
 
 import dao.note.NoteDAO;
 import dao.tag.TagDAO;
-import entity.NoteEntity;
-import entity.TagEntity;
+import entity.entities.NoteEntity;
+import entity.entities.TagEntity;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import org.junit.jupiter.api.BeforeAll;

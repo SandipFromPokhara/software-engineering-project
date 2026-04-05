@@ -2,17 +2,17 @@ package dao.notebook;
 
 import dao.user.JpaUserDao;
 import datasource.MariaDbJpaConnection;
-import entity.NotebookEntity;
-import entity.UserEntity;
+import entity.entities.NotebookEntity;
+import entity.entities.UserEntity;
 import org.junit.jupiter.api.*;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class JpaNoteBookDaoTest {
+class JpaNotebookDaoTest {
 
-    private static  JpaNoteBookDao notebookDao;
+    private static JpaNotebookDao notebookDao;
 
     private static JpaUserDao dao;
     private static UserEntity testUser;
@@ -23,7 +23,7 @@ class JpaNoteBookDaoTest {
         String unique = String.valueOf(System.currentTimeMillis());
         testUser = new UserEntity("Test", "User", "testuser" + unique, "test" + unique + "@example.com");
         dao.save(testUser);
-        notebookDao = new JpaNoteBookDao();
+        notebookDao = new JpaNotebookDao();
     }
 
     @AfterAll
