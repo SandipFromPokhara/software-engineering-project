@@ -1,8 +1,8 @@
 package dao.tag;
 
 import dao.basedao.GenericAbstractDAO;
-import entity.NoteEntity;
-import entity.TagEntity;
+import entity.entities.NoteEntity;
+import entity.entities.TagEntity;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
@@ -14,28 +14,27 @@ public class JpaTagDao extends GenericAbstractDAO<TagEntity, Long> implements Ta
     @Override
     public TagEntity save(TagEntity tag) {
         if (tag == null) throw new IllegalArgumentException("Tag cannot be null");
-        if (tag.getId() == null && existsByName(tag.getTagName())) throw new IllegalArgumentException("Tag with this name already exists");
 
         return executeInTransaction(em -> {
-            if (tag.getId() == null) {
-                em.persist(tag);
-                return tag;
-            } else {
-                // For updates, ensure no other tag has the same name.
-                // Exclude current tag by its ID to allow renaming without conflict.
-                TypedQuery<TagEntity> query = em.createQuery("SELECT t FROM TagEntity t WHERE t.tagName = :tagName AND t.id != :currentId", TagEntity.class);
-                query.setParameter("tagName", tag.getTagName());
-                query.setParameter("currentId", tag.getId());
-                List<TagEntity> result = query.getResultList();
-                if (!result.isEmpty()) throw new IllegalArgumentException("Tag with this name already exists");
-                return em.merge(tag);
+            try {
+                if (tag.getId() == null) {
+                    em.persist(tag);
+                    return tag;
+                } else {
+                    return em.merge(tag);
+                }
+            } catch (Exception e) {
+                if (isUniqueConstraintViolation(e)) {
+                    throw new IllegalArgumentException("Tag already exists");
+                }
+                throw e;
             }
         });
     }
 
     @Override
     public boolean existsByName(String tagName) {
-        return executeInTransaction(em -> {
+        return execute(em -> {
             TypedQuery<Long> query = em.createQuery("SELECT COUNT(t) FROM TagEntity t WHERE t.tagName = :tagName", Long.class);
             query.setParameter("tagName", tagName);
             Long count = query.getSingleResult();
@@ -46,7 +45,7 @@ public class JpaTagDao extends GenericAbstractDAO<TagEntity, Long> implements Ta
 
     @Override
     public TagEntity findByName(String tagName) {
-        return executeInTransaction(em -> {
+        return execute(em -> {
             TypedQuery<TagEntity> query = em.createQuery("SELECT t FROM TagEntity t WHERE t.tagName = :tagName", TagEntity.class);
             query.setParameter("tagName", tagName);
             List<TagEntity> result = query.getResultList();
@@ -57,7 +56,7 @@ public class JpaTagDao extends GenericAbstractDAO<TagEntity, Long> implements Ta
 
     @Override
     public List<TagEntity> findAll() {
-        return executeInTransaction(em -> {
+        return execute(em -> {
             TypedQuery<TagEntity> query = em.createQuery("SELECT t FROM TagEntity t", TagEntity.class);
             return query.getResultList();
         });
@@ -65,7 +64,12 @@ public class JpaTagDao extends GenericAbstractDAO<TagEntity, Long> implements Ta
 
     @Override
     public TagEntity findById(Long id) {
-        return executeInTransaction(em -> em.find(TagEntity.class, id));
+        return execute(em -> em.createQuery(
+                        "SELECT t FROM TagEntity t LEFT JOIN FETCH t.notes WHERE t.id = :id",
+                        TagEntity.class
+                )
+                .setParameter("id", id)
+                .getSingleResult());
     }
 
     @Override
@@ -91,11 +95,13 @@ public class JpaTagDao extends GenericAbstractDAO<TagEntity, Long> implements Ta
         if (tag == null) throw new IllegalArgumentException("Tag cannot be null");
 
         executeInTransaction(em -> {
-            TagEntity managedTag = em.find(TagEntity.class, tag.getId());
+            TagEntity managedTag = em.createQuery("SELECT t FROM TagEntity t LEFT JOIN FETCH t.notes WHERE t.id = :id", TagEntity.class)
+                    .setParameter("id", tag.getId())
+                    .getSingleResult();
 
             if (managedTag != null) {
                 for (NoteEntity note : managedTag.getNotes()) {
-                    note.removeTag(managedTag);
+                    note.getTags().remove(managedTag);
                 }
                 em.remove(managedTag);
             }
