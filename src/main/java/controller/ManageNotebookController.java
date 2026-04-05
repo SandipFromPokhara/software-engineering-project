@@ -1,9 +1,9 @@
 package controller;
 
-import dao.notebook.JpaNoteBookDao;
-import dao.notebook.NoteBookDAO;
-import entity.NotebookEntity;
-import entity.UserEntity;
+import dao.notebook.JpaNotebookDao;
+import dao.notebook.NotebookDAO;
+import entity.entities.NotebookEntity;
+import entity.entities.UserEntity;
 import javafx.concurrent.Task;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldListCell;
@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 public class ManageNotebookController {
     private static final Logger logger = Logger.getLogger(ManageNotebookController.class.getName());
 
-    private NoteBookDAO notebookDao;
+    private NotebookDAO notebookDao;
     private NotebookEntity activeNotebook;
 
     @FXML
@@ -43,7 +43,7 @@ public class ManageNotebookController {
 
     @FXML
     private void initialize() {
-        notebookDao = new JpaNoteBookDao();
+        notebookDao = new JpaNotebookDao();
 
         // LOCALIZATION BINDINGS
         manageTitle.textProperty().bind(Localization.bind("notebooks.title"));
