@@ -7,10 +7,9 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -19,6 +18,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.fxml.FXML?>
+<?import javafx.fxml.FXMLLoader?>
+
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="710.0" styleClass="root" stylesheets="@/css/createNote.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateNoteController">
    <center>
@@ -26,6 +28,7 @@
          <children>
             <VBox spacing="4.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
+                  <!-- ...existing title and notebook selection... -->
                   <VBox spacing="6.0">
                      <children>
                         <Label fx:id="noteTitleLabel" text="Note Title">
@@ -43,6 +46,7 @@
                         <Insets left="25.0" right="25.0" top="10.0" />
                      </VBox.margin>
                   </VBox>
+
                   <VBox spacing="5.0">
                      <children>
                         <Label fx:id="selectLabel" text="Select Notebook">
@@ -56,6 +60,8 @@
                         <Insets left="25.0" right="25.0" top="5.0" />
                      </VBox.margin>
                   </VBox>
+
+                  <!-- Note content using reusable RichTextEditor -->
                   <VBox spacing="5.0" VBox.vgrow="ALWAYS">
                      <children>
                         <Label fx:id="noteContentLabel" text="Note Content">
@@ -63,64 +69,14 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <VBox spacing="5.0" styleClass="editor-container" VBox.vgrow="ALWAYS">
-                           <children>
-                              <HBox alignment="CENTER_LEFT" spacing="2.0" styleClass="editor-toolbar">
-                                 <children>
-                                    <Button fx:id="bulletListButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="•">
-                                       <font>
-                                          <Font size="12.0" />
-                                       </font>
-                                    </Button>
-                                    <Separator orientation="VERTICAL" styleClass="toolbar-separator">
-                                       <padding>
-                                          <Insets bottom="4.0" left="4.0" top="4.0" />
-                                       </padding>
-                                    </Separator>
-                                    <Button fx:id="numberedListButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="1.">
-                                       <font>
-                                          <Font size="12.0" />
-                                       </font>
-                                    </Button>
-                                    <Separator orientation="VERTICAL" styleClass="toolbar-separator">
-                                       <padding>
-                                          <Insets bottom="4.0" left="4.0" top="4.0" />
-                                       </padding>
-                                    </Separator>
-                                    <Button fx:id="headingUpButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="H+">
-                                       <font>
-                                          <Font name="System Bold" size="12.0" />
-                                       </font>
-                                    </Button>
-                                    <Separator orientation="VERTICAL" styleClass="toolbar-separator">
-                                       <padding>
-                                          <Insets bottom="4.0" left="4.0" top="4.0" />
-                                       </padding>
-                                    </Separator>
-                                    <Button fx:id="headingDownButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="H-">
-                                       <font>
-                                          <Font name="System Bold" size="12.0" />
-                                       </font>
-                                    </Button>
-                                 </children>
-                                 <padding>
-                                    <Insets bottom="4.0" left="8.0" right="8.0" top="4.0" />
-                                 </padding>
-                              </HBox>
-
-                              <!-- Text Area -->
-                              <TextArea fx:id="contentArea" promptText="Write your contents..." styleClass="editor-textarea text-area" wrapText="true" VBox.vgrow="ALWAYS">
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font>
-                              </TextArea>
-                           </children>
-                        </VBox>
+                        <fx:include source="RichTextEditor.fxml" fx:id="contentEditor" VBox.vgrow="ALWAYS" />
                      </children>
                      <VBox.margin>
                         <Insets left="25.0" right="25.0" top="5.0" />
                      </VBox.margin>
                   </VBox>
+
+                  <!-- ...existing word count, annotations, tags, buttons... -->
                   <HBox alignment="TOP_RIGHT">
                      <VBox.margin>
                         <Insets left="100.0" />
@@ -136,14 +92,14 @@
                         </Label>
                      </children>
                   </HBox>
-                  <VBox prefWidth="700.0" spacing="5.0">
+                   <VBox prefWidth="700.0" spacing="5.0">
                      <children>
                         <Label fx:id="noteAnnotationLabel" text="Annotations">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextArea fx:id="annotationArea" prefHeight="80.0" promptText="Add annotations..." styleClass="editor-textarea text-area" wrapText="true">
+                        <TextArea fx:id="annotationArea" prefRowCount="3" promptText="Add annotations..." styleClass="editor-textarea text-area" wrapText="true">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -226,33 +182,34 @@
          </children>
       </AnchorPane>
    </center>
-    <top>
+   <!-- top region (menu bar, toggle button) unchanged -->
+   <top>
       <HBox prefHeight="27.0" prefWidth="800.0" BorderPane.alignment="CENTER_LEFT">
          <children>
-              <MenuBar HBox.hgrow="ALWAYS">
-                  <menus>
-                      <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
-                          <items>
-                              <MenuItem fx:id="backDashboard" mnemonicParsing="false" onAction="#handleBackToHome" text="Back to Dashboard" />
-                              <MenuItem fx:id="closeFile" mnemonicParsing="false" onAction="#handleClose" text="Close" />
-                          </items>
-                      </Menu>
-                      <Menu fx:id="editMenu" mnemonicParsing="false" text="Edit">
-                          <items>
-                              <MenuItem fx:id="undoMenuItem" accelerator="Ctrl+Z" mnemonicParsing="false" onAction="#handleUndo" text="Undo" />
-                              <MenuItem fx:id="redoMenuItem" accelerator="Ctrl+Y" mnemonicParsing="false" onAction="#handleRedo" text="Redo" />
-                          </items>
-                      </Menu>
-                  </menus>
-              </MenuBar>
-             <Button fx:id="toggleBtn" mnemonicParsing="false" onAction="#handleThemeToggle" style="-fx-background-color: transparent; -fx-cursor: hand">
-                 <graphic>
-                     <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                         <image>
-                             <Image url="@/Images/dark-theme.png" />
-                         </image>
-                     </ImageView>
-                 </graphic>
+            <MenuBar HBox.hgrow="ALWAYS">
+               <menus>
+                  <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
+                     <items>
+                        <MenuItem fx:id="backDashboard" mnemonicParsing="false" onAction="#handleBackToHome" text="Back to Dashboard" />
+                        <MenuItem fx:id="closeFile" mnemonicParsing="false" onAction="#handleClose" text="Close" />
+                     </items>
+                  </Menu>
+                  <Menu fx:id="editMenu" mnemonicParsing="false" text="Edit">
+                     <items>
+                        <MenuItem fx:id="undoMenuItem" accelerator="Ctrl+Z" mnemonicParsing="false" onAction="#handleUndo" text="Undo" />
+                        <MenuItem fx:id="redoMenuItem" accelerator="Ctrl+Y" mnemonicParsing="false" onAction="#handleRedo" text="Redo" />
+                     </items>
+                  </Menu>
+               </menus>
+            </MenuBar>
+            <Button fx:id="toggleBtn" mnemonicParsing="false" onAction="#handleThemeToggle" style="-fx-background-color: transparent; -fx-cursor: hand">
+               <graphic>
+                  <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@/Images/dark-theme.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
                <tooltip>
                   <Tooltip fx:id="toggleTooltip">
                      <font>
@@ -260,8 +217,8 @@
                      </font>
                   </Tooltip>
                </tooltip>
-             </Button>
+            </Button>
          </children>
       </HBox>
-    </top>
+   </top>
 </BorderPane>
