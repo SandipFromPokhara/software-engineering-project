@@ -20,8 +20,6 @@ import services.NoteService;
 import entity.entities.NoteEntity;
 import session.UserSession;
 import util.*;
-import util.bulletList.BulletListStrategy;
-import util.bulletList.NumberedListStrategy;
 import util.bulletList.TextFormattingUtil;
 import util.events.EventBus;
 import util.events.NoteCreatedEvent;
@@ -81,15 +79,6 @@ public class CreateNoteController implements Initializable {
     @FXML
     private Button addTagBtn;
 
-    // Toolbar buttons
-    @FXML
-    private Button bulletListButton;
-    @FXML
-    private Button numberedListButton;
-    @FXML
-    private Button headingUpButton;
-    @FXML
-    private Button headingDownButton;
     @FXML
     private Tooltip tagTooltip, toggleTooltip;
     @FXML
@@ -140,7 +129,7 @@ public class CreateNoteController implements Initializable {
         clearButton.textProperty().bind(Localization.bind("create.clear"));
 
         titleField.promptTextProperty().bind(Localization.bind("create.placeholder_title"));
-        contentEditorController.getTextArea().promptTextProperty().bind(Localization.bind("create.placeholder_content"));
+        contentEditorController.bindPromptText(Localization.bind("create.placeholder_content"));
         annotationArea.promptTextProperty().bind(Localization.bind("create.placeholder_annotations"));
 
         tagComboBox.promptTextProperty().bind(Localization.bind("create.placeholder_tags"));
@@ -216,7 +205,6 @@ public class CreateNoteController implements Initializable {
             ToggleUtil.applyTheme(scene);
             updateToggleIcon();
             updateTagIcon();
-            WordCountUtil.bind(contentEditorController.getTextArea(), wordCountLabel);
         });
         // Enable list auto-continuation for content area
         TextFormattingUtil.enableListAutoContinuation(contentEditorController.getTextArea());
@@ -292,27 +280,6 @@ public class CreateNoteController implements Initializable {
 
         clearForm();
         statusLabel.setVisible(false);
-    }
-
-    @FXML
-    private void handleToolbarClick(ActionEvent event) {
-        Button clickedButton = (Button) event.getSource();
-        String buttonId = clickedButton.getId();
-
-        switch (buttonId) {
-            case "bulletListButton":
-                TextFormattingUtil.toggleList(contentEditorController.getTextArea(), bulletListButton, new BulletListStrategy());
-                break;
-            case "numberedListButton":
-                TextFormattingUtil.toggleList(contentEditorController.getTextArea(), numberedListButton, new NumberedListStrategy());
-                break;
-            case "headingUpButton":
-                TextFormattingUtil.increaseFontSize(contentEditorController.getTextArea());
-                break;
-            case "headingDownButton":
-                TextFormattingUtil.decreaseFontSize(contentEditorController.getTextArea());
-                break;
-        }
     }
 
     private void clearForm() {
