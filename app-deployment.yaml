@@ -1,0 +1,51 @@
+# app-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notevault-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notevault-app
+  template:
+    metadata:
+      labels:
+        app: notevault-app
+    spec:
+      containers:
+        - name: notevault-frontend
+          image: swostikalama/notevault
+          env:
+            - name: DB_HOST
+              value: "db"
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_NAME
+              value: "notevault_db"
+            - name: DB_USER
+              value: "root"
+            - name: DB_PASSWORD
+              value: "rootpassword"
+            - name: DISPLAY
+              value: "host.docker.internal:0"
+          volumeMounts:
+            - name: x11-socket
+              mountPath: /tmp/.X11-unix
+      volumes:
+        - name: x11-socket
+          hostPath:
+            path: /tmp/.X11-unix
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notevault-app
+spec:
+  selector:
+    app: notevault-app
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
