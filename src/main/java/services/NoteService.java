@@ -1,39 +1,56 @@
 package services;
 
-import dao.note.JpaNoteDao;
-import dao.notebook.JpaNoteBookDao;
+import dao.note.*;
+import dao.notebook.*;
 import dao.tag.JpaTagDao;
-import entity.*;
+import dao.tag.TagDAO;
+import entity.entities.*;
+import entity.translationentities.NoteTranslationEntity;
+import entity.translationentities.NotebookTranslationEntity;
 import session.UserSession;
+import util.Localization;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Service layer for Note operations
  */
 public class NoteService {
 
-    private final JpaNoteDao noteDao;
-    private final JpaNoteBookDao notebookDao;
-    private final JpaTagDao tagDao;
+    private static final Logger logger = Logger.getLogger(NoteService.class.getName());
+
+    private final NoteDAO noteDao;
+    private final NotebookDAO notebookDao;
+    private final TagDAO tagDao;
+    private final TranslationService translationService;
 
     public NoteService() {
         this.noteDao = new JpaNoteDao();
-        this.notebookDao = new JpaNoteBookDao();
+        this.notebookDao = new JpaNotebookDao();
         this.tagDao = new JpaTagDao();
+        this.translationService = new TranslationService();
     }
 
-    public NoteService(JpaNoteDao noteDao, JpaNoteBookDao notebookDao, JpaTagDao tagDao) {
+    // constructor overriding for unit test
+    public NoteService(NoteDAO noteDao, NotebookDAO notebookDao, TagDAO tagDao, TranslationService translationService) {
         this.noteDao = noteDao;
         this.notebookDao = notebookDao;
         this.tagDao = tagDao;
+        this.translationService = translationService;
+    }
+
+    // Backwards-compatible constructor used by some tests (keeps API stable)
+    public NoteService(NoteDAO noteDao, NotebookDAO notebookDao, TagDAO tagDao) {
+        this(noteDao, notebookDao, tagDao, new TranslationService());
     }
 
     /**
      * Creates a new note with title, content, and annotation
      */
-    public NoteEntity createNote(String title, String content, String annotation, NoteBookEntity notebookParameter, Set<String> tagNames) {
+    public NoteEntity createNote(String title, String content, String annotation, NotebookEntity notebookParameter, Set<String> tagNames, String langCode) {
 
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("Title cannot be empty");
@@ -45,59 +62,131 @@ public class NoteService {
         }
 
         // Get or create notebook for current user
-        NoteBookEntity notebookToUse = (notebookParameter != null) ? notebookParameter : getOrCreatePersonalNotebook(currentUser);
+        NotebookEntity notebookToUse = (notebookParameter != null) ? notebookParameter : getOrCreatePersonalNotebook(currentUser);
 
-        // Create and save note - separate content and annotation
-        NoteEntity note = new NoteEntity(title.trim(), content != null ? content : "", annotation != null ? annotation: "");
+        // Create and save note
+        NoteEntity note = new NoteEntity();
         note.setNotebook(notebookToUse);
 
-        // Shift tag handling logic from controller
-        if (tagNames != null) {
-            for (String tagName : tagNames) {
-                String normalized = tagName.trim().toLowerCase();
-                TagEntity tag = tagDao.findByName(normalized);
+        // create translations
+        NoteTranslationEntity translation = new NoteTranslationEntity();
+        translation.setLangCode(langCode);
+        translation.setNote(note);
+        note.addTranslation(translation);
 
-                if (tag == null) {
-                    tag = tagDao.save(new TagEntity(normalized));
-                }
+        translation.setTitle(title.trim());
+        translation.setContent(content != null ? content : "");
+        translation.setAnnotation(annotation != null ? annotation : "");
 
-                note.addTag(tag);
-            }
-        }
+        // Shift tag handling logic from create controller
+        applyTags(note, tagNames);
 
         return noteDao.save(note);
     }
 
-    public NoteBookEntity createNotebook(String name) {
+    public NoteEntity updateNote(NoteEntity note, String langCode, String title, String content,
+                                 String annotation, Set<String> tagNames) {
+        if (note == null) {
+            throw new IllegalArgumentException("Note cannot be null");
+        }
+
+        // Provide a non-null default language to the translation service (use current UI language)
+        String defaultLang = Localization.getCurrentLanguageCode();
+        logger.fine(() -> "updateNote called with langCode=" + langCode + ", defaultLang=" + defaultLang + ", noteId=" + (note.getId()==null?"<null>":note.getId()));
+        NoteTranslationEntity translation = translationService.getTranslation(note, langCode, defaultLang);
+
+        if (translation == null) {
+            translation = new NoteTranslationEntity();
+            translation.setLangCode(langCode);
+            translation.setNote(note);
+            note.addTranslation(translation);
+        }
+
+        translation.setTitle(title != null ? title.trim() : "");
+        translation.setContent(content != null ? content.trim() : "");
+        translation.setAnnotation(annotation != null ? annotation.trim() : "");
+
+        // Shift tag handling logic from edit controller and apply current selected tags
+        applyTags(note, tagNames);
+
+        return noteDao.save(note);
+    }
+
+    public NotebookEntity createNotebook(String title) {
         UserEntity user = UserSession.getUserInstance().getUser();
 
-        if (name == null || name.isBlank()) {
+        if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("Notebook name cannot be empty");
         }
 
-        NoteBookEntity notebook = new NoteBookEntity(name.trim(), user);
+        NotebookEntity notebook = new NotebookEntity();
+        notebook.setUser(user);
+
+        NotebookTranslationEntity translation = new NotebookTranslationEntity();
+        // Use current UI language code so notebook translations match selected language
+        translation.setLangCode(Localization.getCurrentLanguageCode());
+        translation.setTitle(title.trim());
+
+        notebook.addTranslation(translation);
+
         return notebookDao.save(notebook);
     }
 
     /**
      * Gets or creates a notebook for the logged-in user
      */
-    private NoteBookEntity getOrCreatePersonalNotebook(UserEntity user) {
+    private NotebookEntity getOrCreatePersonalNotebook(UserEntity user) {
 
         // Find existing notebook for this user
-        List<NoteBookEntity> notebooks = notebookDao.findByUser(user);
+        List<NotebookEntity> notebooks = notebookDao.findByUser(user);
 
         if (!notebooks.isEmpty()) {
             return notebooks.get(0);
         }
 
-        // Create personal notebook for user (e.g., "John's Notebook")
-        String notebookName = user.getFirstName() + "'s Notebook";
-        NoteBookEntity unsavedNotebook  = new NoteBookEntity(notebookName, user);
-        return notebookDao.save(unsavedNotebook);
+        NotebookEntity notebook = new NotebookEntity();
+        notebook.setUser(user);
+
+        // create default translation using current UI language
+        NotebookTranslationEntity t = new NotebookTranslationEntity();
+        t.setLangCode(Localization.getCurrentLanguageCode());
+        t.setTitle(user.getFirstName() + "'s Notebook");
+
+        notebook.addTranslation(t);
+
+        return notebookDao.save(notebook);
     }
 
     public NoteEntity save(NoteEntity note) {
         return noteDao.save(note);
+    }
+
+    private void applyTags(NoteEntity note, Set<String> tagNames) {
+        // Clear old tags first
+        if (note.getTags() != null) {
+            for (TagEntity tag : new HashSet<>(note.getTags())) {
+                note.removeTag(tag);
+            }
+        }
+
+        if (tagNames == null || tagNames.isEmpty()) return;
+
+        for (String tagName : tagNames) {
+            if (tagName == null || tagName.isBlank()) continue;
+
+            String normalized = tagName.trim().toLowerCase();
+
+            TagEntity tag = tagDao.findByName(normalized);
+
+            if (tag == null) {
+                tag = new TagEntity();
+
+                tag.setTagName(normalized);
+
+                tag = tagDao.save(tag);
+            }
+
+            note.addTag(tag);
+        }
     }
 }

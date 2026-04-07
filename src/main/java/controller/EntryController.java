@@ -1,5 +1,6 @@
 package controller;
 
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -8,10 +9,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import model.LanguageModel;
 import util.Localization;
 import util.NavigationUtil;
 
@@ -24,7 +28,7 @@ public class EntryController {
     static final Logger logger = Logger.getLogger(EntryController.class.getName());
 
     @FXML
-    private Label hello, welcome, privacyLabel;
+    private Label hello, welcome, privacyLabel, languageDisplay;
 
     @FXML
     private Button guestButton, loginButton, registerButton;
@@ -33,10 +37,7 @@ public class EntryController {
     private Hyperlink faqLink;
 
     @FXML
-    private Button languageButton; // world icon button
-
-    @FXML
-    private Tooltip langTooltip;
+    private HBox languageSwitcher;
 
     @FXML
     public void initialize() {
@@ -47,9 +48,32 @@ public class EntryController {
         guestButton.textProperty().bind(Localization.bind("entry.guest"));
         faqLink.textProperty().bind(Localization.bind("entry.faq"));
         privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));
-        langTooltip.textProperty().bind(Localization.bind("tooltip.lang_info"));
 
-        langTooltip.setShowDelay(Duration.millis(100));
+        Tooltip tooltip = new Tooltip();
+        tooltip.textProperty().bind(Localization.bind("tooltip.lang_info"));
+
+        Tooltip.install(languageSwitcher, tooltip);
+        tooltip.setShowDelay(Duration.millis(100));
+
+        languageDisplay.textProperty().bind(
+                Bindings.createStringBinding(
+                        () -> LanguageModel
+                                .getByLocale(Localization.getLocale())
+                                .code(),
+                        Localization.localeProperty()
+                )
+        );
+
+        languageSwitcher.setOnMouseClicked(e -> handleLanguageSelect());
+        languageSwitcher.setPickOnBounds(true);
+
+        languageSwitcher.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                handleLanguageSelect();
+            }
+        });
+
+        languageSwitcher.setFocusTraversable(true);
     }
 
     @FXML
@@ -100,7 +124,7 @@ public class EntryController {
             dialog.setScene(scene);
             dialog.setResizable(false);
 
-            Stage owner = (Stage) languageButton.getScene().getWindow();
+            Stage owner = (Stage) languageSwitcher.getScene().getWindow();
             dialog.setOnShown(e -> {
                 dialog.setX(owner.getX() + (owner.getWidth()  - dialog.getWidth())  / 2);
                 dialog.setY(owner.getY() + (owner.getHeight() - dialog.getHeight()) / 2);

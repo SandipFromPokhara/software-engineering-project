@@ -53,7 +53,7 @@ public class CreateFilesGuestController {
         contentBox.promptTextProperty().bind(Localization.bind("note.placeholder_content"));
         annotation.textProperty().bind(Localization.bind("note.annotation_label"));
         annotationBox.promptTextProperty().bind(Localization.bind("note.placeholder_annotation"));
-        cancelButton.textProperty().bind(Localization.bind("note.cancel"));
+        cancelButton.textProperty().bind(Localization.bind("button.cancel"));
 
     }
 }

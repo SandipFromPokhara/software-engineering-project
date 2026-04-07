@@ -10,8 +10,8 @@ public class NumberedListStrategy implements ListFormattingStrategy {
 
     @Override
     public String applyFormat(String line, int number) {
-        if (line.contains("•")) {
-            line = line.replaceFirst("^.*?•\\s*", ""); // remove bullets first
+        if (line.trim().startsWith("•")) {
+            line = line.replaceFirst("^\\s*•\\s*", "");
         }
         return line.trim().isEmpty() ? number + ". " : number + ". " + line.trim();
     }

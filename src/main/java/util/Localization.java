@@ -4,6 +4,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import model.LanguageModel;
 
 import java.text.MessageFormat;
 import java.util.Locale;
@@ -55,5 +56,9 @@ public class Localization {
 
     public static StringBinding bind(String key) {
         return Bindings.createStringBinding(() -> get(key), locale);
+    }
+
+    public static String getCurrentLanguageCode() {
+        return LanguageModel.getByLocale(getLocale()).code();
     }
 }

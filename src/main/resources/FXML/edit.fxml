@@ -7,8 +7,6 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
@@ -19,6 +17,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.fxml.FXML?>
+<?import javafx.fxml.FXMLLoader?>
 
 <BorderPane prefHeight="600.0" prefWidth="700.0" styleClass="root" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.EditNoteController">
     <top>
@@ -59,60 +59,9 @@
                             </font>
                         </Label>
 
-                        <!-- Content Editor with Toolbar -->
-                        <VBox spacing="8.0" styleClass="editor-container" VBox.vgrow="ALWAYS">
-                            <children>
-                                <HBox alignment="CENTER_LEFT" spacing="2.0" styleClass="editor-toolbar">
-                                    <children>
-                                        <Button fx:id="bulletListButton" mnemonicParsing="false" onAction="#handleToolbarClick" prefHeight="23.0" prefWidth="21.0" styleClass="toolbar-btn" text="•">
-                                            <font>
-                                                <Font size="12.0" />
-                                            </font>
-                                        </Button>
-                                        <Separator orientation="VERTICAL" styleClass="toolbar-separator">
-                                            <padding>
-                                                <Insets bottom="4.0" left="4.0" top="4.0" />
-                                            </padding>
-                                        </Separator>
-                                        <Button fx:id="numberedListButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="1.">
-                                            <font>
-                                                <Font size="12.0" />
-                                            </font>
-                                        </Button>
-                                        <Separator orientation="VERTICAL" styleClass="toolbar-separator">
-                                            <padding>
-                                                <Insets bottom="4.0" left="4.0" top="4.0" />
-                                            </padding>
-                                        </Separator>
-                                        <Button fx:id="headingUpButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="H+">
-                                            <font>
-                                                <Font name="System Bold" size="12.0" />
-                                            </font>
-                                        </Button>
-                              <Separator orientation="VERTICAL" styleClass="toolbar-separator">
-                                 <padding>
-                                    <Insets bottom="4.0" left="4.0" top="4.0" />
-                                 </padding>
-                              </Separator>
-                                        <Button fx:id="headingDownButton" mnemonicParsing="false" onAction="#handleToolbarClick" styleClass="toolbar-btn" text="H-">
-                                            <font>
-                                                <Font name="System Bold" size="12.0" />
-                                            </font>
-                                        </Button>
-                                    </children>
-                                    <padding>
-                                        <Insets bottom="4.0" left="8.0" right="8.0" top="4.0" />
-                                    </padding>
-                                </HBox>
+                        <!-- Reusable rich text editor -->
+                        <fx:include source="RichTextEditor.fxml" fx:id="contentEditor" VBox.vgrow="ALWAYS" />
 
-                                <!-- Text Area -->
-                                <TextArea fx:id="contentBox" promptText="Write your contents..." styleClass="editor-textarea" wrapText="true" VBox.vgrow="ALWAYS">
-                                    <font>
-                                        <Font size="14" />
-                                    </font>
-                                </TextArea>
-                            </children>
-                        </VBox>
                         <VBox.margin>
                             <Insets left="25.0" right="25.0" top="5.0" />
                         </VBox.margin>
@@ -128,9 +77,9 @@
                                 </HBox.margin>
                             </Label>
                         </children>
-                  <VBox.margin>
-                     <Insets bottom="2.0" top="2.0" />
-                  </VBox.margin>
+                        <VBox.margin>
+                            <Insets bottom="2.0" top="2.0" />
+                        </VBox.margin>
                     </HBox>
                     <VBox spacing="5.0">
                         <Label fx:id="annotation" text="Annotations">
@@ -193,9 +142,9 @@
                     <HBox alignment="BOTTOM_LEFT" spacing="35.0">
                         <Button fx:id="updateButton" onAction="#handleUpdate" prefWidth="100.0" text="Update" HBox.hgrow="ALWAYS" />
                         <Button fx:id="cancelButton" alignment="CENTER" contentDisplay="CENTER" onAction="#handleCancel" prefWidth="100.0" text="Cancel" HBox.hgrow="ALWAYS" />
-                  <VBox.margin>
-                     <Insets left="25.0" top="4.0" />
-                  </VBox.margin>
+                        <VBox.margin>
+                            <Insets left="25.0" top="4.0" />
+                        </VBox.margin>
                     </HBox>
                 </VBox>
             </children>

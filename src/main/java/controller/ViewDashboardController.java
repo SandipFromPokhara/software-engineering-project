@@ -5,11 +5,13 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Paragraph;
-import dao.note.JpaNoteDao;
-import dao.tag.JpaTagDao;
-import entity.*;
+import dao.note.*;
+import dao.tag.*;
+import entity.entities.*;
+import entity.translationentities.NoteTranslationEntity;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.control.TableView;
@@ -17,6 +19,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.util.Duration;
@@ -24,6 +27,8 @@ import javafx.util.StringConverter;
 import model.LanguageModel;
 import model.LanguageModel.Language;
 import services.DashboardService;
+import services.NoteService;
+import services.TranslationService;
 import session.NotebookSession;
 import util.*;
 import session.UserSession;
@@ -38,6 +43,7 @@ import util.events.NoteCreatedEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,8 +52,14 @@ public class ViewDashboardController {
 
     static final Logger logger = Logger.getLogger(ViewDashboardController.class.getName());
 
-    private NoteBookEntity activeNotebook;
+    private NotebookEntity activeNotebook;
+
+    // shared instances
     private DashboardService dashboardService = new DashboardService();
+    private final NoteService noteService = new NoteService();
+    private final TranslationService translationService = new TranslationService();
+    private final NoteDAO noteDao = new JpaNoteDao();
+    private final TagDAO tagDao = new JpaTagDao();
 
     @FXML
     private BorderPane rootPane;
@@ -76,11 +88,6 @@ public class ViewDashboardController {
     private Button viewNotesBtn,
             createNoteBtn,
             logoutBtn;
-
-    @FXML
-    private Label viewNotesLabel,
-            createNoteLabel,
-            logoutLabel;
 
     @FXML
     private Button deleteButton,
@@ -114,7 +121,10 @@ public class ViewDashboardController {
     private Button toggleBtn;
 
     @FXML
-    private Tooltip toggleTooltip, langTooltip;
+    private AnchorPane editorPane;
+
+    @FXML
+    private Tooltip toggleTooltip, langTooltip, manageTooltip, createTooltip, logoutTooltip;
 
     @FXML
     private ImageView tagIcon,
@@ -127,6 +137,9 @@ public class ViewDashboardController {
 
     @FXML
     private Label languageIconLabel;
+
+    @FXML
+    private SplitPane mainSplit;
 
     public ViewDashboardController() {}
 
@@ -146,9 +159,9 @@ public class ViewDashboardController {
         faqItem.textProperty().bind(Localization.bind("logged.faq"));
         aboutItem.textProperty().bind(Localization.bind("menu.about"));
 
-        viewNotesLabel.textProperty().bind(Localization.bind("notebook.manage_label"));
-        createNoteLabel.textProperty().bind(Localization.bind("note.create_label"));
-        logoutLabel.textProperty().bind(Localization.bind("button.logout"));
+        manageTooltip.textProperty().bind(Localization.bind("notebook.manage_label"));
+        createTooltip.textProperty().bind(Localization.bind("note.create_label"));
+        logoutTooltip.textProperty().bind(Localization.bind("button.logout"));
 
         titleColumn.textProperty().bind(Localization.bind("note.title"));
         dateColumn.textProperty().bind(Localization.bind("note.date"));
@@ -186,6 +199,9 @@ public class ViewDashboardController {
 
         toggleTooltip.setShowDelay(Duration.millis(100));
         langTooltip.setShowDelay(Duration.millis(100));
+        manageTooltip.setShowDelay(Duration.millis(100));
+        createTooltip.setShowDelay(Duration.millis(100));
+        logoutTooltip.setShowDelay(Duration.millis(100));
 
         WordCountUtil.bind(noteViewArea, wordCountLabel);
 
@@ -196,14 +212,45 @@ public class ViewDashboardController {
         deleteButton.setDisable(true);
 
         setupTableColumns();
-        setupHoverEffects();
         setupEventBusSubscription();
 
         // Determine initial notebook
         activeNotebook = dashboardService.getInitialNotebook();
         if (activeNotebook != null) loadNotes();
 
-        dbStatusLabel.setStyle("-fx-text-fill: green;");
+        // Enforce SplitPane divider limits so the notes table and editor keep their minimum widths
+        Platform.runLater(() -> {
+            try {
+                if (mainSplit == null) return;
+
+                // Helper to clamp divider based on min widths
+                Runnable clampDivider = () -> {
+                    double total = mainSplit.getWidth();
+                    if (total <= 0) return;
+                    double leftMin = notesTable.getMinWidth();
+                    double rightMin = editorPane.getMinWidth();
+                    double minPos = Math.min(0.99, Math.max(0.0, leftMin / total));
+                    double maxPos = Math.max(0.01, Math.min(1.0, 1.0 - (rightMin / total)));
+                    var divider = mainSplit.getDividers().get(0);
+                    double pos = divider.getPosition();
+                    double newPos = Math.max(minPos, Math.min(maxPos, pos));
+                    if (Double.compare(newPos, pos) != 0) {
+                        divider.setPosition(newPos);
+                    }
+                };
+
+                // Clamp immediately
+                clampDivider.run();
+
+                // When user drags divider, ensure it stays within the min/max
+                mainSplit.getDividers().get(0).positionProperty().addListener((obs, oldV, newV) -> clampDivider.run());
+
+                // When the split pane width changes (window resize), re-clamp
+                mainSplit.widthProperty().addListener((obs, oldV, newV) -> clampDivider.run());
+            } catch (Exception ex) {
+                logger.log(Level.FINE, "Failed to initialize split pane clamps", ex);
+            }
+        });
     }
 
     private void setupLanguageCombo() {
@@ -281,7 +328,13 @@ public class ViewDashboardController {
     // ---------- TABLE & NOTES ----------
 
     private void setupTableColumns() {
-        titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        titleColumn.setCellValueFactory(cellData -> {
+            NoteTranslationEntity t = dashboardService.getDisplayTranslation(cellData.getValue());
+
+            return new SimpleStringProperty(
+                    t != null ? t.getTitle() : ""
+            );
+        });
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("formattedCreatedTime"));
         notesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
@@ -315,9 +368,22 @@ public class ViewDashboardController {
 
     private void displayNote(NoteEntity note) {
         noteTitleLabel.textProperty().unbind(); // important so we can show the concrete title
-        noteTitleLabel.setText(note.getTitle());
-        noteViewArea.setText(note.getContent());
-        annotationViewArea.setText(note.getAnnotation());
+
+        NoteTranslationEntity t = dashboardService.getDisplayTranslation(note);
+
+        if (t == null) {
+            logger.warning("Missing translation for note: " + note.getId());
+
+            noteTitleLabel.setText("");
+            noteViewArea.clear();
+            annotationViewArea.clear();
+
+            return;
+        }
+
+        noteTitleLabel.setText(t.getTitle());
+        noteViewArea.setText(t.getContent());
+        annotationViewArea.setText(t.getAnnotation());
         refreshTagView(note);
         editButton.setDisable(false);
         deleteButton.setDisable(false);
@@ -338,9 +404,11 @@ public class ViewDashboardController {
         tagFlowpane.getChildren().clear();
 
         note.getTags().stream()
-                .sorted((t1, t2) -> t1.getTagName().compareToIgnoreCase(t2.getTagName()))
-                .forEach(tag -> {
-                    Label tagLabel = new Label("#" + tag.getTagName());
+                .map(TagEntity::getTagName)
+                .filter(Objects::nonNull)
+                .sorted(String::compareToIgnoreCase)
+                .forEach(tagName -> {
+                    Label tagLabel = new Label("#" + tagName);
                     tagLabel.getStyleClass().addAll("note-tag", "tag-box");
                     tagFlowpane.getChildren().add(tagLabel);
                 });
@@ -396,18 +464,6 @@ public class ViewDashboardController {
         }
     }
 
-    private void setupHover(Button button, Label label) {
-        button.setOnMouseEntered(e -> label.setVisible(true));
-
-        button.setOnMouseExited(e -> label.setVisible(false));
-    }
-
-    private void setupHoverEffects() {
-        setupHover(viewNotesBtn, viewNotesLabel);
-        setupHover(createNoteBtn, createNoteLabel);
-        setupHover(logoutBtn, logoutLabel);
-    }
-
     @FXML
     private void handleThemeToggle() {
         Scene scene = rootPane.getScene();
@@ -448,7 +504,7 @@ public class ViewDashboardController {
                         controller.setActiveNotebook(activeNotebook);
                     });
 
-            NoteBookEntity lastNotebook = NotebookSession.getLastCreatedNotebook();
+            NotebookEntity lastNotebook = NotebookSession.getLastCreatedNotebook();
             if (lastNotebook != null) {
                 activeNotebook = lastNotebook;
                 NotebookSession.clear();
@@ -528,8 +584,10 @@ public class ViewDashboardController {
         Stage stage = (Stage) rootPane.getScene().getWindow();
         NavigationUtil.openWindow(stage, "/FXML/edit.fxml", "edit.window.title", true, true,
                 (EditNoteController controller) -> {
-                    controller.setNoteDao(new JpaNoteDao());
-                    controller.setTagDao(new JpaTagDao());
+                    controller.setNoteDao(noteDao);
+                    controller.setTagDao(tagDao);
+                    controller.setTranslationService(translationService);
+                    controller.setNoteService(noteService);
                     controller.setNote(selectedNote);
                 }
         );
@@ -603,7 +661,10 @@ public class ViewDashboardController {
             return;
         }
         List<NoteEntity> singleNoteList = List.of(selectedNote);
-        exportNotesToPdf(singleNoteList, selectedNote.getTitle());
+
+        NoteTranslationEntity t = dashboardService.getDisplayTranslation(selectedNote);
+
+        exportNotesToPdf(singleNoteList, t.getTitle());
     }
 
     private void exportEntireNotebook() {
@@ -612,7 +673,12 @@ public class ViewDashboardController {
             AlertUtil.showWarning(rootPane.getScene().getWindow(),Localization.get("export.no_notebook"));
             return;
         }
-        exportNotesToPdf(notes, activeNotebook.getTitle());
+
+        String notebookName = activeNotebook.getTranslations().values().stream()
+                .findFirst()
+                .map(t -> t.getTitle())
+                .orElse("Notebook");
+        exportNotesToPdf(notes, notebookName);
     }
 
     private void exportNotesToPdf(List<NoteEntity> notes, String fileName) {
@@ -635,18 +701,20 @@ public class ViewDashboardController {
 
             for (int i = 0; i < notes.size(); i++) {
                 NoteEntity note = notes.get(i);
-                document.add(new Paragraph(note.getTitle())
+                NoteTranslationEntity t = dashboardService.getDisplayTranslation(note);
+
+                document.add(new Paragraph(t.getTitle())
                         .setBold()
                         .setFontSize(18));
-                document.add(new Paragraph(note.getContent()));
+                document.add(new Paragraph(t.getContent()));
 
-                if (note.getAnnotation() != null &&
-                        !note.getAnnotation().isEmpty()) {
+                if (t.getAnnotation() != null &&
+                        !t.getAnnotation().isEmpty()) {
 
                     document.add(new Paragraph("\nAnnotation:")
                             .setBold());
 
-                    document.add(new Paragraph(note.getAnnotation()));
+                    document.add(new Paragraph(t.getAnnotation()));
                 }
 
                 if (i < notes.size() - 1) {
@@ -683,7 +751,12 @@ public class ViewDashboardController {
                 String userHome = System.getProperty("user.home");
                 File dataDir = new File(userHome, ".NoteVault/data");
                 if (!dataDir.exists()) {
-                    dataDir.mkdirs();
+                    boolean created = dataDir.mkdirs();
+                    if (!created) {
+                        logger.warning("Failed to create data directory: " + dataDir.getAbsolutePath());
+                        AlertUtil.showError(owner, Localization.get("dashboard.folder.error_create"));
+                        return;
+                    }
                 }
                 if (java.awt.Desktop.isDesktopSupported()) {
                     java.awt.Desktop.getDesktop().open(dataDir);

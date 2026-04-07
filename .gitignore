@@ -46,6 +46,9 @@ build/
 *.env
 .env.local
 
-#docker-compose.yml
-#Dockerfile
-#Jenkinsfile
+Dockerfile
+Jenkinsfile
+
+### Personal notes ###
+MyNotes.md
+src/main/java/dto/

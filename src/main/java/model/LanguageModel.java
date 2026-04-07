@@ -10,18 +10,24 @@ public class LanguageModel {
 
     public static final Map<String, Language> LANGUAGES = new LinkedHashMap<>();
 
+    public static final String DEFAULT_LANGUAGE_CODE = "EN";
+
     static {
         LANGUAGES.put("EN", new Language("EN", "English",   "Default",    Locale.ENGLISH));
         LANGUAGES.put("FI", new Language("FI", "Finnish",   "Suomi",      new Locale("fi")));
-        LANGUAGES.put("NP", new Language("NP", "Nepali",    "नेपाली",      new Locale("np_NP")));
+        LANGUAGES.put("NP", new Language("NP", "Nepali",    "नेपाली",      new Locale("np")));
         LANGUAGES.put("MY", new Language("MY", "Burmese",   "မြန်မာဘာသာ", new Locale("my")));
         LANGUAGES.put("SI", new Language("SI", "Sinhalese", "සිංහල",      new Locale("si")));
     }
 
     public static Language getByLocale(Locale locale) {
         return LANGUAGES.values().stream()
-                .filter(l -> l.locale().getLanguage().equals(locale.getLanguage()))
+                .filter(l -> l.locale().getLanguage().equalsIgnoreCase(locale.getLanguage()))
                 .findFirst()
-                .orElse(LANGUAGES.get("EN"));
+                .orElse(LANGUAGES.get(DEFAULT_LANGUAGE_CODE));
+    }
+
+    public static Language getDefault() {
+        return LANGUAGES.get(DEFAULT_LANGUAGE_CODE);
     }
 }

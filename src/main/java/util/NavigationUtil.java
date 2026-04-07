@@ -32,7 +32,7 @@ public class NavigationUtil {
      *
      * @param owner       The owner stage; can be null for new window
      * @param fxmlPath    FXML resource path
-     * @param title       Window title
+     * @param titleKey    Window title
      * @param resizable   Whether window is resizable
      * @param modal       If true, window is modal
      * @param consumer    Optional callback to configure the controller
@@ -51,6 +51,12 @@ public class NavigationUtil {
             }
 
             Scene scene = new Scene(root);
+            // Ensure the scene root has the base style class so ToggleUtil.applyTheme can apply theme.css
+            if (!scene.getRoot().getStyleClass().contains("root")) {
+                scene.getRoot().getStyleClass().add("root");
+            }
+            // Apply global theme (theme.css) and per-window row colors
+            util.ToggleUtil.applyTheme(scene);
             scene.getStylesheets().add("/css/row_color.css");
             stage.setScene(scene);
 
@@ -89,6 +95,12 @@ public class NavigationUtil {
             Parent root = loader.load();
             Scene scene = new Scene(root);
 
+            // Ensure the scene root has the base style class so ToggleUtil.applyTheme can apply theme.css
+            if (!scene.getRoot().getStyleClass().contains("root")) {
+                scene.getRoot().getStyleClass().add("root");
+            }
+            // Apply global theme (theme.css) and per-window row colors
+            util.ToggleUtil.applyTheme(scene);
             scene.getStylesheets().add("/css/row_color.css");
 
             stage.setScene(scene);

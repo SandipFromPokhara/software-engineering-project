@@ -1,7 +1,7 @@
 package dao.tag;
 
 import dao.basedao.GenericDAO;
-import entity.TagEntity;
+import entity.entities.TagEntity;
 
 import java.util.List;
 
