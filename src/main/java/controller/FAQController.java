@@ -50,7 +50,9 @@ public class FAQController {
         Label contentLabel = new Label(contentText);
         contentLabel.setWrapText(true);
         contentLabel.setMaxWidth(Double.MAX_VALUE);
-        contentLabel.setStyle("-fx-padding: 10; -fx-text-fill: #333333;");
+
+        contentLabel.getStyleClass().add("faq-answer-label");
+        contentLabel.setStyle("-fx-padding: 10;");
 
         TitledPane pane = new TitledPane(title, contentLabel);
         faqAccordion.getPanes().add(pane);
