@@ -13,14 +13,11 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import services.NoteService;
 import services.TranslationService;
 import util.*;
-import util.bulletList.BulletListStrategy;
-import util.bulletList.NumberedListStrategy;
-import util.bulletList.TextFormattingUtil;
+import util.bulletList.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -198,10 +195,14 @@ public class EditNoteController {
     private void loadTags() {
         tagComboBox.getItems().clear();
 
-        tagComboBox.getItems().addAll(tagDao.findAll()
-                .stream()
-                .map(TagEntity::getTagName)
-                .sorted(String::compareToIgnoreCase).toList()
+        String lang = Localization.getCurrentLanguageCode();
+
+        tagComboBox.getItems().addAll(
+                tagDao.findAll().stream()
+                        .map(TagEntity::getTagName)
+                        .filter(java.util.Objects::nonNull)
+                        .sorted(String.CASE_INSENSITIVE_ORDER)
+                        .toList()
         );
     }
 
@@ -225,7 +226,13 @@ public class EditNoteController {
 
         selectedTags.clear();
         if (note.getTags() != null) {
-            note.getTags().forEach(tag -> selectedTags.add(tag.getTagName()));
+            note.getTags().forEach(tag -> {
+                String tagName = tag.getTagName();
+
+                if (tagName != null) {
+                    selectedTags.add(tagName);
+                }
+            });
         }
         refreshTagFlowPane();
     }
@@ -249,11 +256,6 @@ public class EditNoteController {
         );
 
         handleCancel();
-    }
-    private void showStatus(String msg, boolean isError) {
-        statusLabel.setText(msg);
-        statusLabel.setTextFill(isError ? Color.RED : Color.GREEN);
-        statusLabel.setVisible(true);
     }
 
     private void refreshTagFlowPane() {

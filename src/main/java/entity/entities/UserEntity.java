@@ -1,5 +1,6 @@
 package entity.entities;
 
+import entity.base.BaseEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -7,11 +8,7 @@ import java.util.List;
 
 @Entity
 @Table(name="users")
-public class UserEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class UserEntity extends BaseEntity {
 
     @Column(name="firstName", nullable = false)
     private String firstName;
@@ -28,25 +25,8 @@ public class UserEntity {
     @Column(name="passwordHash")
     private String passwordHash;
 
-    @Column(name="createdAt")
-    private LocalDateTime createdAt;
-
-    @Column(name="updatedAt")
-    private LocalDateTime updatedAt;
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NotebookEntity> notebooks = new ArrayList<>();
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 
     public UserEntity(String firstName, String lastName, String username, String email) {
         this.firstName = firstName;
@@ -57,8 +37,6 @@ public class UserEntity {
 
     public UserEntity() {}
 
-    public Long getId() { return id; }
-
     public String getFirstName() { return firstName; }
 
     public String getLastName() { return lastName; }
@@ -68,10 +46,6 @@ public class UserEntity {
     public String getEmail() { return email; }
 
     public String getPasswordHash() { return passwordHash; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
 
     public void setFirstName(String newFirstName) {
         this.firstName = newFirstName;
@@ -95,7 +69,7 @@ public class UserEntity {
         }
     }
 
-    public List<NotebookEntity> getNoteBooks() { return notebooks; }
+    public List<NotebookEntity> getNotebooks() { return notebooks; }
 
     public void removeNotebook(NotebookEntity notebook) {
         notebooks.remove(notebook);
@@ -110,5 +84,18 @@ public class UserEntity {
     @Override
     public String toString() {
         return username;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserEntity)) return false;
+        UserEntity that = (UserEntity) o;
+        return getId() != null && getId().equals(that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

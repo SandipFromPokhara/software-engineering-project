@@ -1,42 +1,22 @@
 package entity.entities;
 
+import entity.base.BaseEntity;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name="tags")
-public class TagEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class TagEntity extends BaseEntity {
 
     @Column(name="tag_name", nullable = false, unique = true)
     private String tagName;
-
-    @Column(name="createdAt")
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(name="updatedAt")
-    private LocalDateTime updatedAt = LocalDateTime.now();
 
     @ManyToMany(mappedBy = "tags")
     private Set<NoteEntity> notes = new HashSet<>();
 
     public TagEntity() {}
 
-    public TagEntity(String tagName) {
-        this.tagName = tagName;
-    }
-
-    public Long getId() { return id; }
-
     public String getTagName() { return tagName; }
-
-    public void setId(Long id) { this.id = id; }
 
     public void setTagName(String newTagName) { this.tagName = newTagName; }
 
@@ -46,16 +26,21 @@ public class TagEntity {
     public String toString() { return "#" + tagName; }
 
     @Override
-    public boolean equals(Object other) {
-        if ( other == null || getClass() != other.getClass()) return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TagEntity)) return false;
 
-        TagEntity tagEntity = (TagEntity) other;
-        if ( this.id == null || tagEntity.id == null) return false;
-        return (Objects.equals(id, tagEntity.id));
+        TagEntity that = (TagEntity) o;
+
+        if (getId() == null || that.getId() == null) {
+            return false;
+        }
+
+        return getId().equals(that.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hashCode(getId());
     }
 }
