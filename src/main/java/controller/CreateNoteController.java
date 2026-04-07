@@ -21,8 +21,6 @@ import services.NoteService;
 import entity.entities.NoteEntity;
 import session.UserSession;
 import util.*;
-import util.bulletList.BulletListStrategy;
-import util.bulletList.NumberedListStrategy;
 import util.bulletList.TextFormattingUtil;
 import util.events.EventBus;
 import util.events.NoteCreatedEvent;
@@ -66,8 +64,6 @@ public class CreateNoteController implements Initializable {
     @FXML
     private TextField titleField;
     @FXML
-    private TextArea contentArea;
-    @FXML
     private TextArea annotationArea;
     @FXML
     private Button saveButton;
@@ -84,15 +80,6 @@ public class CreateNoteController implements Initializable {
     @FXML
     private Button addTagBtn;
 
-    // Toolbar buttons
-    @FXML
-    private Button bulletListButton;
-    @FXML
-    private Button numberedListButton;
-    @FXML
-    private Button headingUpButton;
-    @FXML
-    private Button headingDownButton;
     @FXML
     private Tooltip tagTooltip, toggleTooltip;
     @FXML
@@ -109,6 +96,10 @@ public class CreateNoteController implements Initializable {
     private MenuItem redoMenuItem;
 
     private UndoRedoManager undoRedoManager = new UndoRedoManager();
+
+    // Reusable rich text editor component controller (from fx:include fx:id="contentEditor")
+    @FXML
+    private RichTextEditorController contentEditorController;
 
     public CreateNoteController() {
     }
@@ -130,7 +121,7 @@ public class CreateNoteController implements Initializable {
         noteContentLabel.textProperty().bind(Localization.bind("create.note_content"));
         selectLabel.textProperty().bind(Localization.bind("notebook.select_label"));
 
-        WordCountUtil.bind(contentArea, wordCountLabel);
+        WordCountUtil.bind(contentEditorController.getTextArea(), wordCountLabel);
 
         noteAnnotationLabel.textProperty().bind(Localization.bind("create.note_annotations"));
         noteTagLabel.textProperty().bind(Localization.bind("create.tags"));
@@ -139,7 +130,7 @@ public class CreateNoteController implements Initializable {
         clearButton.textProperty().bind(Localization.bind("create.clear"));
 
         titleField.promptTextProperty().bind(Localization.bind("create.placeholder_title"));
-        contentArea.promptTextProperty().bind(Localization.bind("create.placeholder_content"));
+        contentEditorController.bindPromptText(Localization.bind("create.placeholder_content"));
         annotationArea.promptTextProperty().bind(Localization.bind("create.placeholder_annotations"));
 
         tagComboBox.promptTextProperty().bind(Localization.bind("create.placeholder_tags"));
@@ -218,7 +209,7 @@ public class CreateNoteController implements Initializable {
         // Initialize undo/redo manager
         undoRedoManager.initialize(undoMenuItem, redoMenuItem);
         undoRedoManager.registerField("title", titleField);
-        undoRedoManager.registerField("content", contentArea);
+        undoRedoManager.registerField("content", contentEditorController.getTextArea());
         undoRedoManager.registerField("annotation", annotationArea);
 
         // Apply theme once scene is ready
@@ -227,10 +218,9 @@ public class CreateNoteController implements Initializable {
             ToggleUtil.applyTheme(scene);
             updateToggleIcon();
             updateTagIcon();
-            WordCountUtil.bind(contentArea, wordCountLabel);
         });
         // Enable list auto-continuation for content area
-        TextFormattingUtil.enableListAutoContinuation(contentArea);
+        TextFormattingUtil.enableListAutoContinuation(contentEditorController.getTextArea());
     }
 
     @FXML
@@ -253,7 +243,7 @@ public class CreateNoteController implements Initializable {
     private void handleSave() {
         try {
             String title = titleField.getText().trim();
-            String content = contentArea.getText() == null ? "" : contentArea.getText();
+            String content = contentEditorController != null ? contentEditorController.getText() : "";
             String annotation = annotationArea.getText() == null ? "" : annotationArea.getText();
 
             NotebookEntity selectedNotebook = notebookComboBox.getSelectionModel().getSelectedItem();
@@ -299,34 +289,17 @@ public class CreateNoteController implements Initializable {
 
     @FXML
     private void handleClear() {
+        // Clear the reusable editor content as well
+        if (contentEditorController != null) {
+            contentEditorController.setText("");
+        }
+
         clearForm();
         statusLabel.setVisible(false);
     }
 
-    @FXML
-    private void handleToolbarClick(ActionEvent event) {
-        Button clickedButton = (Button) event.getSource();
-        String buttonId = clickedButton.getId();
-
-        switch (buttonId) {
-            case "bulletListButton":
-                TextFormattingUtil.toggleList(contentArea, bulletListButton, new BulletListStrategy());
-                break;
-            case "numberedListButton":
-                TextFormattingUtil.toggleList(contentArea, numberedListButton, new NumberedListStrategy());
-                break;
-            case "headingUpButton":
-                TextFormattingUtil.increaseFontSize(contentArea);
-                break;
-            case "headingDownButton":
-                TextFormattingUtil.decreaseFontSize(contentArea);
-                break;
-        }
-    }
-
     private void clearForm() {
         titleField.clear();
-        contentArea.clear();
         annotationArea.clear();
         selectedTags.clear();
         refreshTagFlowPane();

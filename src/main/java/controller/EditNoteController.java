@@ -8,6 +8,7 @@ import entity.translationentities.NoteTranslationEntity;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -17,14 +18,16 @@ import javafx.util.Duration;
 import services.NoteService;
 import services.TranslationService;
 import util.*;
-import util.bulletList.*;
+import util.bulletList.TextFormattingUtil;
 
+import java.net.URL;
 import java.util.HashSet;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import static model.LanguageModel.DEFAULT_LANGUAGE_CODE;
 
-public class EditNoteController {
+public class EditNoteController implements Initializable {
 
     private NoteDAO noteDao;
     private TagDAO tagDao;
@@ -41,9 +44,6 @@ public class EditNoteController {
 
     @FXML
     private Label content;
-
-    @FXML
-    private TextArea contentBox;
 
     @FXML
     private Label annotation;
@@ -98,6 +98,10 @@ public class EditNoteController {
     @FXML
     private Menu editMenu;
 
+    // Reusable rich text editor component controller (from fx:include fx:id="contentEditor")
+    @FXML
+    private RichTextEditorController contentEditorController;
+
     private UndoRedoManager undoRedoManager = new UndoRedoManager();
 
     public void setNoteDao(NoteDAO noteDao) {
@@ -118,7 +122,8 @@ public class EditNoteController {
         this.noteService = noteService;
     }
 
-    public void initialize() {
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
         // LOCALIZATION BINDINGS
         title.textProperty().bind(Localization.bind("edit.title_label"));
         editMenu.textProperty().bind(Localization.bind("edit.menu"));
@@ -126,7 +131,6 @@ public class EditNoteController {
         redoMenuItem.textProperty().bind(Localization.bind("edit.redo"));
 
         content.textProperty().bind(Localization.bind("edit.content_label"));
-        contentBox.promptTextProperty().bind(Localization.bind("edit.content_box"));
         annotation.textProperty().bind(Localization.bind("edit.annotations"));
         editTags.textProperty().bind(Localization.bind("edit.tags"));
 
@@ -138,7 +142,7 @@ public class EditNoteController {
         tagComboBox.promptTextProperty().bind(Localization.bind("edit.placeholder_tags"));
         addTagBtn.textProperty().bind(Localization.bind("edit.add_tags"));
 
-        WordCountUtil.bind(contentBox, wordCountLabel);
+        WordCountUtil.bind(contentEditorController.getTextArea(), wordCountLabel);
 
         tagTooltip.setShowDelay(Duration.millis(100));
         tagComboBox.setEditable(true);
@@ -146,7 +150,7 @@ public class EditNoteController {
         // Initialize undo/redo manager
         undoRedoManager.initialize(undoMenuItem, redoMenuItem);
         undoRedoManager.registerField("title", titleField);
-        undoRedoManager.registerField("content", contentBox);
+        undoRedoManager.registerField("content", contentEditorController.getTextArea());
         undoRedoManager.registerField("annotation", annotationBox);
 
         // Apply theme once scene is ready
@@ -158,7 +162,7 @@ public class EditNoteController {
             }
         });
         // Enable list auto-continuation for content box
-        TextFormattingUtil.enableListAutoContinuation(contentBox);
+        TextFormattingUtil.enableListAutoContinuation(contentEditorController.getTextArea());
     }
 
     @FXML
@@ -169,27 +173,6 @@ public class EditNoteController {
     @FXML
     private void handleRedo() {
         undoRedoManager.redo();
-    }
-
-    @FXML
-    private void handleToolbarClick(ActionEvent event) {
-        Button clickedButton = (Button) event.getSource();
-        String buttonId = clickedButton.getId();
-
-        switch (buttonId) {
-            case "bulletListButton":
-                TextFormattingUtil.toggleList(contentBox, bulletListButton, new BulletListStrategy());
-                break;
-            case "numberedListButton":
-                TextFormattingUtil.toggleList(contentBox, numberedListButton, new NumberedListStrategy());
-                break;
-            case "headingUpButton":
-                TextFormattingUtil.increaseFontSize(contentBox);
-                break;
-            case "headingDownButton":
-                TextFormattingUtil.decreaseFontSize(contentBox);
-                break;
-        }
     }
 
     private void loadTags() {
@@ -216,11 +199,13 @@ public class EditNoteController {
 
         if (translation != null) {
             titleField.setText(translation.getTitle());
-            contentBox.setText(translation.getContent());
+            contentEditorController.setText(translation.getContent());
             annotationBox.setText(translation.getAnnotation());
         } else {
             titleField.clear();
-            contentBox.clear();
+            if (contentEditorController != null) {
+                contentEditorController.setText("");
+            }
             annotationBox.clear();
         }
 
@@ -250,7 +235,7 @@ public class EditNoteController {
                 note,
                 langCode,
                 titleField.getText(),
-                contentBox.getText(),
+                contentEditorController.getText(),
                 annotationBox.getText(),
                 selectedTags
         );
@@ -277,3 +262,4 @@ public class EditNoteController {
         tagIcon.setImage(new Image(path));
     }
 }
+

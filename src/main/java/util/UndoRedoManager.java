@@ -4,10 +4,12 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
+import org.fxmisc.richtext.InlineCssTextArea;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.function.Consumer;
 
 public class UndoRedoManager {
 
@@ -19,6 +21,7 @@ public class UndoRedoManager {
     private MenuItem redoMenuItem;
 
     private final Map<String, TextInputControl> fieldMap = new HashMap<>();
+    private final Map<String, Consumer<String>> richFieldSetters = new HashMap<>();
 
     // Initialize the undo/redo manager with menu items
     public void initialize(MenuItem undoMenuItem, MenuItem redoMenuItem) {
@@ -38,6 +41,23 @@ public class UndoRedoManager {
         fieldMap.put(fieldName, field);
 
         // Add listener to track changes
+        field.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (!isUndoRedoAction && oldVal != null && !oldVal.equals(newVal)) {
+                recordChange(fieldName, oldVal, newVal);
+            }
+        });
+    }
+
+    // Overload for InlineCssTextArea (which is not a TextInputControl)
+    public void registerField(String fieldName, InlineCssTextArea field) {
+        richFieldSetters.put(fieldName, text -> {
+            String safeText = text != null ? text : "";
+            field.replaceText(0, field.getLength(), safeText);
+            if (!safeText.isEmpty()) {
+                field.setStyle(0, safeText.length(), "");
+            }
+        });
+
         field.textProperty().addListener((obs, oldVal, newVal) -> {
             if (!isUndoRedoAction && oldVal != null && !oldVal.equals(newVal)) {
                 recordChange(fieldName, oldVal, newVal);
@@ -74,6 +94,9 @@ public class UndoRedoManager {
         TextInputControl field = fieldMap.get(command.getFieldName());
         if (field != null) {
             field.setText(command.getOldValue());
+        } else {
+            Consumer<String> setter = richFieldSetters.get(command.getFieldName());
+            if (setter != null) setter.accept(command.getOldValue());
         }
 
         updateMenuItems();
@@ -95,6 +118,9 @@ public class UndoRedoManager {
         TextInputControl field = fieldMap.get(command.getFieldName());
         if (field != null) {
             field.setText(command.getNewValue());
+        } else {
+            Consumer<String> setter = richFieldSetters.get(command.getFieldName());
+            if (setter != null) setter.accept(command.getNewValue());
         }
 
         updateMenuItems();
