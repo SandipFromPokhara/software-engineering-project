@@ -36,7 +36,7 @@ public class JpaNoteDao extends GenericAbstractDAO<NoteEntity, Long> implements 
         if (notebook == null) throw new IllegalArgumentException("Notebook cannot be null");
 
         return execute(em -> {
-            TypedQuery<NoteEntity> query = em.createQuery("SELECT DISTINCT n FROM NoteEntity n LEFT JOIN FETCH n.translations t LEFT JOIN FETCH n.tags WHERE n.notebook = :notebook", NoteEntity.class);
+            TypedQuery<NoteEntity> query = em.createQuery("SELECT DISTINCT n FROM NoteEntity n LEFT JOIN FETCH n.translations t LEFT JOIN FETCH n.tags tag WHERE n.notebook = :notebook", NoteEntity.class);
 
             query.setParameter("notebook", notebook);
 
