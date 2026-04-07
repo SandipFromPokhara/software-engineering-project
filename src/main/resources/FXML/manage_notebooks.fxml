@@ -10,7 +10,7 @@
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ManageNotebookController">
    <top>
-      <Label fx:id="manageTitle" text="Manage Notebooks" BorderPane.alignment="CENTER">
+      <Label fx:id="manageTitle" BorderPane.alignment="CENTER">
          <font>
             <Font name="SansSerif Bold" size="18.0" />
          </font>
@@ -32,22 +32,22 @@
    <bottom>
       <HBox alignment="CENTER" prefHeight="60.0" prefWidth="200.0" spacing="30.0" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="openBtn" defaultButton="true" mnemonicParsing="false" onAction="#handleOpen" style="-fx-cursor: hand;" text="Open">
+            <Button fx:id="openBtn" defaultButton="true" mnemonicParsing="false" onAction="#handleOpen" style="-fx-cursor: hand;">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>
             </Button>
-            <Button fx:id="renameBtn" mnemonicParsing="false" onAction="#handleRename" style="-fx-cursor: hand;" text="Rename">
+            <Button fx:id="renameBtn" mnemonicParsing="false" onAction="#handleRename" style="-fx-cursor: hand;">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>
             </Button>
-            <Button fx:id="deleteBtn" mnemonicParsing="false" onAction="#handleDelete" style="-fx-cursor: hand;" text="Delete">
+            <Button fx:id="deleteBtn" mnemonicParsing="false" onAction="#handleDelete" style="-fx-cursor: hand;">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>
             </Button>
-            <Button fx:id="closeBtn" mnemonicParsing="false" onAction="#handleClose" style="-fx-cursor: hand;" text="Close">
+            <Button fx:id="closeBtn" mnemonicParsing="false" onAction="#handleClose" style="-fx-cursor: hand;">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>

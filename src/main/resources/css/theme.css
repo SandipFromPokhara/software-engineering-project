@@ -1,6 +1,12 @@
 /* BASE STYLES */
 .root {
     -fx-font-family: "System";
+    -fx-base: #f4f4f4; /* Background */
+    -fx-text-base-color: #333333;  /* Default text color */
+}
+
+.label {
+    -fx-text-fill: -fx-text-base-color;
 }
 
 .root.light .menu-bar {
@@ -46,6 +52,53 @@
     -fx-cursor: hand;
     -fx-background-insets: 0;
     -fx-border-insets: 0;
+<<<<<<< HEAD
+=======
+}
+
+/* Italic Button - Actual Italic Style */
+.italic-btn {
+    -fx-font-style: italic;
+}
+
+/* Underline Button - Show underline */
+.underline-btn {
+    -fx-underline: true;
+}
+
+/* Color Button - Special styling with color indicator */
+.color-btn {
+    -fx-border-width: 0 0 3 0;
+    -fx-border-color: transparent transparent #000000 transparent;
+}
+
+.color-btn:hover {
+    -fx-border-color: transparent transparent #ff0000 transparent;
+}
+
+/* Alignment Buttons - Visual positioning */
+.align-left {
+    -fx-padding: 5 10 5 6;
+}
+
+.align-center {
+    -fx-padding: 5 8 5 8;
+}
+
+.align-right {
+    -fx-padding: 5 6 5 10;
+}
+
+/* Toolbar Separator */
+.toolbar-separator {
+    -fx-background-color: transparent;
+}
+
+.toolbar-separator .line {
+    -fx-border-color: #d0d0d0;
+    -fx-border-width: 0 0 0 1;
+    -fx-padding: 0 3 0 3;
+>>>>>>> origin/feature-dev2
 }
 
 /* LIGHT MODE */
@@ -53,6 +106,10 @@
     -fx-base: #f8f8f8;
     -fx-background: #f8f8f8;
     -fx-text-fill: #000000;
+}
+
+#privacyLabel {
+    -fx-text-fill: white !important;
 }
 
 .root.light .side-panel {
@@ -113,8 +170,11 @@
     -fx-background-color: #cccccc;
 }
 
-/* Editor container & toolbar - only colors */
+/* Editor container & toolbar */
 .root.light .editor-container {
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-effect: dropshadow(gaussian, #0000001a, 2, 0, 0, 1);
     -fx-background-color: #ffffff;
     -fx-border-color: #d0d0d0;
 }
@@ -133,14 +193,19 @@
 
 .root.light .toolbar-btn:hover {
     -fx-background-color: #d0d0d0;
+<<<<<<< HEAD
+=======
+    -fx-border-color: #c0c0c0;
+>>>>>>> origin/feature-dev2
 }
 
 .root.light .toolbar-btn:pressed {
-    -fx-background-color: rgba(0,0,0,0.12);
+    -fx-background-color: #e1e1e1;
+    -fx-border-color: #a0a0a0;
 }
 
 .root.light .toolbar-btn.active {
-    -fx-background-color: rgba(66,133,244,0.15);
+    -fx-background-color: #e3edfe;
     -fx-border-color: #4285f4;
 }
 
@@ -229,10 +294,22 @@
     -fx-text-fill: #2e7d32;
 }
 
+.root.light .secondary-label {
+    -fx-text-fill: #6b6b6b;
+}
+
+.root.light .faq-answer-label {
+    -fx-text-fill: #333333; /* Dark gray for light background */
+}
+
 /* DARK MODE */
 .root.dark {
     -fx-base: #303030;
     -fx-background: #303030;
+    -fx-text-fill: #e6e6e6;
+}
+
+.root.dark .label {
     -fx-text-fill: #e6e6e6;
 }
 
@@ -281,6 +358,17 @@
 
 .root.dark .side-label:hover {
     -fx-background-color: #808080;
+<<<<<<< HEAD
+=======
+}
+
+.root.dark #noteTitleLabel, .root.dark #annotation, .root.dark #wordCountLabel {
+    -fx-text-fill: #d3d3d3;
+}
+
+.root.dark .separator .line {
+    -fx-border-color: #787878;
+>>>>>>> origin/feature-dev2
 }
 
 /* Editor container & toolbar - only colors */
@@ -290,8 +378,10 @@
 }
 
 .root.dark .editor-toolbar {
-    -fx-background-color: #525252;
-    -fx-border-color: #3d2b2b;
+    -fx-background-color: linear-gradient(to bottom, #f8f8f8 0%, #ececec 100%);
+    -fx-border-color: #d0d0d0;
+    -fx-border-width: 0 0 1 0;
+    -fx-background-radius: 4 4 0 0;
 }
 
 /* Toolbar buttons - only colors */
@@ -313,22 +403,26 @@
     -fx-text-fill: white;
 }
 
-/* TextAreas & TextFields - only colors */
+/* TextAreas & TextFields*/
+.root.dark .text-field,
+.root.dark .text-area,
+.root.dark .editor-textfield,
 .root.dark .editor-textarea,
-.root.dark .text-area {
-    -fx-background-color: #636161;
-    -fx-control-inner-background: #636161;
-    -fx-text-fill: #f2f0f0;
-    -fx-highlight-fill: #f2f0f0;
-    -fx-prompt-text-fill: #f2f0f0;
-    -fx-highlight-text-fill: white;
+.root.dark .text-field .text,
+.root.dark .text-area .content {
+    -fx-control-inner-background: #4a4a4a;
+    -fx-background-color: #3c3c3c;
+    -fx-text-fill: white !important;
+    -fx-prompt-text-fill: #bbbbbb !important;
 }
 
-.root.dark .text-field,
-.root.dark .editor-textfield {
-    -fx-background-color: #636161;
-    -fx-text-fill: #f2f0f0;
-    -fx-border-color: #3c3c3c;
+.root.dark .text-field:focused,
+.root.dark .text-area:focused {
+    -fx-text-fill: white !important;
+}
+
+.root.dark .text-field > .text {
+    -fx-fill: white;
 }
 
 /* ComboBoxes */
@@ -371,6 +465,16 @@
 .root.dark .side-panel .side-panel-btn:hover {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
+}
+
+.root.dark .text-area:readonly,
+.root.dark .editor-textarea:readonly {
+    -fx-opacity: 1.0;
+}
+
+.root.dark .text-area .content,
+.root.dark .editor-textarea .content {
+    -fx-background-color: #4a4a4a;
 }
 
 .root.dark .button:hover {
@@ -468,4 +572,63 @@
 /* Fallback for any label inside list cells */
 .list-view .label {
     -fx-text-fill: inherit;
+}
+
+/* Manage Notebooks ListView*/
+.root.dark #notebookListView {
+    -fx-background-color: #303030; /* Match your TableView background */
+    -fx-border-color: #444444;
+}
+
+/* Actual cells (rows) in the list */
+.root.dark #notebookListView .list-cell {
+    -fx-background-color: #303030;
+    -fx-text-fill: #e6e6e6; /* Light text color */
+}
+
+/* Zebra striping for the list */
+.root.dark #notebookListView .list-cell:odd {
+    -fx-background-color: #383838;
+}
+
+/* Hover state */
+.root.dark #notebookListView .list-cell:hover {
+    -fx-background-color: #444444;
+}
+
+/* Selection state*/
+.root.dark #notebookListView .list-cell:selected {
+    -fx-background-color: #02b7ba;
+    -fx-text-fill: #000000;
+}
+
+/* When the list is empty (placeholder text) */
+.root.dark #notebookListView .placeholder .label {
+    -fx-text-fill: #808080;
+}
+
+.root.dark .secondary-label {
+    -fx-text-fill: #b0b0b0;
+}
+
+.root.dark .faq-answer-label {
+    -fx-text-fill: #ffffff; /* Dark gray for light background */
+}
+
+.root.dark .label,
+.root.dark #welcomeLabel,
+.root.dark .dashboard-header {
+    -fx-text-fill: #e6e6e6 !important;
+}
+
+.root.dark .titled-pane > .collapsible-header > .text,
+.root.dark .titled-pane > .header > .text,
+.root.dark .titled-pane .label,
+.root.dark .titled-pane .text {
+    -fx-fill: #e6e6e6 !important;
+    -fx-text-fill: #e6e6e6 !important;
+}
+
+.root.dark .titled-pane > .header {
+    -fx-background-color: #3c3c3c !important;
 }

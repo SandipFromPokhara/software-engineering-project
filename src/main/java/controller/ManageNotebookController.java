@@ -137,7 +137,7 @@ public class ManageNotebookController {
 
             loadNotebooksTask.setOnSucceeded(e -> {
                 List<NotebookEntity> notebooks = loadNotebooksTask.getValue();
-                logger.info(() -> "Loaded notebooks count: " + (notebooks == null ? 0 : notebooks.size()));
+
                 if (notebooks != null) {
                     String currentCode = Localization.getCurrentLanguageCode();
                     for (NotebookEntity n : notebooks) {

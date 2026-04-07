@@ -70,7 +70,7 @@ public class GuestDashboardController {
 
     @FXML
     public void handleNewFiles() {
-        loadContent("createFilesGuest.fxml");
+        loadContent("create_files_guest.fxml");
     }
 
     @FXML

@@ -5,7 +5,7 @@ public class BulletListStrategy implements ListFormattingStrategy {
 
     @Override
     public boolean hasFormat(String line) {
-        return line.contains("•");
+        return line.trim().startsWith("• ");
     }
 
     @Override
@@ -16,6 +16,6 @@ public class BulletListStrategy implements ListFormattingStrategy {
 
     @Override
     public String removeFormat(String line) {
-        return line.replaceFirst("^.*?•\\s*", "");
+        return line.replaceFirst("^\\s*•\\s*", "");
     }
 }
