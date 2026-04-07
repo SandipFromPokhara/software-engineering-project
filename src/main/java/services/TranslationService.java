@@ -1,13 +1,20 @@
 package services;
 
 import entity.base.Translatable;
+import util.Localization;
+import java.util.logging.Logger;
 
 public class TranslationService {
+    private static final Logger logger = Logger.getLogger(TranslationService.class.getName());
+
     public <T> T getTranslation(Translatable<T> entity, String langCode, String defaultLang) {
         if (entity == null) return null;
 
+        // If defaultLang wasn't provided, use current UI language as a sensible fallback
         if (defaultLang == null || defaultLang.isBlank()) {
-            throw new IllegalArgumentException("Default language must not be null or blank");
+            String fallback = Localization.getCurrentLanguageCode();
+            logger.fine(() -> "TranslationService: defaultLang was null/blank, falling back to " + fallback);
+            defaultLang = fallback;
         }
 
         if (langCode == null || langCode.isBlank()) {

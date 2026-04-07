@@ -57,7 +57,14 @@
 }
 
 .language-combo .list-view .list-cell:hover {
-    -fx-background-color: #eaf6f7;
+    -fx-background-color: #eaf6f7; /* pale teal */
+    -fx-text-fill: #07323a; /* dark teal/near-black for contrast */
+    -fx-font-weight: bold;
+}
+
+/* Dark-theme override: keep dark hover and white text */
+.root.dark .language-combo .list-view .list-cell:hover {
+    -fx-background-color: #575757;
     -fx-text-fill: #ffffff;
     -fx-font-weight: bold;
 }

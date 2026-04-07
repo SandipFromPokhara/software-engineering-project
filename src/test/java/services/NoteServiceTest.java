@@ -24,14 +24,13 @@ class NoteServiceTest {
     private JpaNotebookDao notebookDao;
     private NoteService noteService;
     private JpaTagDao tagDao;
-    private TranslationService translationService;
 
     @BeforeEach
     void setUp() {
         noteDao = mock(JpaNoteDao.class);
         notebookDao = mock(JpaNotebookDao.class);
         tagDao = mock(JpaTagDao.class);
-        noteService = new NoteService(noteDao, notebookDao, tagDao, translationService);
+        noteService = new NoteService(noteDao, notebookDao, tagDao);
     }
 
     @Test

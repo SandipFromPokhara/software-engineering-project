@@ -44,8 +44,15 @@ public class MariaDbJpaConnection {
                     throw new IllegalStateException("Required database environment variables are missing or empty.");
                 }
 
-                properties.put("jakarta.persistence.jdbc.url",
-                        "jdbc:mariadb://" + dbHost + ":" + dbPort + "/" + dbName);
+                // Request utf8mb4 end-to-end (4-byte Unicode) from the driver
+                String jdbcUrl = "jdbc:mariadb://" + dbHost + ":" + dbPort + "/" + dbName
+                        + "?useUnicode=true&characterEncoding=utf8mb4&connectionCollation=utf8mb4_unicode_ci";
+                properties.put("jakarta.persistence.jdbc.url", jdbcUrl);
+                // Advise Hibernate / driver about character set
+                properties.put("hibernate.connection.charSet", "utf8mb4");
+                properties.put("hibernate.connection.useUnicode", "true");
+                properties.put("hibernate.connection.characterEncoding", "utf8mb4");
+
                 properties.put("jakarta.persistence.jdbc.user", dbUser);
                 properties.put("jakarta.persistence.jdbc.password", dbPassword);
 

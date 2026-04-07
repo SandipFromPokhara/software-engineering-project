@@ -5,13 +5,9 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Paragraph;
-import dao.note.JpaNoteDao;
-import dao.note.NoteDAO;
-import dao.tag.JpaTagDao;
-import dao.tag.TagDAO;
-import entity.entities.NoteEntity;
-import entity.entities.NotebookEntity;
-import entity.entities.UserEntity;
+import dao.note.*;
+import dao.tag.*;
+import entity.entities.*;
 import entity.translationentities.NoteTranslationEntity;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -23,6 +19,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.util.Duration;
@@ -46,6 +43,7 @@ import util.events.NoteCreatedEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -123,6 +121,9 @@ public class ViewDashboardController {
     private Button toggleBtn;
 
     @FXML
+    private AnchorPane editorPane;
+
+    @FXML
     private Tooltip toggleTooltip, langTooltip, manageTooltip, createTooltip, logoutTooltip;
 
     @FXML
@@ -136,6 +137,9 @@ public class ViewDashboardController {
 
     @FXML
     private Label languageIconLabel;
+
+    @FXML
+    private SplitPane mainSplit;
 
     public ViewDashboardController() {}
 
@@ -213,6 +217,40 @@ public class ViewDashboardController {
         // Determine initial notebook
         activeNotebook = dashboardService.getInitialNotebook();
         if (activeNotebook != null) loadNotes();
+
+        // Enforce SplitPane divider limits so the notes table and editor keep their minimum widths
+        Platform.runLater(() -> {
+            try {
+                if (mainSplit == null) return;
+
+                // Helper to clamp divider based on min widths
+                Runnable clampDivider = () -> {
+                    double total = mainSplit.getWidth();
+                    if (total <= 0) return;
+                    double leftMin = notesTable.getMinWidth();
+                    double rightMin = editorPane.getMinWidth();
+                    double minPos = Math.min(0.99, Math.max(0.0, leftMin / total));
+                    double maxPos = Math.max(0.01, Math.min(1.0, 1.0 - (rightMin / total)));
+                    var divider = mainSplit.getDividers().get(0);
+                    double pos = divider.getPosition();
+                    double newPos = Math.max(minPos, Math.min(maxPos, pos));
+                    if (Double.compare(newPos, pos) != 0) {
+                        divider.setPosition(newPos);
+                    }
+                };
+
+                // Clamp immediately
+                clampDivider.run();
+
+                // When user drags divider, ensure it stays within the min/max
+                mainSplit.getDividers().get(0).positionProperty().addListener((obs, oldV, newV) -> clampDivider.run());
+
+                // When the split pane width changes (window resize), re-clamp
+                mainSplit.widthProperty().addListener((obs, oldV, newV) -> clampDivider.run());
+            } catch (Exception ex) {
+                logger.log(Level.FINE, "Failed to initialize split pane clamps", ex);
+            }
+        });
     }
 
     private void setupLanguageCombo() {
@@ -366,9 +404,11 @@ public class ViewDashboardController {
         tagFlowpane.getChildren().clear();
 
         note.getTags().stream()
-                .sorted((t1, t2) -> t1.getTagName().compareToIgnoreCase(t2.getTagName()))
-                .forEach(tag -> {
-                    Label tagLabel = new Label("#" + tag.getTagName());
+                .map(TagEntity::getTagName)
+                .filter(Objects::nonNull)
+                .sorted(String::compareToIgnoreCase)
+                .forEach(tagName -> {
+                    Label tagLabel = new Label("#" + tagName);
                     tagLabel.getStyleClass().addAll("note-tag", "tag-box");
                     tagFlowpane.getChildren().add(tagLabel);
                 });
@@ -633,7 +673,12 @@ public class ViewDashboardController {
             AlertUtil.showWarning(rootPane.getScene().getWindow(),Localization.get("export.no_notebook"));
             return;
         }
-        exportNotesToPdf(notes, activeNotebook.getTitle());
+
+        String notebookName = activeNotebook.getTranslations().values().stream()
+                .findFirst()
+                .map(t -> t.getTitle())
+                .orElse("Notebook");
+        exportNotesToPdf(notes, notebookName);
     }
 
     private void exportNotesToPdf(List<NoteEntity> notes, String fileName) {
