@@ -2,7 +2,6 @@ package entity.entities;
 
 import entity.base.BaseEntity;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
