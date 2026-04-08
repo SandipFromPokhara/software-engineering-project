@@ -18,10 +18,27 @@ public class JpaTagDao extends GenericAbstractDAO<TagEntity, Long> implements IT
 
         return executeInTransaction(em -> {
             try {
+                // Proactively check for duplicates (case-insensitive) to provide a consistent
+                // IllegalArgumentException rather than relying solely on DB constraint messages.
                 if (tag.getId() == null) {
+                    TypedQuery<Long> q = em.createQuery("SELECT COUNT(t) FROM TagEntity t WHERE LOWER(t.tagName) = LOWER(:tagName)", Long.class);
+                    q.setParameter("tagName", tag.getTagName());
+                    Long count = q.getSingleResult();
+                    if (count > 0) {
+                        throw new IllegalArgumentException("Tag already exists");
+                    }
+
                     em.persist(tag);
                     return tag;
                 } else {
+                    // For merge path, ensure no other tag (different id) has the same name
+                    TypedQuery<Long> q = em.createQuery("SELECT COUNT(t) FROM TagEntity t WHERE LOWER(t.tagName) = LOWER(:tagName) AND t.id <> :id", Long.class);
+                    q.setParameter("tagName", tag.getTagName()).setParameter("id", tag.getId());
+                    Long cnt = q.getSingleResult();
+                    if (cnt > 0) {
+                        throw new IllegalArgumentException("Tag with this name already exists");
+                    }
+
                     return em.merge(tag);
                 }
             } catch (Exception e) {
@@ -74,23 +91,30 @@ public class JpaTagDao extends GenericAbstractDAO<TagEntity, Long> implements IT
 
     @Override
     public void update(TagEntity tag) {
-        if (tag == null) throw new IllegalArgumentException("Tag cannot be null");
+        if (tag == null) { throw new IllegalArgumentException("Tag cannot be null"); }
+
+        if (tag.getId() == null) { throw new IllegalArgumentException("Tag must have an ID for update"); }
 
         executeInTransaction(em -> {
-            TypedQuery<TagEntity> query = em.createQuery(
-                    "SELECT t FROM TagEntity t WHERE LOWER(t.tagName) = LOWER(:tagName)" +
-                            "AND t.id != :currentId",
-                    TagEntity.class
-            );
+            TagEntity managedTag = em.find(TagEntity.class, tag.getId());
 
-            query.setParameter("tagName", tag.getTagName());
-            query.setParameter("currentId", tag.getId());
-
-            if (!query.getResultList().isEmpty()) {
-                throw new IllegalArgumentException("Tag with this name already exists");
+            if (managedTag == null) {
+                throw new IllegalArgumentException("Tag does not exist");
             }
 
-            em.merge(tag);
+            TypedQuery<Long> query = em.createQuery("SELECT COUNT(t) FROM TagEntity t " +
+                                    "WHERE LOWER(t.tagName) = LOWER(:tagName) " +
+                                    "AND t.id <> :id", Long.class);
+
+            Long count = query.setParameter("tagName", tag.getTagName())
+                            .setParameter("id", tag.getId())
+                            .getSingleResult();
+
+            if (count > 0) {
+                throw new IllegalArgumentException("Tag with this name already exists");
+            }
+            managedTag.setTagName(tag.getTagName());
+
             return null;
         });
     }
@@ -106,7 +130,7 @@ public class JpaTagDao extends GenericAbstractDAO<TagEntity, Long> implements IT
 
             if (managedTag != null) {
                 for (NoteEntity note : new HashSet<>(managedTag.getNotes())) {
-                    note.getTags().remove(managedTag);
+                    note.removeTag(managedTag);
                 }
                 em.remove(managedTag);
             }
