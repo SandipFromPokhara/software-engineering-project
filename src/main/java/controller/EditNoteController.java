@@ -177,8 +177,6 @@ public class EditNoteController implements Initializable {
     private void loadTags() {
         tagComboBox.getItems().clear();
 
-        String lang = Localization.getCurrentLanguageCode();
-
         tagComboBox.getItems().addAll(
                 tagDao.findAll().stream()
                         .map(TagEntity::getTagName)
@@ -261,4 +259,3 @@ public class EditNoteController implements Initializable {
         tagIcon.setImage(new Image(path));
     }
 }
-

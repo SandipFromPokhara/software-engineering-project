@@ -24,20 +24,17 @@ public class DashboardService {
 
     private final INoteDAO noteDao;
     private final INotebookDAO notebookDao;
-    private final ITagDAO tagDao;
     private final TranslationService translationService;
 
-    public DashboardService(INoteDAO noteDao, INotebookDAO notebookDao, ITagDAO tagDao, TranslationService translationService) {
+    public DashboardService(INoteDAO noteDao, INotebookDAO notebookDao, TranslationService translationService) {
         this.noteDao = noteDao;
         this.notebookDao = notebookDao;
-        this.tagDao = tagDao;
         this.translationService = translationService;
     }
 
     public DashboardService() {
         this.noteDao = new JpaNoteDao();
         this.notebookDao = new JpaNotebookDao();
-        this.tagDao = new JpaTagDao();
         this.translationService = new TranslationService();
     }
 
