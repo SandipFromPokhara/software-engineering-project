@@ -52,8 +52,6 @@
     -fx-cursor: hand;
     -fx-background-insets: 0;
     -fx-border-insets: 0;
-<<<<<<< HEAD
-=======
 }
 
 /* Italic Button - Actual Italic Style */
@@ -98,7 +96,6 @@
     -fx-border-color: #d0d0d0;
     -fx-border-width: 0 0 0 1;
     -fx-padding: 0 3 0 3;
->>>>>>> origin/feature-dev2
 }
 
 /* LIGHT MODE */
@@ -193,10 +190,7 @@
 
 .root.light .toolbar-btn:hover {
     -fx-background-color: #d0d0d0;
-<<<<<<< HEAD
-=======
     -fx-border-color: #c0c0c0;
->>>>>>> origin/feature-dev2
 }
 
 .root.light .toolbar-btn:pressed {
@@ -358,8 +352,6 @@
 
 .root.dark .side-label:hover {
     -fx-background-color: #808080;
-<<<<<<< HEAD
-=======
 }
 
 .root.dark #noteTitleLabel, .root.dark #annotation, .root.dark #wordCountLabel {
@@ -368,7 +360,6 @@
 
 .root.dark .separator .line {
     -fx-border-color: #787878;
->>>>>>> origin/feature-dev2
 }
 
 /* Editor container & toolbar - only colors */

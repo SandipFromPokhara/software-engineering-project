@@ -563,14 +563,21 @@ class UserDashboardControllerTest {
         latch.await(1, TimeUnit.SECONDS);
     }
 
-    private void setId(UserEntity user, Long id) {
-        try {
-            Field idField = UserEntity.class.getDeclaredField("id");
-            idField.setAccessible(true);
-            idField.set(user, id);
-        } catch (Exception e) {
-            fail("Failed to set ID on user entity");
+    private void setId(Object target, Object value) {
+        Class<?> clazz = target.getClass();
+
+        while (clazz != null) {
+            try {
+                Field idField = clazz.getDeclaredField("id");
+                idField.setAccessible(true);
+                idField.set(target, value);
+                return;
+            } catch (NoSuchFieldException e) {
+                clazz = clazz.getSuperclass();
+            }catch (Exception e) {
+                throw new RuntimeException("Failed to set ID on user entity", e);
+            }
         }
+        throw new RuntimeException("ID field not found in class hierarchy");
     }
 }
-

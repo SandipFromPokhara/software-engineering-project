@@ -6,6 +6,10 @@ import org.fxmisc.richtext.InlineCssTextArea;
 
 public class WordCountUtil {
 
+    private WordCountUtil() {
+        /* This utility class should not be instantiated */
+    }
+
     public static void bind(TextArea textArea, Label wordCountLabel) {
         if (textArea == null || wordCountLabel == null) return;
 

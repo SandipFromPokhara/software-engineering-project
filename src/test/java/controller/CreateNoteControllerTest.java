@@ -89,7 +89,6 @@ class CreateNoteControllerTest {
             this.tagDao = tagDao;
         }
 
-        @Override
         public NoteEntity createNote(String title, String content, String annotation,
                                      NotebookEntity notebook, Set<String> tagNames) {
 
@@ -101,11 +100,14 @@ class CreateNoteControllerTest {
                 throw new IllegalArgumentException("Title cannot be empty");
             }
 
-            NoteEntity note = new NoteEntity(
-                    title.trim(),
-                    content == null ? "" : content,
-                    annotation == null ? "" : annotation
-            );
+            NoteEntity note = new NoteEntity();
+
+            String lang = Localization.getLocale().getLanguage();
+
+            var translation = note.createTranslation(lang);
+            translation.setTitle(title.trim());
+            translation.setContent(content == null ? "" : content);
+            translation.setAnnotation(annotation == null ? "" : annotation);
 
             note.setNotebook(notebook);
 
@@ -113,7 +115,8 @@ class CreateNoteControllerTest {
                 for (String tagName : tagNames) {
                     TagEntity tag = tagDao.findByName(tagName);
                     if (tag == null) {
-                        tag = new TagEntity(tagName);
+                        tag = new TagEntity();
+                        tag.setTagName(tagName);
                         tagDao.save(tag);
                     }
                     note.addTag(tag);
@@ -366,9 +369,9 @@ class CreateNoteControllerTest {
 
     @Test
     void initialize_WithExistingNotebooks_PopulatesComboBox() throws Exception {
-        NotebookEntity notebook1 = new NotebookEntity("Notebook 1", UserSession.getUserInstance().getUser());
+        NotebookEntity notebook1 = new NotebookEntity(UserSession.getUserInstance().getUser());
         setCreatedAt(notebook1, LocalDateTime.now().minusDays(2));
-        NotebookEntity notebook2 = new NotebookEntity("Notebook 2", UserSession.getUserInstance().getUser());
+        NotebookEntity notebook2 = new NotebookEntity( UserSession.getUserInstance().getUser());
         setCreatedAt(notebook2, LocalDateTime.now().minusDays(1));
 
         mockNotebookDao.addNotebook(notebook1);
@@ -398,8 +401,12 @@ class CreateNoteControllerTest {
 
     @Test
     void initialize_WithExistingTags_PopulatesTagComboBox() throws Exception {
-        TagEntity tag1 = new TagEntity("Important");
-        TagEntity tag2 = new TagEntity("Work");
+        TagEntity tag1 = new TagEntity();
+        tag1.setTagName("Important");
+
+        TagEntity tag2 = new TagEntity();
+        tag2.setTagName("Work");
+
         mockTagDao.addTag(tag1);
         mockTagDao.addTag(tag2);
 
@@ -433,7 +440,7 @@ class CreateNoteControllerTest {
 
     @Test
     void saveButton_EnabledWhenTitleAndNotebookSelected() throws Exception {
-        NotebookEntity notebook = new NotebookEntity("Test Notebook", UserSession.getUserInstance().getUser());
+        NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
         invokeInitialize();
@@ -461,7 +468,7 @@ class CreateNoteControllerTest {
 
     @Test
     void handleSave_WithValidData_SavesNote() throws Exception {
-        NotebookEntity notebook = new NotebookEntity("Test Notebook", UserSession.getUserInstance().getUser());
+        NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
         invokeInitialize();
@@ -479,14 +486,17 @@ class CreateNoteControllerTest {
         invokeSave();
 
         assertNotNull(mockNoteService.savedNote);
-        assertEquals("Test Note", mockNoteService.savedNote.getTitle());
-        assertEquals("Test Content", mockNoteService.savedNote.getContent());
-        assertEquals("Test Annotation", mockNoteService.savedNote.getAnnotation());
+
+        var translation = mockNoteService.savedNote.getTranslations().get("en");
+        assertNotNull(translation);
+        assertEquals("Test Note", translation.getTitle());
+        assertEquals("Test Content", translation.getContent());
+        assertEquals("Test Annotation", translation.getAnnotation());
     }
 
     @Test
     void handleSave_EmptyTitle_ShowsError() throws Exception {
-        NotebookEntity notebook = new NotebookEntity("Test Notebook", UserSession.getUserInstance().getUser());
+        NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
         invokeInitialize();
@@ -542,10 +552,11 @@ class CreateNoteControllerTest {
 
     @Test
     void handleSave_WithTags_AssociatesTagsWithNote() throws Exception {
-        NotebookEntity notebook = new NotebookEntity("Test Notebook", UserSession.getUserInstance().getUser());
+        NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
-        TagEntity tag1 = new TagEntity("Important");
+        TagEntity tag1 = new TagEntity();
+        tag1.setTagName("Important");
         mockTagDao.addTag(tag1);
 
         invokeInitialize();
@@ -573,7 +584,7 @@ class CreateNoteControllerTest {
 
     @Test
     void handleSave_WithNewTag_CreatesAndAssociatesTag() throws Exception {
-        NotebookEntity notebook = new NotebookEntity("Test Notebook", UserSession.getUserInstance().getUser());
+        NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
         invokeInitialize();
@@ -600,7 +611,7 @@ class CreateNoteControllerTest {
 
     @Test
     void handleSave_SetsNoteSession() throws Exception {
-        NotebookEntity notebook = new NotebookEntity("Test Notebook", UserSession.getUserInstance().getUser());
+        NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
         invokeInitialize();
@@ -616,7 +627,10 @@ class CreateNoteControllerTest {
         invokeSave();
 
         assertNotNull(NoteSession.getLastCreatedNote());
-        assertEquals("Test Note", NoteSession.getLastCreatedNote().getTitle());
+
+        var translation = mockNoteService.savedNote.getTranslations().get("en");
+        assertNotNull(translation);
+        assertEquals("Test Note", translation.getTitle());
     }
 
     @Test
@@ -669,7 +683,7 @@ class CreateNoteControllerTest {
 
     @Test
     void handleSave_WithNullContent_SavesWithEmptyContent() throws Exception {
-        NotebookEntity notebook = new NotebookEntity("Test Notebook", UserSession.getUserInstance().getUser());
+        NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
         invokeInitialize();
@@ -685,13 +699,16 @@ class CreateNoteControllerTest {
         invokeSave();
 
         assertNotNull(mockNoteService.savedNote);
-        assertEquals("", mockNoteService.savedNote.getContent());
-        assertEquals("", mockNoteService.savedNote.getAnnotation());
+
+        var translation = NoteSession.getLastCreatedNote().getTranslations().get("en");
+        assertNotNull(translation);
+        assertEquals("", translation.getContent());
+        assertEquals("", translation.getAnnotation());
     }
 
     @Test
     void handleSave_TrimsTitle() throws Exception {
-        NotebookEntity notebook = new NotebookEntity("Test Notebook", UserSession.getUserInstance().getUser());
+        NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
         invokeInitialize();
@@ -707,12 +724,15 @@ class CreateNoteControllerTest {
         invokeSave();
 
         assertNotNull(mockNoteService.savedNote);
-        assertEquals("Test Note", mockNoteService.savedNote.getTitle());
+
+        var translation = mockNoteService.savedNote.getTranslations().get("en");
+        assertNotNull(translation);
+        assertEquals("Test Note", translation.getTitle());
     }
 
     @Test
     void handleSave_ShowsSuccessMessage() throws Exception {
-        NotebookEntity notebook = new NotebookEntity("Test Notebook", UserSession.getUserInstance().getUser());
+        NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
         invokeInitialize();
@@ -740,4 +760,3 @@ class CreateNoteControllerTest {
         assertTrue(message.get().contains(Localization.get("create.success")));
     }
 }
-

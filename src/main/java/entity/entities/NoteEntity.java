@@ -40,11 +40,15 @@ public class NoteEntity extends BaseEntity implements ITranslatable<NoteTranslat
     public void addTag(TagEntity tag) {
         if (tag != null) {
             tags.add(tag);
+            tag.getNotes().add(this);
         }
     }
 
     public void removeTag(TagEntity tag) {
-        tags.remove(tag);
+        if (tag != null) {
+            tags.remove(tag);
+            tag.getNotes().remove(this);
+        }
     }
 
     public Set<TagEntity> getTags() {

@@ -28,6 +28,8 @@ public class JpaNoteDao extends GenericAbstractDAO<NoteEntity, Long> implements 
 
     @Override
     public NoteEntity findById(Long id) {
+        if (id == null) return null;
+
         return execute(em -> em.find(NoteEntity.class, id));
     }
 
