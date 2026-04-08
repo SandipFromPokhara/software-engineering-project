@@ -42,55 +42,77 @@ public class CreateNoteController implements Initializable {
 
     @FXML
     private Menu fileMenu;
+
     @FXML
     private Menu editMenu;
+
     @FXML
     private MenuItem backDashboard;
+
     @FXML
     private MenuItem closeFile;
 
     @FXML
     private Label noteTitleLabel;
+
     @FXML
     private Label noteContentLabel;
+
     @FXML
     private Label noteAnnotationLabel;
+
     @FXML
     private Label noteTagLabel;
+
     @FXML
     private Label selectLabel;
 
     @FXML
     private TextField titleField;
+
     @FXML
     private TextArea annotationArea;
+
     @FXML
     private Button saveButton;
+
     @FXML
     private Button clearButton;
+
     @FXML
     private Label statusLabel;
+
     @FXML
     private ComboBox<NotebookEntity> notebookComboBox;
+
     @FXML
     private FlowPane tagFlowpane;
+
     @FXML
     private ComboBox<String> tagComboBox;
+
     @FXML
     private Button addTagBtn;
 
     @FXML
-    private Tooltip tagTooltip, toggleTooltip;
+    private Tooltip tagTooltip;
+
+    @FXML
+    private Tooltip toggleTooltip;
+
     @FXML
     private Button toggleBtn;
+
     @FXML
     private ImageView tagIcon;
+
     @FXML
     private Label wordCountLabel;
 
     // Undo/Redo components
     @FXML
     private MenuItem undoMenuItem;
+
     @FXML
     private MenuItem redoMenuItem;
 
