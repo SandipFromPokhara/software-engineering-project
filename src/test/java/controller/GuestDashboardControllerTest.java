@@ -1,16 +1,22 @@
 package controller;
 
+import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
+import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import testutil.JavaFXInitializer;
+import util.NavigationUtil;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 class GuestDashboardControllerTest {
 
@@ -36,21 +42,43 @@ class GuestDashboardControllerTest {
         newFilesField.set(controller, new Button());
     }
 
-    // Helper to call private methods
-    private void invokePrivateMethod(String methodName) throws Exception {
-        Method method = GuestDashboardController.class.getDeclaredMethod(methodName);
-        method.setAccessible(true);
-        method.invoke(controller);
+    private void setField(Object target, Object value) {
+        try {
+            Field field = target.getClass().getDeclaredField("centerPane");
+            field.setAccessible(true);
+            field.set(target, value);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
-    void handleNewFiles_shouldNotCrash() throws Exception {
-        assertDoesNotThrow(() -> invokePrivateMethod("handleNewFiles"));
+    void handleNewFiles_shouldNotCrash() {
+        VBox mockVBox = mock(VBox.class);
+        Scene mockScene = mock(Scene.class);
+        Stage mockStage = mock(Stage.class);
 
-        // Ensure centerPane is still valid
-        Field centerPaneField = GuestDashboardController.class.getDeclaredField("centerPane");
-        centerPaneField.setAccessible(true);
-        VBox centerPane = (VBox) centerPaneField.get(controller);
-        assertNotNull(centerPane);
+        // Inject mocks
+        setField(controller, mockVBox);
+
+        when(mockVBox.getScene()).thenReturn(mockScene);
+        when(mockScene.getWindow()).thenReturn(mockStage);
+
+        // Mock NavigationUtil to avoid real FXML loading
+        try (MockedStatic<NavigationUtil> navMock = mockStatic(NavigationUtil.class)) {
+
+            navMock.when(() ->
+                    NavigationUtil.openWindow(
+                            any(),
+                            anyString(),
+                            anyString(),
+                            anyBoolean(),
+                            anyBoolean(),
+                            any()
+                    )
+            ).thenAnswer(invocation -> null);
+
+            assertDoesNotThrow(() -> controller.handleNewFiles());
+        }
     }
 }
