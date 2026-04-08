@@ -63,18 +63,20 @@ detailed code review documentation, and a complete acceptance testing plan, ensu
 **5. Architecture Design Documentation**
 - Update ER diagrams to reflect localization
 - Create/update UML diagrams
-- Store all diagrams in /docs folder
+- Store all diagrams in /Documents folder
 
 ---
 
 ## Sprint Backlog
-| Task	                                         | Story Points |
-|-----------------------------------------------|--------------|
-| Database localization design & implementation | 	5           |
-| Statistical code review                       | 	5           |
-| Code clean-up and refactoring                 | 	5           |
-| Acceptance test planning                      | 	5           |
-| Architecture documentation (ERD & UML)        | 	1           |
+| Task	                                  | Story Points |
+|----------------------------------------|--------------|
+| Database Localization                  | 5            |
+| Statistical code review                | 5            |
+| Code clean-up and refactoring          | 5            |
+| Acceptance test planning               | 5            |
+| Architecture documentation (ERD & UML) | 5            |
+| Implement Rich Text Formatting         | 3            |
+| Debug & manual testing                 | 3            |
 
 ---
 
