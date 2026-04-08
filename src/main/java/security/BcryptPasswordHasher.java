@@ -4,7 +4,7 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BcryptPasswordHasher implements PasswordHasher {
+public class BcryptPasswordHasher implements IPasswordHasher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BcryptPasswordHasher.class);
     private final int cost;

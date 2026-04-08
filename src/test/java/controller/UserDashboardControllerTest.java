@@ -1,6 +1,6 @@
 package controller;
 
-import dao.user.UserDAO;
+import dao.user.IUserDAO;
 import entity.entities.UserEntity;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import security.BcryptPasswordHasher;
-import security.PasswordHasher;
+import security.IPasswordHasher;
 import session.UserSession;
 import testutil.JavaFXInitializer;
 import util.Localization;
@@ -32,7 +32,7 @@ class UserDashboardControllerTest {
 
     private UserDashboardController controller;
     private MockUserDAO mockUserDAO;
-    private PasswordHasher passwordHasher;
+    private IPasswordHasher passwordHasher;
 
     private TextField firstNameField;
     private TextField lastNameField;
@@ -52,7 +52,7 @@ class UserDashboardControllerTest {
     private Button manageUpdate;
     private Stage testStage;
 
-    private static class MockUserDAO implements UserDAO {
+    private static class MockUserDAO implements IUserDAO {
         private UserEntity userToReturn;
         private UserEntity updatedUser;
         private boolean shouldThrowException = false;

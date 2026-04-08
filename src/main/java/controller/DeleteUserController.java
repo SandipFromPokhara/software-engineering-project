@@ -8,7 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.stage.Stage;
 import security.MessageType;
-import security.PasswordHasher;
+import security.IPasswordHasher;
 import session.UserSession;
 import security.BcryptPasswordHasher;
 import util.Localization;
@@ -17,7 +17,7 @@ import util.ShowMessageUtil;
 public class DeleteUserController {
 
     private final JpaUserDao userDao = new JpaUserDao();
-    private PasswordHasher passwordHasher;
+    private IPasswordHasher passwordHasher;
 
     @FXML
     private PasswordField passwordField;

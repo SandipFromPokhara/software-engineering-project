@@ -3,7 +3,7 @@ package services;
 import dao.note.*;
 import dao.notebook.*;
 import dao.tag.JpaTagDao;
-import dao.tag.TagDAO;
+import dao.tag.ITagDAO;
 import entity.entities.*;
 import entity.translationentities.NoteTranslationEntity;
 import entity.translationentities.NotebookTranslationEntity;
@@ -22,9 +22,9 @@ public class NoteService {
 
     private static final Logger logger = Logger.getLogger(NoteService.class.getName());
 
-    private final NoteDAO noteDao;
-    private final NotebookDAO notebookDao;
-    private final TagDAO tagDao;
+    private final INoteDAO noteDao;
+    private final INotebookDAO notebookDao;
+    private final ITagDAO tagDao;
     private final TranslationService translationService;
 
     public NoteService() {
@@ -35,7 +35,7 @@ public class NoteService {
     }
 
     // constructor overriding for unit test
-    public NoteService(NoteDAO noteDao, NotebookDAO notebookDao, TagDAO tagDao, TranslationService translationService) {
+    public NoteService(INoteDAO noteDao, INotebookDAO notebookDao, ITagDAO tagDao, TranslationService translationService) {
         this.noteDao = noteDao;
         this.notebookDao = notebookDao;
         this.tagDao = tagDao;
@@ -43,7 +43,7 @@ public class NoteService {
     }
 
     // Backwards-compatible constructor used by some tests (keeps API stable)
-    public NoteService(NoteDAO noteDao, NotebookDAO notebookDao, TagDAO tagDao) {
+    public NoteService(INoteDAO noteDao, INotebookDAO notebookDao, ITagDAO tagDao) {
         this(noteDao, notebookDao, tagDao, new TranslationService());
     }
 

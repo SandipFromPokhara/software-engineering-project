@@ -7,7 +7,7 @@ import dao.basedao.GenericAbstractDAO;
 
 import java.util.List;
 
-public class JpaNotebookDao extends GenericAbstractDAO<NotebookEntity, Long> implements NotebookDAO {
+public class JpaNotebookDao extends GenericAbstractDAO<NotebookEntity, Long> implements INotebookDAO {
 
     public JpaNotebookDao() {}
 

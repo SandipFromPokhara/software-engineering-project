@@ -10,7 +10,7 @@ import entity.entities.UserEntity;
 import dao.user.JpaUserDao;
 import javafx.stage.Stage;
 import security.BcryptPasswordHasher;
-import security.PasswordHasher;
+import security.IPasswordHasher;
 import services.UserService;
 import util.Localization;
 import util.NavigationUtil;
@@ -20,7 +20,7 @@ public class LoginController {
 
     private UserService userService;
     private JpaUserDao userDao;
-    private PasswordHasher passwordHasher;
+    private IPasswordHasher passwordHasher;
 
     // For FXML
     public LoginController() {}

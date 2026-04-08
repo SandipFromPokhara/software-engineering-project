@@ -1,6 +1,6 @@
 package controller;
 
-import dao.user.UserDAO;
+import dao.user.IUserDAO;
 import entity.entities.UserEntity;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import security.BcryptPasswordHasher;
-import security.PasswordHasher;
+import security.IPasswordHasher;
 import testutil.JavaFXInitializer;
 
 import java.lang.reflect.Field;
@@ -25,7 +25,7 @@ class SignUpControllerTest {
 
     private SignUpController controller;
     private MockUserDAO mockUserDAO;
-    private PasswordHasher passwordHasher;
+    private IPasswordHasher passwordHasher;
 
     private TextField firstNameField, lastNameField, usernameField, emailField;
     private PasswordField passwordField, confirmPasswordField;
@@ -36,7 +36,7 @@ class SignUpControllerTest {
     private ProgressBar passwordStrengthBar;
     private Stage testStage;
 
-    private static class MockUserDAO implements UserDAO {
+    private static class MockUserDAO implements IUserDAO {
         private UserEntity userToReturn;
         UserEntity savedUser;
         boolean shouldThrowRuntimeException = false;
@@ -580,7 +580,7 @@ class SignUpControllerTest {
 
     @Test
     void testSetPasswordHasher() {
-        PasswordHasher newHasher = new BcryptPasswordHasher();
+        IPasswordHasher newHasher = new BcryptPasswordHasher();
         controller.setPasswordHasher(newHasher);
         assertNotNull(newHasher);
     }

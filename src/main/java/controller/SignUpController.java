@@ -1,6 +1,6 @@
 package controller;
 
-import dao.user.UserDAO;
+import dao.user.IUserDAO;
 import dao.user.JpaUserDao;
 import entity.entities.UserEntity;
 import javafx.animation.PauseTransition;
@@ -8,7 +8,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import security.BcryptPasswordHasher;
 import security.MessageType;
-import security.PasswordHasher;
+import security.IPasswordHasher;
 import util.Localization;
 import util.NavigationUtil;
 import security.Validation;
@@ -22,9 +22,9 @@ import java.util.logging.Logger;
 public class SignUpController {
 
     private static final Logger logger = Logger.getLogger(SignUpController.class.getName());
-    private PasswordHasher passwordHasher;
+    private IPasswordHasher passwordHasher;
     private boolean skipValidation = false;
-    private UserDAO userDAO;
+    private IUserDAO userDAO;
     private PauseTransition strengthHideDelay;
 
     private boolean firstNameTouched = false;
@@ -350,11 +350,11 @@ public class SignUpController {
         NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "entry.window_title", false);
     }
 
-    public void setUserDAO(UserDAO userDAO) {
+    public void setUserDAO(IUserDAO userDAO) {
         this.userDAO = userDAO;
     }
 
-    public void setPasswordHasher(PasswordHasher hasher) {
+    public void setPasswordHasher(IPasswordHasher hasher) {
         this.passwordHasher = hasher;
     }
 }
