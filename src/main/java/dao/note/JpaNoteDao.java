@@ -8,7 +8,7 @@ import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
-public class JpaNoteDao extends GenericAbstractDAO<NoteEntity, Long> implements NoteDAO{
+public class JpaNoteDao extends GenericAbstractDAO<NoteEntity, Long> implements INoteDAO {
 
     public JpaNoteDao() {}
 

@@ -6,7 +6,6 @@ import entity.entities.NotebookEntity;
 import entity.entities.TagEntity;
 import entity.entities.UserEntity;
 import entity.translationentities.NotebookTranslationEntity;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;

@@ -1,7 +1,7 @@
 package controller;
 
 import dao.user.JpaUserDao;
-import dao.user.UserDAO;
+import dao.user.IUserDAO;
 import entity.entities.UserEntity;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -12,7 +12,7 @@ import javafx.scene.control.TextField;
 import security.MessageType;
 import session.UserSession;
 import security.BcryptPasswordHasher;
-import security.PasswordHasher;
+import security.IPasswordHasher;
 import security.Validation;
 import util.Localization;
 import util.ShowMessageUtil;
@@ -23,8 +23,8 @@ import java.util.TimerTask;
 
 public class UserDashboardController {
 
-    private UserDAO userDao = new JpaUserDao();
-    private PasswordHasher passwordHasher;
+    private IUserDAO userDao = new JpaUserDao();
+    private IPasswordHasher passwordHasher;
 
     @FXML
     private TextField firstNameField;
@@ -172,11 +172,11 @@ public class UserDashboardController {
         WindowUtil.closeWindow(firstNameField);
     }
 
-    public void setUserDao(UserDAO userDao) {
+    public void setUserDao(IUserDAO userDao) {
         this.userDao = userDao;
     }
 
-    public void setPasswordHasher(PasswordHasher passwordHasher) {
+    public void setPasswordHasher(IPasswordHasher passwordHasher) {
         this.passwordHasher = passwordHasher;
     }
 }

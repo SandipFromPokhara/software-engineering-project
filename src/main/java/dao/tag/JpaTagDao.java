@@ -4,14 +4,11 @@ import dao.basedao.GenericAbstractDAO;
 import entity.entities.NoteEntity;
 import entity.entities.TagEntity;
 import jakarta.persistence.TypedQuery;
-import util.Localization;
 
 import java.util.HashSet;
 import java.util.List;
 
-import static model.LanguageModel.DEFAULT_LANGUAGE_CODE;
-
-public class JpaTagDao extends GenericAbstractDAO<TagEntity, Long> implements TagDAO{
+public class JpaTagDao extends GenericAbstractDAO<TagEntity, Long> implements ITagDAO {
 
     public JpaTagDao() {}
 

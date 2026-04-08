@@ -1,7 +1,7 @@
 package controller;
 
-import dao.note.NoteDAO;
-import dao.tag.TagDAO;
+import dao.note.INoteDAO;
+import dao.tag.ITagDAO;
 import entity.entities.NoteEntity;
 import entity.entities.TagEntity;
 import javafx.scene.control.*;
@@ -20,8 +20,8 @@ import static org.mockito.Mockito.*;
 class EditNoteControllerTest {
 
     private EditNoteController controller;
-    private NoteDAO noteDao;
-    private TagDAO tagDao;
+    private INoteDAO noteDao;
+    private ITagDAO tagDao;
     private NoteEntity note;
 
     // Initialize JavaFX
@@ -34,8 +34,8 @@ class EditNoteControllerTest {
     void setUp() throws Exception {
         controller = new EditNoteController();
 
-        noteDao = mock(NoteDAO.class);
-        tagDao = mock(TagDAO.class);
+        noteDao = mock(INoteDAO.class);
+        tagDao = mock(ITagDAO.class);
         note = new NoteEntity();
 
         // Inject DAOs

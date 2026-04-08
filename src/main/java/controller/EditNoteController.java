@@ -1,12 +1,11 @@
 package controller;
 
-import dao.note.NoteDAO;
-import dao.tag.TagDAO;
+import dao.note.INoteDAO;
+import dao.tag.ITagDAO;
 import entity.entities.NoteEntity;
 import entity.entities.TagEntity;
 import entity.translationentities.NoteTranslationEntity;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
@@ -29,8 +28,8 @@ import static model.LanguageModel.DEFAULT_LANGUAGE_CODE;
 
 public class EditNoteController implements Initializable {
 
-    private NoteDAO noteDao;
-    private TagDAO tagDao;
+    private INoteDAO noteDao;
+    private ITagDAO tagDao;
     private NoteEntity note;
     Set<String> selectedTags = new HashSet<>();
     private TranslationService translationService;
@@ -104,11 +103,11 @@ public class EditNoteController implements Initializable {
 
     private UndoRedoManager undoRedoManager = new UndoRedoManager();
 
-    public void setNoteDao(NoteDAO noteDao) {
+    public void setNoteDao(INoteDAO noteDao) {
         this.noteDao = noteDao;
     }
 
-    public void setTagDao(TagDAO tagDao) {
+    public void setTagDao(ITagDAO tagDao) {
         this.tagDao = tagDao;
         loadTags();
     }
@@ -177,8 +176,6 @@ public class EditNoteController implements Initializable {
 
     private void loadTags() {
         tagComboBox.getItems().clear();
-
-        String lang = Localization.getCurrentLanguageCode();
 
         tagComboBox.getItems().addAll(
                 tagDao.findAll().stream()
@@ -262,4 +259,3 @@ public class EditNoteController implements Initializable {
         tagIcon.setImage(new Image(path));
     }
 }
-

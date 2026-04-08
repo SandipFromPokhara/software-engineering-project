@@ -58,8 +58,8 @@ public class ViewDashboardController {
     private DashboardService dashboardService = new DashboardService();
     private final NoteService noteService = new NoteService();
     private final TranslationService translationService = new TranslationService();
-    private final NoteDAO noteDao = new JpaNoteDao();
-    private final TagDAO tagDao = new JpaTagDao();
+    private final INoteDAO noteDao = new JpaNoteDao();
+    private final ITagDAO tagDao = new JpaTagDao();
 
     @FXML
     private BorderPane rootPane;
