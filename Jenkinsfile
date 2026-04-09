@@ -7,15 +7,19 @@ pipeline {
 
     tools {
         maven 'MAVEN_HOME'
+        jdk 'JDK21'
     }
 
     environment {
+        JAVA_HOME = tool 'JDK21'
+        PATH = "${env.JAVA_HOME}/bin:/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
+
         DB_HOST = '127.0.0.1'
         DB_PORT = '3306'
         DB_NAME = 'notevault_db'
-        DB_CREDENTIALS_ID = 'DB_CREDENTIALS'
-        DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
-        DOCKERHUB_REPO = 'sandipranjit/notevault-branchtest'
+        DB_CREDENTIALS_ID = 'sep1'
+        DOCKERHUB_CREDENTIALS_ID = 'docker-jenkins'
+        DOCKERHUB_REPO = 'swostikalama/notevault'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
         BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
     }
@@ -24,7 +28,8 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'feature-dashboard2', url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
+                git branch: 'guest-Dashboard', url: 'git@github.com:SandipFromPokhara/software-engineering-project.git',
+                credentialsId: 'private'
             }
         }
 
@@ -94,7 +99,7 @@ pipeline {
                         bat """
                         REM --- Build Docker image with build number tag ---
                         docker build --pull -t %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% .
-        
+
                         REM --- Verify image exists ---
                         docker images
                     """
@@ -115,13 +120,13 @@ pipeline {
                         if (isUnix()) {
                             sh '''
                                 echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                                
+
                                 docker push ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}
-                                
+
                                 docker tag ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} ${DOCKERHUB_REPO}:latest
-                        
+
                                 docker push ${DOCKERHUB_REPO}:latest
-                                
+
                                 docker image rm ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}
                                 docker image prune -f
                                 '''
@@ -129,15 +134,15 @@ pipeline {
                             bat """
                                 REM --- Login to Docker Hub ---
                                 echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
-                                
+
                                 REM --- Push image with build number tag ---
                                 echo Pushing Docker image %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG%...
                                 docker push %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG%
-                               
+
                                 REM --- Tag as latest and push ---
                                 docker tag %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% %DOCKERHUB_REPO%:latest
                                 docker push %DOCKERHUB_REPO%:latest
-                                
+
                                 REM --- Cleanup local images to save disk space ---
                                 docker image rm %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG%
                                 docker image prune -f
