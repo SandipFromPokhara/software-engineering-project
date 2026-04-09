@@ -3,14 +3,14 @@ package entity.entities;
 import entity.base.BaseEntity;
 import entity.translationentities.NoteTranslationEntity;
 import jakarta.persistence.*;
-import entity.base.Translatable;
+import entity.base.ITranslatable;
 
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Entity
 @Table(name="notes")
-public class NoteEntity extends BaseEntity implements Translatable<NoteTranslationEntity> {
+public class NoteEntity extends BaseEntity implements ITranslatable<NoteTranslationEntity> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "notebook_id", nullable = false)
@@ -40,11 +40,15 @@ public class NoteEntity extends BaseEntity implements Translatable<NoteTranslati
     public void addTag(TagEntity tag) {
         if (tag != null) {
             tags.add(tag);
+            tag.getNotes().add(this);
         }
     }
 
     public void removeTag(TagEntity tag) {
-        tags.remove(tag);
+        if (tag != null) {
+            tags.remove(tag);
+            tag.getNotes().remove(this);
+        }
     }
 
     public Set<TagEntity> getTags() {

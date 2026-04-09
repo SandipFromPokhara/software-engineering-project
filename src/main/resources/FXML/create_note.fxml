@@ -18,44 +18,36 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import javafx.fxml.FXML?>
-<?import javafx.fxml.FXMLLoader?>
 
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="710.0" styleClass="root" stylesheets="@/css/createNote.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateNoteController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="710.0" styleClass="root" stylesheets="@/css/theme.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateNoteController">
    <center>
       <AnchorPane BorderPane.alignment="CENTER">
-         <children>
             <VBox spacing="4.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-               <children>
                   <!-- ...existing title and notebook selection... -->
                   <VBox spacing="6.0">
-                     <children>
-                        <Label fx:id="noteTitleLabel" text="Note Title">
+                        <Label fx:id="noteTitleLabel">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField fx:id="titleField" promptText="Enter note title" styleClass="editor-textfield text-field">
+                        <TextField fx:id="titleField" styleClass="editor-textfield text-field">
                            <font>
                               <Font size="14.0" />
                            </font>
                         </TextField>
-                     </children>
                      <VBox.margin>
                         <Insets left="25.0" right="25.0" top="10.0" />
                      </VBox.margin>
                   </VBox>
 
                   <VBox spacing="5.0">
-                     <children>
-                        <Label fx:id="selectLabel" text="Select Notebook">
+                        <Label fx:id="selectLabel">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <ComboBox fx:id="notebookComboBox" prefWidth="215.0" promptText="Choose notebook or create new" styleClass="editor-combo combo-box" />
-                     </children>
+                        <ComboBox fx:id="notebookComboBox" prefWidth="215.0" styleClass="editor-combo combo-box" />
                      <VBox.margin>
                         <Insets left="25.0" right="25.0" top="5.0" />
                      </VBox.margin>
@@ -63,14 +55,12 @@
 
                   <!-- Note content using reusable RichTextEditor -->
                   <VBox spacing="5.0" VBox.vgrow="ALWAYS">
-                     <children>
-                        <Label fx:id="noteContentLabel" text="Note Content">
+                        <Label fx:id="noteContentLabel">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <fx:include source="RichTextEditor.fxml" fx:id="contentEditor" VBox.vgrow="ALWAYS" />
-                     </children>
+                        <fx:include source="rich_text_editor.fxml" fx:id="contentEditor" VBox.vgrow="ALWAYS" />
                      <VBox.margin>
                         <Insets left="25.0" right="25.0" top="5.0" />
                      </VBox.margin>
@@ -81,7 +71,6 @@
                      <VBox.margin>
                         <Insets left="100.0" />
                      </VBox.margin>
-                     <children>
                         <Label fx:id="wordCountLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="15.0" prefWidth="180.0" text="Words: 0 | Chars: 0" HBox.hgrow="ALWAYS">
                            <HBox.margin>
                               <Insets bottom="2.0" right="26.0" top="2.0" />
@@ -90,21 +79,18 @@
                               <Font name="Arial Italic" size="12.0" />
                            </font>
                         </Label>
-                     </children>
                   </HBox>
                    <VBox prefWidth="700.0" spacing="5.0">
-                     <children>
                         <Label fx:id="noteAnnotationLabel" text="Annotations">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextArea fx:id="annotationArea" prefRowCount="3" promptText="Add annotations..." styleClass="editor-textarea text-area" wrapText="true">
+                        <TextArea fx:id="annotationArea" prefRowCount="3" styleClass="editor-textarea text-area" wrapText="true">
                            <font>
                               <Font size="14.0" />
                            </font>
                         </TextArea>
-                     </children>
                      <VBox.margin>
                         <Insets left="25.0" right="25.0" />
                      </VBox.margin>
@@ -118,13 +104,12 @@
                      </VBox.margin>
                   </Label>
                   <HBox spacing="5.0">
-                     <children>
                         <ImageView fx:id="tagIcon" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@/Images/tag-black.png" />
                            </image>
                         </ImageView>
-                        <Label fx:id="noteTagLabel" styleClass="tag-label" text="Tags">
+                        <Label fx:id="noteTagLabel" styleClass="tag-label">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
@@ -141,7 +126,6 @@
                               <Insets bottom="2.0" left="6.0" right="6.0" top="2.0" />
                            </HBox.margin>
                         </Label>
-                     </children>
                      <VBox.margin>
                         <Insets bottom="2.0" left="25.0" top="2.0" />
                      </VBox.margin>
@@ -152,52 +136,45 @@
                      </VBox.margin>
                   </FlowPane>
                   <HBox spacing="5.0">
-                     <children>
-                        <ComboBox fx:id="tagComboBox" editable="true" prefWidth="160.0" promptText="Add/Select a tag..." styleClass="editor-combo combo-box" />
+                        <ComboBox fx:id="tagComboBox" editable="true" prefWidth="160.0" styleClass="editor-combo combo-box" />
                         <Button fx:id="addTagBtn" mnemonicParsing="false" onAction="#handleAddTag" text="Add tags" />
-                     </children>
                      <VBox.margin>
                         <Insets left="25.0" top="2.0" />
                      </VBox.margin>
                   </HBox>
                   <HBox alignment="CENTER" spacing="50.0">
-                     <children>
-                        <Button fx:id="saveButton" mnemonicParsing="false" onAction="#handleSave" prefWidth="100.0" text="Save Note">
+                        <Button fx:id="saveButton" mnemonicParsing="false" onAction="#handleSave" prefWidth="100.0">
                            <font>
                               <Font size="14.0" />
                            </font>
                         </Button>
-                        <Button fx:id="clearButton" mnemonicParsing="false" onAction="#handleClear" prefWidth="100.0" text="Clear">
+                        <Button fx:id="clearButton" mnemonicParsing="false" onAction="#handleClear" prefWidth="100.0">
                            <font>
                               <Font size="14.0" />
                            </font>
                         </Button>
-                     </children>
                      <VBox.margin>
                         <Insets bottom="10.0" left="25.0" right="25.0" top="4.0" />
                      </VBox.margin>
                   </HBox>
-               </children>
             </VBox>
-         </children>
       </AnchorPane>
    </center>
    <!-- top region (menu bar, toggle button) unchanged -->
    <top>
       <HBox prefHeight="27.0" prefWidth="800.0" BorderPane.alignment="CENTER_LEFT">
-         <children>
             <MenuBar HBox.hgrow="ALWAYS">
                <menus>
                   <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
                      <items>
-                        <MenuItem fx:id="backDashboard" mnemonicParsing="false" onAction="#handleBackToHome" text="Back to Dashboard" />
-                        <MenuItem fx:id="closeFile" mnemonicParsing="false" onAction="#handleClose" text="Close" />
+                        <MenuItem fx:id="backDashboard" mnemonicParsing="false" onAction="#handleBackToHome" />
+                        <MenuItem fx:id="closeFile" mnemonicParsing="false" onAction="#handleClose" />
                      </items>
                   </Menu>
                   <Menu fx:id="editMenu" mnemonicParsing="false" text="Edit">
                      <items>
-                        <MenuItem fx:id="undoMenuItem" accelerator="Ctrl+Z" mnemonicParsing="false" onAction="#handleUndo" text="Undo" />
-                        <MenuItem fx:id="redoMenuItem" accelerator="Ctrl+Y" mnemonicParsing="false" onAction="#handleRedo" text="Redo" />
+                        <MenuItem fx:id="undoMenuItem" accelerator="Ctrl+Z" mnemonicParsing="false" onAction="#handleUndo" />
+                        <MenuItem fx:id="redoMenuItem" accelerator="Ctrl+Y" mnemonicParsing="false" onAction="#handleRedo" />
                      </items>
                   </Menu>
                </menus>
@@ -218,7 +195,6 @@
                   </Tooltip>
                </tooltip>
             </Button>
-         </children>
       </HBox>
    </top>
 </BorderPane>

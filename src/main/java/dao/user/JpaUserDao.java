@@ -6,7 +6,7 @@ import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
-public class JpaUserDao extends GenericAbstractDAO<UserEntity, Long> implements UserDAO{
+public class JpaUserDao extends GenericAbstractDAO<UserEntity, Long> implements IUserDAO {
 
     public JpaUserDao() {}
 

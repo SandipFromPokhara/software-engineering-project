@@ -36,20 +36,27 @@ class JpaNotebookDaoTest {
 
     @Test
     void testSaveNotebook() {
-        NotebookEntity notebook = new NotebookEntity("JUnit 5 test", testUser);
+        NotebookEntity notebook = new NotebookEntity(testUser);
+
+        var translation = notebook.createTranslation("EN");
+        translation.setTitle("JUnit 5 test");
         notebookDao.save(notebook);
 
         NotebookEntity retrievedNotebook = notebookDao.findById(notebook.getId());
+        var getTranslate = retrievedNotebook.getTranslations().get("EN");
 
-        assertNotNull(retrievedNotebook);
-        assertEquals("JUnit 5 test", retrievedNotebook.getTitle());
+        assertNotNull(getTranslate);
+        assertEquals("JUnit 5 test", getTranslate.getTitle());
 
         notebookDao.delete(notebook);
     }
 
     @Test
     void testFindNotebookByTitle() {
-        NotebookEntity notebook = new NotebookEntity("Find By Title", testUser);
+        NotebookEntity notebook = new NotebookEntity(testUser);
+
+        var translation = notebook.createTranslation("EN");
+        translation.setTitle("Find By Title");
         notebookDao.save(notebook);
 
         List<NotebookEntity> retrievedList = notebookDao.findByTitle("Find By Title");
@@ -57,8 +64,9 @@ class JpaNotebookDaoTest {
         assertNotNull(retrievedList);
         assertFalse(retrievedList.isEmpty());
         boolean found = false;
-        for (NotebookEntity n : retrievedList) {
-            if (n.getTitle().equals("Find By Title")) {
+        for (NotebookEntity book : retrievedList) {
+            var getTranslate = book.getTranslations().get("EN");
+            if (getTranslate != null && getTranslate.getTitle().equals("Find By Title")) {
                 found = true;
                 break;
             }
@@ -75,15 +83,19 @@ class JpaNotebookDaoTest {
 
     @Test
     void testFindByUser() {
-        NotebookEntity notebook = new NotebookEntity("User's Notebook", testUser);
+        NotebookEntity notebook = new NotebookEntity(testUser);
+
+        var translation = notebook.createTranslation("EN");
+        translation.setTitle("User's Notebook");
         notebookDao.save(notebook);
 
         List<NotebookEntity> retrievedList = notebookDao.findByUser(testUser);
         assertFalse(retrievedList.isEmpty());
 
         boolean found = false;
-        for (NotebookEntity n : retrievedList) {
-            if (n.getTitle().equals("User's Notebook")) {
+        for (NotebookEntity book : retrievedList) {
+            var getTranslate = book.getTranslations().get("EN");
+            if (getTranslate != null && getTranslate.getTitle().equals("User's Notebook")) {
                 found = true;
                 break;
             }
@@ -103,15 +115,23 @@ class JpaNotebookDaoTest {
 
     @Test
     void testUpdateNotebook() {
-        NotebookEntity notebook = new NotebookEntity("Test update method", testUser);
+        NotebookEntity notebook = new NotebookEntity(testUser);
+
+        var translation = notebook.createTranslation("EN");
+        translation.setTitle("Test update method");
         notebookDao.save(notebook);
 
         NotebookEntity retrievedNotebook = notebookDao.findById(notebook.getId());
-        retrievedNotebook.setTitle("Test update method for NoteBook entity");
+        var getTranslate = retrievedNotebook.getTranslations().get("EN");
+
+        getTranslate.setTitle("Test update method for NoteBook entity");
         notebookDao.update(retrievedNotebook);
 
+        var updated = notebookDao.findById(retrievedNotebook.getId());
+        var updatedT = updated.getTranslations().get("EN");
+
         assertNotNull(retrievedNotebook);
-        assertEquals("Test update method for NoteBook entity", retrievedNotebook.getTitle());
+        assertEquals("Test update method for NoteBook entity", updatedT.getTitle());
     }
 
     @Test
@@ -121,7 +141,10 @@ class JpaNotebookDaoTest {
 
     @Test
     void testDeleteNotebook() {
-        NotebookEntity notebook = new NotebookEntity("Testing delete method", testUser);
+        NotebookEntity notebook = new NotebookEntity(testUser);
+
+        var translation = notebook.createTranslation("EN");
+        translation.setTitle("Testing delete method");
         notebookDao.save(notebook);
 
         NotebookEntity managedNotebook = notebookDao.findById(notebook.getId());

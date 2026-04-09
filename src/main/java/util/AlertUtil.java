@@ -5,7 +5,14 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Window;
 
+/**
+ * Utility class for displaying JavaFX Alerts.
+ */
 public class AlertUtil {
+
+    private AlertUtil() {
+        throw new IllegalStateException("Utility class");
+    }
 
     /**
      * Generic alert method
@@ -57,5 +64,4 @@ public class AlertUtil {
 
         return alert.showAndWait().filter(response -> response == okButton).isPresent();
     }
-
 }

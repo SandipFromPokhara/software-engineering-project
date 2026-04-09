@@ -37,5 +37,4 @@ public class ToggleUtil {
     public static void setDarkMode(boolean mode) {
         darkMode = mode;
     }
-
 }

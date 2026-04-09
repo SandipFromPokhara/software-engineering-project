@@ -4,7 +4,7 @@ import dao.user.JpaUserDao;
 import entity.entities.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import security.PasswordHasher;
+import security.IPasswordHasher;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -13,12 +13,12 @@ class UserServiceTest {
 
     private JpaUserDao userDao;
     private UserService userService;
-    private PasswordHasher passwordHasher;
+    private IPasswordHasher passwordHasher;
 
     @BeforeEach
     void setUp() {
         userDao = mock(JpaUserDao.class);
-        passwordHasher = mock(PasswordHasher.class);
+        passwordHasher = mock(IPasswordHasher.class);
         userService = new UserService(userDao, passwordHasher);
     }
 

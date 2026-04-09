@@ -9,7 +9,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.*;
 import services.UserService;
-import security.PasswordHasher;
+import security.IPasswordHasher;
 import security.BcryptPasswordHasher;
 import testutil.JavaFXInitializer;
 
@@ -23,7 +23,7 @@ class LoginControllerTest {
 
     private LoginController controller;
     private UserService mockUserService;
-    private PasswordHasher passwordHasher;
+    private IPasswordHasher passwordHasher;
 
     private TextField usernameField;
     private PasswordField passwordField;

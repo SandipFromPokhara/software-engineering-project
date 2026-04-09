@@ -39,7 +39,7 @@ public class TextFormattingUtil {
     // TextArea overloads (used by existing tests — do not remove)
     // -----------------------------------------------------------------------
 
-    public static void toggleList(TextArea textArea, Button button, ListFormattingStrategy strategy) {
+    public static void toggleList(TextArea textArea, Button button, IListFormattingStrategy strategy) {
         String text = textArea.getText();
 
         if (text == null || text.isEmpty()) {
@@ -94,7 +94,7 @@ public class TextFormattingUtil {
     }
 
     private static boolean handleListEnter(TextArea textArea, KeyEvent event,
-                                           ListFormattingStrategy strategy) {
+                                           IListFormattingStrategy strategy) {
         String text     = textArea.getText();
         int caretPos    = textArea.getCaretPosition();
         int lineStart   = findLineStart(text, caretPos);
@@ -126,7 +126,7 @@ public class TextFormattingUtil {
     // InlineCssTextArea overloads (used by RichTextEditorController)
     // -----------------------------------------------------------------------
 
-    public static void toggleList(InlineCssTextArea textArea, Button button, ListFormattingStrategy strategy) {
+    public static void toggleList(InlineCssTextArea textArea, Button button, IListFormattingStrategy strategy) {
         String text = textArea.getText();
 
         if (text == null || text.isEmpty()) {
@@ -180,7 +180,7 @@ public class TextFormattingUtil {
     }
 
     private static boolean handleListEnter(InlineCssTextArea textArea, KeyEvent event,
-                                           ListFormattingStrategy strategy) {
+                                           IListFormattingStrategy strategy) {
         String text      = textArea.getText();
         int caretPos     = textArea.getCaretPosition();
         int lineStart    = findLineStart(text, caretPos);
@@ -221,7 +221,7 @@ public class TextFormattingUtil {
         return pos;
     }
 
-    private static String getNextPrefix(String currentLine, ListFormattingStrategy strategy) {
+    private static String getNextPrefix(String currentLine, IListFormattingStrategy strategy) {
         if (strategy instanceof NumberedListStrategy) {
             String numberStr = currentLine.trim().replaceFirst("^(\\d+)\\..*", "$1");
             int nextNumber = Integer.parseInt(numberStr) + 1;

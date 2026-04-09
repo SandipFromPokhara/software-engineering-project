@@ -1,7 +1,7 @@
 package controller;
 
 import dao.notebook.JpaNotebookDao;
-import dao.notebook.NotebookDAO;
+import dao.notebook.INotebookDAO;
 import entity.entities.NotebookEntity;
 import entity.entities.UserEntity;
 import entity.translationentities.NotebookTranslationEntity;
@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 public class ManageNotebookController {
     private static final Logger logger = Logger.getLogger(ManageNotebookController.class.getName());
 
-    private NotebookDAO notebookDao;
+    private INotebookDAO notebookDao;
     private NotebookEntity activeNotebook;
 
     @FXML
@@ -137,7 +137,7 @@ public class ManageNotebookController {
 
             loadNotebooksTask.setOnSucceeded(e -> {
                 List<NotebookEntity> notebooks = loadNotebooksTask.getValue();
-                logger.info(() -> "Loaded notebooks count: " + (notebooks == null ? 0 : notebooks.size()));
+
                 if (notebooks != null) {
                     String currentCode = Localization.getCurrentLanguageCode();
                     for (NotebookEntity n : notebooks) {

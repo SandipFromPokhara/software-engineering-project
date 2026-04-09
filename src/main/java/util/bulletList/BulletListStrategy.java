@@ -1,7 +1,7 @@
 package util.bulletList;
 
 // Bullet strategy
-public class BulletListStrategy implements ListFormattingStrategy {
+public class BulletListStrategy implements IListFormattingStrategy {
 
     @Override
     public boolean hasFormat(String line) {

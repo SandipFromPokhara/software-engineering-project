@@ -145,7 +145,7 @@ public class RichTextEditorController {
     /**
      * Toggles a CSS property on the current selection.
      * If every character in the selection already has property=value, the property is removed.
-     * Otherwise it is applied to the whole selection.
+     * Otherwise, it is applied to the whole selection.
      */
     private void toggleStyle(String property, String value) {
         IndexRange sel = contentArea.getSelection();

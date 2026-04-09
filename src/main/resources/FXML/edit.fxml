@@ -17,8 +17,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import javafx.fxml.FXML?>
-<?import javafx.fxml.FXMLLoader?>
 
 <BorderPane prefHeight="600.0" prefWidth="700.0" styleClass="root" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.EditNoteController">
     <top>
@@ -60,7 +58,7 @@
                         </Label>
 
                         <!-- Reusable rich text editor -->
-                        <fx:include source="RichTextEditor.fxml" fx:id="contentEditor" VBox.vgrow="ALWAYS" />
+                        <fx:include source="rich_text_editor.fxml" fx:id="contentEditor" VBox.vgrow="ALWAYS" />
 
                         <VBox.margin>
                             <Insets left="25.0" right="25.0" top="5.0" />

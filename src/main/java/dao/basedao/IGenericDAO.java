@@ -1,6 +1,6 @@
 package dao.basedao;
 
-public interface GenericDAO<T, ID> {
+public interface IGenericDAO<T, ID> {
 
     T save(T entity);
 

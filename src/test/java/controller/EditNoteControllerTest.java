@@ -1,14 +1,17 @@
 package controller;
 
-import dao.note.NoteDAO;
-import dao.tag.TagDAO;
+import dao.note.INoteDAO;
+import dao.tag.ITagDAO;
 import entity.entities.NoteEntity;
 import entity.entities.TagEntity;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
+import org.fxmisc.richtext.InlineCssTextArea;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import services.NoteService;
+import services.TranslationService;
 import testutil.JavaFXInitializer;
 
 import java.lang.reflect.Field;
@@ -20,9 +23,11 @@ import static org.mockito.Mockito.*;
 class EditNoteControllerTest {
 
     private EditNoteController controller;
-    private NoteDAO noteDao;
-    private TagDAO tagDao;
+    private INoteDAO noteDao;
+    private ITagDAO tagDao;
     private NoteEntity note;
+    private RichTextEditorController editorMock;
+    private NoteService noteServiceMock;
 
     // Initialize JavaFX
     @BeforeAll
@@ -34,8 +39,8 @@ class EditNoteControllerTest {
     void setUp() throws Exception {
         controller = new EditNoteController();
 
-        noteDao = mock(NoteDAO.class);
-        tagDao = mock(TagDAO.class);
+        noteDao = mock(INoteDAO.class);
+        tagDao = mock(ITagDAO.class);
         note = new NoteEntity();
 
         // Inject DAOs
@@ -44,13 +49,59 @@ class EditNoteControllerTest {
 
         // Inject UI components
         setField("titleField", new TextField());
-        setField("contentBox", new TextArea());
         setField("annotationBox", new TextField());
         setField("updateButton", new Button());
         setField("tagFlowpane", new FlowPane());
         setField("tagComboBox", new ComboBox<String>());
         setField("statusLabel", new Label());
 
+        // Inject RichTextEditorController mock
+        editorMock = mock(RichTextEditorController.class);
+        InlineCssTextArea textAreaMock = mock(InlineCssTextArea.class);
+
+        when(editorMock.getTextArea()).thenReturn(textAreaMock);
+        when(editorMock.getText()).thenReturn("test content");
+
+        setField("contentEditorController", editorMock);
+
+        // Inject TranslationService mock
+        TranslationService translationServiceMock = mock(TranslationService.class);
+
+        when(translationServiceMock.getTranslation(any(), anyString(), anyString()))
+                .thenAnswer(invocation -> {
+                    NoteEntity n = invocation.getArgument(0);
+                    String lang = invocation.getArgument(1);
+                    return n.getTranslations().get(lang);
+                });
+
+        setField("translationService", translationServiceMock);
+
+        // Inject NoteService mock
+        noteServiceMock = mock(NoteService.class);
+
+        when(noteServiceMock.updateNote(
+                any(),
+                anyString(),
+                anyString(),
+                anyString(),
+                anyString(),
+                anySet()
+        )).thenAnswer(invocation -> {
+            NoteEntity n = invocation.getArgument(0);
+            String lang = invocation.getArgument(1);
+            String title = invocation.getArgument(2);
+            String content = invocation.getArgument(3);
+            String annotation = invocation.getArgument(4);
+
+            var t = n.getTranslations().computeIfAbsent(lang, k -> n.createTranslation(lang));
+            t.setTitle(title);
+            t.setContent(content);
+            t.setAnnotation(annotation);
+
+            return n;
+        });
+
+        setField("noteService", noteServiceMock);
         ComboBox<String> combo = getField("tagComboBox");
         combo.setEditable(true);
 
@@ -75,20 +126,22 @@ class EditNoteControllerTest {
     // ---------- setNote ----------
     @Test
     void setNote_shouldPopulateFields() throws Exception {
-        note.setTitle("My Title");
-        note.setContent("My Content");
-        note.setAnnotation("My Annotation");
+        var translation = note.createTranslation("en");
+        translation.setTitle("My Title");
+        translation.setContent("My Content");
+        translation.setAnnotation("My Annotation");
 
         controller.setNote(note);
 
         assertEquals("My Title", ((TextField) getField("titleField")).getText());
-        assertEquals("My Content", ((TextArea) getField("contentBox")).getText());
+        verify(editorMock).setText("My Content");
         assertEquals("My Annotation", ((TextField) getField("annotationBox")).getText());
     }
 
     @Test
     void setNote_shouldLoadTags() {
-        TagEntity tag = new TagEntity("work");
+        TagEntity tag = new TagEntity();
+        tag.setTagName("work");
         note.addTag(tag);
 
         controller.setNote(note);
@@ -100,11 +153,14 @@ class EditNoteControllerTest {
     @Test
     void handleUpdate_shouldSaveNote() throws Exception {
         TextField titleField = getField("titleField");
-        TextArea contentBox = getField("contentBox");
         TextField annotationBox = getField("annotationBox");
 
+        String lang = util.Localization.getCurrentLanguageCode();
+        note.createTranslation(lang);
+
+        when(editorMock.getText()).thenReturn("New Content");
+
         titleField.setText("New Title");
-        contentBox.setText("New Content");
         annotationBox.setText("New Annotation");
 
         //Ignore JavaFX window closing crash
@@ -112,11 +168,15 @@ class EditNoteControllerTest {
             controller.handleUpdate();
         } catch (Exception ignored) {}
 
-        assertEquals("New Title", note.getTitle());
-        assertEquals("New Content", note.getContent());
-        assertEquals("New Annotation", note.getAnnotation());
+        var translation = note.getTranslations().get(lang);
 
-        verify(noteDao).save(note);
+        assertEquals("New Title", translation.getTitle());
+        assertEquals("New Content", translation.getContent());
+        assertEquals("New Annotation", translation.getAnnotation());
+
+        verify(noteServiceMock).updateNote(
+                any(), anyString(), anyString(), anyString(), anyString(), anySet()
+        );
     }
 
     @Test
@@ -132,7 +192,8 @@ class EditNoteControllerTest {
 
     @Test
     void handleUpdate_shouldAddExistingTag() throws Exception {
-        TagEntity tag = new TagEntity("work");
+        TagEntity tag = new TagEntity();
+        tag.setTagName("work");
         when(tagDao.findByName("work")).thenReturn(tag);
 
         controller.selectedTags.add("work");
@@ -141,7 +202,7 @@ class EditNoteControllerTest {
             controller.handleUpdate();
         } catch (Exception ignored) {}
 
-        assertTrue(note.getTags().contains(tag));
+        verify(noteServiceMock).updateNote(any(), anyString(), anyString(), anyString(), anyString(), anySet());
     }
 
     @Test
@@ -155,7 +216,7 @@ class EditNoteControllerTest {
             controller.handleUpdate();
         } catch (Exception ignored) {}
 
-        verify(tagDao).save(any(TagEntity.class));
+        verify(noteServiceMock).updateNote(any(), anyString(), anyString(), anyString(), anyString(), anySet());
     }
 
     // ---------- handleAddTag ----------

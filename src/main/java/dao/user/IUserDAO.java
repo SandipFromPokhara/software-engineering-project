@@ -1,9 +1,9 @@
 package dao.user;
 
-import dao.basedao.GenericDAO;
+import dao.basedao.IGenericDAO;
 import entity.entities.UserEntity;
 
-public interface UserDAO extends GenericDAO<UserEntity, Long> {
+public interface IUserDAO extends IGenericDAO<UserEntity, Long> {
     UserEntity findByUsername(String username);
     UserEntity findByEmail(String email);
 }
