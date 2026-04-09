@@ -152,6 +152,13 @@ public class EditNoteController implements Initializable {
         undoRedoManager.registerField("content", contentEditorController.getTextArea());
         undoRedoManager.registerField("annotation", annotationBox);
 
+        // Ensure update button is disabled when there's no title and enable when title is present
+        updateButton.setDisable(true);
+        titleField.textProperty().addListener((obs, old, newVal) -> {
+            boolean disable = newVal == null || newVal.isBlank();
+            updateButton.setDisable(disable);
+        });
+
         // Apply theme once scene is ready
         Platform.runLater(() -> {
             Scene scene = titleField.getScene();
@@ -216,6 +223,8 @@ public class EditNoteController implements Initializable {
                 }
             });
         }
+        // Update updateButton state based on current title
+        updateButton.setDisable(titleField.getText() == null || titleField.getText().isBlank());
         refreshTagFlowPane();
     }
 
