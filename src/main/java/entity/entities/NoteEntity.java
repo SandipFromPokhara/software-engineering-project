@@ -28,7 +28,7 @@ public class NoteEntity extends BaseEntity implements ITranslatable<NoteTranslat
     @MapKey(name="langCode")
     private Map<String, NoteTranslationEntity> translations = new HashMap<>();
 
-    protected NoteEntity() {}
+    public NoteEntity() {}
 
     public NotebookEntity getNotebook() { return notebook; }
 

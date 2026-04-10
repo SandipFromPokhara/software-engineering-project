@@ -14,7 +14,7 @@ public class TagEntity extends BaseEntity {
     @ManyToMany(mappedBy = "tags")
     private Set<NoteEntity> notes = new HashSet<>();
 
-    protected TagEntity() {}
+    public TagEntity() {}
 
     public String getTagName() { return tagName; }
 
