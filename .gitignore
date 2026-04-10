@@ -55,3 +55,7 @@ MyNotes.md
 src/main/java/dto/
 
 .scannerwork/
+
+app-deployment.yaml
+
+docker-compose.yml

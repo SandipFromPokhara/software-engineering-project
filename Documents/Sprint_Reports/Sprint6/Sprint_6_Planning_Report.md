@@ -63,7 +63,7 @@ detailed code review documentation, and a complete acceptance testing plan, ensu
 **5. Architecture Design Documentation**
 - Update ER diagrams to reflect localization
 - Create/update UML diagrams
-- Store all diagrams in /docs folder
+- Store all diagrams in /Documents folder
 
 ---
 
