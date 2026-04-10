@@ -22,6 +22,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Window;
 import javafx.util.Duration;
+import org.fxmisc.richtext.InlineCssTextArea;
 import services.*;
 import util.*;
 import session.UserSession;
@@ -102,7 +103,7 @@ public class ViewDashboardController {
 
     @FXML private Label annotation;
 
-    @FXML private TextArea noteViewArea;
+    @FXML private InlineCssTextArea noteViewArea;
 
     @FXML private TextArea annotationViewArea;
 
@@ -325,7 +326,7 @@ public class ViewDashboardController {
         }
 
         noteTitleLabel.setText(translation.getTitle());
-        noteViewArea.setText(translation.getContent());
+        noteViewArea.replaceText(translation.getContent());
         annotationViewArea.setText(translation.getAnnotation());
         refreshTagView(note);
         editButton.setDisable(false);
@@ -378,22 +379,8 @@ public class ViewDashboardController {
     private void setupTheme() {
         Platform.runLater(() -> {
             ToggleUtil.applyTheme(rootPane.getScene());
-            ImageView icon = new ImageView(new Image(ToggleUtil.isDarkMode() ? "/Images/light-theme.png" : "/Images/dark-theme.png"));
-            icon.setFitWidth(20);
-            icon.setFitHeight(20);
-            icon.setPreserveRatio(true);
-            toggleBtn.setGraphic(icon);
-            updateIcons();
-
-            // Update globe label color for current theme
-            updateLanguageIconColor();
+            setToggleIcon();
         });
-    }
-
-    private void updateLanguageIconColor() {
-        if (languageIconLabel != null) {
-            languageIconLabel.getStyleClass().add("language-icon");
-        }
     }
 
     @FXML
@@ -401,15 +388,28 @@ public class ViewDashboardController {
         Scene scene = rootPane.getScene();
         ToggleUtil.toggleTheme(scene);
 
+        setToggleIcon();
+    }
+
+    private void setToggleIcon() {
         ImageView icon = new ImageView(new Image(ToggleUtil.isDarkMode() ? "/Images/light-theme.png" : "/Images/dark-theme.png"));
 
         icon.setFitWidth(20);
         icon.setFitHeight(20);
         icon.setPreserveRatio(true);
+
         toggleBtn.setGraphic(icon);
 
         updateIcons();
-        updateLanguageIconColor(); // keep globe label in sync when toggling
+
+        // Update globe label color for current theme
+        updateLanguageIconColor();
+    }
+
+    private void updateLanguageIconColor() {
+        if (languageIconLabel != null) {
+            languageIconLabel.getStyleClass().add("language-icon");
+        }
     }
 
     // Update side-panel buttons
