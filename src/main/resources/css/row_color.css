@@ -17,6 +17,52 @@
     -fx-text-fill: white;
 }
 
+.root.dark .column-header .label {
+    -fx-text-fill: #dadada;
+    -fx-font-weight: bold;
+}
+
+.root.dark .placeholder .label {
+    -fx-text-fill: #808080;
+}
+
+.root.dark .label,
+.root.dark .table-cell,
+.root.dark .text {
+    -fx-text-fill: inherit;
+}
+
+.root.dark .table-row-cell {
+    -fx-background-color: #333333;
+    -fx-text-fill: #e6e6e6;
+}
+
+.root.dark .table-row-cell:odd {
+    -fx-background-color: #4a4a4a;
+}
+
+.root.dark .table-row-cell:even {
+    -fx-background-color: #333333;
+}
+
+.root.dark .table-row-cell:hover {
+    -fx-background-color: #444444;
+}
+
+.root.dark .table-row-cell:selected {
+    -fx-background-color: #02b7ba;
+    -fx-text-fill: #000000;
+}
+
+.root.dark .table-view {
+    -fx-background-color: #2b2b2b;
+    -fx-border-color: #3d2b2b;
+}
+
+.root.dark .column-header, .root.dark .column-header-background {
+    -fx-background-color: #2b2b2b;
+}
+
 /* ─── Language ComboBox ─── */
 .language-combo .combo-box-base {
     -fx-background-color: transparent;
@@ -57,7 +103,14 @@
 }
 
 .language-combo .list-view .list-cell:hover {
-    -fx-background-color: #eaf6f7;
+    -fx-background-color: #eaf6f7; /* pale teal */
+    -fx-text-fill: #07323a; /* dark teal/near-black for contrast */
+    -fx-font-weight: bold;
+}
+
+/* Dark-theme override: keep dark hover and white text */
+.root.dark .language-combo .list-view .list-cell:hover {
+    -fx-background-color: #575757;
     -fx-text-fill: #ffffff;
     -fx-font-weight: bold;
 }

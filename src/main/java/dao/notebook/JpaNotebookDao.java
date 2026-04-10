@@ -2,12 +2,13 @@ package dao.notebook;
 
 import entity.entities.NotebookEntity;
 import entity.entities.UserEntity;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import dao.basedao.GenericAbstractDAO;
 
 import java.util.List;
 
-public class JpaNotebookDao extends GenericAbstractDAO<NotebookEntity, Long> implements NotebookDAO {
+public class JpaNotebookDao extends GenericAbstractDAO<NotebookEntity, Long> implements INotebookDAO {
 
     public JpaNotebookDao() {}
 
@@ -29,7 +30,15 @@ public class JpaNotebookDao extends GenericAbstractDAO<NotebookEntity, Long> imp
     public NotebookEntity findById(Long id) {
         if (id == null) throw new IllegalArgumentException("ID cannot be null");
 
-        return execute(em -> em.find(NotebookEntity.class, id));
+        return execute(em -> {
+            try {
+                return em.createQuery("SELECT n FROM NotebookEntity n LEFT JOIN FETCH n.translations WHERE n.id = :id", NotebookEntity.class)
+                        .setParameter("id", id)
+                        .getSingleResult();
+            } catch (NoResultException e) {
+                return null;
+            }
+        });
     }
 
     @Override
@@ -37,9 +46,22 @@ public class JpaNotebookDao extends GenericAbstractDAO<NotebookEntity, Long> imp
         if (user == null) throw new IllegalArgumentException("User cannot be null");
 
         return execute(em -> {
-            TypedQuery<NotebookEntity> query = em.createQuery("SELECT n FROM NotebookEntity n WHERE n.user = :user", NotebookEntity.class);
-            query.setParameter("user", user);
-            return query.getResultList();
+            em.clear();
+            TypedQuery<NotebookEntity> query = em.createQuery(
+                    "SELECT DISTINCT n FROM NotebookEntity n LEFT JOIN FETCH n.translations WHERE n.user.id = :userId", NotebookEntity.class);
+            query.setParameter("userId", user.getId());
+
+            List<NotebookEntity> results = query.getResultList();
+
+            // MANUALLY TRIGGER INITIALIZATION while the EM is still open
+            for (NotebookEntity n : results) {
+                if (n.getTranslations() != null) {
+                    // Accessing the size forces Hibernate to load the Map from the DB
+                    n.getTranslations().size();
+                }
+            }
+
+            return results;
         });
     }
 
@@ -48,7 +70,7 @@ public class JpaNotebookDao extends GenericAbstractDAO<NotebookEntity, Long> imp
         if (title == null) throw new IllegalArgumentException("Title cannot be null");
 
         return execute(em -> {
-            TypedQuery<NotebookEntity> query = em.createQuery("SELECT n FROM NotebookEntity n WHERE n.title = :title", NotebookEntity.class);
+            TypedQuery<NotebookEntity> query = em.createQuery("SELECT DISTINCT n FROM NotebookEntity n LEFT JOIN FETCH n.translations t WHERE t.title = :title", NotebookEntity.class);
             query.setParameter("title", title);
             return query.getResultList();
         });
@@ -66,16 +88,19 @@ public class JpaNotebookDao extends GenericAbstractDAO<NotebookEntity, Long> imp
 
     @Override
     public void delete(NotebookEntity noteBook) {
-        if  (noteBook == null) throw new IllegalArgumentException("Notebook cannot be null");
+        if  (noteBook == null || noteBook.getId() == null) throw new IllegalArgumentException("Notebook cannot be null");
 
         executeInTransaction(em -> {
-            NotebookEntity managedNoteBook = em.find(NotebookEntity.class, noteBook.getId());
+            NotebookEntity managedNotebook = em.find(NotebookEntity.class, noteBook.getId());
 
-            if (managedNoteBook != null) {
-                managedNoteBook.setUser(null);
-                em.remove(managedNoteBook);
+            if (managedNotebook != null) {
+                UserEntity user = managedNotebook.getUser();
+                if (user != null) {
+                    user.removeNotebook(managedNotebook);
+                }
+
+                em.remove(managedNotebook);
             }
-
             return null;
         });
     }

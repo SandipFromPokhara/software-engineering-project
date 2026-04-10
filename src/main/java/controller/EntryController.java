@@ -91,7 +91,7 @@ public class EntryController {
     @FXML
     private void onContinueAsGuest() {
         Stage stage = (Stage) guestButton.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/guestDashboard.fxml", "guest.window_title", true);
+        NavigationUtil.replaceScene(stage, "/FXML/guest_dashboard.fxml", "guest.window_title", true);
     }
 
     @FXML

@@ -93,4 +93,3 @@ public class NoteModel {
         return "Note {Id: " + id + ", Title: '" + title + "', Annotation: '" + annotation + "', Notebook: '" + notebook + "', Timestamp: " + createdAt + "}";
     }
 }
-

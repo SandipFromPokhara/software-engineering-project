@@ -2,8 +2,13 @@ package util;
 
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import org.fxmisc.richtext.InlineCssTextArea;
 
 public class WordCountUtil {
+
+    private WordCountUtil() {
+        /* This utility class should not be instantiated */
+    }
 
     public static void bind(TextArea textArea, Label wordCountLabel) {
         if (textArea == null || wordCountLabel == null) return;
@@ -19,6 +24,18 @@ public class WordCountUtil {
         });
 
         // Initialize with localized template
+        updateLabel(textArea.getText(), wordCountLabel);
+    }
+
+    public static void bind(InlineCssTextArea textArea, Label wordCountLabel) {
+        if (textArea == null || wordCountLabel == null) return;
+
+        textArea.textProperty().addListener((obs, oldText, newText) ->
+                updateLabel(newText, wordCountLabel));
+
+        Localization.localeProperty().addListener((obs, oldLoc, newLoc) ->
+                updateLabel(textArea.getText(), wordCountLabel));
+
         updateLabel(textArea.getText(), wordCountLabel);
     }
 

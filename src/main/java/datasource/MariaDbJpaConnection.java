@@ -34,22 +34,43 @@ public class MariaDbJpaConnection {
                 String dbName = System.getProperty("DB_NAME");
                 if (dbName == null) dbName = System.getenv("DB_NAME");
 
-                if (dbUser == null || dbPassword == null || dbHost == null || dbPort == null || dbName == null) {
-                    LOGGER.error("Database environment variables are not set properly");
-                    throw new IllegalStateException("Database environment variables are not set properly.");
+                boolean missing = dbUser == null || dbPassword == null || dbHost == null || dbPort == null || dbName == null
+                        || isBlank(dbUser) || isBlank(dbPassword) || isBlank(dbHost) || isBlank(dbPort) || isBlank(dbName);
+
+                if (!missing) {
+                    // Use MariaDB as configured
+                    LOGGER.info("Using MariaDB DB connection");
+
+                    // Request utf8mb4 end-to-end (4-byte Unicode) from the driver
+                    String jdbcUrl = "jdbc:mariadb://" + dbHost + ":" + dbPort + "/" + dbName
+                            + "?useUnicode=true&characterEncoding=utf8mb4&connectionCollation=utf8mb4_unicode_ci";
+                    properties.put("jakarta.persistence.jdbc.url", jdbcUrl);
+                    properties.put("hibernate.connection.charSet", "utf8mb4");
+                    properties.put("hibernate.connection.useUnicode", "true");
+                    properties.put("hibernate.connection.characterEncoding", "utf8mb4");
+                    properties.put("jakarta.persistence.jdbc.user", dbUser);
+                    properties.put("jakarta.persistence.jdbc.password", dbPassword);
+                    properties.put("jakarta.persistence.jdbc.driver", "org.mariadb.jdbc.Driver");
+                    properties.put("hibernate.hbm2ddl.auto", "update");
+                    properties.put("hibernate.dialect", "org.hibernate.dialect.MariaDBDialect");
+
+                    LOGGER.info("Connecting to DB: jdbc:mariadb://{}:{}/{} with user {}", dbHost, dbPort, dbName, dbUser);
+                } else {
+                    // Fallback to H2 in-memory for tests and local runs without env vars
+                    LOGGER.warn("Database environment variables are not set properly; falling back to in-memory H2 for tests");
+
+                    String jdbcUrl = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=MySQL;DATABASE_TO_LOWER=TRUE";
+                    properties.put("jakarta.persistence.jdbc.url", jdbcUrl);
+                    properties.put("jakarta.persistence.jdbc.user", "sa");
+                    properties.put("jakarta.persistence.jdbc.password", "");
+                    properties.put("jakarta.persistence.jdbc.driver", "org.h2.Driver");
+
+                    // Use create-drop so schema is clean for each JVM run (tests)
+                    properties.put("hibernate.hbm2ddl.auto", "create-drop");
+                    properties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+                    properties.put("hibernate.show_sql", "false");
                 }
 
-                if (isBlank(dbUser) || isBlank(dbPassword) || isBlank(dbHost) || isBlank(dbPort) || isBlank(dbName)) {
-                    LOGGER.error("Database env variables are missing or empty.");
-                    throw new IllegalStateException("Required database environment variables are missing or empty.");
-                }
-
-                properties.put("jakarta.persistence.jdbc.url",
-                        "jdbc:mariadb://" + dbHost + ":" + dbPort + "/" + dbName);
-                properties.put("jakarta.persistence.jdbc.user", dbUser);
-                properties.put("jakarta.persistence.jdbc.password", dbPassword);
-
-                LOGGER.info("Connecting to DB: jdbc:mariadb://{}:{}/{} with user {}", dbHost, dbPort, dbName, dbUser);
                 emf = Persistence.createEntityManagerFactory("CompanyMariaDbUnit", properties);
                 LOGGER.info("EntityManagerFactory created successfully");
             } catch (Exception e) {

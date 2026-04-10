@@ -5,7 +5,7 @@ import dao.tag.JpaTagDao;
 import entity.entities.NotebookEntity;
 import entity.entities.TagEntity;
 import entity.entities.UserEntity;
-import javafx.event.ActionEvent;
+import entity.translationentities.NotebookTranslationEntity;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
@@ -20,8 +20,6 @@ import services.NoteService;
 import entity.entities.NoteEntity;
 import session.UserSession;
 import util.*;
-import util.bulletList.BulletListStrategy;
-import util.bulletList.NumberedListStrategy;
 import util.bulletList.TextFormattingUtil;
 import util.events.EventBus;
 import util.events.NoteCreatedEvent;
@@ -44,70 +42,85 @@ public class CreateNoteController implements Initializable {
 
     @FXML
     private Menu fileMenu;
+
     @FXML
     private Menu editMenu;
+
     @FXML
     private MenuItem backDashboard;
+
     @FXML
     private MenuItem closeFile;
 
     @FXML
     private Label noteTitleLabel;
+
     @FXML
     private Label noteContentLabel;
+
     @FXML
     private Label noteAnnotationLabel;
+
     @FXML
     private Label noteTagLabel;
+
     @FXML
     private Label selectLabel;
 
     @FXML
     private TextField titleField;
-    @FXML
-    private TextArea contentArea;
+
     @FXML
     private TextArea annotationArea;
+
     @FXML
     private Button saveButton;
+
     @FXML
     private Button clearButton;
+
     @FXML
     private Label statusLabel;
+
     @FXML
     private ComboBox<NotebookEntity> notebookComboBox;
+
     @FXML
     private FlowPane tagFlowpane;
+
     @FXML
     private ComboBox<String> tagComboBox;
+
     @FXML
     private Button addTagBtn;
 
-    // Toolbar buttons
     @FXML
-    private Button bulletListButton;
+    private Tooltip tagTooltip;
+
     @FXML
-    private Button numberedListButton;
-    @FXML
-    private Button headingUpButton;
-    @FXML
-    private Button headingDownButton;
-    @FXML
-    private Tooltip tagTooltip, toggleTooltip;
+    private Tooltip toggleTooltip;
+
     @FXML
     private Button toggleBtn;
+
     @FXML
     private ImageView tagIcon;
+
     @FXML
     private Label wordCountLabel;
 
     // Undo/Redo components
     @FXML
     private MenuItem undoMenuItem;
+
     @FXML
     private MenuItem redoMenuItem;
 
     private UndoRedoManager undoRedoManager = new UndoRedoManager();
+
+    // Reusable rich text editor component controller (from fx:include fx:id="contentEditor")
+    @FXML
+    private RichTextEditorController contentEditorController;
 
     public CreateNoteController() {
     }
@@ -129,7 +142,7 @@ public class CreateNoteController implements Initializable {
         noteContentLabel.textProperty().bind(Localization.bind("create.note_content"));
         selectLabel.textProperty().bind(Localization.bind("notebook.select_label"));
 
-        WordCountUtil.bind(contentArea, wordCountLabel);
+        WordCountUtil.bind(contentEditorController.getTextArea(), wordCountLabel);
 
         noteAnnotationLabel.textProperty().bind(Localization.bind("create.note_annotations"));
         noteTagLabel.textProperty().bind(Localization.bind("create.tags"));
@@ -138,7 +151,7 @@ public class CreateNoteController implements Initializable {
         clearButton.textProperty().bind(Localization.bind("create.clear"));
 
         titleField.promptTextProperty().bind(Localization.bind("create.placeholder_title"));
-        contentArea.promptTextProperty().bind(Localization.bind("create.placeholder_content"));
+        contentEditorController.bindPromptText(Localization.bind("create.placeholder_content"));
         annotationArea.promptTextProperty().bind(Localization.bind("create.placeholder_annotations"));
 
         tagComboBox.promptTextProperty().bind(Localization.bind("create.placeholder_tags"));
@@ -160,7 +173,16 @@ public class CreateNoteController implements Initializable {
 
         notebookComboBox.getItems().setAll(notebooks);
 
-        NotebookEntity createNewItem = new NotebookEntity(Localization.get("create.new_notebook"), currentUser);
+        NotebookEntity createNewItem = new NotebookEntity();
+        createNewItem.setUser(currentUser);
+
+        NotebookTranslationEntity t = new NotebookTranslationEntity();
+        t.setLangCode(Localization.getCurrentLanguageCode());
+        t.setTitle(Localization.get("create.new_notebook"));
+        t.setNotebook(createNewItem);
+
+        createNewItem.addTranslation(t);
+
         notebookComboBox.getItems().add(createNewItem);
 
         notebookComboBox.setConverter(new javafx.util.StringConverter<>() {
@@ -169,7 +191,9 @@ public class CreateNoteController implements Initializable {
                 if (notebook == null) {
                     return "";
                 }
-                return notebook.getTitle() == null ? "" : notebook.getTitle();
+                // Use robust lookup that handles case-variants and fallbacks
+                String title = getNotebookTitle(notebook);
+                return title == null ? "" : title;
             }
 
             @Override
@@ -197,6 +221,7 @@ public class CreateNoteController implements Initializable {
         List<TagEntity> allTags = (tagDao != null ? tagDao : new JpaTagDao()).findAll();
         List<String> tagNames = allTags.stream()
                 .map(TagEntity::getTagName)
+                .filter(name -> name != null && !name.isBlank())
                 .sorted(String::compareToIgnoreCase)
                 .toList();
 
@@ -205,7 +230,7 @@ public class CreateNoteController implements Initializable {
         // Initialize undo/redo manager
         undoRedoManager.initialize(undoMenuItem, redoMenuItem);
         undoRedoManager.registerField("title", titleField);
-        undoRedoManager.registerField("content", contentArea);
+        undoRedoManager.registerField("content", contentEditorController.getTextArea());
         undoRedoManager.registerField("annotation", annotationArea);
 
         // Apply theme once scene is ready
@@ -214,10 +239,9 @@ public class CreateNoteController implements Initializable {
             ToggleUtil.applyTheme(scene);
             updateToggleIcon();
             updateTagIcon();
-            WordCountUtil.bind(contentArea, wordCountLabel);
         });
         // Enable list auto-continuation for content area
-        TextFormattingUtil.enableListAutoContinuation(contentArea);
+        TextFormattingUtil.enableListAutoContinuation(contentEditorController.getTextArea());
     }
 
     @FXML
@@ -240,7 +264,7 @@ public class CreateNoteController implements Initializable {
     private void handleSave() {
         try {
             String title = titleField.getText().trim();
-            String content = contentArea.getText() == null ? "" : contentArea.getText();
+            String content = contentEditorController != null ? contentEditorController.getText() : "";
             String annotation = annotationArea.getText() == null ? "" : annotationArea.getText();
 
             NotebookEntity selectedNotebook = notebookComboBox.getSelectionModel().getSelectedItem();
@@ -256,7 +280,10 @@ public class CreateNoteController implements Initializable {
             }
 
             // Handle "Create New Notebook"
-            if (Localization.get("create.new_notebook").equals(selectedNotebook.getTitle())) {
+            String notebookTitle = getNotebookTitle(selectedNotebook);
+
+            if (Localization.get("create.new_notebook").equals(notebookTitle)) {
+
                 String name = promptForNotebookName();
                 if (name == null) {
                     showStatus(Localization.get("create.cancelled"), true);
@@ -283,34 +310,17 @@ public class CreateNoteController implements Initializable {
 
     @FXML
     private void handleClear() {
+        // Clear the reusable editor content as well
+        if (contentEditorController != null) {
+            contentEditorController.setText("");
+        }
+
         clearForm();
         statusLabel.setVisible(false);
     }
 
-    @FXML
-    private void handleToolbarClick(ActionEvent event) {
-        Button clickedButton = (Button) event.getSource();
-        String buttonId = clickedButton.getId();
-
-        switch (buttonId) {
-            case "bulletListButton":
-                TextFormattingUtil.toggleList(contentArea, bulletListButton, new BulletListStrategy());
-                break;
-            case "numberedListButton":
-                TextFormattingUtil.toggleList(contentArea, numberedListButton, new NumberedListStrategy());
-                break;
-            case "headingUpButton":
-                TextFormattingUtil.increaseFontSize(contentArea);
-                break;
-            case "headingDownButton":
-                TextFormattingUtil.decreaseFontSize(contentArea);
-                break;
-        }
-    }
-
     private void clearForm() {
         titleField.clear();
-        contentArea.clear();
         annotationArea.clear();
         selectedTags.clear();
         refreshTagFlowPane();
@@ -410,7 +420,8 @@ public class CreateNoteController implements Initializable {
     }
 
     private void addNotebookToComboBox(NotebookEntity newNotebook) {
-        notebookComboBox.getItems().removeIf(nb -> Localization.get("create.new_notebook").equals(nb.getTitle()));
+        // Remove the "Create new notebook" placeholder(s) by comparing the displayed title using getNotebookTitle
+        notebookComboBox.getItems().removeIf(nb -> Localization.get("create.new_notebook").equals(getNotebookTitle(nb)));
         notebookComboBox.getItems().add(newNotebook);
 
         notebookComboBox.getItems().sort((n1, n2) -> {
@@ -419,8 +430,67 @@ public class CreateNoteController implements Initializable {
             return n1.getCreatedAt().compareTo(n2.getCreatedAt());
         });
 
-        notebookComboBox.getItems().add(new NotebookEntity(Localization.get("create.new_notebook"), newNotebook.getUser()));
+        NotebookEntity placeholder = new NotebookEntity();
+        placeholder.setUser(newNotebook.getUser());
+
+        NotebookTranslationEntity t = new NotebookTranslationEntity();
+        t.setLangCode(Localization.getCurrentLanguageCode());
+        t.setTitle(Localization.get("create.new_notebook"));
+        t.setNotebook(placeholder);
+
+        placeholder.addTranslation(t);
+
+        notebookComboBox.getItems().add(placeholder);
 
         notebookComboBox.getSelectionModel().select(newNotebook);
+    }
+
+    // Robust notebook title lookup: case-insensitive keys and fallbacks (mirrors ManageNotebookController logic)
+    private String getNotebookTitle(NotebookEntity nb) {
+        if (nb == null) return "";
+
+        String currentCode = Localization.getCurrentLanguageCode();
+
+        NotebookTranslationEntity translation = nb.getTranslations().get(currentCode);
+        if (translation == null) {
+            translation = nb.getTranslations().get(currentCode == null ? null : currentCode.toLowerCase());
+        }
+        if (translation == null) {
+            translation = nb.getTranslations().get(currentCode == null ? null : currentCode.toUpperCase());
+        }
+        if (translation == null && currentCode != null) {
+            for (String key : nb.getTranslations().keySet()) {
+                if (key != null && key.equalsIgnoreCase(currentCode)) {
+                    translation = nb.getTranslations().get(key);
+                    break;
+                }
+            }
+        }
+        if (translation != null && translation.getTitle() != null && !translation.getTitle().isBlank()) {
+            return translation.getTitle();
+        }
+
+        // Fallback to English
+        translation = nb.getTranslations().get("en");
+        if (translation == null) translation = nb.getTranslations().get("EN");
+        if (translation == null) {
+            for (String key : nb.getTranslations().keySet()) {
+                if (key != null && key.equalsIgnoreCase("en")) {
+                    translation = nb.getTranslations().get(key);
+                    break;
+                }
+            }
+        }
+        if (translation != null && translation.getTitle() != null && !translation.getTitle().isBlank()) {
+            return translation.getTitle();
+        }
+
+        for (NotebookTranslationEntity t : nb.getTranslations().values()) {
+            if (t != null && t.getTitle() != null && !t.getTitle().isBlank()) {
+                return t.getTitle();
+            }
+        }
+
+        return "";
     }
 }

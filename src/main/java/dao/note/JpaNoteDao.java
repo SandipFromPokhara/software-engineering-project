@@ -8,7 +8,7 @@ import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
-public class JpaNoteDao extends GenericAbstractDAO<NoteEntity, Long> implements NoteDAO{
+public class JpaNoteDao extends GenericAbstractDAO<NoteEntity, Long> implements INoteDAO {
 
     public JpaNoteDao() {}
 
@@ -28,6 +28,8 @@ public class JpaNoteDao extends GenericAbstractDAO<NoteEntity, Long> implements 
 
     @Override
     public NoteEntity findById(Long id) {
+        if (id == null) return null;
+
         return execute(em -> em.find(NoteEntity.class, id));
     }
 
@@ -36,7 +38,7 @@ public class JpaNoteDao extends GenericAbstractDAO<NoteEntity, Long> implements 
         if (notebook == null) throw new IllegalArgumentException("Notebook cannot be null");
 
         return execute(em -> {
-            TypedQuery<NoteEntity> query = em.createQuery("SELECT DISTINCT n FROM NoteEntity n LEFT JOIN FETCH n.translations t LEFT JOIN FETCH n.tags WHERE n.notebook = :notebook", NoteEntity.class);
+            TypedQuery<NoteEntity> query = em.createQuery("SELECT DISTINCT n FROM NoteEntity n LEFT JOIN FETCH n.translations t LEFT JOIN FETCH n.tags tag WHERE n.notebook = :notebook", NoteEntity.class);
 
             query.setParameter("notebook", notebook);
 

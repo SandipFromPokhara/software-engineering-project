@@ -10,17 +10,17 @@ import java.util.Objects;
 @Table(name="note_translation", uniqueConstraints = { @UniqueConstraint(columnNames = {"note_id", "language_code"}) })
 public class NoteTranslationEntity extends BaseTranslationEntity {
 
-    @Column(name="title", nullable = false)
+    @Column(name="title", nullable=false)
     private String title;
 
-    @Column(name="content", columnDefinition = "TEXT")
+    @Column(name="content", columnDefinition="TEXT")
     private String content;
 
     @Column(name="annotation")
     private String annotation;
 
     @ManyToOne
-    @JoinColumn(name = "note_id", nullable = false)
+    @JoinColumn(name="note_id", nullable=false)
     private NoteEntity note;
 
     public NoteTranslationEntity() {}
@@ -53,7 +53,7 @@ public class NoteTranslationEntity extends BaseTranslationEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof NoteTranslationEntity))return false;
+        if (!(o instanceof NoteTranslationEntity)) return false;
 
         // cast to correct type
         NoteTranslationEntity that = (NoteTranslationEntity) o;

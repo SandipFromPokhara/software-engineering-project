@@ -47,8 +47,15 @@ build/
 .env.local
 
 Dockerfile
+
 Jenkinsfile
 
 ### Personal notes ###
 MyNotes.md
 src/main/java/dto/
+
+.scannerwork/
+
+app-deployment.yaml
+
+docker-compose.yml
