@@ -20,9 +20,6 @@ public class LoginController {
 
     private UserService userService;
 
-    // For FXML
-    public LoginController() {}
-
     // For test
     public LoginController(UserService userService) {
         this.userService = userService;
