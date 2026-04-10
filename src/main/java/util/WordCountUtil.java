@@ -1,31 +1,11 @@
 package util;
 
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import org.fxmisc.richtext.InlineCssTextArea;
 
 public class WordCountUtil {
 
-    private WordCountUtil() {
-        /* This utility class should not be instantiated */
-    }
-
-    public static void bind(TextArea textArea, Label wordCountLabel) {
-        if (textArea == null || wordCountLabel == null) return;
-
-        // Update on every text change
-        textArea.textProperty().addListener((obs, oldText, newText) -> {
-            updateLabel(newText, wordCountLabel);
-        });
-
-        // Update on language change
-        Localization.localeProperty().addListener((obs, oldLoc, newLoc) -> {
-            updateLabel(textArea.getText(), wordCountLabel);
-        });
-
-        // Initialize with localized template
-        updateLabel(textArea.getText(), wordCountLabel);
-    }
+    private WordCountUtil() {/* Private constructor to prevent instantiation of utility class */}
 
     public static void bind(InlineCssTextArea textArea, Label wordCountLabel) {
         if (textArea == null || wordCountLabel == null) return;

@@ -98,6 +98,21 @@
     -fx-padding: 0 3 0 3;
 }
 
+.language-combo-button {
+    -fx-background-color: transparent;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+}
+
+.language-icon {
+    -fx-font-size: 12px;
+    -fx-padding: 3 2 3 6;
+}
+
+.language-combo-item {
+    -fx-font-size: 12px;
+}
+
 /* LIGHT MODE */
 .root.light {
     -fx-base: #f8f8f8;
@@ -193,7 +208,7 @@
     -fx-border-color: #c0c0c0;
 }
 
-.root.light .toolbar-btn:pressed {
+.root.light .toolbar-btn:pressed{
     -fx-background-color: #e1e1e1;
     -fx-border-color: #a0a0a0;
 }
@@ -294,6 +309,18 @@
 
 .root.light .faq-answer-label {
     -fx-text-fill: #333333; /* Dark gray for light background */
+}
+
+.root.light .language-combo-button {
+    -fx-text-fill: #266973;
+}
+
+.root.light .language-icon {
+    -fx-text-fill: #266973;
+}
+
+.root.light .combo-box .list-cell {
+    -fx-text-fill: #07323a;
 }
 
 /* DARK MODE */
@@ -449,11 +476,6 @@
 }
 
 .root.dark .side-panel .side-panel-btn {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-}
-
-.root.dark .side-panel .side-panel-btn:hover {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
 }
@@ -622,4 +644,12 @@
 
 .root.dark .titled-pane > .header {
     -fx-background-color: #3c3c3c !important;
+}
+
+.root.dark .language-combo-button {
+    -fx-text-fill: white;
+}
+
+.root.dark .language-icon {
+    -fx-text-fill: white;
 }

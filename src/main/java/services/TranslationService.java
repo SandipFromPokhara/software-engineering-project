@@ -39,14 +39,4 @@ public class TranslationService {
 
         return translation;
     }
-
-    public <T> T createTranslation(ITranslatable<T> entity, String langCode) {
-        if (entity == null) return null;
-
-        if (langCode == null || langCode.isBlank()) {
-            throw new IllegalArgumentException("Language code cannot be null or blank");
-        }
-
-        return entity.createTranslation(langCode);
-    }
 }

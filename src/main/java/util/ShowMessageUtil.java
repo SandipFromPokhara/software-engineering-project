@@ -5,7 +5,7 @@ import security.MessageType;
 
 public class ShowMessageUtil {
 
-    private ShowMessageUtil() {}
+    private ShowMessageUtil() {/* Private constructor to prevent instantiation of utility class */}
 
     // For raw text
     public static void showMessage(Label label, String message, MessageType type) {
