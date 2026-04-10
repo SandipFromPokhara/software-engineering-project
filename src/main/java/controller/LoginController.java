@@ -20,6 +20,10 @@ public class LoginController {
 
     private UserService userService;
 
+    public LoginController() {
+        /* Empty constructor */
+    }
+
     // For test
     public LoginController(UserService userService) {
         this.userService = userService;
