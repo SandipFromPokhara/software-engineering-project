@@ -19,8 +19,6 @@ import session.UserSession;
 public class LoginController {
 
     private UserService userService;
-    private JpaUserDao userDao;
-    private IPasswordHasher passwordHasher;
 
     // For FXML
     public LoginController() {}
@@ -31,7 +29,19 @@ public class LoginController {
     }
 
     @FXML
-    private Label loginWelcome, loginNote, statusLabel, loginNoAccount, privacyLabel;
+    private Label loginWelcome;
+
+    @FXML
+    private Label loginNote;
+
+    @FXML
+    private Label statusLabel;
+
+    @FXML
+    private Label loginNoAccount;
+
+    @FXML
+    private Label privacyLabel;
 
     @FXML
     private TextField usernameField;
@@ -40,15 +50,19 @@ public class LoginController {
     private PasswordField passwordField;
 
     @FXML
-    private Button loginButton, backButton;
+    private Button loginButton;
+
+    @FXML
+    private Button backButton;
 
     @FXML
     private Hyperlink signupLink;
 
     @FXML
     private void initialize() {
-        userDao = new JpaUserDao();
-        passwordHasher = new BcryptPasswordHasher();
+        JpaUserDao userDao = new JpaUserDao();
+        IPasswordHasher passwordHasher = new BcryptPasswordHasher();
+
         userService = new UserService(userDao, passwordHasher);
 
         loginButton.setDisable(true);
