@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 
 public class ManageNotebookController {
     private static final Logger logger = Logger.getLogger(ManageNotebookController.class.getName());
+    private static final String NOTEBOOKS_RENAME_KEY = "notebooks.rename";
 
     private INotebookDAO notebookDao;
     private NotebookEntity activeNotebook;
@@ -34,7 +35,16 @@ public class ManageNotebookController {
     private ListView<NotebookEntity> notebookListView;
 
     @FXML
-    private Button openBtn, renameBtn, deleteBtn, closeBtn;
+    private Button openBtn;
+
+    @FXML
+    private Button renameBtn;
+
+    @FXML
+    private Button deleteBtn;
+
+    @FXML
+    private Button closeBtn;
 
     public void setActiveNotebook(NotebookEntity notebook) {
         this.activeNotebook = notebook;
@@ -44,16 +54,8 @@ public class ManageNotebookController {
     private void initialize() {
         notebookDao = new JpaNotebookDao();
 
-        // LOCALIZATION BINDINGS
-        manageTitle.textProperty().bind(Localization.bind("notebooks.title"));
-        openBtn.textProperty().bind(Localization.bind("notebooks.open"));
-        renameBtn.textProperty().bind(Localization.bind("notebooks.rename"));
-        deleteBtn.textProperty().bind(Localization.bind("button.delete"));
-        closeBtn.textProperty().bind(Localization.bind("notebooks.close"));
-
-        // Disable buttons initially
-        renameBtn.setDisable(true);
-        deleteBtn.setDisable(true);
+        bindUIProperties();
+        setupListeners();
 
         loadNotebooks();
 
@@ -61,15 +63,35 @@ public class ManageNotebookController {
             notebookListView.getSelectionModel().select(activeNotebook);
         }
 
+        StringConverter<NotebookEntity> converter = createNotebookConverter();
+        notebookListView.setCellFactory(lv -> createNotebookListCell(lv, converter));
+    }
+
+    // UI binding method
+    private void bindUIProperties() {
+        manageTitle.textProperty().bind(Localization.bind("notebooks.title"));
+        openBtn.textProperty().bind(Localization.bind("notebooks.open"));
+        renameBtn.textProperty().bind(Localization.bind(NOTEBOOKS_RENAME_KEY));
+        deleteBtn.textProperty().bind(Localization.bind("button.delete"));
+        closeBtn.textProperty().bind(Localization.bind("notebooks.close"));
+
+        // Disable buttons initially
+        renameBtn.setDisable(true);
+        deleteBtn.setDisable(true);
+    }
+
+    private void setupListeners() {
         notebookListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             boolean isSelected = newVal != null;
             openBtn.setDisable(!isSelected);
             renameBtn.setDisable(!isSelected);
             deleteBtn.setDisable(!isSelected);
         });
+    }
 
-        // Use a StringConverter for converting NotebookEntity -> title string
-        StringConverter<NotebookEntity> converter = new StringConverter<>() {
+    // Use a StringConverter for converting NotebookEntity -> title string
+    private StringConverter<NotebookEntity> createNotebookConverter() {
+        return new StringConverter<>() {
             @Override
             public String toString(NotebookEntity nb) {
                 if (nb == null) return "";
@@ -82,10 +104,12 @@ public class ManageNotebookController {
                 return notebookListView.getSelectionModel().getSelectedItem();
             }
         };
+    }
 
-        // Create a cell factory that uses a wrapping Label so long titles are visible
-        notebookListView.setCellFactory(lv -> new ListCell<NotebookEntity>() {
+    private ListCell<NotebookEntity> createNotebookListCell(ListView<NotebookEntity> lv, StringConverter<NotebookEntity> converter) {
+        return new ListCell<>() {
             private final Label label = new Label();
+
             {
                 label.setWrapText(true);
                 // Bind the label max width to the list view width minus padding so it can wrap correctly
@@ -106,23 +130,24 @@ public class ManageNotebookController {
                     setText(null);
                     setStyle(null);
                 } else {
-                    String title = converter.toString(item);
-                    logger.fine(() -> "Updating notebook list cell: id=" + (item.getId() == null ? "<null>" : item.getId()) + ", title='" + title + "'");
-                    // Set both the text and graphic as a fallback so the title is visible even if CSS/graphic rendering fails
-                    label.setText(title);
-                    setText(title);
-                    setGraphic(null);
-                    // Inline fallback for text color if stylesheets didn't apply yet
-                    boolean dark = util.ToggleUtil.isDarkMode();
-                    if (dark) {
-                        setStyle("-fx-text-fill: #e6e6e6;");
-                    } else {
-                        setStyle("-fx-text-fill: #000000;");
-                    }
+                    updateCellContent(item, converter);
                 }
             }
-        });
+
+            private void updateCellContent(NotebookEntity item, StringConverter<NotebookEntity> converter) {
+                String title = converter.toString(item);
+                logger.fine(() -> "Updating notebook list cell: id=" + (item.getId() == null ? "<null>" : item.getId()) + ", title='" + title + "'");
+                label.setText(title);
+                setText(title);
+                setGraphic(null);
+
+                // Inline fallback for text color
+                String colorStyle = util.ToggleUtil.isDarkMode() ? "-fx-text-fill: #e6e6e6;" : "-fx-text-fill: #000000;";
+                setStyle(colorStyle);
+            }
+        };
     }
+
 
     public void loadNotebooks() {
         try {
@@ -144,13 +169,17 @@ public class ManageNotebookController {
                         String title = getNotebookTitle(n);
                         logger.fine(() -> "Notebook id=" + (n.getId() == null ? "<null>" : n.getId()) + ", title='" + title + "', lang=" + currentCode);
                     }
+
+                    // Ensure the list is not null before sorting or setting items
+                    notebooks.sort((n1, n2) -> {
+                        String t1 = getNotebookTitle(n1);
+                        String t2 = getNotebookTitle(n2);
+                        return String.CASE_INSENSITIVE_ORDER.compare(t1, t2);
+                    });
+                    notebookListView.getItems().setAll(notebooks);
+                } else {
+                    notebookListView.getItems().clear();
                 }
-                notebooks.sort((n1, n2) -> {
-                    String t1 = getNotebookTitle(n1);
-                    String t2 = getNotebookTitle(n2);
-                    return String.CASE_INSENSITIVE_ORDER.compare(t1, t2);
-                });
-                notebookListView.getItems().setAll(notebooks);
 
                 // Select active notebook if available
                 if (activeNotebook != null) {
@@ -185,15 +214,12 @@ public class ManageNotebookController {
         if (selected == null) return;
 
         TextInputDialog dialog = new TextInputDialog(getNotebookTitle(selected));
-        dialog.setTitle(Localization.get("notebooks.rename"));
-        dialog.setHeaderText(Localization.get("notebooks.rename"));
+        dialog.setTitle(Localization.get(NOTEBOOKS_RENAME_KEY));
+        dialog.setHeaderText(Localization.get(NOTEBOOKS_RENAME_KEY));
         dialog.setContentText(Localization.get("notebooks.new_name"));
 
-        // Localize OK and Cancel buttons
-        ButtonType okButton = new ButtonType(Localization.get("button.ok"), ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancelButton = new ButtonType(Localization.get("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
-
-        dialog.getDialogPane().getButtonTypes().setAll(okButton, cancelButton);
+        // Handle creation and localization of OK and Cancel buttons
+        AlertUtil.addStandardButtons(dialog);
 
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(newName -> {
@@ -220,11 +246,8 @@ public class ManageNotebookController {
 
                 notebookListView.refresh();
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Failed to rename notebook: " + getNotebookTitle(selected), e);
-                AlertUtil.showError(
-                        notebookListView.getScene().getWindow(),
-                        Localization.get("notebooks.rename_failed")
-                );
+                logger.log(Level.SEVERE, e, () -> "Failed to rename notebook: " + getNotebookTitle(selected));
+                AlertUtil.showError(notebookListView.getScene().getWindow(), Localization.get("notebooks.rename_failed"));
             }
         });
     }
@@ -267,56 +290,37 @@ public class ManageNotebookController {
 
         String currentCode = Localization.getCurrentLanguageCode();
 
-        // 1) Preferred: exact match for current language code
-        // Try case-sensitive key first
-        NotebookTranslationEntity translation = nb.getTranslations().get(currentCode);
-        if (translation == null) {
-            // Try lowercase/uppercase variants
-            translation = nb.getTranslations().get(currentCode == null ? null : currentCode.toLowerCase());
-        }
-        if (translation == null) {
-            translation = nb.getTranslations().get(currentCode == null ? null : currentCode.toUpperCase());
-        }
-        if (translation == null && currentCode != null) {
-            // Try to find a key that equalsIgnoreCase(currentCode)
-            for (String key : nb.getTranslations().keySet()) {
-                if (key != null && key.equalsIgnoreCase(currentCode)) {
-                    translation = nb.getTranslations().get(key);
-                    break;
-                }
-            }
-        }
-        if (translation != null && translation.getTitle() != null && !translation.getTitle().isBlank()) {
-            return translation.getTitle();
+        // 1) Try exact/case-insensitive match for current language
+        String title = findTitleByLanguage(nb, currentCode);
+        if (title != null) return title;
+
+        // 2) Fallback to English
+        title = findTitleByLanguage(nb, "en");
+        if (title != null) {
+            logger.fine(() -> "Falling back to en translation for notebook id=" + nb.getId());
+            return title;
         }
 
-        // 2) Common fallback: English (if available)
-        // Try english keys in a case-insensitive way
-        translation = nb.getTranslations().get("en");
-        if (translation == null) translation = nb.getTranslations().get("EN");
-        if (translation == null) {
-            for (String key : nb.getTranslations().keySet()) {
-                if (key != null && key.equalsIgnoreCase("en")) {
-                    translation = nb.getTranslations().get(key);
-                    break;
-                }
-            }
-        }
-        if (translation != null && translation.getTitle() != null && !translation.getTitle().isBlank()) {
-            logger.fine(() -> "Falling back to 'en' translation for notebook id=" + nb.getId());
-            return translation.getTitle();
-        }
+        // 3) Any other available translation
+        return nb.getTranslations().values().stream()
+                .map(NotebookTranslationEntity::getTitle)
+                .filter(t -> t != null && !t.isBlank())
+                .findFirst()
+                .orElseGet(() -> {
+                    logger.fine(() -> "No translation found for notebook id=" + nb.getId());
+                    return "";
+                });
+    }
 
-        // 3) Any other available translation (first non-empty)
-        for (NotebookTranslationEntity t : nb.getTranslations().values()) {
-            if (t != null && t.getTitle() != null && !t.getTitle().isBlank()) {
-                logger.fine(() -> "Falling back to available translation (lang=" + t.getLangCode() + ") for notebook id=" + nb.getId());
-                return t.getTitle();
-            }
-        }
+    // Helper method to find a title by language key (case-insensitive)
+    private String findTitleByLanguage(NotebookEntity nb, String langCode) {
+        if (langCode == null) return null;
 
-        // 4) Nothing found
-        logger.fine(() -> "No translation found for notebook id=" + nb.getId() + " (requested lang=" + currentCode + ") available langs=" + nb.getTranslations().keySet());
-        return "";
+        return nb.getTranslations().entrySet().stream()
+                .filter(entry -> langCode.equalsIgnoreCase(entry.getKey()))
+                .map(entry -> entry.getValue().getTitle())
+                .filter(t -> t != null && !t.isBlank())
+                .findFirst()
+                .orElse(null);
     }
 }
