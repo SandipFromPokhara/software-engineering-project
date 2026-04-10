@@ -10,18 +10,18 @@ public class NoteModel {
     private String title;
     private String content;
     private String annotation;
+    private String langCode;
     private Set<TagModel> tags;
     private NotebookModel notebook;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public NoteModel(String title, String content, String annotation, NotebookModel notebook) {
+    public NoteModel(String title, String content, String annotation, String langCode, NotebookModel notebook) {
         this.title = title;
         this.content = content;
         this.notebook = notebook;
         this.annotation = annotation;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.langCode = langCode;
         this.tags = new HashSet<>();
     }
 
@@ -82,6 +82,10 @@ public class NoteModel {
         this.notebook = notebook;
     }
 
+    public String geLangCode() { return this.langCode; }
+
+    public void setLangCode(String langCode) { this.langCode = langCode; }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -93,4 +97,3 @@ public class NoteModel {
         return "Note {Id: " + id + ", Title: '" + title + "', Annotation: '" + annotation + "', Notebook: '" + notebook + "', Timestamp: " + createdAt + "}";
     }
 }
-

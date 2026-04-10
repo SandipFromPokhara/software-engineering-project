@@ -1,11 +1,7 @@
 package services;
 
-import dao.note.JpaNoteDao;
-import dao.note.NoteDAO;
-import dao.notebook.JpaNotebookDao;
-import dao.notebook.NotebookDAO;
-import dao.tag.JpaTagDao;
-import dao.tag.TagDAO;
+import dao.note.*;
+import dao.notebook.*;
 import entity.translationentities.NoteTranslationEntity;
 import entity.entities.NotebookEntity;
 import entity.entities.NoteEntity;
@@ -22,22 +18,13 @@ import static model.LanguageModel.DEFAULT_LANGUAGE_CODE;
 
 public class DashboardService {
 
-    private final NoteDAO noteDao;
-    private final NotebookDAO notebookDao;
-    private final TagDAO tagDao;
+    private final INoteDAO noteDao;
+    private final INotebookDAO notebookDao;
     private final TranslationService translationService;
-
-    public DashboardService(NoteDAO noteDao, NotebookDAO notebookDao, TagDAO tagDao, TranslationService translationService) {
-        this.noteDao = noteDao;
-        this.notebookDao = notebookDao;
-        this.tagDao = tagDao;
-        this.translationService = translationService;
-    }
 
     public DashboardService() {
         this.noteDao = new JpaNoteDao();
         this.notebookDao = new JpaNotebookDao();
-        this.tagDao = new JpaTagDao();
         this.translationService = new TranslationService();
     }
 

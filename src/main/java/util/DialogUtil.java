@@ -5,6 +5,8 @@ import javafx.stage.Window;
 
 public class DialogUtil {
 
+    private DialogUtil() {/* Private constructor to prevent instantiation of utility class */}
+
     public static void showAbout(Window owner) {
         Alert about = new Alert(Alert.AlertType.INFORMATION);
         about.setTitle(Localization.get("about.window_title"));

@@ -7,14 +7,14 @@ public class NotebookModel {
     private int id;
     private String title;
     private UserModel user;
+    private String langCode;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public NotebookModel(String title, UserModel user) {
+    public NotebookModel(String title, UserModel user, String langCode) {
         this.title = title;
         this.user = user;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.langCode = langCode;
     }
 
     public int getId() {
@@ -44,6 +44,10 @@ public class NotebookModel {
     public void setUser(UserModel user) {
         this.user = user;
     }
+
+    public String geLangCode() { return this.langCode; }
+
+    public void setLangCode(String langCode) { this.langCode = langCode; }
 
     @Override
     public String toString() {

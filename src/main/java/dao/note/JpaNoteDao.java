@@ -8,7 +8,7 @@ import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
-public class JpaNoteDao extends GenericAbstractDAO<NoteEntity, Long> implements NoteDAO{
+public class JpaNoteDao extends GenericAbstractDAO<NoteEntity, Long> implements INoteDAO {
 
     public JpaNoteDao() {}
 
@@ -28,6 +28,8 @@ public class JpaNoteDao extends GenericAbstractDAO<NoteEntity, Long> implements 
 
     @Override
     public NoteEntity findById(Long id) {
+        if (id == null) return null;
+
         return execute(em -> em.find(NoteEntity.class, id));
     }
 

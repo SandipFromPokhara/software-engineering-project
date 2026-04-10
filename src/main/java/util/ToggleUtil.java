@@ -5,7 +5,10 @@ import javafx.scene.Scene;
 import java.util.Objects;
 
 public class ToggleUtil {
+
     private static boolean darkMode = false;
+
+    private ToggleUtil() {/* Private constructor to prevent instantiation of utility class */}
 
     public static void applyTheme(Scene scene) {
 
@@ -37,5 +40,4 @@ public class ToggleUtil {
     public static void setDarkMode(boolean mode) {
         darkMode = mode;
     }
-
 }

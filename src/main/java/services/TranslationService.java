@@ -1,13 +1,13 @@
 package services;
 
-import entity.base.Translatable;
+import entity.base.ITranslatable;
 import util.Localization;
 import java.util.logging.Logger;
 
 public class TranslationService {
     private static final Logger logger = Logger.getLogger(TranslationService.class.getName());
 
-    public <T> T getTranslation(Translatable<T> entity, String langCode, String defaultLang) {
+    public <T> T getTranslation(ITranslatable<T> entity, String langCode, String defaultLang) {
         if (entity == null) return null;
 
         // If defaultLang wasn't provided, use current UI language as a sensible fallback
@@ -38,15 +38,5 @@ public class TranslationService {
         }
 
         return translation;
-    }
-
-    public <T> T createTranslation(Translatable<T> entity, String langCode) {
-        if (entity == null) return null;
-
-        if (langCode == null || langCode.isBlank()) {
-            throw new IllegalArgumentException("Language code cannot be null or blank");
-        }
-
-        return entity.createTranslation(langCode);
     }
 }

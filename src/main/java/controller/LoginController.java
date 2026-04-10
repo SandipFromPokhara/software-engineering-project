@@ -10,7 +10,7 @@ import entity.entities.UserEntity;
 import dao.user.JpaUserDao;
 import javafx.stage.Stage;
 import security.BcryptPasswordHasher;
-import security.PasswordHasher;
+import security.IPasswordHasher;
 import services.UserService;
 import util.Localization;
 import util.NavigationUtil;
@@ -19,11 +19,6 @@ import session.UserSession;
 public class LoginController {
 
     private UserService userService;
-    private JpaUserDao userDao;
-    private PasswordHasher passwordHasher;
-
-    // For FXML
-    public LoginController() {}
 
     // For test
     public LoginController(UserService userService) {
@@ -31,7 +26,19 @@ public class LoginController {
     }
 
     @FXML
-    private Label loginWelcome, loginNote, statusLabel, loginNoAccount, privacyLabel;
+    private Label loginWelcome;
+
+    @FXML
+    private Label loginNote;
+
+    @FXML
+    private Label statusLabel;
+
+    @FXML
+    private Label loginNoAccount;
+
+    @FXML
+    private Label privacyLabel;
 
     @FXML
     private TextField usernameField;
@@ -40,15 +47,19 @@ public class LoginController {
     private PasswordField passwordField;
 
     @FXML
-    private Button loginButton, backButton;
+    private Button loginButton;
+
+    @FXML
+    private Button backButton;
 
     @FXML
     private Hyperlink signupLink;
 
     @FXML
     private void initialize() {
-        userDao = new JpaUserDao();
-        passwordHasher = new BcryptPasswordHasher();
+        JpaUserDao userDao = new JpaUserDao();
+        IPasswordHasher passwordHasher = new BcryptPasswordHasher();
+
         userService = new UserService(userDao, passwordHasher);
 
         loginButton.setDisable(true);

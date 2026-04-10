@@ -10,6 +10,8 @@ import java.util.Set;
 
 public class TagUtil {
 
+    private TagUtil() {/* Private constructor to prevent instantiation of utility class */}
+
     public static void addTagToUI(Set<String> selectedTags,
                                   FlowPane flowPane,
                                   ComboBox<String> comboBox,

@@ -13,7 +13,7 @@
             <property name="jakarta.persistence.jdbc.password" value="DB_PASSWORD"/>
             <property name="jakarta.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver"/>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
-            <property name="jakarta.persistence.sql-dialect" value="org.hibernate.dialect.MariaDBDialect"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MariaDBDialect"/>
             <property name="hibernate.show_sql" value="false"/>
         </properties>
     </persistence-unit>

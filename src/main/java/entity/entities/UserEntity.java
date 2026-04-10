@@ -2,7 +2,6 @@ package entity.entities;
 
 import entity.base.BaseEntity;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +34,7 @@ public class UserEntity extends BaseEntity {
         this.email = email;
     }
 
-    public UserEntity() {}
+    protected UserEntity() {}
 
     public String getFirstName() { return firstName; }
 

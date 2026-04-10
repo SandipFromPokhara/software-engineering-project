@@ -1,12 +1,16 @@
 package dao.tag;
 
 import datasource.MariaDbJpaConnection;
+import entity.base.BaseEntity;
 import entity.entities.NotebookEntity;
 import entity.entities.NoteEntity;
 import entity.entities.TagEntity;
 import entity.entities.UserEntity;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import org.junit.jupiter.api.*;
+
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import java.util.List;
@@ -43,7 +47,8 @@ class JpaTagDaoTest {
 
     @Test
     void testSaveAndFindTag() {
-        TagEntity tag = new TagEntity(uniqueName("TestTag"));
+        TagEntity tag = new TagEntity();
+        tag.setTagName(uniqueName("TestTag"));
         TagEntity saved = tagDao.save(tag);
 
         testTags.add(saved);
@@ -58,7 +63,9 @@ class JpaTagDaoTest {
     @Test
     void testSaveWithExistingIdMerges() {
         String name = uniqueName("MergeTag");
-        TagEntity tag = tagDao.save(new TagEntity(name));
+        TagEntity tag = new TagEntity();
+        tag.setTagName(name);
+        tag = tagDao.save(tag);
 
         tag.setTagName(uniqueName("MergedName"));
 
@@ -72,13 +79,16 @@ class JpaTagDaoTest {
 
     @Test
     void testFindByIdNotFound() {
-        assertNull(tagDao.findById(99999L));
+        assertThrows(NoResultException.class, () -> {
+            tagDao.findById(99999L);
+        });
     }
 
     @Test
     void testExistsByName() {
         String name = uniqueName("ExistsTag");
-        TagEntity tag = new TagEntity(name);
+        TagEntity tag = new TagEntity();
+        tag.setTagName(name);
         tagDao.save(tag);
 
         testTags.add(tag);
@@ -90,7 +100,8 @@ class JpaTagDaoTest {
     @Test
     void testFindByName() {
         String name = uniqueName("FindByName");
-        TagEntity tag = new TagEntity(name);
+        TagEntity tag = new TagEntity();
+        tag.setTagName(name);
         tagDao.save(tag);
 
         testTags.add(tag);
@@ -109,8 +120,13 @@ class JpaTagDaoTest {
 
     @Test
     void testFindAll() {
-        TagEntity tag1 = tagDao.save(new TagEntity(uniqueName("Tag1")));
-        TagEntity tag2 = tagDao.save(new TagEntity(uniqueName("Tag2")));
+        TagEntity tag1 = new TagEntity();
+        tag1.setTagName(uniqueName("Tag1"));
+        tagDao.save(tag1);
+
+        TagEntity tag2 = new TagEntity();
+        tag2.setTagName(uniqueName("Tag2"));
+        tagDao.save(tag2);
 
         testTags.add(tag1);
         testTags.add(tag2);
@@ -123,15 +139,20 @@ class JpaTagDaoTest {
 
     @Test
     void testFindAllEmpty() {
-        tagDao.findAll().forEach(tagDao::delete); // ensure empty DB
         List<TagEntity> tags = tagDao.findAll();
-        assertTrue(tags.isEmpty());
+
+        for (TagEntity t : tags) {
+            tagDao.delete(t);
+        }
+
+        assertEquals(0, tagDao.findAll().size());
     }
 
     @Test
     void testUpdateTag() {
         String name = uniqueName("OldName");
-        TagEntity tag = new TagEntity(name);
+        TagEntity tag = new TagEntity();
+        tag.setTagName(name);
         tag = tagDao.save(tag);
 
         tag.setTagName(uniqueName("NewName"));
@@ -148,9 +169,20 @@ class JpaTagDaoTest {
         String name1 = uniqueName("TagA");
         String name2 = uniqueName("TagB");
 
-        TagEntity tag1 = tagDao.save(new TagEntity(name1));
-        TagEntity tag2 = tagDao.save(new TagEntity(name2));
+        // Create and persist the original tag that will cause the duplicate
+        TagEntity tag1 = new TagEntity();
+        tag1.setTagName(name1);
+        tagDao.save(tag1);
 
+        TagEntity tag2 = new TagEntity();
+        tag2.setTagName(name2);
+        tagDao.save(tag2);
+
+        // Ensure cleanup will remove both
+        testTags.add(tag1);
+        testTags.add(tag2);
+
+        // Attempt to rename tag2 to name1 should fail
         tag2.setTagName(name1);
 
         assertThrows(IllegalArgumentException.class, () -> tagDao.update(tag2));
@@ -162,20 +194,32 @@ class JpaTagDaoTest {
 
     @Test
     void testDeleteTag() {
-        TagEntity tag = tagDao.save(new TagEntity(uniqueName("ToDelete")));
+        TagEntity tag = new TagEntity();
+        tag.setTagName(uniqueName("ToDelete"));
+        tagDao.save(tag);
 
         // associate a note to ensure deletion handles removal
-        NoteEntity note = new NoteEntity("Note", "Content", "Annotation");
+        NoteEntity note = new NoteEntity();
+
+        var translation = note.createTranslation("EN");
+        translation.setTitle("Title");
+        translation.setContent("Content");
+        translation.setAnnotation("Annotation");
+
         note.addTag(tag);
 
         tagDao.delete(tag);
 
-        assertNull(tagDao.findById(tag.getId()));
+        assertThrows(NoResultException.class, () -> {
+            tagDao.findById(tag.getId());
+        });
     }
 
     @Test
     void testDeleteTagWithRealNoteAssociation() {
-        TagEntity tag = tagDao.save(new TagEntity(uniqueName("TagWithNote")));
+        TagEntity tag = new TagEntity();
+        tag.setTagName(uniqueName("TagWithNote"));
+        tagDao.save(tag);
 
         EntityManager em = MariaDbJpaConnection.createEntityManager();
         em.getTransaction().begin();
@@ -188,10 +232,16 @@ class JpaTagDaoTest {
         user.changePasswordHash("Test@123");
         em.persist(user);
 
-        NotebookEntity notebook = new NotebookEntity("Test Notebook", user);
+        NotebookEntity notebook = new NotebookEntity(user);
         em.persist(notebook);
 
-        NoteEntity note = new NoteEntity("Title", "Content", "Annotation");
+        NoteEntity note = new NoteEntity();
+
+        var translation = note.createTranslation("en");
+        translation.setTitle("Title");
+        translation.setContent("Content");
+        translation.setAnnotation("Annotation");
+
         note.setNotebook(notebook);
         note.addTag(tag);
 
@@ -201,23 +251,27 @@ class JpaTagDaoTest {
 
         tagDao.delete(tag);
 
-        assertNull(tagDao.findById(tag.getId()));
+        assertThrows(NoResultException.class, () -> tagDao.findById(tag.getId()));
     }
 
     @Test
     void testDeleteNonExistentTag() {
-        TagEntity tag = new TagEntity("NonExistent");
-        tag.setId(99999L); // fake ID
-        assertDoesNotThrow(() -> tagDao.delete(tag));
+        TagEntity tag = new TagEntity();
+        tag.setTagName("NonExistent");
+        setId(tag, 99999L); // reflection to set fake ID
+        assertThrows(RuntimeException.class, () -> tagDao.delete(tag));
     }
 
     @Test
     void testSaveDuplicateThrows() {
         String name = uniqueName("DuplicateTag");
-        TagEntity tag1 = new TagEntity(name);
+        TagEntity tag1 = new TagEntity();
+        tag1.setTagName(name);
         tagDao.save(tag1);
 
-        TagEntity tag2 = new TagEntity(name);
+        TagEntity tag2 = new TagEntity();
+        tag2.setTagName(name);
+
         assertThrows(IllegalArgumentException.class, () -> tagDao.save(tag2));
     }
 
@@ -226,13 +280,18 @@ class JpaTagDaoTest {
         String name1 = uniqueName("Tag1");
         String name2 = uniqueName("Tag2");
 
-        TagEntity tag1 = tagDao.save(new TagEntity(name1));
-        TagEntity tag2 = tagDao.save(new TagEntity(name2));
+        TagEntity tag1 = new TagEntity();
+        tag1.setTagName(name1);
+        tagDao.save(tag1);
+
+        TagEntity tag2 = new TagEntity();
+        tag2.setTagName(name2);
+        tagDao.save(tag2);
 
         testTags.add(tag1);
         testTags.add(tag2);
 
-        // try to rename tag2 to name1
+        // try to rename tag2 to tag1's name
         tag2.setTagName(name1);
         assertThrows(IllegalArgumentException.class, () -> tagDao.update(tag2)); // or tagDao.update(tag2)
     }
@@ -250,5 +309,15 @@ class JpaTagDaoTest {
     @Test
     void testSaveNullTagThrows() {
         assertThrows(IllegalArgumentException.class, () -> tagDao.save(null));
+    }
+
+    private void setId(BaseEntity entity, Long id) {
+        try {
+            Field idField = BaseEntity.class.getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(entity, id);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

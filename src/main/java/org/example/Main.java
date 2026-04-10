@@ -1,3 +1,5 @@
+package org.example;
+
 import javafx.application.Application;
 import view.StartView;
 

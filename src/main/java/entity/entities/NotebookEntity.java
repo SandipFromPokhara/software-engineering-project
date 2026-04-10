@@ -1,7 +1,7 @@
 package entity.entities;
 
 import entity.base.BaseEntity;
-import entity.base.Translatable;
+import entity.base.ITranslatable;
 import entity.translationentities.NotebookTranslationEntity;
 import jakarta.persistence.*;
 
@@ -9,7 +9,7 @@ import java.util.*;
 
 @Entity
 @Table(name="notebooks")
-public class NotebookEntity extends BaseEntity implements Translatable<NotebookTranslationEntity> {
+public class NotebookEntity extends BaseEntity implements ITranslatable<NotebookTranslationEntity> {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -26,7 +26,7 @@ public class NotebookEntity extends BaseEntity implements Translatable<NotebookT
         this.user = user;
     }
 
-    public NotebookEntity() {}
+    public NotebookEntity() {/* JPA */}
 
     public UserEntity getUser() { return user; }
 

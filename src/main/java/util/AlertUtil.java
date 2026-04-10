@@ -3,9 +3,20 @@ package util;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.stage.Window;
 
+/**
+ * Utility class for displaying JavaFX Alerts.
+ */
 public class AlertUtil {
+
+    private static final ButtonType OK_BUTTON = new ButtonType(Localization.get("button.ok"), ButtonBar.ButtonData.OK_DONE);
+    private static final ButtonType CANCEL_BUTTON = new ButtonType(Localization.get("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+
+    private AlertUtil() {
+        throw new IllegalStateException("Utility class");
+    }
 
     /**
      * Generic alert method
@@ -49,13 +60,12 @@ public class AlertUtil {
             alert.initOwner(owner);
         }
 
-        // Localized buttons
-        ButtonType okButton = new ButtonType(Localization.get("button.ok"), ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancelButton = new ButtonType(Localization.get("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(OK_BUTTON, CANCEL_BUTTON);
 
-        alert.getButtonTypes().setAll(okButton, cancelButton);
-
-        return alert.showAndWait().filter(response -> response == okButton).isPresent();
+        return alert.showAndWait().filter(response -> response == OK_BUTTON).isPresent();
     }
 
+    public static void addStandardButtons(Dialog<?> dialog) {
+        dialog.getDialogPane().getButtonTypes().setAll(OK_BUTTON, CANCEL_BUTTON);
+    }
 }

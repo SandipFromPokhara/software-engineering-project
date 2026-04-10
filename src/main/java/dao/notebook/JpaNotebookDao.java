@@ -2,12 +2,13 @@ package dao.notebook;
 
 import entity.entities.NotebookEntity;
 import entity.entities.UserEntity;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import dao.basedao.GenericAbstractDAO;
 
 import java.util.List;
 
-public class JpaNotebookDao extends GenericAbstractDAO<NotebookEntity, Long> implements NotebookDAO {
+public class JpaNotebookDao extends GenericAbstractDAO<NotebookEntity, Long> implements INotebookDAO {
 
     public JpaNotebookDao() {}
 
@@ -29,11 +30,15 @@ public class JpaNotebookDao extends GenericAbstractDAO<NotebookEntity, Long> imp
     public NotebookEntity findById(Long id) {
         if (id == null) throw new IllegalArgumentException("ID cannot be null");
 
-        return execute(em -> em.createQuery(
-                                "SELECT n FROM NotebookEntity n LEFT JOIN FETCH n.translations WHERE n.id = :id", NotebookEntity.class)
+        return execute(em -> {
+            try {
+                return em.createQuery("SELECT n FROM NotebookEntity n LEFT JOIN FETCH n.translations WHERE n.id = :id", NotebookEntity.class)
                         .setParameter("id", id)
-                        .getSingleResult()
-        );
+                        .getSingleResult();
+            } catch (NoResultException e) {
+                return null;
+            }
+        });
     }
 
     @Override

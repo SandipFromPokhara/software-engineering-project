@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Locale;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class WordCountUtilTest {
@@ -20,6 +22,7 @@ class WordCountUtilTest {
 
     @BeforeEach
     void setup() {
+        Localization.setLocale(Locale.ENGLISH);
         textArea = new TextArea();
         label = new Label();
         WordCountUtil.bind(textArea, label);
@@ -38,7 +41,7 @@ class WordCountUtilTest {
     }
 
     @Test
-    void testMultipleSanat() {
+    void testMultipleWords() {
         textArea.setText("Hello testing testing");
         assertEquals("Words: 3 | Chars: 21", label.getText());
     }

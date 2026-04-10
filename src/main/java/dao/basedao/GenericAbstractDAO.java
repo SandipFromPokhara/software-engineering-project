@@ -21,6 +21,9 @@ public abstract class GenericAbstractDAO<T, ID> {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
             throw new RuntimeException("Transaction failed", e);
         } finally {
             em.close();
