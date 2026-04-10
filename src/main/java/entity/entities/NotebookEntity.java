@@ -26,7 +26,7 @@ public class NotebookEntity extends BaseEntity implements ITranslatable<Notebook
         this.user = user;
     }
 
-    public NotebookEntity() {}
+    public NotebookEntity() {/* JPA */}
 
     public UserEntity getUser() { return user; }
 
