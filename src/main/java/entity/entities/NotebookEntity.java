@@ -26,7 +26,7 @@ public class NotebookEntity extends BaseEntity implements ITranslatable<Notebook
         this.user = user;
     }
 
-    public NotebookEntity() {}
+    protected NotebookEntity() {}
 
     public UserEntity getUser() { return user; }
 
