@@ -6,9 +6,13 @@ import java.util.Map;
 
 public class Validation {
 
-    // Private constructor to prevent instantiation
-    private Validation() {
-    }
+    private static final String SIGNUP_ALL_FIELDS_ERROR = "signup.all_fields";
+    private static final String LASTNAME_KEY = "lastName";
+    private static final String USERNAME_KEY = "username";
+    private static final String PASSWORD_KEY = "password";
+    private static final String CONFIRM_PASSWORD_KEY = "confirmPassword";
+
+    private Validation() {/* Private constructor to prevent instantiation */ }
 
     public record ValidationError(String key, List<Object> args) {}
 
@@ -29,31 +33,31 @@ public class Validation {
 
         Map<String, List<ValidationError>> errors = new HashMap<>();
 
-        firstName = firstName == null ? "" : firstName.trim();
-        lastName = lastName == null ? "" : lastName.trim();
-        username = username == null ? "" : username.trim();
-        email = email == null ? "" : email.trim();
-        password = password == null ? "" : password;
-        confirmPassword = confirmPassword == null ? "" : confirmPassword;
+        firstName = checkValueAndTrim(firstName);
+        lastName = checkValueAndTrim(lastName);
+        username = checkValueAndTrim(username);
+        email = checkValueAndTrim(email);
+        password = checkValueAndTrim(password);
+        confirmPassword = checkValueAndTrim(confirmPassword);
 
         if (!validateRequiredFields(firstName, lastName, username, email, password, confirmPassword)) {
-            addError(errors, "firstName", "signup.all_fields");
-            addError(errors, "lastName", "signup.all_fields");
-            addError(errors, "username", "signup.all_fields");
-            addError(errors, "email", "signup.all_fields");
-            addError(errors, "password", "signup.all_fields");
-            addError(errors, "confirmPassword", "signup.all_fields");
+            addError(errors, "firstName", SIGNUP_ALL_FIELDS_ERROR);
+            addError(errors, LASTNAME_KEY, SIGNUP_ALL_FIELDS_ERROR);
+            addError(errors, USERNAME_KEY, SIGNUP_ALL_FIELDS_ERROR);
+            addError(errors, "email", SIGNUP_ALL_FIELDS_ERROR);
+            addError(errors, PASSWORD_KEY, SIGNUP_ALL_FIELDS_ERROR);
+            addError(errors, CONFIRM_PASSWORD_KEY, SIGNUP_ALL_FIELDS_ERROR);
         }
 
         // First name
         validateName(firstName, "firstName", errors, "First name");
 
         // Last name
-        validateName(lastName, "lastName", errors, "Last name");
+        validateName(lastName, LASTNAME_KEY, errors, "Last name");
 
         // Username
         if (!username.matches("^[\\p{L}0-9_]{3,20}$")) {
-            addError(errors,"username", "signup.username_chars");
+            addError(errors,USERNAME_KEY, "signup.username_chars");
         }
 
         // Email
@@ -63,21 +67,10 @@ public class Validation {
 
         // Password match
         if (!password.equals(confirmPassword)) {
-            addError(errors,"confirmPassword", "signup.password_mismatch");
+            addError(errors,CONFIRM_PASSWORD_KEY, "signup.password_mismatch");
         }
 
-        // Password rules
-        if (password.length() < 6) {
-            addError(errors,"password", "signup.password_too_short");
-        }
-
-        if (!password.matches(".*\\d.*")) {
-            addError(errors,"password", "signup.password_missing_number");
-        }
-
-        if (!password.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*")) {
-            addError(errors,"password", "signup.password_missing_special");
-        }
+        validatePassword(password, errors, PASSWORD_KEY);
 
         return new ValidationResult(errors.isEmpty(), errors);
     }
@@ -111,10 +104,7 @@ public class Validation {
         return username.matches("^[\\p{L}0-9_]{3,20}$");
     }
 
-    public static void validatePassword(String password,
-                                        Map<String, List<ValidationError>> errors,
-                                        String field) {
-
+    public static void validatePassword(String password, Map<String, List<ValidationError>> errors, String field) {
         if (password == null || password.isBlank()) {
             return;
         }
@@ -146,23 +136,23 @@ public class Validation {
 
         Map<String, List<ValidationError>> errors = new HashMap<>();
 
-        lastName = lastName == null ? "" : lastName.trim();
-        username = username == null ? "" : username.trim();
-        password = password == null ? "" : password;
-        confirmPassword = confirmPassword == null ? "" : confirmPassword;
+        lastName = checkValueAndTrim(lastName);
+        username = checkValueAndTrim(username);
+        password = checkValueAndTrim(password);
+        confirmPassword = checkValueAndTrim(confirmPassword);
 
         // Required fields
         if (lastName.isBlank() || username.isBlank()) {
-            addError(errors, "lastName", "signup.all_fields");
-            addError(errors, "username", "signup.all_fields");
+            addError(errors, LASTNAME_KEY, SIGNUP_ALL_FIELDS_ERROR);
+            addError(errors, USERNAME_KEY, SIGNUP_ALL_FIELDS_ERROR);
         }
 
         // Last name validation
-        validateName(lastName, "lastName", errors, "Last name");
+        validateName(lastName, LASTNAME_KEY, errors, "Last name");
 
         // Username validation
         if (!validateUsername(username)) {
-            addError(errors, "username", "signup.username_chars");
+            addError(errors, USERNAME_KEY, "signup.username_chars");
         }
 
         // Password OPTIONAL
@@ -170,13 +160,17 @@ public class Validation {
 
             // Match
             if (!password.equals(confirmPassword)) {
-                addError(errors, "confirmPassword", "signup.password_mismatch");
+                addError(errors, CONFIRM_PASSWORD_KEY, "signup.password_mismatch");
             }
 
             // Strength
-            validatePassword(password, errors, "password");
+            validatePassword(password, errors, PASSWORD_KEY);
         }
 
         return new ValidationResult(errors.isEmpty(), errors);
+    }
+
+    private static String checkValueAndTrim(String value) {
+        return value == null ? "" : value.trim();
     }
 }
