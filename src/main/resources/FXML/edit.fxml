@@ -22,10 +22,10 @@
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <menus>
-                <Menu mnemonicParsing="false" fx:id="editMenu" text="Edit">
+                <Menu mnemonicParsing="false" fx:id="editMenu">
                     <items>
-                        <MenuItem fx:id="undoMenuItem" accelerator="Ctrl+Z" mnemonicParsing="false" onAction="#handleUndo" text="Undo" />
-                        <MenuItem fx:id="redoMenuItem" accelerator="Ctrl+Y" mnemonicParsing="false" onAction="#handleRedo" text="Redo" />
+                        <MenuItem fx:id="undoMenuItem" accelerator="Ctrl+Z" mnemonicParsing="false" onAction="#handleUndo"  />
+                        <MenuItem fx:id="redoMenuItem" accelerator="Ctrl+Y" mnemonicParsing="false" onAction="#handleRedo"  />
                     </items>
                 </Menu>
             </menus>
@@ -36,12 +36,12 @@
             <children>
                 <VBox spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <VBox spacing="5.0">
-                        <Label fx:id="title" text="Title">
+                        <Label fx:id="title" >
                             <font>
                                 <Font name="System Bold" size="14" />
                             </font>
                         </Label>
-                        <TextField fx:id="titleField" promptText="Enter note title" styleClass="editor-textfield text-field">
+                        <TextField fx:id="titleField" styleClass="editor-textfield text-field">
                             <font>
                                 <Font size="14" />
                             </font>
@@ -51,7 +51,7 @@
                         </VBox.margin>
                     </VBox>
                     <VBox spacing="5.0" VBox.vgrow="ALWAYS">
-                        <Label fx:id="content" text="Content">
+                        <Label fx:id="content">
                             <font>
                                 <Font name="System Bold" size="14" />
                             </font>
@@ -66,7 +66,7 @@
                     </VBox>
                     <HBox alignment="TOP_RIGHT">
                         <children>
-                            <Label fx:id="wordCountLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="18.0" prefWidth="180.0" text="Words: 0 | Chars: 0" HBox.hgrow="ALWAYS">
+                            <Label fx:id="wordCountLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="18.0" prefWidth="180.0" HBox.hgrow="ALWAYS">
                                 <font>
                                     <Font name="Arial Italic" size="12.0" />
                                 </font>
@@ -80,12 +80,12 @@
                         </VBox.margin>
                     </HBox>
                     <VBox spacing="5.0">
-                        <Label fx:id="annotation" text="Annotations">
+                        <Label fx:id="annotation">
                             <font>
                                 <Font name="System Bold" size="14" />
                             </font>
                         </Label>
-                        <TextField fx:id="annotationBox" promptText="Add annotations..." styleClass="editor-textarea text-area">
+                        <TextField fx:id="annotationBox" styleClass="editor-textarea text-area">
                             <font>
                                 <Font size="14" />
                             </font>
@@ -101,14 +101,14 @@
                                     <Image url="@/Images/tag-black.png" />
                                 </image>
                             </ImageView>
-                            <Label styleClass="tag-label" fx:id="editTags" text="Tags">
+                            <Label styleClass="tag-label" fx:id="editTags">
                                 <font>
                                     <Font name="System Bold" size="14.0" />
                                 </font>
                             </Label>
-                            <Label alignment="CENTER" opacity="0.64" styleClass="help-label" text="?">
+                            <Label alignment="CENTER" opacity="0.64" styleClass="help-label">
                                 <tooltip>
-                                    <Tooltip fx:id="tagTooltip" styleClass="tooltip" text="Tags are keywords to organize your notes">
+                                    <Tooltip fx:id="tagTooltip" styleClass="tooltip">
                                         <font>
                                             <Font name="System Italic" size="12.0" />
                                         </font>
@@ -130,16 +130,16 @@
                     </FlowPane>
                     <HBox spacing="5.0">
                         <children>
-                            <ComboBox fx:id="tagComboBox" editable="true" prefWidth="160.0" promptText="Add/Select a tag..." styleClass="editor-combo combo-box" />
-                            <Button fx:id="addTagBtn" mnemonicParsing="false" onAction="#handleAddTag" text="Add tags" />
+                            <ComboBox fx:id="tagComboBox" editable="true" prefWidth="160.0" styleClass="editor-combo combo-box" />
+                            <Button fx:id="addTagBtn" mnemonicParsing="false" onAction="#handleAddTag"/>
                         </children>
                         <VBox.margin>
                             <Insets bottom="4.0" left="25.0" top="2.0" />
                         </VBox.margin>
                     </HBox>
                     <HBox alignment="BOTTOM_LEFT" spacing="35.0">
-                        <Button fx:id="updateButton" onAction="#handleUpdate" prefWidth="100.0" text="Update" HBox.hgrow="ALWAYS" />
-                        <Button fx:id="cancelButton" alignment="CENTER" contentDisplay="CENTER" onAction="#handleCancel" prefWidth="100.0" text="Cancel" HBox.hgrow="ALWAYS" />
+                        <Button fx:id="updateButton" onAction="#handleUpdate" prefWidth="100.0" HBox.hgrow="ALWAYS" />
+                        <Button fx:id="cancelButton" alignment="CENTER" contentDisplay="CENTER" onAction="#handleCancel" prefWidth="100.0" HBox.hgrow="ALWAYS" />
                         <VBox.margin>
                             <Insets left="25.0" top="4.0" />
                         </VBox.margin>
@@ -149,7 +149,7 @@
         </AnchorPane>
     </center>
     <bottom>
-        <Label fx:id="statusLabel" text="" visible="false">
+        <Label fx:id="statusLabel" visible="false">
             <BorderPane.margin>
                 <Insets bottom="10" left="20" right="20" />
             </BorderPane.margin>

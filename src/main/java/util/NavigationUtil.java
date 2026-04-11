@@ -4,6 +4,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -137,6 +140,24 @@ public class NavigationUtil {
         } else {
             stage.setMinWidth(600);
             stage.setMinHeight(400);
+        }
+    }
+    public static void setCenter(VBox centerPane, String fxmlPath) {
+        try {
+            FxmlLoadResult<?> result = buildScene(fxmlPath);
+
+            Parent view = result.scene.getRoot();
+
+            StackPane wrapper = new StackPane(view);
+            VBox.setVgrow(wrapper, Priority.ALWAYS);
+
+            wrapper.prefWidthProperty().bind(centerPane.widthProperty());
+            wrapper.prefHeightProperty().bind(centerPane.heightProperty());
+
+            centerPane.getChildren().setAll(wrapper);
+
+        } catch (IOException e) {
+            LOGGER.error("Failed to load center FXML: {}", fxmlPath, e);
         }
     }
 }

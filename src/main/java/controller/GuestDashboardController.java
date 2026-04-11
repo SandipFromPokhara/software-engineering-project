@@ -12,7 +12,13 @@ import util.NavigationUtil;
 public class GuestDashboardController {
 
     @FXML
-    private Button home, login, register;
+    private Button home;
+
+    @FXML
+    private Button login;
+
+    @FXML
+    private Button register;
 
     @FXML
     private Button newFiles;
@@ -41,20 +47,9 @@ public class GuestDashboardController {
         NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "entry.window_title", false);
     }
 
-    private void loadContent(String fxmlFile) {
-        NavigationUtil.openWindow(
-                (Stage) centerPane.getScene().getWindow(),
-                "/FXML/" + fxmlFile,
-                "some.title.key",
-                true,
-                false,
-                null
-        );
-    }
-
     @FXML
     public void handleNewFiles() {
-        loadContent("create_files_guest.fxml");
+        NavigationUtil.setCenter(centerPane, "/FXML/createFilesGuest.fxml");
     }
 
     @FXML

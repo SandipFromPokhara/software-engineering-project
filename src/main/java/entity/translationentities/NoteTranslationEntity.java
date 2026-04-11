@@ -13,7 +13,7 @@ public class NoteTranslationEntity extends BaseTranslationEntity {
     @Column(name="title", nullable=false)
     private String title;
 
-    @Column(name="content", columnDefinition="TEXT")
+    @Column(name="content", columnDefinition="TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String content;
 
     @Column(name="annotation")
