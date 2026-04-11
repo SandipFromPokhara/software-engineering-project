@@ -493,7 +493,6 @@ public class ViewDashboardController {
         Stage stage = (Stage) rootPane.getScene().getWindow();
         NavigationUtil.openWindow(stage, "/FXML/edit.fxml", "edit.window.title", true, true,
                 (EditNoteController controller) -> {
-                    // noteDao removed from EditNoteController (was unused). Only set tagDao, translationService and noteService.
                     controller.setTagDao(tagDao);
                     controller.setTranslationService(translationService);
                     controller.setNoteService(noteService);
