@@ -17,7 +17,7 @@ public class NotebookTranslationEntity extends BaseTranslationEntity {
     @JoinColumn(name="notebook_id", nullable = false)
     private NotebookEntity notebook;
 
-    public NotebookTranslationEntity() {}
+    public NotebookTranslationEntity() {/* JPA only*/}
 
     public String getTitle() { return title; }
 

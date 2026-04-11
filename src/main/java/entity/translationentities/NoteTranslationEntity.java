@@ -23,7 +23,7 @@ public class NoteTranslationEntity extends BaseTranslationEntity {
     @JoinColumn(name="note_id", nullable=false)
     private NoteEntity note;
 
-    public NoteTranslationEntity() {}
+    public NoteTranslationEntity() {/* JPA only*/}
 
     public String getTitle() { return title; }
 

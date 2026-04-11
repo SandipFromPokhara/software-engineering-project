@@ -34,7 +34,7 @@ public class UserEntity extends BaseEntity {
         this.email = email;
     }
 
-    public UserEntity() {}
+    protected UserEntity() {}
 
     public String getFirstName() { return firstName; }
 
