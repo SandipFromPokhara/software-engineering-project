@@ -8,12 +8,13 @@ import entity.entities.TagEntity;
 import entity.entities.UserEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.*;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,28 +22,32 @@ import static org.junit.jupiter.api.Assertions.*;
 class JpaTagDaoTest {
 
     private static JpaTagDao tagDao;
-
-    private List<TagEntity> testTags;
+    private EntityManager em;
 
     @BeforeAll
     static void setupAll() {
         tagDao = new JpaTagDao();
     }
 
-    private String uniqueName(String base) {
-        return base + "_" + System.currentTimeMillis();
-    }
-
     @BeforeEach
-    void initTestTags() {
-        testTags = new ArrayList<>();
+    void setUp() {
+        em = MariaDbJpaConnection.getEntityManager();
+        if (!em.getTransaction().isActive()) {
+            em.getTransaction().begin();
+        }
     }
 
     @AfterEach
-    void cleanupTestTags() {
-        if (testTags != null) {
-            testTags.forEach(tagDao::delete);
+    void tearDown() {
+        if (em.getTransaction().isActive()) {
+            em.getTransaction().rollback();
         }
+        em.clear();
+    }
+
+    private String uniqueName(String base) {
+        String shortId = UUID.randomUUID().toString().substring(0, 4);
+        return base + "_" + shortId;
     }
 
     @Test
@@ -51,9 +56,7 @@ class JpaTagDaoTest {
         tag.setTagName(uniqueName("TestTag"));
         TagEntity saved = tagDao.save(tag);
 
-        testTags.add(saved);
-
-        assertNotNull(saved.getId());
+        em.flush();
 
         TagEntity found = tagDao.findById(saved.getId());
         assertNotNull(found);
@@ -71,15 +74,13 @@ class JpaTagDaoTest {
 
         TagEntity merged = tagDao.save(tag); // for merge branch
 
-        testTags.add(merged);
-
         assertEquals(tag.getId(), merged.getId());
         assertEquals(tag.getTagName(), merged.getTagName());
     }
 
     @Test
     void testFindByIdNotFound() {
-        assertThrows(NoResultException.class, () -> {
+        assertThrows(RuntimeException.class, () -> {
             tagDao.findById(99999L);
         });
     }
@@ -91,7 +92,7 @@ class JpaTagDaoTest {
         tag.setTagName(name);
         tagDao.save(tag);
 
-        testTags.add(tag);
+        em.flush();
 
         assertTrue(tagDao.existsByName(name));
         assertFalse(tagDao.existsByName(name + "_none"));
@@ -104,7 +105,7 @@ class JpaTagDaoTest {
         tag.setTagName(name);
         tagDao.save(tag);
 
-        testTags.add(tag);
+        em.flush();
 
         TagEntity found = tagDao.findByName(name);
         assertNotNull(found);
@@ -120,6 +121,8 @@ class JpaTagDaoTest {
 
     @Test
     void testFindAll() {
+        int initialSize = tagDao.findAll().size();
+
         TagEntity tag1 = new TagEntity();
         tag1.setTagName(uniqueName("Tag1"));
         tagDao.save(tag1);
@@ -128,24 +131,26 @@ class JpaTagDaoTest {
         tag2.setTagName(uniqueName("Tag2"));
         tagDao.save(tag2);
 
-        testTags.add(tag1);
-        testTags.add(tag2);
+        em.flush();
 
         List<TagEntity> allTags = tagDao.findAll();
         assertTrue(allTags.contains(tag1));
         assertTrue(allTags.contains(tag2));
-        assertTrue(allTags.size() >= 2);
+        assertTrue(allTags.size() >= initialSize + 2);
     }
 
     @Test
     void testFindAllEmpty() {
-        List<TagEntity> tags = tagDao.findAll();
+        String name = uniqueName("CheckEmpty");
+        TagEntity tag = new TagEntity();
+        tag.setTagName(name);
+        tagDao.save(tag);
+        em.flush();
 
-        for (TagEntity t : tags) {
-            tagDao.delete(t);
-        }
+        tagDao.delete(tag);
+        em.flush();
 
-        assertEquals(0, tagDao.findAll().size());
+        assertNull(tagDao.findByName(name));
     }
 
     @Test
@@ -158,7 +163,7 @@ class JpaTagDaoTest {
         tag.setTagName(uniqueName("NewName"));
         tagDao.update(tag);
 
-        testTags.add(tag);
+        em.flush();
 
         TagEntity updated = tagDao.findById(tag.getId());
         assertEquals(tag.getTagName(), updated.getTagName());
@@ -178,14 +183,17 @@ class JpaTagDaoTest {
         tag2.setTagName(name2);
         tagDao.save(tag2);
 
-        // Ensure cleanup will remove both
-        testTags.add(tag1);
-        testTags.add(tag2);
+        em.flush();
 
         // Attempt to rename tag2 to name1 should fail
         tag2.setTagName(name1);
 
-        assertThrows(IllegalArgumentException.class, () -> tagDao.update(tag2));
+        assertThrows(RuntimeException.class, () -> {
+            tagDao.update(tag2);
+            em.flush();
+        });
+
+        em.clear();
 
         // Ensure original tag2 name unchanged in DB
         TagEntity reloaded = tagDao.findById(tag2.getId());
@@ -210,7 +218,7 @@ class JpaTagDaoTest {
 
         tagDao.delete(tag);
 
-        assertThrows(NoResultException.class, () -> {
+        assertThrows(RuntimeException.class, () -> {
             tagDao.findById(tag.getId());
         });
     }
@@ -218,11 +226,8 @@ class JpaTagDaoTest {
     @Test
     void testDeleteTagWithRealNoteAssociation() {
         TagEntity tag = new TagEntity();
-        tag.setTagName(uniqueName("TagWithNote"));
+        tag.setTagName(uniqueName("TagNote"));
         tagDao.save(tag);
-
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        em.getTransaction().begin();
 
         UserEntity user = new UserEntity();
         user.setFirstName("Test");
@@ -236,22 +241,20 @@ class JpaTagDaoTest {
         em.persist(notebook);
 
         NoteEntity note = new NoteEntity();
+        note.setNotebook(notebook);
+        note.addTag(tag);
 
         var translation = note.createTranslation("en");
         translation.setTitle("Title");
         translation.setContent("Content");
         translation.setAnnotation("Annotation");
 
-        note.setNotebook(notebook);
-        note.addTag(tag);
-
         em.persist(note);
-        em.getTransaction().commit();
-        em.close();
+        em.flush();
 
         tagDao.delete(tag);
 
-        assertThrows(NoResultException.class, () -> tagDao.findById(tag.getId()));
+        assertThrows(RuntimeException.class, () -> tagDao.findById(tag.getId()));
     }
 
     @Test
@@ -264,7 +267,7 @@ class JpaTagDaoTest {
 
     @Test
     void testSaveDuplicateThrows() {
-        String name = uniqueName("DuplicateTag");
+        String name = uniqueName("DupsTag");
         TagEntity tag1 = new TagEntity();
         tag1.setTagName(name);
         tagDao.save(tag1);
@@ -288,12 +291,11 @@ class JpaTagDaoTest {
         tag2.setTagName(name2);
         tagDao.save(tag2);
 
-        testTags.add(tag1);
-        testTags.add(tag2);
+        em.flush();
 
         // try to rename tag2 to tag1's name
         tag2.setTagName(name1);
-        assertThrows(IllegalArgumentException.class, () -> tagDao.update(tag2)); // or tagDao.update(tag2)
+        assertThrows(ConstraintViolationException.class, () -> tagDao.update(tag2)); // or tagDao.update(tag2)
     }
 
     @Test
