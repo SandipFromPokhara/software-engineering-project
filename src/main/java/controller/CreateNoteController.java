@@ -38,7 +38,7 @@ public class CreateNoteController implements Initializable {
     private static final String NEW_NOTEBOOK_KEY = "create.new_notebook";
 
     private NoteService noteService;
-    private Set<String> selectedTags = new HashSet<>();
+    private final Set<String> selectedTags = new HashSet<>();
     private JpaNotebookDao notebookDao;
     private JpaTagDao tagDao;
 
@@ -118,7 +118,7 @@ public class CreateNoteController implements Initializable {
     @FXML
     private MenuItem redoMenuItem;
 
-    private UndoRedoManager undoRedoManager = new UndoRedoManager();
+    private final UndoRedoManager undoRedoManager = new UndoRedoManager();
 
     // Reusable rich text editor component controller (from fx:include fx:id="contentEditor")
     @FXML

@@ -23,10 +23,18 @@ public class DeleteUserController {
     private PasswordField passwordField;
 
     @FXML
-    private Label deleteTitle, deleteWarning, deleteConfirmLabel;
+    private Label deleteTitle;
 
     @FXML
-    private Button cancelButton, deleteButton;
+    private Label deleteConfirmLabel;
+
+    @FXML
+    private Label deleteWarning;
+
+    @FXML
+    private Button cancelButton;
+
+    @FXML Button deleteButton;
 
     @FXML
     private Label messageLabel;
