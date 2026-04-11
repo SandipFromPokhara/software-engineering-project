@@ -2,6 +2,7 @@ package dao.user;
 
 import datasource.MariaDbJpaConnection;
 import entity.entities.UserEntity;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,22 +13,28 @@ class JpaUserDaoTest {
 
     @BeforeAll
     static void setupBeforeClass() {
-    dao = new JpaUserDao();
+        dao = new JpaUserDao();
     }
 
     @BeforeEach
     void setUp() {
+        EntityManager em = MariaDbJpaConnection.getEntityManager();
+        em.getTransaction().begin();
+
         String unique = String.valueOf(System.currentTimeMillis());
         testUser = new UserEntity("Test", "User", "tester" + unique, "tester" + unique + "@example.com");
         dao.save(testUser);
+
+        em.flush();
     }
 
     @AfterEach
     void tearDown() {
-        if (testUser != null) {
-            dao.delete(testUser);
+        EntityManager em = MariaDbJpaConnection.getEntityManager();
+        if (em.getTransaction().isActive()) {
+            em.getTransaction().rollback();
         }
-        MariaDbJpaConnection.shutdown();
+        em.clear();
     }
 
     @Test
