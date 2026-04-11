@@ -8,7 +8,7 @@ import java.util.*;
 @Table(name="tags")
 public class TagEntity extends BaseEntity {
 
-    @Column(name="tag_name", nullable = false, unique = true)
+    @Column(name="tag_name", nullable = false, unique = true, columnDefinition = "VARCHAR(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String tagName;
 
     @ManyToMany(mappedBy = "tags")
