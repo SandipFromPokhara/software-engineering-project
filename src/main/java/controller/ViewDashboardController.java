@@ -1,6 +1,5 @@
 package controller;
 
-import dao.note.*;
 import dao.tag.*;
 import entity.entities.*;
 import entity.translationentities.NoteTranslationEntity;
@@ -55,7 +54,6 @@ public class ViewDashboardController {
     private final PdfExportService exportService = new PdfExportService(dashboardService);
     private final NoteService noteService = new NoteService();
     private final TranslationService translationService = new TranslationService();
-    private final INoteDAO noteDao = new JpaNoteDao();
     private final ITagDAO tagDao = new JpaTagDao();
 
     @FXML private BorderPane rootPane;
@@ -495,7 +493,7 @@ public class ViewDashboardController {
         Stage stage = (Stage) rootPane.getScene().getWindow();
         NavigationUtil.openWindow(stage, "/FXML/edit.fxml", "edit.window.title", true, true,
                 (EditNoteController controller) -> {
-                    controller.setNoteDao(noteDao);
+                    // noteDao removed from EditNoteController (was unused). Only set tagDao, translationService and noteService.
                     controller.setTagDao(tagDao);
                     controller.setTranslationService(translationService);
                     controller.setNoteService(noteService);
