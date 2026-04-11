@@ -22,7 +22,6 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Window;
 import javafx.util.Duration;
-import org.fxmisc.richtext.InlineCssTextArea;
 import services.*;
 import util.*;
 import session.UserSession;
@@ -103,7 +102,7 @@ public class ViewDashboardController {
 
     @FXML private Label annotation;
 
-    @FXML private InlineCssTextArea noteViewArea;
+    @FXML private TextArea noteViewArea;
 
     @FXML private TextArea annotationViewArea;
 
@@ -326,7 +325,7 @@ public class ViewDashboardController {
         }
 
         noteTitleLabel.setText(translation.getTitle());
-        noteViewArea.replaceText(translation.getContent());
+        noteViewArea.setText(translation.getContent());
         annotationViewArea.setText(translation.getAnnotation());
         refreshTagView(note);
         editButton.setDisable(false);

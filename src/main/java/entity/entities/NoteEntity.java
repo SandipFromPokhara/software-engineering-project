@@ -16,7 +16,7 @@ public class NoteEntity extends BaseEntity implements ITranslatable<NoteTranslat
     @JoinColumn(name = "notebook_id", nullable = false)
     private NotebookEntity notebook;
 
-    @ManyToMany(fetch=FetchType.LAZY)
+    @ManyToMany(fetch=FetchType.EAGER)
     @JoinTable(
             name = "note_tags",
             joinColumns = @JoinColumn(name = "note_id"),
@@ -40,14 +40,12 @@ public class NoteEntity extends BaseEntity implements ITranslatable<NoteTranslat
     public void addTag(TagEntity tag) {
         if (tag != null) {
             tags.add(tag);
-            tag.getNotes().add(this);
         }
     }
 
     public void removeTag(TagEntity tag) {
         if (tag != null) {
             tags.remove(tag);
-            tag.getNotes().remove(this);
         }
     }
 
