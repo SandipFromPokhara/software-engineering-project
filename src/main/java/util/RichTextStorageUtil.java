@@ -22,7 +22,7 @@ public final class RichTextStorageUtil {
 
         StringBuilder runs = new StringBuilder();
         for (StyleSpan<String> span : spans) {
-            if (runs.length() > 0) {
+            if (!runs.isEmpty()) {
                 runs.append(';');
             }
             String style = span.getStyle() == null ? "" : span.getStyle();
@@ -55,24 +55,27 @@ public final class RichTextStorageUtil {
         StyleSpansBuilder<String> builder = new StyleSpansBuilder<>();
         String[] runs = runsPart.split(";");
         for (String run : runs) {
-            if (run.isBlank()) {
-                continue;
-            }
-            String[] pieces = run.split(":", 2);
-            if (pieces.length < 2) {
-                continue;
-            }
-            int length;
-            try {
-                length = Integer.parseInt(pieces[0]);
-            } catch (NumberFormatException ex) {
-                continue;
-            }
-            String style = decodeBase64(pieces[1]);
-            builder.add(style, length);
+            addRunIfValid(builder, run);
         }
 
         return new DecodedContent(text, builder.create());
+    }
+
+    private static void addRunIfValid(StyleSpansBuilder<String> builder, String run) {
+        if (run == null || run.isBlank()) {
+            return;
+        }
+        String[] pieces = run.split(":", 2);
+        if (pieces.length < 2) {
+            return;
+        }
+        try {
+            int length = Integer.parseInt(pieces[0]);
+            String style = decodeBase64(pieces[1]);
+            builder.add(style, length);
+        } catch (NumberFormatException ignored) {
+            // Skip malformed length entries.
+        }
     }
 
     public static String toPlainText(String stored) {
@@ -98,4 +101,3 @@ public final class RichTextStorageUtil {
 
     public record DecodedContent(String text, StyleSpans<String> spans) {}
 }
-

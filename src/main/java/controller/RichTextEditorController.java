@@ -40,6 +40,7 @@ public class RichTextEditorController {
     private static final double MAX_FONT_SIZE = 48.0;
     private static final double FONT_STEP = 2.0;
     private static final double DEFAULT_FONT_SIZE = 14.0;
+    private static final String FONT_WEIGHT_PROPERTY = "-fx-font-weight";
 
     @FXML
     public void initialize() {
@@ -132,13 +133,16 @@ public class RichTextEditorController {
             case "numberedListButton" -> toggleNumbered();
             case "headingUpButton"    -> headingUp();
             case "headingDownButton"  -> headingDown();
+            default -> {
+                // No-op: unrecognized toolbar button.
+            }
         }
     }
 
     // ---------- Formatting actions ----------
 
     private void applyBold() {
-        toggleStyle("-fx-font-weight", "bold");
+        toggleStyle(FONT_WEIGHT_PROPERTY, "bold");
     }
 
     private void applyItalic() {
@@ -193,12 +197,12 @@ public class RichTextEditorController {
         StyleSpans<String> spans = contentArea.getStyleSpans(sel.getStart(), sel.getEnd());
         StyleSpans<String> newSpans = spans.mapStyles(style -> {
             double current = parseFontSize(style);
-            double next = Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, current + delta));
+            double next = Math.clamp(current + delta, MIN_FONT_SIZE, MAX_FONT_SIZE);
             String updated = setProperty(style, "-fx-font-size", next + "px");
             // Explicitly pin weight to normal so the font renderer does not pick a heavier
             // optical weight for larger sizes (unless the user has explicitly applied bold).
-            if (!hasProperty(updated, "-fx-font-weight", "bold")) {
-                updated = setProperty(updated, "-fx-font-weight", "normal");
+            if (!hasProperty(updated, FONT_WEIGHT_PROPERTY, "bold")) {
+                updated = setProperty(updated, FONT_WEIGHT_PROPERTY, "normal");
             }
             return updated;
         });
