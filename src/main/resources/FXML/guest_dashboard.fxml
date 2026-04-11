@@ -40,8 +40,8 @@
             <VBox VBox.vgrow="ALWAYS">
             <children>
                   <HBox alignment="CENTER" prefHeight="1.0" prefWidth="157.0" spacing="10">
-                      <Button fx:id="login" onAction="#handleLogin" text="Login" />
-                      <Button fx:id="register" onAction="#handleSignUp" text="Signup" />
+                      <Button fx:id="login" onAction="#handleLogin" />
+                      <Button fx:id="register" onAction="#handleSignUp"/>
                   </HBox>
             </children></VBox>
         </VBox>
