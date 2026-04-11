@@ -1,4 +1,4 @@
-package util.bulletList;
+package util.list;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;

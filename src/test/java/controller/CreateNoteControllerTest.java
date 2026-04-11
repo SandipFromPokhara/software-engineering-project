@@ -22,6 +22,7 @@ import session.NotebookSession;
 import session.UserSession;
 import testutil.JavaFxTestExtension;
 import util.Localization;
+import util.RichTextStorageUtil;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -44,13 +45,13 @@ class CreateNoteControllerTest {
     private MockTagDao mockTagDao;
 
     private TextField titleField;
-    private TextArea contentArea;
+    private RichTextEditorController contentEditorController;
     private TextArea annotationArea;
     private Button saveButton;
     private Button clearButton;
     private Label statusLabel;
     private ComboBox<NotebookEntity> notebookComboBox;
-    private FlowPane tagFlowpane;
+    private FlowPane tagFlowPane;
     private ComboBox<String> tagComboBox;
     private Button addTagBtn;
     private Menu fileMenu;
@@ -68,33 +69,28 @@ class CreateNoteControllerTest {
     private Tooltip tagTooltip;
     private Tooltip toggleTooltip;
     private Button toggleBtn;
-    private Button bulletListButton;
-    private Button numberedListButton;
-    private Button headingUpButton;
-    private Button headingDownButton;
     private ImageView tagIcon;
-
-    private Stage testStage;
 
     private static class MockNoteService extends NoteService {
         private NoteEntity savedNote;
         private boolean shouldThrowException = false;
 
-        private final MockNotebookDao notebookDao;
         private final MockTagDao tagDao;
 
         public MockNoteService(MockNotebookDao notebookDao, MockTagDao tagDao) {
             super(null, notebookDao, tagDao);
-            this.notebookDao = notebookDao;
             this.tagDao = tagDao;
         }
 
+        @Override
         public NoteEntity createNote(String title, String content, String annotation,
-                                     NotebookEntity notebook, Set<String> tagNames) {
+                                     NotebookEntity notebook, Set<String> tagNames, String langCode) {
 
             if (shouldThrowException) {
                 throw new RuntimeException("Mock exception");
             }
+
+            System.out.println("MOCK createNote called!");
 
             if (title == null || title.isBlank()) {
                 throw new IllegalArgumentException("Title cannot be empty");
@@ -102,7 +98,9 @@ class CreateNoteControllerTest {
 
             NoteEntity note = new NoteEntity();
 
-            String lang = Localization.getLocale().getLanguage();
+            String lang = (langCode == null || langCode.isBlank())
+                    ? Localization.getLocale().getLanguage()
+                    : langCode;
 
             var translation = note.createTranslation(lang);
             translation.setTitle(title.trim());
@@ -124,6 +122,7 @@ class CreateNoteControllerTest {
             }
 
             savedNote = note;
+            System.out.println("assigned savedNote: " + savedNote);
             return note;
         }
 
@@ -134,7 +133,7 @@ class CreateNoteControllerTest {
     }
 
     private static class MockNotebookDao extends JpaNotebookDao {
-        private List<NotebookEntity> notebooks = new ArrayList<>();
+        private final List<NotebookEntity> notebooks = new ArrayList<>();
 
         @Override
         public List<NotebookEntity> findByUser(UserEntity user) {
@@ -157,7 +156,7 @@ class CreateNoteControllerTest {
     }
 
     private static class MockTagDao extends JpaTagDao {
-        private List<TagEntity> tags = new ArrayList<>();
+        private final List<TagEntity> tags = new ArrayList<>();
         private TagEntity savedTag;
 
         @Override
@@ -194,10 +193,11 @@ class CreateNoteControllerTest {
 
         private void setId(TagEntity tag, Long id) {
             try {
-                Field idField = TagEntity.class.getDeclaredField("id");
+                Field idField = getFieldFromHierarchy(TagEntity.class, "id");
                 idField.setAccessible(true);
                 idField.set(tag, id);
             } catch (Exception e) {
+                fail("Failed to set TagEntity id via reflection", e);
             }
         }
     }
@@ -214,20 +214,27 @@ class CreateNoteControllerTest {
         mockTagDao = new MockTagDao();
         mockNoteService = new MockNoteService(mockNotebookDao, mockTagDao);
 
-        UserEntity testUser = new UserEntity("Test", "User", "testuser", "test@example.com");
-        setId(testUser, 1L);
+        UserEntity testUser = new UserEntity("Test", "User", "testUser", "test@example.com");
+        setUserId(testUser);
         UserSession.getUserInstance().setUser(testUser);
 
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             titleField = new TextField();
-            contentArea = new TextArea();
+            contentEditorController = new RichTextEditorController();
+            try {
+                Field wrapperField = RichTextEditorController.class.getDeclaredField("editorWrapper");
+                wrapperField.setAccessible(true);
+                wrapperField.set(contentEditorController, new VBox());
+            } catch (Exception e) {
+                fail("Failed to set editorWrapper", e);
+            }
+            contentEditorController.initialize();
             annotationArea = new TextArea();
             saveButton = new Button();
             clearButton = new Button();
             statusLabel = new Label();
             notebookComboBox = new ComboBox<>();
-            tagFlowpane = new FlowPane();
+            tagFlowPane = new FlowPane();
             tagComboBox = new ComboBox<>();
             addTagBtn = new Button();
             fileMenu = new Menu();
@@ -245,31 +252,25 @@ class CreateNoteControllerTest {
             tagTooltip = new Tooltip();
             toggleTooltip = new Tooltip();
             toggleBtn = new Button();
-            bulletListButton = new Button();
-            numberedListButton = new Button();
-            headingUpButton = new Button();
-            headingDownButton = new Button();
             tagIcon = new ImageView();
 
-            testStage = new Stage();
+            Stage localStage = new Stage();
             VBox root = new VBox();
-            root.getChildren().addAll(titleField, contentArea, annotationArea,
+            root.getChildren().addAll(titleField, annotationArea,
                     saveButton, clearButton, statusLabel, notebookComboBox,
-                    tagFlowpane, tagComboBox, addTagBtn, wordCountLabel, toggleBtn);
+                    tagFlowPane, tagComboBox, addTagBtn, wordCountLabel, toggleBtn);
             Scene scene = new Scene(root, 600, 800);
-            testStage.setScene(scene);
-            latch.countDown();
+            localStage.setScene(scene);
         });
-        latch.await(2, TimeUnit.SECONDS);
 
         injectField("titleField", titleField);
-        injectField("contentArea", contentArea);
+        injectField("contentEditorController", contentEditorController);
         injectField("annotationArea", annotationArea);
         injectField("saveButton", saveButton);
         injectField("clearButton", clearButton);
         injectField("statusLabel", statusLabel);
         injectField("notebookComboBox", notebookComboBox);
-        injectField("tagFlowpane", tagFlowpane);
+        injectField("tagFlowpane", tagFlowPane);
         injectField("tagComboBox", tagComboBox);
         injectField("addTagBtn", addTagBtn);
         injectField("fileMenu", fileMenu);
@@ -287,10 +288,6 @@ class CreateNoteControllerTest {
         injectField("tagTooltip", tagTooltip);
         injectField("toggleTooltip", toggleTooltip);
         injectField("toggleBtn", toggleBtn);
-        injectField("bulletListButton", bulletListButton);
-        injectField("numberedListButton", numberedListButton);
-        injectField("headingUpButton", headingUpButton);
-        injectField("headingDownButton", headingDownButton);
         injectField("tagIcon", tagIcon);
 
         // Set mocks before they get reset
@@ -299,13 +296,26 @@ class CreateNoteControllerTest {
         controller.setTagDao(mockTagDao);
     }
 
-    private void setId(UserEntity user, Long id) {
+    private void setUserId(UserEntity user) {
         try {
-            Field idField = UserEntity.class.getDeclaredField("id");
+            Field idField = getFieldFromHierarchy(UserEntity.class, "id");
             idField.setAccessible(true);
-            idField.set(user, id);
+            idField.set(user, 1L);
         } catch (Exception e) {
+            fail("Failed to set UserEntity id via reflection", e);
         }
+    }
+
+    private static Field getFieldFromHierarchy(Class<?> type, String fieldName) throws NoSuchFieldException {
+        Class<?> current = type;
+        while (current != null) {
+            try {
+                return current.getDeclaredField(fieldName);
+            } catch (NoSuchFieldException ignored) {
+                current = current.getSuperclass();
+            }
+        }
+        throw new NoSuchFieldException(fieldName);
     }
 
     private void injectField(String fieldName, Object value) throws Exception {
@@ -314,30 +324,50 @@ class CreateNoteControllerTest {
         field.set(controller, value);
     }
 
-    private void invokeInitialize() throws Exception {
+    private void awaitLatch(CountDownLatch latch, long timeoutSeconds, String message) throws InterruptedException {
+        assertTrue(latch.await(timeoutSeconds, TimeUnit.SECONDS), message);
+    }
+
+    private void runOnFxAndWait(Runnable action) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<Throwable> error = new AtomicReference<>();
         Platform.runLater(() -> {
             try {
-                controller.initialize(null, null);
-                // Re-inject mocks after initialize in case it resets them
-                controller.setNoteService(mockNoteService);
-                controller.setNotebookDao(mockNotebookDao);
-                controller.setTagDao(mockTagDao);
-                mockNoteService.reset();
-                mockNotebookDao.reset();
-                mockTagDao.reset();
-            } catch (Exception e) {
-                e.printStackTrace();
+                action.run();
+            } catch (Throwable t) {
+                error.set(t);
+            } finally {
+                latch.countDown();
             }
-            latch.countDown();
         });
-        latch.await(2, TimeUnit.SECONDS);
+        awaitLatch(latch, 2, "FX task timed out");
+        if (error.get() != null) {
+            fail("FX task failed", error.get());
+        }
+    }
+
+    private void invokeInitialize() throws Exception {
+        runOnFxAndWait(() -> {
+            controller.initialize(null, null);
+            // Re-inject mocks after initialize in case it resets them
+            controller.setNoteService(mockNoteService);
+            controller.setNotebookDao(mockNotebookDao);
+            controller.setTagDao(mockTagDao);
+            mockNoteService.reset();
+            mockNotebookDao.reset();
+            mockTagDao.reset();
+        });
     }
 
     private void invokeSave() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             try {
+                Field nsField = CreateNoteController.class.getDeclaredField("noteService");
+                nsField.setAccessible(true);
+                Object ns = nsField.get(controller);
+                System.out.println("Type of noteService in controller: " + (ns == null ? "null" : ns.getClass().getName()));
+                System.out.println("Is it identical to test's mockNoteService? " + (ns == mockNoteService));
+
                 java.lang.reflect.Method method = CreateNoteController.class.getDeclaredMethod("handleSave");
                 method.setAccessible(true);
                 method.invoke(controller);
@@ -346,32 +376,28 @@ class CreateNoteControllerTest {
                     NoteSession.setLastCreatedNote(mockNoteService.savedNote);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
-            latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
     }
 
     private void invokeClear() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             try {
                 java.lang.reflect.Method method = CreateNoteController.class.getDeclaredMethod("handleClear");
                 method.setAccessible(true);
                 method.invoke(controller);
             } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-            latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
     }
 
     @Test
     void initialize_WithExistingNotebooks_PopulatesComboBox() throws Exception {
         NotebookEntity notebook1 = new NotebookEntity(UserSession.getUserInstance().getUser());
         setCreatedAt(notebook1, LocalDateTime.now().minusDays(2));
-        NotebookEntity notebook2 = new NotebookEntity( UserSession.getUserInstance().getUser());
+        NotebookEntity notebook2 = new NotebookEntity(UserSession.getUserInstance().getUser());
         setCreatedAt(notebook2, LocalDateTime.now().minusDays(1));
 
         mockNotebookDao.addNotebook(notebook1);
@@ -385,17 +411,18 @@ class CreateNoteControllerTest {
             itemCount.set(notebookComboBox.getItems().size());
             checkLatch.countDown();
         });
-        checkLatch.await(1, TimeUnit.SECONDS);
+        awaitLatch(checkLatch, 1, "Notebook combo box population timed out");
 
         assertEquals(3, itemCount.get());
     }
 
     private void setCreatedAt(NotebookEntity notebook, LocalDateTime dateTime) {
         try {
-            Field field = NotebookEntity.class.getDeclaredField("createdAt");
+            Field field = getFieldFromHierarchy(NotebookEntity.class, "createdAt");
             field.setAccessible(true);
             field.set(notebook, dateTime);
         } catch (Exception e) {
+            fail("Failed to set NotebookEntity createdAt via reflection", e);
         }
     }
 
@@ -418,7 +445,7 @@ class CreateNoteControllerTest {
             itemCount.set(tagComboBox.getItems().size());
             checkLatch.countDown();
         });
-        checkLatch.await(1, TimeUnit.SECONDS);
+        awaitLatch(checkLatch, 1, "Tag combo box population timed out");
 
         assertEquals(2, itemCount.get());
     }
@@ -433,7 +460,7 @@ class CreateNoteControllerTest {
             isDisabled.set(saveButton.isDisabled());
             checkLatch.countDown();
         });
-        checkLatch.await(1, TimeUnit.SECONDS);
+        awaitLatch(checkLatch, 1, "Save button disable check timed out");
 
         assertTrue(isDisabled.get());
     }
@@ -445,15 +472,10 @@ class CreateNoteControllerTest {
 
         invokeInitialize();
 
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             titleField.setText("Test Title");
             notebookComboBox.getSelectionModel().select(0);
-            latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
-
-        Thread.sleep(100);
 
         CountDownLatch checkLatch = new CountDownLatch(1);
         AtomicReference<Boolean> isDisabled = new AtomicReference<>();
@@ -461,7 +483,7 @@ class CreateNoteControllerTest {
             isDisabled.set(saveButton.isDisabled());
             checkLatch.countDown();
         });
-        checkLatch.await(1, TimeUnit.SECONDS);
+        awaitLatch(checkLatch, 1, "Save button state check timed out");
 
         assertFalse(isDisabled.get());
     }
@@ -473,24 +495,21 @@ class CreateNoteControllerTest {
 
         invokeInitialize();
 
-        CountDownLatch setupLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             titleField.setText("Test Note");
-            contentArea.setText("Test Content");
+            contentEditorController.setText("Test Content");
             annotationArea.setText("Test Annotation");
             notebookComboBox.getSelectionModel().select(0);
-            setupLatch.countDown();
         });
-        setupLatch.await(1, TimeUnit.SECONDS);
 
         invokeSave();
 
         assertNotNull(mockNoteService.savedNote);
 
-        var translation = mockNoteService.savedNote.getTranslations().get("en");
+        var translation = mockNoteService.savedNote.getTranslations().get(Localization.getCurrentLanguageCode());
         assertNotNull(translation);
         assertEquals("Test Note", translation.getTitle());
-        assertEquals("Test Content", translation.getContent());
+        assertEquals("Test Content", RichTextStorageUtil.decode(translation.getContent()).text());
         assertEquals("Test Annotation", translation.getAnnotation());
     }
 
@@ -501,23 +520,15 @@ class CreateNoteControllerTest {
 
         invokeInitialize();
 
-        CountDownLatch setupLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             titleField.setText("   ");
             notebookComboBox.getSelectionModel().select(0);
-            setupLatch.countDown();
         });
-        setupLatch.await(1, TimeUnit.SECONDS);
 
         invokeSave();
 
         AtomicReference<String> message = new AtomicReference<>();
-        CountDownLatch checkLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            message.set(statusLabel.getText());
-            checkLatch.countDown();
-        });
-        checkLatch.await(1, TimeUnit.SECONDS);
+        runOnFxAndWait(() -> message.set(statusLabel.getText()));
 
         assertTrue(message.get().contains(Localization.get("create.error_no_title")));
         assertNull(mockNoteService.savedNote);
@@ -527,24 +538,16 @@ class CreateNoteControllerTest {
     void handleSave_NoNotebookSelected_ShowsError() throws Exception {
         invokeInitialize();
 
-        CountDownLatch setupLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             titleField.setText("Test Note");
             // Clear the notebook selection
             notebookComboBox.getSelectionModel().clearSelection();
-            setupLatch.countDown();
         });
-        setupLatch.await(1, TimeUnit.SECONDS);
 
         invokeSave();
 
         AtomicReference<String> message = new AtomicReference<>();
-        CountDownLatch checkLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            message.set(statusLabel.getText());
-            checkLatch.countDown();
-        });
-        checkLatch.await(1, TimeUnit.SECONDS);
+        runOnFxAndWait(() -> message.set(statusLabel.getText()));
 
         assertTrue(message.get().contains(Localization.get("create.error_no_notebook")));
         assertNull(mockNoteService.savedNote);
@@ -561,13 +564,10 @@ class CreateNoteControllerTest {
 
         invokeInitialize();
 
-        CountDownLatch setupLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             titleField.setText("Test Note");
             notebookComboBox.getSelectionModel().select(0);
-            setupLatch.countDown();
         });
-        setupLatch.await(1, TimeUnit.SECONDS);
 
         Field selectedTagsField = CreateNoteController.class.getDeclaredField("selectedTags");
         selectedTagsField.setAccessible(true);
@@ -589,13 +589,10 @@ class CreateNoteControllerTest {
 
         invokeInitialize();
 
-        CountDownLatch setupLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             titleField.setText("Test Note");
             notebookComboBox.getSelectionModel().select(0);
-            setupLatch.countDown();
         });
-        setupLatch.await(1, TimeUnit.SECONDS);
 
         Field selectedTagsField = CreateNoteController.class.getDeclaredField("selectedTags");
         selectedTagsField.setAccessible(true);
@@ -616,19 +613,16 @@ class CreateNoteControllerTest {
 
         invokeInitialize();
 
-        CountDownLatch setupLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             titleField.setText("Test Note");
             notebookComboBox.getSelectionModel().select(0);
-            setupLatch.countDown();
         });
-        setupLatch.await(1, TimeUnit.SECONDS);
 
         invokeSave();
 
         assertNotNull(NoteSession.getLastCreatedNote());
 
-        var translation = mockNoteService.savedNote.getTranslations().get("en");
+        var translation = mockNoteService.savedNote.getTranslations().get(Localization.getCurrentLanguageCode());
         assertNotNull(translation);
         assertEquals("Test Note", translation.getTitle());
     }
@@ -637,28 +631,22 @@ class CreateNoteControllerTest {
     void handleClear_ClearsAllFields() throws Exception {
         invokeInitialize();
 
-        CountDownLatch setupLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             titleField.setText("Test Title");
-            contentArea.setText("Test Content");
+            contentEditorController.setText("Test Content");
             annotationArea.setText("Test Annotation");
-            setupLatch.countDown();
         });
-        setupLatch.await(1, TimeUnit.SECONDS);
 
         invokeClear();
 
-        CountDownLatch checkLatch = new CountDownLatch(1);
         AtomicReference<String> title = new AtomicReference<>();
         AtomicReference<String> content = new AtomicReference<>();
         AtomicReference<String> annotation = new AtomicReference<>();
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             title.set(titleField.getText());
-            content.set(contentArea.getText());
+            content.set(contentEditorController.getText());
             annotation.set(annotationArea.getText());
-            checkLatch.countDown();
         });
-        checkLatch.await(1, TimeUnit.SECONDS);
 
         assertTrue(title.get().isEmpty());
         assertTrue(content.get().isEmpty());
@@ -688,21 +676,18 @@ class CreateNoteControllerTest {
 
         invokeInitialize();
 
-        CountDownLatch setupLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             titleField.setText("Test Note");
             notebookComboBox.getSelectionModel().select(0);
-            setupLatch.countDown();
         });
-        setupLatch.await(1, TimeUnit.SECONDS);
 
         invokeSave();
 
         assertNotNull(mockNoteService.savedNote);
 
-        var translation = NoteSession.getLastCreatedNote().getTranslations().get("en");
+        var translation = NoteSession.getLastCreatedNote().getTranslations().get(Localization.getCurrentLanguageCode());
         assertNotNull(translation);
-        assertEquals("", translation.getContent());
+        assertEquals("", RichTextStorageUtil.decode(translation.getContent()).text());
         assertEquals("", translation.getAnnotation());
     }
 
@@ -713,19 +698,16 @@ class CreateNoteControllerTest {
 
         invokeInitialize();
 
-        CountDownLatch setupLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             titleField.setText("  Test Note  ");
             notebookComboBox.getSelectionModel().select(0);
-            setupLatch.countDown();
         });
-        setupLatch.await(1, TimeUnit.SECONDS);
 
         invokeSave();
 
         assertNotNull(mockNoteService.savedNote);
 
-        var translation = mockNoteService.savedNote.getTranslations().get("en");
+        var translation = mockNoteService.savedNote.getTranslations().get(Localization.getCurrentLanguageCode());
         assertNotNull(translation);
         assertEquals("Test Note", translation.getTitle());
     }
@@ -737,25 +719,15 @@ class CreateNoteControllerTest {
 
         invokeInitialize();
 
-        CountDownLatch setupLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             titleField.setText("Test Note");
             notebookComboBox.getSelectionModel().select(0);
-            setupLatch.countDown();
         });
-        setupLatch.await(1, TimeUnit.SECONDS);
 
         invokeSave();
 
-        Thread.sleep(100);
-
         AtomicReference<String> message = new AtomicReference<>();
-        CountDownLatch checkLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            message.set(statusLabel.getText());
-            checkLatch.countDown();
-        });
-        checkLatch.await(1, TimeUnit.SECONDS);
+        runOnFxAndWait(() -> message.set(statusLabel.getText()));
 
         assertTrue(message.get().contains(Localization.get("create.success")));
     }
