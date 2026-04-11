@@ -107,6 +107,7 @@ class JpaUserDaoTest {
     void testUpdateNullUser() {
         assertThrows(IllegalArgumentException.class, () -> dao.update(null));
     }
+
     @Test
     void testDeleteNullUser() {
         assertThrows(IllegalArgumentException.class, () -> dao.delete(null));
