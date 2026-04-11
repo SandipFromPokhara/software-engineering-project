@@ -11,12 +11,11 @@ import static org.mockito.Mockito.*;
 class MariaDbJpaConnectionTest {
 
     private EntityManagerFactory mockEmf;
-    private EntityManager mockEm;
 
     @BeforeEach
     void setup() {
         mockEmf = mock(EntityManagerFactory.class);
-        mockEm = mock(EntityManager.class);
+        EntityManager mockEm = mock(EntityManager.class);
         when(mockEmf.createEntityManager()).thenReturn(mockEm);
         when(mockEmf.isOpen()).thenReturn(true);
 

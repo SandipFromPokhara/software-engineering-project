@@ -3,13 +3,26 @@ package datasource;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import jakarta.persistence.PersistenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
+
+/**
+ * Custom exception for database configuration issues.
+ */
+class DatabaseConfigurationException extends RuntimeException {
+    public DatabaseConfigurationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
 
 public class MariaDbJpaConnection {
+
+    private MariaDbJpaConnection() {/* Prevent instantiation */}
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MariaDbJpaConnection.class);
     private static EntityManagerFactory emf;
@@ -24,68 +37,85 @@ public class MariaDbJpaConnection {
     }
 
     private static synchronized void ensureFactory() {
-        if (emf == null) {
-            try {
-                Map<String, String> properties = new ConcurrentHashMap<>();
+        if (emf != null) return;
 
-                String dbUser = System.getProperty("DB_USER");
-                if (dbUser == null) dbUser = System.getenv("DB_USER");
+        try {
+            Map<String, String> properties = new ConcurrentHashMap<>();
+            ConfigData config = resolveConfig();
 
-                String dbPassword = System.getProperty("DB_PASSWORD");
-                if (dbPassword == null) dbPassword = System.getenv("DB_PASSWORD");
-
-                String dbHost = System.getProperty("DB_HOST");
-                if (dbHost == null) dbHost = System.getenv("DB_HOST");
-
-                String dbPort = System.getProperty("DB_PORT");
-                if (dbPort == null) dbPort = System.getenv("DB_PORT");
-
-                String dbName = System.getProperty("DB_NAME");
-                if (dbName == null) dbName = System.getenv("DB_NAME");
-
-                boolean missing = dbUser == null || dbPassword == null || dbHost == null || dbPort == null || dbName == null
-                        || isBlank(dbUser) || isBlank(dbPassword) || isBlank(dbHost) || isBlank(dbPort) || isBlank(dbName);
-
-                if (!missing) {
-                    // Use MariaDB as configured
-                    LOGGER.info("Using MariaDB DB connection");
-
-                    // Request utf8mb4 end-to-end (4-byte Unicode) from the driver
-                    String jdbcUrl = "jdbc:mariadb://" + dbHost + ":" + dbPort + "/" + dbName
-                            + "?useUnicode=true&characterEncoding=utf8mb4&connectionCollation=utf8mb4_unicode_ci";
-                    properties.put("jakarta.persistence.jdbc.url", jdbcUrl);
-                    properties.put("hibernate.connection.charSet", "utf8mb4");
-                    properties.put("hibernate.connection.useUnicode", "true");
-                    properties.put("hibernate.connection.characterEncoding", "utf8mb4");
-                    properties.put("jakarta.persistence.jdbc.user", dbUser);
-                    properties.put("jakarta.persistence.jdbc.password", dbPassword);
-                    properties.put("jakarta.persistence.jdbc.driver", "org.mariadb.jdbc.Driver");
-                    properties.put("hibernate.hbm2ddl.auto", "update");
-                    properties.put("hibernate.dialect", "org.hibernate.dialect.MariaDBDialect");
-
-                    LOGGER.info("Connecting to DB: jdbc:mariadb://{}:{}/{} with user {}", dbHost, dbPort, dbName, dbUser);
-                } else {
-                    // Fallback to H2 in-memory for tests and local runs without env vars
-                    LOGGER.warn("Database environment variables are not set properly; falling back to in-memory H2 for tests");
-
-                    String jdbcUrl = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=MySQL;DATABASE_TO_LOWER=TRUE";
-                    properties.put("jakarta.persistence.jdbc.url", jdbcUrl);
-                    properties.put("jakarta.persistence.jdbc.user", "sa");
-                    properties.put("jakarta.persistence.jdbc.password", "");
-                    properties.put("jakarta.persistence.jdbc.driver", "org.h2.Driver");
-
-                    // Use create-drop so schema is clean for each JVM run (tests)
-                    properties.put("hibernate.hbm2ddl.auto", "create-drop");
-                    properties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
-                    properties.put("hibernate.show_sql", "false");
-                }
-
-                emf = Persistence.createEntityManagerFactory("CompanyMariaDbUnit", properties);
-                LOGGER.info("EntityManagerFactory created successfully");
-            } catch (Exception e) {
-                LOGGER.error("Failed to initialize EntityManagerFactory. Confirm DB user and password", e);
-                throw new RuntimeException("Database connection failed", e);
+            if (config.isValid()) {
+                configureMariaDB(properties, config);
+            } else {
+                configureH2Fallback(properties);
             }
+
+            emf = Persistence.createEntityManagerFactory("CompanyMariaDbUnit", properties);
+            LOGGER.info("EntityManagerFactory created successfully");
+        } catch (PersistenceException e) {
+            throw new DatabaseConfigurationException("JPA Persistence initialization failed for 'CompanyMariaDbUnit'. Verify MariaDB reachability.", e);
+        } catch (RuntimeException e) {
+            throw new DatabaseConfigurationException(
+                    "Unexpected configuration error for 'CompanyMariaDbUnit'.", e);
+        }
+    }
+
+    private static ConfigData resolveConfig() {
+        return new ConfigData(
+                getEnvOrProp("DB_USER"),
+                getEnvOrProp("DB_PASSWORD"),
+                getEnvOrProp("DB_HOST"),
+                getEnvOrProp("DB_PORT"),
+                getEnvOrProp("DB_NAME")
+        );
+    }
+
+    private static String getEnvOrProp(String key) {
+        String val = System.getProperty(key);
+        return (val != null) ? val : System.getenv(key);
+    }
+
+    private static void configureMariaDB(Map<String, String> props, ConfigData config) {
+        LOGGER.info("Using MariaDB DB connection");
+        String jdbcUrl = String.format("jdbc:mariadb://%s:%s/%s?useUnicode=true&characterEncoding=utf8mb4&connectionCollation=utf8mb4_unicode_ci",
+                config.host, config.port, config.name);
+
+        props.put("jakarta.persistence.jdbc.url", jdbcUrl);
+        props.put("jakarta.persistence.jdbc.user", config.user);
+        props.put("jakarta.persistence.jdbc.password", config.pass);
+        props.put("jakarta.persistence.jdbc.driver", "org.mariadb.jdbc.Driver");
+        props.put("hibernate.hbm2ddl.auto", "update");
+        props.put("hibernate.dialect", "org.hibernate.dialect.MariaDBDialect");
+
+        // Encoding properties
+        props.put("hibernate.connection.charSet", "utf8mb4");
+        props.put("hibernate.connection.useUnicode", "true");
+        props.put("hibernate.connection.characterEncoding", "utf8mb4");
+    }
+
+    private static void configureH2Fallback(Map<String, String> props) {
+        LOGGER.warn("Database environment variables are not set properly; falling back to in-memory H2");
+        props.put("jakarta.persistence.jdbc.url", "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;MODE=MySQL;DATABASE_TO_LOWER=TRUE");
+        props.put("jakarta.persistence.jdbc.user", "sa");
+        props.put("jakarta.persistence.jdbc.password", "");
+        props.put("jakarta.persistence.jdbc.driver", "org.h2.Driver");
+        props.put("hibernate.hbm2ddl.auto", "create-drop");
+        props.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+    }
+
+    // Simple internal record/class to hold data
+    private static class ConfigData {
+        String user;
+        String pass;
+        String host;
+        String port;
+        String name;
+
+        ConfigData(String u, String p, String h, String po, String n) {
+            this.user = u; this.pass = p; this.host = h; this.port = po; this.name = n;
+        }
+        boolean isValid() {
+            return Stream.of(user, pass, host, port, name)
+                    .allMatch(s -> s != null && !s.isBlank());
         }
     }
 
@@ -99,9 +129,5 @@ public class MariaDbJpaConnection {
             emf.close();
             emf = null;
         }
-    }
-
-    private static boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
     }
 }

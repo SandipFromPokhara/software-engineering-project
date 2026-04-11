@@ -7,7 +7,6 @@ import entity.entities.NoteEntity;
 import entity.entities.TagEntity;
 import entity.entities.UserEntity;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.*;
 
@@ -80,9 +79,7 @@ class JpaTagDaoTest {
 
     @Test
     void testFindByIdNotFound() {
-        assertThrows(RuntimeException.class, () -> {
-            tagDao.findById(99999L);
-        });
+        assertThrows(RuntimeException.class, () -> tagDao.findById(99999L));
     }
 
     @Test
@@ -188,10 +185,13 @@ class JpaTagDaoTest {
         // Attempt to rename tag2 to name1 should fail
         tag2.setTagName(name1);
 
-        assertThrows(RuntimeException.class, () -> {
+        try {
             tagDao.update(tag2);
-            em.flush();
-        });
+        } catch (RuntimeException e) {
+            // If update() already flushed and failed, we caught it.
+        }
+
+        assertThrows(RuntimeException.class, () -> em.flush());
 
         em.clear();
 
@@ -218,9 +218,8 @@ class JpaTagDaoTest {
 
         tagDao.delete(tag);
 
-        assertThrows(RuntimeException.class, () -> {
-            tagDao.findById(tag.getId());
-        });
+        long id = tag.getId();
+        assertThrows(RuntimeException.class, () -> tagDao.findById(id));
     }
 
     @Test
@@ -232,7 +231,7 @@ class JpaTagDaoTest {
         UserEntity user = new UserEntity();
         user.setFirstName("Test");
         user.setLastName("User");
-        user.setUsername("testuser_" + System.currentTimeMillis());
+        user.setUsername("tester_" + System.currentTimeMillis());
         user.setEmail("test_" + System.currentTimeMillis() + "@example.com");
         user.changePasswordHash("Test@123");
         em.persist(user);
@@ -254,7 +253,8 @@ class JpaTagDaoTest {
 
         tagDao.delete(tag);
 
-        assertThrows(RuntimeException.class, () -> tagDao.findById(tag.getId()));
+        Long id = tag.getId();
+        assertThrows(RuntimeException.class, () -> tagDao.findById(id));
     }
 
     @Test
@@ -267,7 +267,7 @@ class JpaTagDaoTest {
 
     @Test
     void testSaveDuplicateThrows() {
-        String name = uniqueName("DupsTag");
+        String name = uniqueName("DumpsTag");
         TagEntity tag1 = new TagEntity();
         tag1.setTagName(name);
         tagDao.save(tag1);
