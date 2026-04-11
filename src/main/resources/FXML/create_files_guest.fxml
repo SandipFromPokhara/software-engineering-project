@@ -9,19 +9,19 @@
 <AnchorPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateFilesGuestController">
 
     <!-- title -->
-    <Label fx:id="title" text="Title" AnchorPane.leftAnchor="20" AnchorPane.topAnchor="10" />
-    <TextField fx:id="titleBox" promptText="Enter note title" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="40" />
+    <Label fx:id="title"  AnchorPane.leftAnchor="20" AnchorPane.topAnchor="10" />
+    <TextField fx:id="titleBox"  AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="40" />
 
     <!-- Content -->
-    <Label fx:id="content" text="Content" AnchorPane.leftAnchor="20" AnchorPane.topAnchor="75" />
-    <TextArea fx:id="contentBox" promptText="Write content here" AnchorPane.bottomAnchor="60" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="100" /> <!-- leave space for annotation -->
+    <Label fx:id="content"  AnchorPane.leftAnchor="20" AnchorPane.topAnchor="75" />
+    <TextArea fx:id="contentBox"  AnchorPane.bottomAnchor="60" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="100" /> <!-- leave space for annotation -->
 
     <!-- Annotation row -->
-    <Label fx:id="annotation" prefHeight="30" text="Annotation:" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="20" />
+    <Label fx:id="annotation" prefHeight="30"  AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="20" />
 
-    <TextField fx:id="annotationBox" prefHeight="30" promptText="Enter annotation" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="90" AnchorPane.rightAnchor="100" />
+    <TextField fx:id="annotationBox" prefHeight="30"  AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="90" AnchorPane.rightAnchor="100" />
 
     <!-- Cancel button -->
-    <Button fx:id="cancelButton" onAction="#handleCancel" prefHeight="30" prefWidth="70" text="Cancel" AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="20" />
+    <Button fx:id="cancelButton" onAction="#handleCancel" prefHeight="30" prefWidth="70"  AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="20" />
 
 </AnchorPane>

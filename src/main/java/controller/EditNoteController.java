@@ -1,6 +1,5 @@
 package controller;
 
-import dao.note.INoteDAO;
 import dao.tag.ITagDAO;
 import entity.entities.NoteEntity;
 import entity.entities.TagEntity;
@@ -28,7 +27,6 @@ import static model.LanguageModel.DEFAULT_LANGUAGE_CODE;
 
 public class EditNoteController implements Initializable {
 
-    private INoteDAO noteDao;
     private ITagDAO tagDao;
     private NoteEntity note;
     Set<String> selectedTags = new HashSet<>();
@@ -102,10 +100,6 @@ public class EditNoteController implements Initializable {
     private RichTextEditorController contentEditorController;
 
     private UndoRedoManager undoRedoManager = new UndoRedoManager();
-
-    public void setNoteDao(INoteDAO noteDao) {
-        this.noteDao = noteDao;
-    }
 
     public void setTagDao(ITagDAO tagDao) {
         this.tagDao = tagDao;
