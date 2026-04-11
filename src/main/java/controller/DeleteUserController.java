@@ -34,7 +34,8 @@ public class DeleteUserController {
     @FXML
     private Button cancelButton;
 
-    @FXML Button deleteButton;
+    @FXML
+    Button deleteButton;
 
     @FXML
     private Label messageLabel;
@@ -80,7 +81,7 @@ public class DeleteUserController {
             UserSession.getUserInstance().setUser(null);
             closeWindow();
         } catch (Exception e) {
-            ShowMessageUtil.showMessageKey(messageLabel,Localization.get("delete.failed"), MessageType.ERROR);
+            ShowMessageUtil.showMessageKey(messageLabel, Localization.get("delete.failed"), MessageType.ERROR);
         }
     }
 

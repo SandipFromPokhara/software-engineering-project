@@ -16,7 +16,7 @@ import javafx.util.Duration;
 import services.NoteService;
 import services.TranslationService;
 import util.*;
-import util.bulletList.TextFormattingUtil;
+import util.list.TextFormattingUtil;
 
 import java.net.URL;
 import java.util.HashSet;
@@ -248,7 +248,7 @@ public class EditNoteController implements Initializable {
     }
 
     @FXML
-   public  void handleAddTag() {
+    public void handleAddTag() {
         String tagName = tagComboBox.getEditor().getText();
         TagUtil.addTagToUI(selectedTags, tagFlowpane, tagComboBox, tagName);
     }

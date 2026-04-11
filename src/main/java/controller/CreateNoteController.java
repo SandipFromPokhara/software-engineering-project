@@ -20,7 +20,7 @@ import services.NoteService;
 import entity.entities.NoteEntity;
 import session.UserSession;
 import util.*;
-import util.bulletList.TextFormattingUtil;
+import util.list.TextFormattingUtil;
 import util.events.EventBus;
 import util.events.NoteCreatedEvent;
 

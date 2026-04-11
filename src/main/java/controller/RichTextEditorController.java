@@ -14,24 +14,32 @@ import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.InlineCssTextArea;
 import org.fxmisc.richtext.model.StyleSpans;
 import util.RichTextStorageUtil;
-import util.bulletList.BulletListStrategy;
-import util.bulletList.NumberedListStrategy;
-import util.bulletList.TextFormattingUtil;
+import util.list.BulletListStrategy;
+import util.list.NumberedListStrategy;
+import util.list.TextFormattingUtil;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RichTextEditorController {
 
-    @FXML private VBox editorWrapper;
+    @FXML
+    private VBox editorWrapper;
 
-    @FXML private Button boldButton;
-    @FXML private Button italicButton;
-    @FXML private Button underlineButton;
-    @FXML private Button bulletListButton;
-    @FXML private Button numberedListButton;
-    @FXML private Button headingUpButton;
-    @FXML private Button headingDownButton;
+    @FXML
+    private Button boldButton;
+    @FXML
+    private Button italicButton;
+    @FXML
+    private Button underlineButton;
+    @FXML
+    private Button bulletListButton;
+    @FXML
+    private Button numberedListButton;
+    @FXML
+    private Button headingUpButton;
+    @FXML
+    private Button headingDownButton;
 
     private InlineCssTextArea contentArea;
     private Label placeholderLabel;
@@ -66,7 +74,6 @@ public class RichTextEditorController {
         VBox.setVgrow(stack, Priority.ALWAYS);
         editorWrapper.getChildren().add(stack);
     }
-
 
 
     public String getText() {
@@ -126,13 +133,13 @@ public class RichTextEditorController {
     private void handleToolbarClick(ActionEvent event) {
         if (!(event.getSource() instanceof Button button)) return;
         switch (button.getId()) {
-            case "boldButton"         -> applyBold();
-            case "italicButton"       -> applyItalic();
-            case "underlineButton"    -> applyUnderline();
-            case "bulletListButton"   -> toggleBullet();
+            case "boldButton" -> applyBold();
+            case "italicButton" -> applyItalic();
+            case "underlineButton" -> applyUnderline();
+            case "bulletListButton" -> toggleBullet();
             case "numberedListButton" -> toggleNumbered();
-            case "headingUpButton"    -> headingUp();
-            case "headingDownButton"  -> headingDown();
+            case "headingUpButton" -> headingUp();
+            case "headingDownButton" -> headingDown();
             default -> {
                 // No-op: unrecognized toolbar button.
             }
@@ -168,6 +175,7 @@ public class RichTextEditorController {
     private void headingDown() {
         changeFontSize(-FONT_STEP);
     }
+
     /**
      * Toggles a CSS property on the current selection.
      * If every character in the selection already has property=value, the property is removed.
