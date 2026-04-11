@@ -13,6 +13,7 @@ import javafx.scene.layout.VBox;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.InlineCssTextArea;
 import org.fxmisc.richtext.model.StyleSpans;
+import util.RichTextStorageUtil;
 import util.bulletList.BulletListStrategy;
 import util.bulletList.NumberedListStrategy;
 import util.bulletList.TextFormattingUtil;
@@ -71,6 +72,13 @@ public class RichTextEditorController {
         return contentArea.getText();
     }
 
+    public String getSerializedContent() {
+        return RichTextStorageUtil.serialize(
+                contentArea.getText(),
+                contentArea.getStyleSpans(0, contentArea.getLength())
+        );
+    }
+
     public void setText(String text) {
         String safeText = text != null ? text : "";
         contentArea.replaceText(0, contentArea.getLength(), safeText);
@@ -78,6 +86,20 @@ public class RichTextEditorController {
             contentArea.setStyle(0, safeText.length(), "");
         }
         placeholderLabel.setVisible(safeText.isEmpty());
+    }
+
+    public void setSerializedContent(String stored) {
+        RichTextStorageUtil.DecodedContent decoded = RichTextStorageUtil.decode(stored);
+        String text = decoded.text() == null ? "" : decoded.text();
+
+        contentArea.replaceText(0, contentArea.getLength(), text);
+        if (decoded.spans() != null) {
+            contentArea.setStyleSpans(0, decoded.spans());
+        } else if (!text.isEmpty()) {
+            contentArea.setStyle(0, text.length(), "");
+        }
+
+        placeholderLabel.setVisible(text.isEmpty());
     }
 
     public InlineCssTextArea getTextArea() {

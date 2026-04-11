@@ -197,7 +197,7 @@ public class EditNoteController implements Initializable {
 
         if (translation != null) {
             titleField.setText(translation.getTitle());
-            contentEditorController.setText(translation.getContent());
+            contentEditorController.setSerializedContent(translation.getContent());
             annotationBox.setText(translation.getAnnotation());
         } else {
             titleField.clear();
@@ -235,7 +235,7 @@ public class EditNoteController implements Initializable {
                 note,
                 langCode,
                 titleField.getText(),
-                contentEditorController.getText(),
+                contentEditorController.getSerializedContent(),
                 annotationBox.getText(),
                 selectedTags
         );
