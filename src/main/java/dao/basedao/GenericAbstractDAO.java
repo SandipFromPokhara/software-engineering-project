@@ -8,34 +8,38 @@ import java.util.function.Function;
 public abstract class GenericAbstractDAO<T, ID> {
 
     protected <R> R executeInTransaction(Function<EntityManager, R> action) {
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        try {
-            em.getTransaction().begin();
+        EntityManager em = MariaDbJpaConnection.getEntityManager();
+        boolean wasAlreadyActive = em.getTransaction().isActive();
 
+        if (!wasAlreadyActive) {
+            em.getTransaction().begin();
+        }
+
+        try {
             R result = action.apply(em);
 
-            em.getTransaction().commit();
+            if (!wasAlreadyActive) {
+                em.getTransaction().commit();
+            }
             return result;
 
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
+            if (!wasAlreadyActive && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
             if (e instanceof RuntimeException) {
                 throw (RuntimeException) e;
             }
             throw new RuntimeException("Transaction failed", e);
-        } finally {
-            em.close();
         }
     }
 
     protected <R> R execute(Function<EntityManager, R> action) {
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
+        EntityManager em = MariaDbJpaConnection.getEntityManager();
         try {
             return action.apply(em);
-        } finally {
-            em.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

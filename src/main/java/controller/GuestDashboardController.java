@@ -47,7 +47,6 @@ public class GuestDashboardController {
         NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "entry.window_title", false);
     }
 
-
     @FXML
     public void handleNewFiles() {
         NavigationUtil.setCenter(centerPane, "/FXML/createFilesGuest.fxml");
