@@ -13,6 +13,15 @@ public class MariaDbJpaConnection {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MariaDbJpaConnection.class);
     private static EntityManagerFactory emf;
+    private static EntityManager sharedEm;
+
+    public static synchronized EntityManager getEntityManager() {
+        ensureFactory();
+        if (sharedEm == null || !sharedEm.isOpen()) {
+            sharedEm = emf.createEntityManager();
+        }
+        return sharedEm;
+    }
 
     private static synchronized void ensureFactory() {
         if (emf == null) {
