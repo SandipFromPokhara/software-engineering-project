@@ -20,15 +20,6 @@ public class LoginController {
 
     private UserService userService;
 
-    public LoginController() {
-        /* Empty constructor */
-    }
-
-    // For test
-    public LoginController(UserService userService) {
-        this.userService = userService;
-    }
-
     @FXML
     private Label loginWelcome;
 
@@ -123,6 +114,7 @@ public class LoginController {
 
         loginTask.setOnSucceeded(e -> {
             UserEntity authenticatedUser = loginTask.getValue();
+
             if (authenticatedUser != null) {
                 UserSession.getUserInstance().setUser(authenticatedUser);
                 Stage stage = (Stage) loginButton.getScene().getWindow();

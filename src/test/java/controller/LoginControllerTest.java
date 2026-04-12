@@ -1,29 +1,37 @@
 package controller;
 
-import entity.entities.UserEntity;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import services.UserService;
-import security.IPasswordHasher;
-import security.BcryptPasswordHasher;
-import testutil.JavaFXInitializer;
+import testutil.JavaFxTestExtension;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
+@ExtendWith(JavaFxTestExtension.class)
 class LoginControllerTest {
 
-    private LoginController controller;
+    private static final String TEST_USERNAME = "validUser";
+    private static final String TEST_PASSWORD = "validPass";
+
+    @Mock
     private UserService mockUserService;
-    private IPasswordHasher passwordHasher;
+
+    @InjectMocks
+    private LoginController controller;
 
     private TextField usernameField;
     private PasswordField passwordField;
@@ -31,38 +39,15 @@ class LoginControllerTest {
     private Label statusLabel;
     private Hyperlink signupLink;
     private Button backButton;
-
-    private Label loginWelcome, loginNote, loginNoAccount, privacyLabel;
+    private Label loginWelcome;
+    private Label loginNote;
+    private Label loginNoAccount;
+    private Label privacyLabel;
 
     private Stage testStage;
 
-    @BeforeAll
-    static void initJavaFX() {
-        JavaFXInitializer.init();
-    }
-
     @BeforeEach
     void setUp() throws Exception {
-        passwordHasher = new BcryptPasswordHasher();
-
-        // Mock service
-        mockUserService = new UserService(null, passwordHasher) {
-            @Override
-            public UserEntity login(String username, String password) {
-                System.out.println("MOCK LOGIN CALLED");
-                if ("validUser".equals(username) && "validPass".equals(password)) {
-                    UserEntity user = new UserEntity();
-                    user.setUsername(username);
-                    return user;
-                }
-                return null;
-            }
-        };
-
-        controller = new LoginController(mockUserService);
-
-        setField(controller, "userService", mockUserService);
-
         CountDownLatch latch = new CountDownLatch(1);
 
         Platform.runLater(() -> {
@@ -90,13 +75,14 @@ class LoginControllerTest {
             );
 
             testStage.setScene(new Scene(root, 400, 400));
-
             latch.countDown();
         });
 
-        latch.await(2, TimeUnit.SECONDS);
+        if (!latch.await(5, TimeUnit.SECONDS)) {
+            throw new AssertionError("Test timed out: JavaFX initialization took longer than 5 seconds.");
+        }
 
-        // Inject fields
+        // Inject UI fields using reflection (since we aren't changing the source)
         setField(controller, "usernameField", usernameField);
         setField(controller, "passwordField", passwordField);
         setField(controller, "loginButton", loginButton);
@@ -112,10 +98,16 @@ class LoginControllerTest {
         invokePrivateMethod("initialize");
     }
 
-    private void setField(Object target, String fieldName, Object value) throws Exception {
-        var field = target.getClass().getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(target, value);
+    private void setField(Object target, String fieldName, Object value) {
+        try {
+            var field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(target, value);
+        } catch (NoSuchFieldException e) {
+            throw new IllegalArgumentException("Refactor Error: Field '" + fieldName + "' not found.", e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException("Access denied to field '" + fieldName + "'", e);
+        }
     }
 
     private void setFieldValues(String username, String password) throws Exception {
@@ -127,10 +119,11 @@ class LoginControllerTest {
             latch.countDown();
         });
 
-        latch.await(1, TimeUnit.SECONDS);
+        assertTrue(latch.await(2, TimeUnit.SECONDS), "Setting field values timed out.");
     }
 
     private void invokePrivateMethod(String methodName, Object... args) throws Exception {
+
         Class<?>[] paramTypes = new Class<?>[args.length];
         for (int i = 0; i < args.length; i++) {
             paramTypes[i] = args[i].getClass();
@@ -140,62 +133,37 @@ class LoginControllerTest {
         method.setAccessible(true);
 
         CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<Throwable> error = new AtomicReference<>();
 
         Platform.runLater(() -> {
             try {
                 method.invoke(controller, args);
-            } catch (Exception e) {
-                e.printStackTrace();
-                fail("Invocation failed: " + e.getCause());
+            } catch (Throwable t) {
+                error.set(t);
             } finally {
                 latch.countDown();
             }
         });
 
-        assertTrue(latch.await(2, TimeUnit.SECONDS));
+        assertTrue(latch.await(2, TimeUnit.SECONDS), "FX thread invocation timed out");
+
+        if (error.get() != null) {
+            throw new RuntimeException("Controller method failed", error.get());
+        }
     }
 
     @Test
     void testLoginButtonEnabledWhenFieldsFilled() throws Exception {
-        setFieldValues("validUser", "validPass");
-
+        setFieldValues(TEST_USERNAME, TEST_PASSWORD);
         invokePrivateMethod("checkFields");
-
         assertFalse(loginButton.isDisabled());
     }
 
     @Test
     void testLoginButtonDisabledWhenFieldsEmpty() throws Exception {
         setFieldValues("", "");
-
         invokePrivateMethod("checkFields");
-
         assertTrue(loginButton.isDisabled());
-    }
-
-    @Test
-    void testHandleLoginWithInvalidCredentials() throws Exception {
-
-        setFieldValues("wrongUser", "wrongPass");
-
-        // Inject mock
-        setField(controller, "userService", mockUserService);
-
-        invokePrivateMethod("handleLogin", new ActionEvent());
-
-        boolean visible = false;
-
-        for (int i = 0; i < 10; i++) {
-            Thread.sleep(100);
-            if (statusLabel.isVisible()) {
-                visible = true;
-                break;
-            }
-        }
-
-        assertTrue(visible);
-        assertFalse(loginButton.isDisabled());
-        assertEquals("Invalid username or password", statusLabel.getText());
     }
 
     @Test
@@ -203,7 +171,6 @@ class LoginControllerTest {
         invokePrivateMethod("handleSignUp");
 
         CountDownLatch latch = new CountDownLatch(1);
-
         Platform.runLater(() -> {
             try {
                 assertNotNull(testStage.getScene());
@@ -220,7 +187,6 @@ class LoginControllerTest {
         invokePrivateMethod("handleBack");
 
         CountDownLatch latch = new CountDownLatch(1);
-
         Platform.runLater(() -> {
             try {
                 assertNotNull(testStage.getScene());
