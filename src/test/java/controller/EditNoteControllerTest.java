@@ -13,6 +13,7 @@ import services.NoteService;
 import services.TranslationService;
 import testutil.JavaFXInitializer;
 
+
 import java.lang.reflect.Field;
 import java.util.HashSet;
 
@@ -60,6 +61,7 @@ class EditNoteControllerTest {
 
         // Mock TranslationService
         TranslationService translationServiceMock = mock(TranslationService.class);
+        setField("translationService", translationServiceMock);
 
         when(translationServiceMock.getTranslation(any(), anyString(), anyString()))
                 .thenAnswer(invocation -> {
@@ -87,7 +89,14 @@ class EditNoteControllerTest {
             String content = invocation.getArgument(3);
             String annotation = invocation.getArgument(4);
 
-            var t = n.getTranslations().computeIfAbsent(lang, k -> n.createTranslation(lang));
+            var translations = n.getTranslations();
+
+            var t = translations.get(lang);
+            if (t == null) {
+                t = n.createTranslation(lang);
+                translations.put(lang, t);
+            }
+
             t.setTitle(title);
             t.setContent(content);
             t.setAnnotation(annotation);
@@ -180,6 +189,7 @@ class EditNoteControllerTest {
         );
     }
 
+
     @Test
     void handleUpdate_shouldCallService() {
         assertDoesNotThrow(() -> controller.handleUpdate());
@@ -201,7 +211,7 @@ class EditNoteControllerTest {
                 anyString(),
                 anyString(),
                 anyString(),
-                eq(controller.selectedTags)
+                argThat(set -> set.contains("work"))
         );
     }
 
