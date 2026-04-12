@@ -8,7 +8,7 @@ class ValidationTest {
 
     private static final String FIRSTNAME = "John";
     private static final String LASTNAME = "Doe";
-    private static final String USER123 = "User123!";
+    private static final String USER123 = "User123";
     private static final String USERNAME = "username";
     private static final String EMAIL = "user@example.com";
     private static final String PASSWORD = "Abc123!";
