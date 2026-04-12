@@ -41,7 +41,10 @@ class JpaNoteDaoTest {
     @AfterAll
     static void cleanup() {
         List<NoteEntity> notes = noteDao.findByNotebookWithTranslations(testNotebook);
-        notes.forEach(noteDao::delete);
+        for (NoteEntity note : notes) {
+            note.getTranslations().clear();
+            noteDao.delete(note);
+        }
 
         notebookDao.delete(testNotebook);
         userDao.delete(testUser);
