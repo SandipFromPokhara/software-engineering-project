@@ -7,8 +7,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="TOP_LEFT" prefHeight="257.0" prefWidth="351.0" spacing="12.0" style="-fx-padding: 20;" styleClass="root dialog-content" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DeleteUserController">
-    <children>
+<VBox prefHeight="257.0" prefWidth="351.0" spacing="12.0" style="-fx-padding: 20;" styleClass="root dialog-content" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DeleteUserController">
         <Label fx:id="deleteTitle" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Delete Account" />
         <Label fx:id="deleteWarning" maxWidth="420.0" prefHeight="51.0" prefWidth="420.0" text="Are you sure you want to delete your account?&#10;This will permanently delete all your notebooks and notes!" textOverrun="CLIP" wrapText="true" />
         <Label fx:id="deleteConfirmLabel" text="Enter password to confirm:" />
@@ -16,7 +15,6 @@
         <Label fx:id="messageLabel" styleClass="message-label" visible="false" wrapText="true" />
 
         <HBox alignment="CENTER_LEFT" spacing="20.0">
-            <children>
                 <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#handleCancel" text="Cancel">
                     <HBox.margin>
                         <Insets top="8.0" />
@@ -27,7 +25,5 @@
                         <Insets top="8.0" />
                     </HBox.margin>
                 </Button>
-            </children>
         </HBox>
-    </children>
 </VBox>
