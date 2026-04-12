@@ -18,10 +18,10 @@ class JpaNotebookDaoTest {
     private static UserEntity testUser;
 
     @BeforeAll
-    static void setupBeforeClass() throws Exception {
+    static void setupBeforeClass() {
         dao = new JpaUserDao();
         String unique = String.valueOf(System.currentTimeMillis());
-        testUser = new UserEntity("Test", "User", "testuser" + unique, "test" + unique + "@example.com");
+        testUser = new UserEntity("Test", "User", "tester" + unique, "test" + unique + "@example.com");
         dao.save(testUser);
         notebookDao = new JpaNotebookDao();
     }
@@ -107,9 +107,7 @@ class JpaNotebookDaoTest {
 
     @Test
     void testFindByUserWithNull() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            notebookDao.findByUser(null);
-        });
+        assertThrows(IllegalArgumentException.class, () -> notebookDao.findByUser(null));
     }
 
 
@@ -132,6 +130,8 @@ class JpaNotebookDaoTest {
 
         assertNotNull(retrievedNotebook);
         assertEquals("Test update method for NoteBook entity", updatedT.getTitle());
+
+        notebookDao.delete(updated);
     }
 
     @Test
