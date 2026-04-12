@@ -6,11 +6,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ValidationTest {
 
+    private static final String FIRSTNAME = "John";
+    private static final String LASTNAME = "Doe";
+    private static final String USERNAME = "User123";
+    private static final String EMAIL = "user@example.com";
+    private static final String PASSWORD = "Abc123!";
+
     @Test
-    void testValidateSignup_valid() {
+    void testValidateSignupValid() {
         Validation.ValidationResult result = Validation.validateSignup(
-                "John", "Doe", "User123",
-                "user@example.com", "Abc123!", "Abc123!"
+                FIRSTNAME, LASTNAME, USERNAME,
+                EMAIL, PASSWORD, PASSWORD
         );
 
         assertTrue(result.success());
@@ -18,10 +24,10 @@ class ValidationTest {
     }
 
     @Test
-    void testValidateSignup_missingFields() {
+    void testValidateSignupMissingFields() {
         Validation.ValidationResult result = Validation.validateSignup(
-                "", "Doe", "User123",
-                "user@example.com", "Abc123!", "Abc123!"
+                "", LASTNAME, USERNAME,
+                EMAIL, PASSWORD, PASSWORD
         );
 
         assertFalse(result.success());
@@ -29,10 +35,10 @@ class ValidationTest {
     }
 
     @Test
-    void testValidateSignup_invalidUsername() {
+    void testValidateSignupInvalidUsername() {
         Validation.ValidationResult result = Validation.validateSignup(
-                "John", "Doe", "Us",
-                "user@example.com", "Abc123!", "Abc123!"
+                FIRSTNAME, LASTNAME, "Us",
+                EMAIL, PASSWORD, PASSWORD
         );
 
         assertFalse(result.success());
@@ -40,10 +46,10 @@ class ValidationTest {
     }
 
     @Test
-    void testValidateSignup_invalidEmail() {
+    void testValidateSignupInvalidEmail() {
         Validation.ValidationResult result = Validation.validateSignup(
-                "John", "Doe", "User123",
-                "invalid-email", "Abc123!", "Abc123!"
+                FIRSTNAME, LASTNAME, USERNAME,
+                "invalid-email", PASSWORD, PASSWORD
         );
 
         assertFalse(result.success());
@@ -51,10 +57,10 @@ class ValidationTest {
     }
 
     @Test
-    void testValidateSignup_passwordMismatch() {
+    void testValidateSignupPasswordMismatch() {
         Validation.ValidationResult result = Validation.validateSignup(
-                "John", "Doe", "User123",
-                "user@example.com", "Abc123!", "Wrong123!"
+                FIRSTNAME, LASTNAME, USERNAME,
+                EMAIL, PASSWORD, "Wrong123!"
         );
 
         assertFalse(result.success());
@@ -62,10 +68,10 @@ class ValidationTest {
     }
 
     @Test
-    void testValidateSignup_weakPassword() {
+    void testValidateSignupWeakPassword() {
         Validation.ValidationResult result = Validation.validateSignup(
-                "John", "Doe", "User123",
-                "user@example.com", "abc", "abc"
+                FIRSTNAME, LASTNAME, USERNAME,
+                EMAIL, "abc", "abc"
         );
 
         assertFalse(result.success());
@@ -92,27 +98,27 @@ class ValidationTest {
     }
 
     @Test
-    void testValidateUpdate_validWithoutPasswordChange() {
+    void testValidateUpdateValidWithoutPasswordChange() {
         Validation.ValidationResult result = Validation.validateUpdate(
-                "Doe", "User123", "", ""
+                LASTNAME, USERNAME, "", ""
         );
 
         assertTrue(result.success());
     }
 
     @Test
-    void testValidateUpdate_withPasswordChange_valid() {
+    void testValidateUpdateWithPasswordChangeValid() {
         Validation.ValidationResult result = Validation.validateUpdate(
-                "Doe", "User123", "Abc123!", "Abc123!"
+                LASTNAME, USERNAME, PASSWORD, PASSWORD
         );
 
         assertTrue(result.success());
     }
 
     @Test
-    void testValidateUpdate_passwordMismatch() {
+    void testValidateUpdatePasswordMismatch() {
         Validation.ValidationResult result = Validation.validateUpdate(
-                "Doe", "User123", "Abc123!", "Wrong123!"
+                LASTNAME, USERNAME, PASSWORD, "Wrong123!"
         );
 
         assertFalse(result.success());
@@ -120,9 +126,9 @@ class ValidationTest {
     }
 
     @Test
-    void testValidateUpdate_invalidUsername() {
+    void testValidateUpdateInvalidUsername() {
         Validation.ValidationResult result = Validation.validateUpdate(
-                "Doe", "Us", "", ""
+                LASTNAME, "Us", "", ""
         );
 
         assertFalse(result.success());
@@ -130,7 +136,7 @@ class ValidationTest {
     }
 
     @Test
-    void testValidateUpdate_missingRequiredFields() {
+    void testValidateUpdateMissingRequiredFields() {
         Validation.ValidationResult result = Validation.validateUpdate(
                 "", "", "", ""
         );
