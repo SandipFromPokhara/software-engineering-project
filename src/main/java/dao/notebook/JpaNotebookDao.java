@@ -5,6 +5,7 @@ import entity.entities.UserEntity;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import dao.basedao.GenericAbstractDAO;
+import org.hibernate.Hibernate;
 
 import java.util.List;
 
@@ -57,7 +58,7 @@ public class JpaNotebookDao extends GenericAbstractDAO<NotebookEntity, Long> imp
             for (NotebookEntity n : results) {
                 if (n.getTranslations() != null) {
                     // Accessing the size forces Hibernate to load the Map from the DB
-                    n.getTranslations().size();
+                    Hibernate.initialize(n.getTranslations().size());
                 }
             }
 
