@@ -28,10 +28,20 @@ public class EntryController {
     static final Logger logger = Logger.getLogger(EntryController.class.getName());
 
     @FXML
-    private Label hello, welcome, privacyLabel, languageDisplay;
+    private Label hello;
+    @FXML
+    private Label welcome;
+    @FXML
+    private Label privacyLabel;
+    @FXML
+    private Label languageDisplay;
 
     @FXML
-    private Button guestButton, loginButton, registerButton;
+    private Button guestButton;
+    @FXML
+    private Button loginButton;
+    @FXML
+    private Button registerButton;
 
     @FXML
     private Hyperlink faqLink;

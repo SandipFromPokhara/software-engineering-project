@@ -287,6 +287,10 @@ public class ViewDashboardController {
     }
 
     private void loadNotes() {
+        loadNotes(null);
+    }
+
+    private void loadNotes(Long noteIdToSelect) {
         if (activeNotebook == null) return;
 
         Task<List<NoteEntity>> loadNotesTask = new Task<>() {
@@ -300,8 +304,22 @@ public class ViewDashboardController {
             List<NoteEntity> notes = loadNotesTask.getValue();
             notesTable.getItems().setAll(notes);
 
-            // Auto-select latest updated note
-            if (!notes.isEmpty()) notesTable.getSelectionModel().select(0);
+            if (notes.isEmpty()) {
+                return;
+            }
+
+            if (noteIdToSelect == null) {
+                notesTable.getSelectionModel().select(0);
+                return;
+            }
+
+            notesTable.getItems().stream()
+                    .filter(n -> noteIdToSelect.equals(n.getId()))
+                    .findFirst()
+                    .ifPresentOrElse(
+                            n -> notesTable.getSelectionModel().select(n),
+                            () -> notesTable.getSelectionModel().select(0)
+                    );
         });
 
         new Thread(loadNotesTask).start();
@@ -323,7 +341,7 @@ public class ViewDashboardController {
         }
 
         noteTitleLabel.setText(translation.getTitle());
-        noteViewArea.setText(translation.getContent());
+        noteViewArea.setText(RichTextStorageUtil.toPlainText(translation.getContent()));
         annotationViewArea.setText(translation.getAnnotation());
         refreshTagView(note);
         editButton.setDisable(false);
@@ -490,6 +508,8 @@ public class ViewDashboardController {
         NoteEntity selectedNote = notesTable.getSelectionModel().getSelectedItem();
         if (selectedNote == null) return;
 
+        Long selectedNoteId = selectedNote.getId();
+
         Stage stage = (Stage) rootPane.getScene().getWindow();
         NavigationUtil.openWindow(stage, "/FXML/edit.fxml", "edit.window.title", true, true,
                 (EditNoteController controller) -> {
@@ -500,7 +520,7 @@ public class ViewDashboardController {
                 }
         );
 
-        loadNotes();    // Refresh table after edit
+        loadNotes(selectedNoteId);    // Refresh table after edit and reselect edited note
     }
 
     @FXML
