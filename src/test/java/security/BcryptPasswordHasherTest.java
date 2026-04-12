@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class BcryptPasswordHasherTest {
     private final BcryptPasswordHasher hasher = new BcryptPasswordHasher();
     private final String password = "secret123";
-    private final String hash = "something";
+    private final String hashedPassword = "something";
 
 
     private int invokeGetCost() {
@@ -78,19 +78,19 @@ class BcryptPasswordHasherTest {
 
     @Test
     void testVerifyNullPassword() {
-       hasher.hash(hash);
-        assertFalse(hasher.verify(null, hash));
+       String checkHash = hasher.hash(hashedPassword);
+        assertFalse(hasher.verify(null, checkHash));
     }
 
     @Test
     void testVerifyNullHash() {
-        assertFalse(hasher.verify(hash, null));
+        assertFalse(hasher.verify(hashedPassword, null));
     }
 
     @Test
     void testVerifyEmptyPasswordOrHash() {
-        hasher.hash(hash);
-        assertFalse(hasher.verify("", hash));
-        assertFalse(hasher.verify(hash, ""));
+        String hashCheck = hasher.hash(hashedPassword);
+        assertFalse(hasher.verify("", hashCheck));
+        assertFalse(hasher.verify(hashedPassword, ""));
     }
 }
