@@ -108,13 +108,13 @@ public class UserDashboardController {
 
         String newLastName = lastNameField.getText() == null ? "" : lastNameField.getText().trim();
         String newUsername = usernameField.getText() == null ? "" : usernameField.getText().trim();
-        String newPassword = passwordField.getText() == null ? "" : passwordField.getText().trim();
+        String updatedPassword = passwordField.getText() == null ? "" : passwordField.getText().trim();
         String confirmPassword = confirmPasswordField.getText() == null ? "" : confirmPasswordField.getText().trim();
 
         Validation.ValidationResult result = Validation.validateUpdate(
                 newLastName,
                 newUsername,
-                newPassword,
+                updatedPassword,
                 confirmPassword
         );
 
@@ -129,22 +129,22 @@ public class UserDashboardController {
             return;
         }
 
-        if (!newPassword.isBlank()) {
+        if (!updatedPassword.isBlank()) {
 
-            if (!Validation.validatePasswordMatch(newPassword, confirmPassword)) {
+            if (!Validation.validatePasswordMatch(updatedPassword, confirmPassword)) {
                 ShowMessageUtil.showMessageKey(messageLabel, "account.password_no_match", MessageType.ERROR);
                 return;
             }
 
-            if (newPassword.length() < 6 ||
-                    !newPassword.matches(".*\\d.*") ||
-                    !newPassword.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*")) {
+            if (updatedPassword.length() < 6 ||
+                    !updatedPassword.matches(".*\\d.*") ||
+                    !updatedPassword.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*")) {
 
                 ShowMessageUtil.showMessageKey(messageLabel, "password.not_strong", MessageType.ERROR);
                 return;
             }
 
-            currentUser.changePasswordHash(passwordHasher.hash(newPassword));
+            currentUser.changePasswordHash(passwordHasher.hash(updatedPassword));
         }
 
         currentUser.setLastName(newLastName);
@@ -164,7 +164,7 @@ public class UserDashboardController {
             public void run() {
                 Platform.runLater(() -> WindowUtil.closeWindow(firstNameField));
             }
-        }, 1500); // 1.5 second delay
+        }, 1500);
     }
 
     @FXML

@@ -13,24 +13,33 @@ import javafx.scene.layout.VBox;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.InlineCssTextArea;
 import org.fxmisc.richtext.model.StyleSpans;
-import util.bulletList.BulletListStrategy;
-import util.bulletList.NumberedListStrategy;
-import util.bulletList.TextFormattingUtil;
+import util.RichTextStorageUtil;
+import util.list.BulletListStrategy;
+import util.list.NumberedListStrategy;
+import util.list.TextFormattingUtil;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RichTextEditorController {
 
-    @FXML private VBox editorWrapper;
+    @FXML
+    private VBox editorWrapper;
 
-    @FXML private Button boldButton;
-    @FXML private Button italicButton;
-    @FXML private Button underlineButton;
-    @FXML private Button bulletListButton;
-    @FXML private Button numberedListButton;
-    @FXML private Button headingUpButton;
-    @FXML private Button headingDownButton;
+    @FXML
+    private Button boldButton;
+    @FXML
+    private Button italicButton;
+    @FXML
+    private Button underlineButton;
+    @FXML
+    private Button bulletListButton;
+    @FXML
+    private Button numberedListButton;
+    @FXML
+    private Button headingUpButton;
+    @FXML
+    private Button headingDownButton;
 
     private InlineCssTextArea contentArea;
     private Label placeholderLabel;
@@ -39,6 +48,7 @@ public class RichTextEditorController {
     private static final double MAX_FONT_SIZE = 48.0;
     private static final double FONT_STEP = 2.0;
     private static final double DEFAULT_FONT_SIZE = 14.0;
+    private static final String FONT_WEIGHT_PROPERTY = "-fx-font-weight";
 
     @FXML
     public void initialize() {
@@ -66,9 +76,15 @@ public class RichTextEditorController {
     }
 
 
-
     public String getText() {
         return contentArea.getText();
+    }
+
+    public String getSerializedContent() {
+        return RichTextStorageUtil.serialize(
+                contentArea.getText(),
+                contentArea.getStyleSpans(0, contentArea.getLength())
+        );
     }
 
     public void setText(String text) {
@@ -78,6 +94,20 @@ public class RichTextEditorController {
             contentArea.setStyle(0, safeText.length(), "");
         }
         placeholderLabel.setVisible(safeText.isEmpty());
+    }
+
+    public void setSerializedContent(String stored) {
+        RichTextStorageUtil.DecodedContent decoded = RichTextStorageUtil.decode(stored);
+        String text = decoded.text() == null ? "" : decoded.text();
+
+        contentArea.replaceText(0, contentArea.getLength(), text);
+        if (decoded.spans() != null) {
+            contentArea.setStyleSpans(0, decoded.spans());
+        } else if (!text.isEmpty()) {
+            contentArea.setStyle(0, text.length(), "");
+        }
+
+        placeholderLabel.setVisible(text.isEmpty());
     }
 
     public InlineCssTextArea getTextArea() {
@@ -103,20 +133,23 @@ public class RichTextEditorController {
     private void handleToolbarClick(ActionEvent event) {
         if (!(event.getSource() instanceof Button button)) return;
         switch (button.getId()) {
-            case "boldButton"         -> applyBold();
-            case "italicButton"       -> applyItalic();
-            case "underlineButton"    -> applyUnderline();
-            case "bulletListButton"   -> toggleBullet();
+            case "boldButton" -> applyBold();
+            case "italicButton" -> applyItalic();
+            case "underlineButton" -> applyUnderline();
+            case "bulletListButton" -> toggleBullet();
             case "numberedListButton" -> toggleNumbered();
-            case "headingUpButton"    -> headingUp();
-            case "headingDownButton"  -> headingDown();
+            case "headingUpButton" -> headingUp();
+            case "headingDownButton" -> headingDown();
+            default -> {
+                // No-op: unrecognized toolbar button.
+            }
         }
     }
 
     // ---------- Formatting actions ----------
 
     private void applyBold() {
-        toggleStyle("-fx-font-weight", "bold");
+        toggleStyle(FONT_WEIGHT_PROPERTY, "bold");
     }
 
     private void applyItalic() {
@@ -142,6 +175,7 @@ public class RichTextEditorController {
     private void headingDown() {
         changeFontSize(-FONT_STEP);
     }
+
     /**
      * Toggles a CSS property on the current selection.
      * If every character in the selection already has property=value, the property is removed.
@@ -171,12 +205,12 @@ public class RichTextEditorController {
         StyleSpans<String> spans = contentArea.getStyleSpans(sel.getStart(), sel.getEnd());
         StyleSpans<String> newSpans = spans.mapStyles(style -> {
             double current = parseFontSize(style);
-            double next = Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, current + delta));
+            double next = Math.clamp(current + delta, MIN_FONT_SIZE, MAX_FONT_SIZE);
             String updated = setProperty(style, "-fx-font-size", next + "px");
             // Explicitly pin weight to normal so the font renderer does not pick a heavier
             // optical weight for larger sizes (unless the user has explicitly applied bold).
-            if (!hasProperty(updated, "-fx-font-weight", "bold")) {
-                updated = setProperty(updated, "-fx-font-weight", "normal");
+            if (!hasProperty(updated, FONT_WEIGHT_PROPERTY, "bold")) {
+                updated = setProperty(updated, FONT_WEIGHT_PROPERTY, "normal");
             }
             return updated;
         });

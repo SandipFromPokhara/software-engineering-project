@@ -16,7 +16,7 @@ import javafx.util.Duration;
 import services.NoteService;
 import services.TranslationService;
 import util.*;
-import util.bulletList.TextFormattingUtil;
+import util.list.TextFormattingUtil;
 
 import java.net.URL;
 import java.util.HashSet;
@@ -197,7 +197,7 @@ public class EditNoteController implements Initializable {
 
         if (translation != null) {
             titleField.setText(translation.getTitle());
-            contentEditorController.setText(translation.getContent());
+            contentEditorController.setSerializedContent(translation.getContent());
             annotationBox.setText(translation.getAnnotation());
         } else {
             titleField.clear();
@@ -235,7 +235,7 @@ public class EditNoteController implements Initializable {
                 note,
                 langCode,
                 titleField.getText(),
-                contentEditorController.getText(),
+                contentEditorController.getSerializedContent(),
                 annotationBox.getText(),
                 selectedTags
         );
@@ -248,7 +248,7 @@ public class EditNoteController implements Initializable {
     }
 
     @FXML
-   public  void handleAddTag() {
+    public void handleAddTag() {
         String tagName = tagComboBox.getEditor().getText();
         TagUtil.addTagToUI(selectedTags, tagFlowpane, tagComboBox, tagName);
     }

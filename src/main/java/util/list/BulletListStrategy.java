@@ -1,4 +1,4 @@
-package util.bulletList;
+package util.list;
 
 // Bullet strategy
 public class BulletListStrategy implements IListFormattingStrategy {
