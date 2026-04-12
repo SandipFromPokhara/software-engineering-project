@@ -18,8 +18,6 @@ import session.UserSession;
 
 public class LoginController {
 
-    private UserService userService;
-
     @FXML
     private Label loginWelcome;
 
@@ -52,11 +50,6 @@ public class LoginController {
 
     @FXML
     private void initialize() {
-        JpaUserDao userDao = new JpaUserDao();
-        IPasswordHasher passwordHasher = new BcryptPasswordHasher();
-
-        userService = new UserService(userDao, passwordHasher);
-
         loginButton.setDisable(true);
         statusLabel.setVisible(false);
 
@@ -104,6 +97,10 @@ public class LoginController {
         String password = getPassword();
 
         loginButton.setDisable(true);
+
+        JpaUserDao userDao = new JpaUserDao();
+        IPasswordHasher passwordHasher = new BcryptPasswordHasher();
+        UserService userService = new UserService(userDao, passwordHasher);
 
         Task<UserEntity> loginTask = new Task<>() {
             @Override
