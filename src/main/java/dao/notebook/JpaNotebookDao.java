@@ -10,7 +10,7 @@ import java.util.List;
 
 public class JpaNotebookDao extends GenericAbstractDAO<NotebookEntity, Long> implements INotebookDAO {
 
-    public JpaNotebookDao() {}
+    public JpaNotebookDao() {/* Empty constructor to prevent instantiation of the class */}
 
     @Override
     public NotebookEntity save(NotebookEntity noteBook) {
