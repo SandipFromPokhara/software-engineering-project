@@ -6,7 +6,7 @@
     <persistence-unit name="CompanyMariaDbUnit" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <properties>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:mariadb://${DB_HOST}:${DB_PORT}/${DB_NAME}?useUnicode=true&amp;characterEncoding=utf8mb4"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:mariadb://${DB_HOST}:${DB_PORT}/${DB_NAME}?useUnicode=true&amp;characterEncoding=UTF-8"/>
             <property name="hibernate.connection.characterEncoding" value="utf8mb4"/>
             <property name="hibernate.connection.useUnicode" value="true"/>
             <property name="jakarta.persistence.jdbc.user" value="DB_USER"/>

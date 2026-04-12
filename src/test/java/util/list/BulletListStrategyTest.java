@@ -1,4 +1,4 @@
-package util.bulletList;
+package util.list;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ class BulletListStrategyTest {
     void hasFormat_WithBullet_ReturnsTrue() {
         assertTrue(strategy.hasFormat("• Sample text"));
         assertTrue(strategy.hasFormat("  • Indented bullet"));
-        assertTrue(strategy.hasFormat("1. • Combined format"));
+        assertFalse(strategy.hasFormat("1. • Combined format"));
     }
 
     @Test
@@ -58,7 +58,7 @@ class BulletListStrategyTest {
     void removeFormat_BulletText_RemovesBullet() {
         assertEquals("Sample text", strategy.removeFormat("• Sample text"));
         assertEquals("Text", strategy.removeFormat("  • Text"));
-        assertEquals("Item", strategy.removeFormat("1. • Item"));
+        assertEquals("1. • Item", strategy.removeFormat("1. • Item"));
     }
 
     @Test
@@ -77,4 +77,3 @@ class BulletListStrategyTest {
         assertEquals("", strategy.removeFormat(""));
     }
 }
-

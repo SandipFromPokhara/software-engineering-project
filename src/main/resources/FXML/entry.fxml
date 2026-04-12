@@ -23,7 +23,7 @@
                         <Image url="@../Images/NoteVault.png" />
                     </image>
                 </ImageView>
-                <Label fx:id="privacyLabel" alignment="CENTER" text="" textAlignment="CENTER" textFill="WHITE" wrapText="true" StackPane.alignment="CENTER">
+                <Label fx:id="privacyLabel" alignment="CENTER" textAlignment="CENTER" textFill="WHITE" wrapText="true" StackPane.alignment="CENTER">
                     <StackPane.margin>
                         <Insets left="15.0" right="15.0" top="40.0" />
                     </StackPane.margin>

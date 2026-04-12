@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class EventBus {
+    private EventBus() {
+        /* This utility class should not be instantiated */
+    }
 
     private static final List<Consumer<Object>> listeners = new ArrayList<>();
 

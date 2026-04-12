@@ -65,7 +65,7 @@ The database is automatically initialized when the application runs; no manual s
 
 - For full table details, visit [Database Documentation](Documents/Database/database-architecture.md)
 
-- For modelling diagrams, visit [UML Diagrams](Documents/Diagrams/)
+- For initial and updated modelling diagrams, visit [UML Diagrams](Documents/Diagrams/)
 
 ---
 

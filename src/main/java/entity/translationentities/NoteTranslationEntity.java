@@ -13,7 +13,7 @@ public class NoteTranslationEntity extends BaseTranslationEntity {
     @Column(name="title", nullable=false)
     private String title;
 
-    @Column(name="content", columnDefinition="TEXT")
+    @Column(name="content", columnDefinition="TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String content;
 
     @Column(name="annotation")
@@ -23,7 +23,7 @@ public class NoteTranslationEntity extends BaseTranslationEntity {
     @JoinColumn(name="note_id", nullable=false)
     private NoteEntity note;
 
-    public NoteTranslationEntity() {}
+    public NoteTranslationEntity() {/* JPA only*/}
 
     public String getTitle() { return title; }
 
@@ -53,21 +53,13 @@ public class NoteTranslationEntity extends BaseTranslationEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof NoteTranslationEntity)) return false;
+        if (!(o instanceof NoteTranslationEntity that)) return false;
 
-        // cast to correct type
-        NoteTranslationEntity that = (NoteTranslationEntity) o;
-
-        if (getLangCode() == null || that.getLangCode() == null) return false;
-        if (getNote() == null || that.getNote() == null) return false;
-
-        return Objects.equals(getLangCode(), that.getLangCode())
-                && Objects.equals(note != null ? note.getId() : null,
-                that.note != null ? that.note.getId() : null);
+        return Objects.equals(getLangCode(), that.getLangCode());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getLangCode(), note != null ? note.getId() : null);
+        return Objects.hash(getLangCode());
     }
 }

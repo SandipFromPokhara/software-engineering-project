@@ -8,6 +8,10 @@
 
     <logger name="org.hibernate" level="INFO" />
 
+    <logger name="org.hibernate.engine.jdbc.spi.SqlExceptionHelper" level="OFF" />
+
+    <logger name="org.mariadb.jdbc.message.server.ErrorPacket" level="OFF" />
+
     <logger name ="util" level="DEBUG" />
 
     <root level="INFO">

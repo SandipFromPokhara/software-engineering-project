@@ -10,7 +10,9 @@ import java.util.List;
 
 public class JpaTagDao extends GenericAbstractDAO<TagEntity, Long> implements ITagDAO {
 
-    public JpaTagDao() {}
+    private static final String PARAMETER_TAGNAME = "tagName";
+
+    public JpaTagDao() {/* Empty constructor to prevent instantiation */}
 
     @Override
     public TagEntity save(TagEntity tag) {
@@ -22,7 +24,7 @@ public class JpaTagDao extends GenericAbstractDAO<TagEntity, Long> implements IT
                 // IllegalArgumentException rather than relying solely on DB constraint messages.
                 if (tag.getId() == null) {
                     TypedQuery<Long> q = em.createQuery("SELECT COUNT(t) FROM TagEntity t WHERE LOWER(t.tagName) = LOWER(:tagName)", Long.class);
-                    q.setParameter("tagName", tag.getTagName());
+                    q.setParameter(PARAMETER_TAGNAME, tag.getTagName());
                     Long count = q.getSingleResult();
                     if (count > 0) {
                         throw new IllegalArgumentException("Tag already exists");
@@ -33,7 +35,7 @@ public class JpaTagDao extends GenericAbstractDAO<TagEntity, Long> implements IT
                 } else {
                     // For merge path, ensure no other tag (different id) has the same name
                     TypedQuery<Long> q = em.createQuery("SELECT COUNT(t) FROM TagEntity t WHERE LOWER(t.tagName) = LOWER(:tagName) AND t.id <> :id", Long.class);
-                    q.setParameter("tagName", tag.getTagName()).setParameter("id", tag.getId());
+                    q.setParameter(PARAMETER_TAGNAME, tag.getTagName()).setParameter("id", tag.getId());
                     Long cnt = q.getSingleResult();
                     if (cnt > 0) {
                         throw new IllegalArgumentException("Tag with this name already exists");
@@ -54,7 +56,7 @@ public class JpaTagDao extends GenericAbstractDAO<TagEntity, Long> implements IT
     public boolean existsByName(String tagName) {
         return execute(em -> {
             TypedQuery<Long> query = em.createQuery("SELECT COUNT(t) FROM TagEntity t WHERE LOWER(t.tagName) = LOWER(:tagName)", Long.class);
-            query.setParameter("tagName", tagName);
+            query.setParameter(PARAMETER_TAGNAME, tagName);
 
             Long count = query.getSingleResult();
             return count > 0;
@@ -66,7 +68,7 @@ public class JpaTagDao extends GenericAbstractDAO<TagEntity, Long> implements IT
         return execute(em -> {
             TypedQuery<TagEntity> query = em.createQuery("SELECT t FROM TagEntity t WHERE LOWER(t.tagName) = LOWER(:tagName)", TagEntity.class);
 
-            query.setParameter("tagName", tagName);
+            query.setParameter(PARAMETER_TAGNAME, tagName);
 
             List<TagEntity> result = query.getResultList();
             return result.isEmpty() ? null : result.get(0);
@@ -106,7 +108,7 @@ public class JpaTagDao extends GenericAbstractDAO<TagEntity, Long> implements IT
                                     "WHERE LOWER(t.tagName) = LOWER(:tagName) " +
                                     "AND t.id <> :id", Long.class);
 
-            Long count = query.setParameter("tagName", tag.getTagName())
+            Long count = query.setParameter(PARAMETER_TAGNAME, tag.getTagName())
                             .setParameter("id", tag.getId())
                             .getSingleResult();
 

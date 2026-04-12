@@ -17,7 +17,7 @@ public class NotebookTranslationEntity extends BaseTranslationEntity {
     @JoinColumn(name="notebook_id", nullable = false)
     private NotebookEntity notebook;
 
-    public NotebookTranslationEntity() {}
+    public NotebookTranslationEntity() {/* JPA only*/}
 
     public String getTitle() { return title; }
 
@@ -35,21 +35,13 @@ public class NotebookTranslationEntity extends BaseTranslationEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof NotebookTranslationEntity))return false;
+        if (!(o instanceof NotebookTranslationEntity that)) return false;
 
-        // cast to correct type
-        NotebookTranslationEntity that = (NotebookTranslationEntity) o;
-
-        if (getLangCode() == null || that.getLangCode() == null) return false;
-        if (getNotebook() == null || that.getNotebook() == null) return false;
-
-        return Objects.equals(getLangCode(), that.getLangCode())
-                && Objects.equals(notebook != null ? notebook.getId() : null,
-                that.notebook != null ? that.notebook.getId() : null);
+        return Objects.equals(getLangCode(), that.getLangCode());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getLangCode(), notebook != null ? notebook.getId() : null);
+        return Objects.hash(getLangCode());
     }
 }

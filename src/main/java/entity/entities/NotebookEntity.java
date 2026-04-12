@@ -26,7 +26,7 @@ public class NotebookEntity extends BaseEntity implements ITranslatable<Notebook
         this.user = user;
     }
 
-    public NotebookEntity() {}
+    public NotebookEntity() {/* JPA */}
 
     public UserEntity getUser() { return user; }
 
@@ -46,7 +46,7 @@ public class NotebookEntity extends BaseEntity implements ITranslatable<Notebook
             String langCode = nt.getLangCode();
             nt.setNotebook(this);
 
-            if (translations.containsKey(langCode)) {
+            if (translations.putIfAbsent(langCode, nt) != null) {
                 throw new IllegalArgumentException("Translation already exists for language: " + langCode);
             }
 

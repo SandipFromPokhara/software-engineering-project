@@ -18,20 +18,20 @@ import session.UserSession;
 
 public class LoginController {
 
-    private UserService userService;
-    private JpaUserDao userDao;
-    private IPasswordHasher passwordHasher;
-
-    // For FXML
-    public LoginController() {}
-
-    // For test
-    public LoginController(UserService userService) {
-        this.userService = userService;
-    }
+    @FXML
+    private Label loginWelcome;
 
     @FXML
-    private Label loginWelcome, loginNote, statusLabel, loginNoAccount, privacyLabel;
+    private Label loginNote;
+
+    @FXML
+    private Label statusLabel;
+
+    @FXML
+    private Label loginNoAccount;
+
+    @FXML
+    private Label privacyLabel;
 
     @FXML
     private TextField usernameField;
@@ -40,17 +40,16 @@ public class LoginController {
     private PasswordField passwordField;
 
     @FXML
-    private Button loginButton, backButton;
+    private Button loginButton;
+
+    @FXML
+    private Button backButton;
 
     @FXML
     private Hyperlink signupLink;
 
     @FXML
     private void initialize() {
-        userDao = new JpaUserDao();
-        passwordHasher = new BcryptPasswordHasher();
-        userService = new UserService(userDao, passwordHasher);
-
         loginButton.setDisable(true);
         statusLabel.setVisible(false);
 
@@ -99,6 +98,10 @@ public class LoginController {
 
         loginButton.setDisable(true);
 
+        JpaUserDao userDao = new JpaUserDao();
+        IPasswordHasher passwordHasher = new BcryptPasswordHasher();
+        UserService userService = new UserService(userDao, passwordHasher);
+
         Task<UserEntity> loginTask = new Task<>() {
             @Override
             protected UserEntity call() throws Exception {
@@ -108,6 +111,7 @@ public class LoginController {
 
         loginTask.setOnSucceeded(e -> {
             UserEntity authenticatedUser = loginTask.getValue();
+
             if (authenticatedUser != null) {
                 UserSession.getUserInstance().setUser(authenticatedUser);
                 Stage stage = (Stage) loginButton.getScene().getWindow();

@@ -2,40 +2,59 @@ package dao.basedao;
 
 import datasource.MariaDbJpaConnection;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
 
 import java.util.function.Function;
 
-public abstract class GenericAbstractDAO<T, ID> {
+/**
+ * @param <E> Entity type
+ * @param <K> ID (Key) type
+ */
+public abstract class GenericAbstractDAO<E, K> {
+
+    public abstract E findById(K id);
+    public abstract E save(E entity);
+    public abstract void update(E entity);
+    public abstract void delete(E entity);
 
     protected <R> R executeInTransaction(Function<EntityManager, R> action) {
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        try {
-            em.getTransaction().begin();
+        EntityManager em = MariaDbJpaConnection.getEntityManager();
+        var transaction = em.getTransaction();
+        boolean wasAlreadyActive = em.getTransaction().isActive();
 
+        if (!wasAlreadyActive) {
+            transaction.begin();
+        }
+
+        try {
             R result = action.apply(em);
 
-            em.getTransaction().commit();
+            if (!wasAlreadyActive) {
+                transaction.commit();
+            }
             return result;
 
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
+        } catch (RuntimeException e) {
+            if (!wasAlreadyActive && transaction.isActive()) {
                 em.getTransaction().rollback();
             }
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
+            throw e;
+        } catch (Exception e) { // Catching any potential checked exceptions
+            if (!wasAlreadyActive && transaction.isActive()) {
+                transaction.rollback();
             }
-            throw new RuntimeException("Transaction failed", e);
-        } finally {
-            em.close();
+            throw new PersistenceException("Unexpected checked exception during transaction", e);
         }
     }
 
     protected <R> R execute(Function<EntityManager, R> action) {
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
+        EntityManager em = MariaDbJpaConnection.getEntityManager();
         try {
             return action.apply(em);
-        } finally {
-            em.close();
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new PersistenceException("Data access operation failed", e);
         }
     }
 

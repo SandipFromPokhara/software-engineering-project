@@ -8,7 +8,7 @@ import java.util.List;
 
 public class JpaUserDao extends GenericAbstractDAO<UserEntity, Long> implements IUserDAO {
 
-    public JpaUserDao() {}
+    public JpaUserDao() {/* Prevent instantiation. JPA only*/}
 
     @Override
     public UserEntity save(UserEntity user) {

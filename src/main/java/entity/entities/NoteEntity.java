@@ -16,7 +16,7 @@ public class NoteEntity extends BaseEntity implements ITranslatable<NoteTranslat
     @JoinColumn(name = "notebook_id", nullable = false)
     private NotebookEntity notebook;
 
-    @ManyToMany(fetch=FetchType.LAZY)
+    @ManyToMany(fetch=FetchType.EAGER)
     @JoinTable(
             name = "note_tags",
             joinColumns = @JoinColumn(name = "note_id"),
@@ -28,7 +28,7 @@ public class NoteEntity extends BaseEntity implements ITranslatable<NoteTranslat
     @MapKey(name="langCode")
     private Map<String, NoteTranslationEntity> translations = new HashMap<>();
 
-    public NoteEntity() {}
+    public NoteEntity() {/* JPA */}
 
     public NotebookEntity getNotebook() { return notebook; }
 
@@ -63,7 +63,7 @@ public class NoteEntity extends BaseEntity implements ITranslatable<NoteTranslat
             String langCode = nt.getLangCode();
             nt.setNote(this);
 
-            if (translations.containsKey(langCode)) {
+            if (translations.putIfAbsent(langCode, nt) != null) {
                 throw new IllegalArgumentException("Translation already exists for language: " + langCode);
             }
 

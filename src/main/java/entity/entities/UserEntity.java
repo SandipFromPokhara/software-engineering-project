@@ -34,7 +34,7 @@ public class UserEntity extends BaseEntity {
         this.email = email;
     }
 
-    public UserEntity() {}
+    public UserEntity() {/* Prevent instantiation. JPA only */}
 
     public String getFirstName() { return firstName; }
 

@@ -1,6 +1,5 @@
 package controller;
 
-import dao.note.INoteDAO;
 import dao.tag.ITagDAO;
 import entity.entities.NoteEntity;
 import entity.entities.TagEntity;
@@ -17,7 +16,7 @@ import javafx.util.Duration;
 import services.NoteService;
 import services.TranslationService;
 import util.*;
-import util.bulletList.TextFormattingUtil;
+import util.list.TextFormattingUtil;
 
 import java.net.URL;
 import java.util.HashSet;
@@ -28,7 +27,6 @@ import static model.LanguageModel.DEFAULT_LANGUAGE_CODE;
 
 public class EditNoteController implements Initializable {
 
-    private INoteDAO noteDao;
     private ITagDAO tagDao;
     private NoteEntity note;
     Set<String> selectedTags = new HashSet<>();
@@ -102,10 +100,6 @@ public class EditNoteController implements Initializable {
     private RichTextEditorController contentEditorController;
 
     private UndoRedoManager undoRedoManager = new UndoRedoManager();
-
-    public void setNoteDao(INoteDAO noteDao) {
-        this.noteDao = noteDao;
-    }
 
     public void setTagDao(ITagDAO tagDao) {
         this.tagDao = tagDao;
@@ -204,6 +198,7 @@ public class EditNoteController implements Initializable {
         if (translation != null) {
             titleField.setText(translation.getTitle());
             contentEditorController.setText(translation.getContent());
+            contentEditorController.setSerializedContent(translation.getContent());
             annotationBox.setText(translation.getAnnotation());
         } else {
             titleField.clear();
@@ -235,18 +230,24 @@ public class EditNoteController implements Initializable {
 
     @FXML
     public void handleUpdate() {
+        Set<String> tags = selectedTags == null ? new HashSet<>() : new HashSet<>(selectedTags);
         String langCode = Localization.getCurrentLanguageCode();
 
         noteService.updateNote(
                 note,
                 langCode,
                 titleField.getText(),
-                contentEditorController.getText(),
-                annotationBox.getText(),
-                selectedTags
+                safe(contentEditorController.getSerializedContent()),
+                safe(annotationBox.getText()),
+                tags
         );
 
         handleCancel();
+    }
+
+    // null-check helper
+    private String safe(String s) {
+        return s == null ? "" : s;
     }
 
     private void refreshTagFlowPane() {
@@ -254,7 +255,7 @@ public class EditNoteController implements Initializable {
     }
 
     @FXML
-   public  void handleAddTag() {
+    public void handleAddTag() {
         String tagName = tagComboBox.getEditor().getText();
         TagUtil.addTagToUI(selectedTags, tagFlowpane, tagComboBox, tagName);
     }

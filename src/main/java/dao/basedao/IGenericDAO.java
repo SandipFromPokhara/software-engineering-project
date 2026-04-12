@@ -1,10 +1,10 @@
 package dao.basedao;
 
-public interface IGenericDAO<T, ID> {
+public interface IGenericDAO<T, I> {
 
     T save(T entity);
 
-    T findById(ID id);
+    T findById(I id);
 
     void delete(T entity);
 
