@@ -44,12 +44,12 @@
                     </font>
                 </Label>
                 <VBox layoutX="54.0" layoutY="132.0" prefHeight="128.0" prefWidth="220.0" spacing="20.0" AnchorPane.topAnchor="136.0">
-                        <TextField fx:id="usernameField" alignment="CENTER" prefHeight="30.0" prefWidth="150.0" promptText="Username" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-padding: 6 10 6 10; -fx-border-color: rgba(37,105,115,0.18); -fx-background-color: white;">
+                        <TextField fx:id="usernameField" alignment="CENTER" prefHeight="30.0" prefWidth="150.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-padding: 6 10 6 10; -fx-border-color: rgba(37,105,115,0.18); -fx-background-color: white;">
                             <font>
                                 <Font size="12.0" />
                             </font>
                         </TextField>
-                        <PasswordField fx:id="passwordField" alignment="CENTER" prefHeight="30.0" prefWidth="150.0" promptText="Password" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-padding: 6 10 6 10; -fx-border-color: rgba(37,105,115,0.18); -fx-background-color: white;">
+                        <PasswordField fx:id="passwordField" alignment="CENTER" prefHeight="30.0" prefWidth="150.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-padding: 6 10 6 10; -fx-border-color: rgba(37,105,115,0.18); -fx-background-color: white;">
                             <font>
                                 <Font size="12.0" />
                             </font>
