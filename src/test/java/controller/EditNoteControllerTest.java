@@ -171,7 +171,7 @@ class EditNoteControllerTest {
         String lang = util.Localization.getCurrentLanguageCode();
         note.createTranslation(lang);
 
-        when(editorMock.getText()).thenReturn("New Content");
+        when(editorMock.getSerializedContent()).thenReturn("New Content");
 
         titleField.setText("New Title");
         annotationBox.setText("New Annotation");
