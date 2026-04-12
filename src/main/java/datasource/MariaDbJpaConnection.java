@@ -11,29 +11,32 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-/**
- * Custom exception for database configuration issues.
- */
-class DatabaseConfigurationException extends RuntimeException {
-    public DatabaseConfigurationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-}
-
 public class MariaDbJpaConnection {
 
     private MariaDbJpaConnection() {/* Prevent instantiation */}
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MariaDbJpaConnection.class);
     private static EntityManagerFactory emf;
-    private static EntityManager sharedEm;
+    private static final ThreadLocal<EntityManager> threadLocalEm = new ThreadLocal<>();
 
     public static synchronized EntityManager getEntityManager() {
         ensureFactory();
-        if (sharedEm == null || !sharedEm.isOpen()) {
-            sharedEm = emf.createEntityManager();
+
+        EntityManager em = threadLocalEm.get();
+        if (em == null || !em.isOpen()) {
+            em = emf.createEntityManager();
+            threadLocalEm.set(em);
+            LOGGER.debug("Created new EntityManager for thread: {}", Thread.currentThread().getName());
         }
-        return sharedEm;
+        return em;
+    }
+
+    public static void closeEntityManager() {
+        EntityManager em = threadLocalEm.get();
+        if (em != null && em.isOpen()) {
+            em.close();
+        }
+        threadLocalEm.remove();
     }
 
     private static synchronized void ensureFactory() {
@@ -125,6 +128,8 @@ public class MariaDbJpaConnection {
     }
 
     public static synchronized void shutdown() {
+        closeEntityManager();
+
         if (emf != null && emf.isOpen()) {
             emf.close();
             emf = null;
