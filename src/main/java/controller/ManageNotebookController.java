@@ -2,6 +2,7 @@ package controller;
 
 import dao.notebook.JpaNotebookDao;
 import dao.notebook.INotebookDAO;
+import datasource.MariaDbJpaConnection;
 import entity.entities.NotebookEntity;
 import entity.entities.UserEntity;
 import entity.translationentities.NotebookTranslationEntity;
@@ -148,7 +149,6 @@ public class ManageNotebookController {
         };
     }
 
-
     public void loadNotebooks() {
         try {
             UserEntity user = UserSession.getUserInstance().getUser();
@@ -156,7 +156,11 @@ public class ManageNotebookController {
             Task<List<NotebookEntity>> loadNotebooksTask = new Task<>() {
                 @Override
                 protected List<NotebookEntity> call() {
-                    return notebookDao.findByUser(user);
+                    try {
+                        return notebookDao.findByUser(user);
+                    } finally {
+                        MariaDbJpaConnection.closeEntityManager();
+                    }
                 }
             };
 
