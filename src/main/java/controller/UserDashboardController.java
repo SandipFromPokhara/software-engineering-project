@@ -20,8 +20,12 @@ import util.WindowUtil;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Pattern;
 
 public class UserDashboardController {
+
+    private static final Pattern HAS_DIGIT = Pattern.compile("\\d");
+    private static final Pattern HAS_SPECIAL = Pattern.compile("[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?]");
 
     private IUserDAO userDao = new JpaUserDao();
     private IPasswordHasher passwordHasher;
@@ -137,8 +141,8 @@ public class UserDashboardController {
             }
 
             if (updatedPassword.length() < 6 ||
-                    !updatedPassword.matches(".*\\d.*") ||
-                    !updatedPassword.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*")) {
+                    !HAS_DIGIT.matcher(updatedPassword).find() ||
+                    !HAS_SPECIAL.matcher(updatedPassword).find()) {
 
                 ShowMessageUtil.showMessageKey(messageLabel, "password.not_strong", MessageType.ERROR);
                 return;
