@@ -9,6 +9,7 @@ class ValidationTest {
     private static final String FIRSTNAME = "John";
     private static final String LASTNAME = "Doe";
     private static final String USERNAME = "User123";
+    private static final String username = "username";
     private static final String EMAIL = "user@example.com";
     private static final String PASSWORD = "Abc123!";
 
@@ -42,7 +43,7 @@ class ValidationTest {
         );
 
         assertFalse(result.success());
-        assertTrue(result.errors().containsKey("username"));
+        assertTrue(result.errors().containsKey(username));
     }
 
     @Test
@@ -93,8 +94,9 @@ class ValidationTest {
 
     @Test
     void testValidatePasswordMatch() {
-        assertTrue(Validation.validatePasswordMatch("pass123!", "pass123!"));
-        assertFalse(Validation.validatePasswordMatch("pass123!", "pass124!"));
+        String validatePassword = "pass123!";
+        assertTrue(Validation.validatePasswordMatch(validatePassword, validatePassword));
+        assertFalse(Validation.validatePasswordMatch(validatePassword, "pass124!"));
     }
 
     @Test
@@ -132,7 +134,7 @@ class ValidationTest {
         );
 
         assertFalse(result.success());
-        assertTrue(result.errors().containsKey("username"));
+        assertTrue(result.errors().containsKey(username));
     }
 
     @Test
@@ -143,6 +145,6 @@ class ValidationTest {
 
         assertFalse(result.success());
         assertTrue(result.errors().containsKey("lastName"));
-        assertTrue(result.errors().containsKey("username"));
+        assertTrue(result.errors().containsKey(username));
     }
 }
