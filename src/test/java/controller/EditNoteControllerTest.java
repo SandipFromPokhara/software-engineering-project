@@ -35,7 +35,6 @@ class EditNoteControllerTest {
     @BeforeEach
     void setUp() {
         controller = new EditNoteController();
-
         ITagDAO tagDao = mock(ITagDAO.class);
         note = new NoteEntity();
 
