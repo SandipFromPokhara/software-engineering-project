@@ -27,9 +27,6 @@ class LoginControllerTest {
     private static final String TEST_USERNAME = "validUser";
     private static final String TEST_PASSWORD = "validPass";
 
-    @Mock
-    private UserService mockUserService;
-
     @InjectMocks
     private LoginController controller;
 

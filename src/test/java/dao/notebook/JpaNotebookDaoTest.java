@@ -56,17 +56,18 @@ class JpaNotebookDaoTest {
         NotebookEntity notebook = new NotebookEntity(testUser);
 
         var translation = notebook.createTranslation("EN");
-        translation.setTitle("Find By Title");
+        String findTitle = "Find By Title";
+        translation.setTitle(findTitle);
         notebookDao.save(notebook);
 
-        List<NotebookEntity> retrievedList = notebookDao.findByTitle("Find By Title");
+        List<NotebookEntity> retrievedList = notebookDao.findByTitle(findTitle);
 
         assertNotNull(retrievedList);
         assertFalse(retrievedList.isEmpty());
         boolean found = false;
         for (NotebookEntity book : retrievedList) {
             var getTranslate = book.getTranslations().get("EN");
-            if (getTranslate != null && getTranslate.getTitle().equals("Find By Title")) {
+            if (getTranslate != null && getTranslate.getTitle().equals(findTitle)) {
                 found = true;
                 break;
             }
