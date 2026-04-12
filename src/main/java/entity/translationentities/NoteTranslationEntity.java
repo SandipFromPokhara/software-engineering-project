@@ -53,21 +53,13 @@ public class NoteTranslationEntity extends BaseTranslationEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof NoteTranslationEntity)) return false;
+        if (!(o instanceof NoteTranslationEntity that)) return false;
 
-        // cast to correct type
-        NoteTranslationEntity that = (NoteTranslationEntity) o;
-
-        if (getLangCode() == null || that.getLangCode() == null) return false;
-        if (getNote() == null || that.getNote() == null) return false;
-
-        return Objects.equals(getLangCode(), that.getLangCode())
-                && Objects.equals(note != null ? note.getId() : null,
-                that.note != null ? that.note.getId() : null);
+        return Objects.equals(getLangCode(), that.getLangCode());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getLangCode(), note != null ? note.getId() : null);
+        return Objects.hash(getLangCode());
     }
 }

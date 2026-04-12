@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class NavigationUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(NavigationUtil.class);
@@ -124,8 +125,10 @@ public class NavigationUtil {
             scene.getRoot().getStyleClass().add("root");
         }
 
+        scene.getStylesheets().add(css("/css/theme.css"));
+        scene.getStylesheets().add(css("/css/row_color.css"));
+
         ToggleUtil.applyTheme(scene);
-        scene.getStylesheets().add("/css/row_color.css");
 
         return new FxmlLoadResult<>(scene, loader.getController());
     }
@@ -142,6 +145,7 @@ public class NavigationUtil {
             stage.setMinHeight(400);
         }
     }
+
     public static void setCenter(VBox centerPane, String fxmlPath) {
         try {
             FxmlLoadResult<?> result = buildScene(fxmlPath);
@@ -159,5 +163,12 @@ public class NavigationUtil {
         } catch (IOException e) {
             LOGGER.error("Failed to load center FXML: {}", fxmlPath, e);
         }
+    }
+
+    private static String css(String path) {
+        return Objects.requireNonNull(
+                NavigationUtil.class.getResource(path),
+                "Missing CSS file: " + path
+        ).toExternalForm();
     }
 }

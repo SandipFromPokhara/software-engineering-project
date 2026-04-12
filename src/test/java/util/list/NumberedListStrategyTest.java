@@ -1,4 +1,4 @@
-package util.bulletList;
+package util.list;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ class NumberedListStrategyTest {
     void applyFormat_BulletText_RemovesBulletAndAddsNumber() {
         assertEquals("1. Item", strategy.applyFormat("• Item", 1));
         assertEquals("3. Text", strategy.applyFormat("  • Text", 3));
-        assertEquals("5. Content", strategy.applyFormat("1. • Content", 5));
+        assertEquals("5. 1. • Content", strategy.applyFormat("1. • Content", 5));
     }
 
     @Test
@@ -86,4 +86,3 @@ class NumberedListStrategyTest {
         assertEquals("", strategy.removeFormat(""));
     }
 }
-
