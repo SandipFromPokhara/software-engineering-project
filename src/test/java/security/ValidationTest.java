@@ -11,13 +11,13 @@ class ValidationTest {
     private static final String USER123 = "User123";
     private static final String USERNAME = "username";
     private static final String EMAIL = "user@example.com";
-    private static final String PASSWORD = "Abc123!";
+    private static final String TEST_PASS = "Abc123!";
 
     @Test
     void testValidateSignupValid() {
         Validation.ValidationResult result = Validation.validateSignup(
                 FIRSTNAME, LASTNAME, USER123,
-                EMAIL, PASSWORD, PASSWORD
+                EMAIL, TEST_PASS, TEST_PASS
         );
 
         assertTrue(result.success());
@@ -28,7 +28,7 @@ class ValidationTest {
     void testValidateSignupMissingFields() {
         Validation.ValidationResult result = Validation.validateSignup(
                 "", LASTNAME, USER123,
-                EMAIL, PASSWORD, PASSWORD
+                EMAIL, TEST_PASS, TEST_PASS
         );
 
         assertFalse(result.success());
@@ -39,7 +39,7 @@ class ValidationTest {
     void testValidateSignupInvalidUsername() {
         Validation.ValidationResult result = Validation.validateSignup(
                 FIRSTNAME, LASTNAME, "Us",
-                EMAIL, PASSWORD, PASSWORD
+                EMAIL, TEST_PASS, TEST_PASS
         );
 
         assertFalse(result.success());
@@ -50,7 +50,7 @@ class ValidationTest {
     void testValidateSignupInvalidEmail() {
         Validation.ValidationResult result = Validation.validateSignup(
                 FIRSTNAME, LASTNAME, USER123,
-                "invalid-email", PASSWORD, PASSWORD
+                "invalid-email", TEST_PASS, TEST_PASS
         );
 
         assertFalse(result.success());
@@ -61,7 +61,7 @@ class ValidationTest {
     void testValidateSignupPasswordMismatch() {
         Validation.ValidationResult result = Validation.validateSignup(
                 FIRSTNAME, LASTNAME, USER123,
-                EMAIL, PASSWORD, "Wrong123!"
+                EMAIL, TEST_PASS, "Wrong123!"
         );
 
         assertFalse(result.success());
@@ -94,9 +94,9 @@ class ValidationTest {
 
     @Test
     void testValidatePasswordMatch() {
-        String validatePassword = "pass123!";
-        assertTrue(Validation.validatePasswordMatch(validatePassword, validatePassword));
-        assertFalse(Validation.validatePasswordMatch(validatePassword, "pass124!"));
+        String validateMatch = "pass123!";
+        assertTrue(Validation.validatePasswordMatch(validateMatch, validateMatch));
+        assertFalse(Validation.validatePasswordMatch(validateMatch, "pass124!"));
     }
 
     @Test
@@ -111,7 +111,7 @@ class ValidationTest {
     @Test
     void testValidateUpdateWithPasswordChangeValid() {
         Validation.ValidationResult result = Validation.validateUpdate(
-                LASTNAME, USER123, PASSWORD, PASSWORD
+                LASTNAME, USER123, TEST_PASS, TEST_PASS
         );
 
         assertTrue(result.success());
@@ -120,7 +120,7 @@ class ValidationTest {
     @Test
     void testValidateUpdatePasswordMismatch() {
         Validation.ValidationResult result = Validation.validateUpdate(
-                LASTNAME, USER123, PASSWORD, "Wrong123!"
+                LASTNAME, USER123, TEST_PASS, "Wrong123!"
         );
 
         assertFalse(result.success());

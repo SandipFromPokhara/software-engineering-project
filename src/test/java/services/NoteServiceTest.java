@@ -6,10 +6,9 @@ import dao.tag.JpaTagDao;
 import entity.entities.NotebookEntity;
 import entity.entities.NoteEntity;
 import entity.entities.UserEntity;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import session.UserSession;
 
 import java.util.ArrayList;
@@ -20,10 +19,10 @@ import static org.mockito.Mockito.*;
 
 class NoteServiceTest {
 
-    private final String content = "content";
-    private final String annotation = "annotation";
-    private final String notNull = "NotNull";
-    private final String testTitle = "Test Title";
+    private static final String CONTENT = "content";
+    private static final String ANNOTATION = "annotation";
+    private static final String NOT_NULL = "NotNull";
+    private static final String TEST_TITLE = "Test Title";
 
     private JpaNoteDao noteDao;
     private JpaNotebookDao notebookDao;
@@ -35,6 +34,14 @@ class NoteServiceTest {
         notebookDao = mock(JpaNotebookDao.class);
         JpaTagDao tagDao = mock(JpaTagDao.class);
         noteService = new NoteService(noteDao, notebookDao, tagDao);
+        // ensure no leftover session
+        UserSession.getUserInstance().setUser(null);
+    }
+
+    @AfterEach
+    void tearDown() {
+        // reset singleton session state between tests
+        UserSession.getUserInstance().setUser(null);
     }
 
     @Test
@@ -42,14 +49,9 @@ class NoteServiceTest {
         UserEntity user = new UserEntity();
         user.setFirstName("Test");
 
-        try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
-            UserSession session = mock(UserSession.class);
-            when(session.getUser()).thenReturn(user);
-            mockedSession.when(UserSession::getUserInstance).thenReturn(session);
-
-            assertThrows(IllegalArgumentException.class, () ->
-                    noteService.createNote(null, content, annotation, null, null, "en"));
-        }
+        UserSession.getUserInstance().setUser(user);
+        assertThrows(IllegalArgumentException.class, () ->
+                noteService.createNote(null, CONTENT, ANNOTATION, null, null, "en"));
     }
 
     @Test
@@ -57,26 +59,16 @@ class NoteServiceTest {
         UserEntity user = new UserEntity();
         user.setFirstName("Test");
 
-        try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
-            UserSession session = mock(UserSession.class);
-            when(session.getUser()).thenReturn(user);
-            mockedSession.when(UserSession::getUserInstance).thenReturn(session);
-
-            assertThrows(IllegalArgumentException.class, () ->
-                    noteService.createNote("   ", content, annotation, null, null, "en"));
-        }
+        UserSession.getUserInstance().setUser(user);
+        assertThrows(IllegalArgumentException.class, () ->
+                noteService.createNote("   ", CONTENT, ANNOTATION, null, null, "en"));
     }
 
     @Test
     void createNoteNoUserLoggedInTest() {
-        try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
-            UserSession session = mock(UserSession.class);
-            when(session.getUser()).thenReturn(null);
-            mockedSession.when(UserSession::getUserInstance).thenReturn(session);
-
-            assertThrows(IllegalStateException.class, () ->
-                    noteService.createNote("title", content, annotation, null, null, "en"));
-        }
+        UserSession.getUserInstance().setUser(null);
+        assertThrows(IllegalStateException.class, () ->
+                noteService.createNote("title", CONTENT, ANNOTATION, null, null, "en"));
     }
 
     @Test
@@ -87,20 +79,16 @@ class NoteServiceTest {
 
         var translation = notebook.createTranslation("en");
         translation.setTitle("Test Notebook");
-        Set<String> tags = Set.of(notNull);
+        Set<String> tags = Set.of(NOT_NULL);
         NoteEntity expectedNote = new NoteEntity();
 
-        try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
-            UserSession session = mock(UserSession.class);
-            when(session.getUser()).thenReturn(user);
-            mockedSession.when(UserSession::getUserInstance).thenReturn(session);
-            when(noteDao.save(any(NoteEntity.class))).thenReturn(expectedNote);
+        UserSession.getUserInstance().setUser(user);
+        when(noteDao.save(any(NoteEntity.class))).thenReturn(expectedNote);
 
-            NoteEntity result = noteService.createNote(testTitle, content, annotation, notebook, tags, "en");
+        NoteEntity result = noteService.createNote(TEST_TITLE, CONTENT, ANNOTATION, notebook, tags, "en");
 
-            assertNotNull(result);
-            verify(noteDao, times(1)).save(any(NoteEntity.class));
-        }
+        assertNotNull(result);
+        verify(noteDao, times(1)).save(any(NoteEntity.class));
     }
 
     @Test
@@ -113,21 +101,17 @@ class NoteServiceTest {
         translation.setTitle("Test's Notebook");
         NoteEntity expectedNote = new NoteEntity();
 
-        try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
-            UserSession session = mock(UserSession.class);
-            when(session.getUser()).thenReturn(user);
-            mockedSession.when(UserSession::getUserInstance).thenReturn(session);
-            when(notebookDao.findByUser(user)).thenReturn(new ArrayList<>());
-            when(notebookDao.save(any(NotebookEntity.class))).thenReturn(personalNotebook);
-            when(noteDao.save(any(NoteEntity.class))).thenReturn(expectedNote);
+        UserSession.getUserInstance().setUser(user);
+        when(notebookDao.findByUser(user)).thenReturn(new ArrayList<>());
+        when(notebookDao.save(any(NotebookEntity.class))).thenReturn(personalNotebook);
+        when(noteDao.save(any(NoteEntity.class))).thenReturn(expectedNote);
 
-            NoteEntity result = noteService.createNote(testTitle, content, annotation, null, null, "en");
+        NoteEntity result = noteService.createNote(TEST_TITLE, CONTENT, ANNOTATION, null, null, "en");
 
-            assertNotNull(result);
-            verify(notebookDao, times(1)).findByUser(user);
-            verify(notebookDao, times(1)).save(any(NotebookEntity.class));
-            verify(noteDao, times(1)).save(any(NoteEntity.class));
-        }
+        assertNotNull(result);
+        verify(notebookDao, times(1)).findByUser(user);
+        verify(notebookDao, times(1)).save(any(NotebookEntity.class));
+        verify(noteDao, times(1)).save(any(NoteEntity.class));
     }
 
     @Test
@@ -138,20 +122,16 @@ class NoteServiceTest {
 
         var translation = notebook.createTranslation("en");
         translation.setTitle("Content Notebook");
-        Set<String> tags = Set.of(notNull);
+        Set<String> tags = Set.of(NOT_NULL);
         NoteEntity expectedNote = new NoteEntity();
 
-        try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
-            UserSession session = mock(UserSession.class);
-            when(session.getUser()).thenReturn(user);
-            mockedSession.when(UserSession::getUserInstance).thenReturn(session);
-            when(noteDao.save(any(NoteEntity.class))).thenReturn(expectedNote);
+        UserSession.getUserInstance().setUser(user);
+        when(noteDao.save(any(NoteEntity.class))).thenReturn(expectedNote);
 
-            NoteEntity result = noteService.createNote(testTitle, null, annotation, notebook, tags, "en");
+        NoteEntity result = noteService.createNote(TEST_TITLE, null, ANNOTATION, notebook, tags, "en");
 
-            assertNotNull(result);
-            verify(noteDao, times(1)).save(any(NoteEntity.class));
-        }
+        assertNotNull(result);
+        verify(noteDao, times(1)).save(any(NoteEntity.class));
     }
 
     @Test
@@ -162,19 +142,15 @@ class NoteServiceTest {
 
         var translation = notebook.createTranslation("en");
         translation.setTitle("Annotation Notebook");
-        Set<String> tags = Set.of(notNull);
+        Set<String> tags = Set.of(NOT_NULL);
         NoteEntity expectedNote = new NoteEntity();
 
-        try (MockedStatic<UserSession> mockedSession = Mockito.mockStatic(UserSession.class)) {
-            UserSession session = mock(UserSession.class);
-            when(session.getUser()).thenReturn(user);
-            mockedSession.when(UserSession::getUserInstance).thenReturn(session);
-            when(noteDao.save(any(NoteEntity.class))).thenReturn(expectedNote);
+        UserSession.getUserInstance().setUser(user);
+        when(noteDao.save(any(NoteEntity.class))).thenReturn(expectedNote);
 
-            NoteEntity result = noteService.createNote(testTitle, content, null, notebook, tags, "en");
+        NoteEntity result = noteService.createNote(TEST_TITLE, CONTENT, null, notebook, tags, "en");
 
-            assertNotNull(result);
-            verify(noteDao, times(1)).save(any(NoteEntity.class));
-        }
+        assertNotNull(result);
+        verify(noteDao, times(1)).save(any(NoteEntity.class));
     }
 }

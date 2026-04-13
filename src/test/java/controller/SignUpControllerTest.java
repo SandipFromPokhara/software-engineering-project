@@ -506,13 +506,13 @@ class SignUpControllerTest {
     @Test
     void testPasswordIsHashedBeforeSaving() throws Exception {
         mockUserDAO.reset();
-        String plainPassword = "Pass123!";
-        setFieldValues("John", "Doe", "johndoe", "john@example.com", plainPassword, plainPassword);
+        String plainPass = "Pass123!";
+        setFieldValues("John", "Doe", "johndoe", "john@example.com", plainPass, plainPass);
         invokeHandleSignUp();
         Thread.sleep(2000);
 
         assertNotNull(mockUserDAO.savedUser);
-        assertNotEquals(plainPassword, mockUserDAO.savedUser.getPasswordHash());
+        assertNotEquals(plainPass, mockUserDAO.savedUser.getPasswordHash());
         assertTrue(mockUserDAO.savedUser.getPasswordHash().startsWith("$2a$"));
     }
 
