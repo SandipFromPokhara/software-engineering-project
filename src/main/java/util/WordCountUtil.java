@@ -3,7 +3,6 @@ package util;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextInputControl;
 import org.fxmisc.richtext.InlineCssTextArea;
 
 public class WordCountUtil {

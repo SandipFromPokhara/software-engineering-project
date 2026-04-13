@@ -60,7 +60,7 @@ public class NoteEntity extends BaseEntity implements ITranslatable<NoteTranslat
             String langCode = nt.getLangCode();
             nt.setNote(this);
 
-            if (translations.containsKey(langCode)) {
+            if (translations.putIfAbsent(langCode, nt) != null) {
                 throw new IllegalArgumentException("Translation already exists for language: " + langCode);
             }
 

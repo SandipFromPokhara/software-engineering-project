@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class JpaUserDaoTest {
 
     private static JpaUserDao dao;
-    private static UserEntity testUser;
+    private UserEntity testUser;
 
     @BeforeAll
     static void setupBeforeClass() {
@@ -22,7 +22,7 @@ class JpaUserDaoTest {
         em.getTransaction().begin();
 
         String unique = String.valueOf(System.currentTimeMillis());
-        testUser = new UserEntity("Test", "User", "tester" + unique, "tester" + unique + "@example.com");
+        this.testUser = new UserEntity("Test", "User", "tester" + unique, "tester" + unique + "@example.com");
         dao.save(testUser);
 
         em.flush();
