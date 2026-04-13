@@ -5,6 +5,8 @@ import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -19,14 +21,8 @@ class MariaDbJpaConnectionTest {
         when(mockEmf.createEntityManager()).thenReturn(mockEm);
         when(mockEmf.isOpen()).thenReturn(true);
 
-        // Inject mocks using reflection
-        try {
-            var emfField = MariaDbJpaConnection.class.getDeclaredField("emf");
-            emfField.setAccessible(true);
-            emfField.set(null, mockEmf);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        // Inject mocks using targeted reflection
+        injectStaticField("emf", mockEmf);
     }
 
     @Test
@@ -44,11 +40,23 @@ class MariaDbJpaConnectionTest {
 
     private EntityManagerFactory getStaticEmfField() {
         try {
-            var emfField = MariaDbJpaConnection.class.getDeclaredField("emf");
-            emfField.setAccessible(true);
-            return (EntityManagerFactory) emfField.get(null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            Field field = MariaDbJpaConnection.class.getDeclaredField("emf");
+            field.setAccessible(true);
+            return (EntityManagerFactory) field.get(null);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalStateException("Failed to read 'emf' field via reflection", e);
+        }
+    }
+
+    private void injectStaticField(String fieldName, Object value) {
+        try {
+            Field field = MariaDbJpaConnection.class.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(null, value);
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException("Field '" + fieldName + "' not found in MariaDbJpaConnection. Did the production code change?", e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Security Manager prevented access to field: " + fieldName, e);
         }
     }
 }

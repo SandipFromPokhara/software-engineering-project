@@ -18,17 +18,6 @@ import session.UserSession;
 
 public class LoginController {
 
-    private UserService userService;
-
-    public LoginController() {
-        /* Empty constructor */
-    }
-
-    // For test
-    public LoginController(UserService userService) {
-        this.userService = userService;
-    }
-
     @FXML
     private Label loginWelcome;
 
@@ -61,11 +50,6 @@ public class LoginController {
 
     @FXML
     private void initialize() {
-        JpaUserDao userDao = new JpaUserDao();
-        IPasswordHasher passwordHasher = new BcryptPasswordHasher();
-
-        userService = new UserService(userDao, passwordHasher);
-
         loginButton.setDisable(true);
         statusLabel.setVisible(false);
 
@@ -114,6 +98,10 @@ public class LoginController {
 
         loginButton.setDisable(true);
 
+        JpaUserDao userDao = new JpaUserDao();
+        IPasswordHasher passwordHasher = new BcryptPasswordHasher();
+        UserService userService = new UserService(userDao, passwordHasher);
+
         Task<UserEntity> loginTask = new Task<>() {
             @Override
             protected UserEntity call() throws Exception {
@@ -123,6 +111,7 @@ public class LoginController {
 
         loginTask.setOnSucceeded(e -> {
             UserEntity authenticatedUser = loginTask.getValue();
+
             if (authenticatedUser != null) {
                 UserSession.getUserInstance().setUser(authenticatedUser);
                 Stage stage = (Stage) loginButton.getScene().getWindow();

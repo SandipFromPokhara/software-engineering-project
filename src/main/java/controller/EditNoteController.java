@@ -197,6 +197,7 @@ public class EditNoteController implements Initializable {
 
         if (translation != null) {
             titleField.setText(translation.getTitle());
+            contentEditorController.setText(translation.getContent());
             contentEditorController.setSerializedContent(translation.getContent());
             annotationBox.setText(translation.getAnnotation());
         } else {
@@ -229,18 +230,24 @@ public class EditNoteController implements Initializable {
 
     @FXML
     public void handleUpdate() {
+        Set<String> tags = selectedTags == null ? new HashSet<>() : new HashSet<>(selectedTags);
         String langCode = Localization.getCurrentLanguageCode();
 
         noteService.updateNote(
                 note,
                 langCode,
                 titleField.getText(),
-                contentEditorController.getSerializedContent(),
-                annotationBox.getText(),
-                selectedTags
+                safe(contentEditorController.getSerializedContent()),
+                safe(annotationBox.getText()),
+                tags
         );
 
         handleCancel();
+    }
+
+    // null-check helper
+    private String safe(String s) {
+        return s == null ? "" : s;
     }
 
     private void refreshTagFlowPane() {
