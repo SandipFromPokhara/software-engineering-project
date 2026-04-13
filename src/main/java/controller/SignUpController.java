@@ -275,10 +275,10 @@ public class SignUpController {
 
         int score = 0;
         if (password.length() >= 6) score++;
-        if (password.matches(".*[A-Z].*")) score++;
-        if (password.matches(".*[a-z].*")) score++;
-        if (password.matches(".*\\d.*")) score++;
-        if (password.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*")) score++;
+        if (password.chars().anyMatch(Character::isUpperCase)) score++;
+        if (password.chars().anyMatch(Character::isLowerCase)) score++;
+        if (password.chars().anyMatch(Character::isDigit)) score++;
+        if (password.chars().anyMatch(c -> "!@#$%^&*()_+=\\-[]{};\':\"\\|,.<>/?".indexOf(c) >= 0)) score++;
 
         double progress = score / 5.0;
         passwordStrengthBar.setProgress(progress);
