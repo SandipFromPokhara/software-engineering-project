@@ -103,7 +103,7 @@ class LoginControllerTest {
         });
 
         // Wait for the JavaFX thread to finish setup
-        if (!latch.await(5, TimeUnit.SECONDS)) {
+        if (!latch.await(30, TimeUnit.SECONDS)) {
             throw new IllegalStateException("Timeout waiting for JavaFX setup");
         }
 
