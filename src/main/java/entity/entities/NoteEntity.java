@@ -39,12 +39,15 @@ public class NoteEntity extends BaseEntity implements ITranslatable<NoteTranslat
 
     public void addTag(TagEntity tag) {
         if (tag != null) {
+            // Owning side of the relationship is NoteEntity.tags.
+            // Don't touch tag.getNotes() here; it's LAZY and may be detached outside a session.
             tags.add(tag);
         }
     }
 
     public void removeTag(TagEntity tag) {
         if (tag != null) {
+            // Only update the owning side to avoid lazy-init of TagEntity.notes.
             tags.remove(tag);
         }
     }
