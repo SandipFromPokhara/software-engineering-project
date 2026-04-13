@@ -65,7 +65,7 @@ The database is automatically initialized when the application runs; no manual s
 
 - For full table details, visit [Database Documentation](Documents/Database/database-architecture.md)
 
-- For initial and updated modelling diagrams, visit [UML Diagrams](Documents/Diagrams/)
+- For initial and updated modelling diagrams, visit [UML Diagrams](Documents/Diagrams)
 
 ---
 
@@ -98,8 +98,8 @@ Developed by a team of 4 students as part of:
 
 - **Trello workspace:** [SEP1_Team9](https://trello.com/w/sep1_team9/home)
 
-- **Detailed DevOps process, project management:** [Related Files](Documents/Related_Files/)
+- **Detailed DevOps process, project management:** [Related Files](Documents/Related_Files)
 
-- **Localization Documentation:** [Localization Details](Documents/Localization/localization.md)
+- **UI and DB Localization Documentations:** [Localization Details](Documents/Localization)
 
-- **Sprint reports and reviews:** [Sprint Documentations](Documents/Sprint_Reports/)
+- **Sprint reports and reviews:** [Sprint Documentations](Documents/Sprint_Reports)

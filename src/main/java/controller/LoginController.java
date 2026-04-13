@@ -48,8 +48,29 @@ public class LoginController {
     @FXML
     private Hyperlink signupLink;
 
+    private UserService userService;
+
+    private Stage stage;
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+    private UserService getUserService() {
+        if (userService == null) {
+            JpaUserDao userDao = new JpaUserDao();
+            IPasswordHasher passwordHasher = new BcryptPasswordHasher();
+            userService = new UserService(userDao, passwordHasher);
+        }
+        return userService;
+    }
+
     @FXML
-    private void initialize() {
+    void initialize() {
+        initView();
+    }
+
+    void initView() {
         loginButton.setDisable(true);
         statusLabel.setVisible(false);
 
@@ -69,11 +90,11 @@ public class LoginController {
 
         usernameField.setOnAction(this::handleLogin);
         passwordField.setOnAction(this::handleLogin);
+        loginButton.setOnAction(this::handleLogin);
     }
 
     @FXML
     private void handleBack() {
-        Stage stage = (Stage) backButton.getScene().getWindow();
         NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "entry.window_title", false);
     }
 
@@ -92,20 +113,18 @@ public class LoginController {
     }
 
     @FXML
-    private void handleLogin(ActionEvent event) {
+    void handleLogin(ActionEvent event) {
         String username = getUsername();
         String password = getPassword();
 
         loginButton.setDisable(true);
 
-        JpaUserDao userDao = new JpaUserDao();
-        IPasswordHasher passwordHasher = new BcryptPasswordHasher();
-        UserService userService = new UserService(userDao, passwordHasher);
+        UserService service = getUserService();
 
         Task<UserEntity> loginTask = new Task<>() {
             @Override
-            protected UserEntity call() throws Exception {
-                return userService.login(username, password);
+            protected UserEntity call() {
+                return service.login(username, password);
             }
         };
 
@@ -114,7 +133,6 @@ public class LoginController {
 
             if (authenticatedUser != null) {
                 UserSession.getUserInstance().setUser(authenticatedUser);
-                Stage stage = (Stage) loginButton.getScene().getWindow();
                 NavigationUtil.replaceScene(stage, "/FXML/view_dashboard.fxml", "dashboard.window_title", true);
             } else {
                 loginButton.setDisable(false);
@@ -128,7 +146,22 @@ public class LoginController {
 
     @FXML
     private void handleSignUp() {
-        Stage stage = (Stage) signupLink.getScene().getWindow();
         NavigationUtil.replaceScene(stage, "/FXML/signup.fxml", "register.window_title", false);
+    }
+
+    // setters for package-private fields required for testing
+    void setUsernameField(TextField field) { this.usernameField = field; }
+    void setPasswordField(PasswordField field) { this.passwordField = field; }
+    void setLoginButton(Button button) { this.loginButton = button; }
+    void setStatusLabel(Label label) { this.statusLabel = label; }
+    void setSignupLink(Hyperlink link) { this.signupLink = link; }
+    void setBackButton(Button button) { this.backButton = button; }
+    void setLoginWelcome(Label label) { this.loginWelcome = label; }
+    void setLoginNote(Label label) { this.loginNote = label; }
+    void setLoginNoAccount(Label label) { this.loginNoAccount = label; }
+    void setPrivacyLabel(Label label) { this.privacyLabel = label; }
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
     }
 }
