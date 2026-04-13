@@ -10,9 +10,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BcryptPasswordHasherTest {
     private final BcryptPasswordHasher hasher = new BcryptPasswordHasher();
-    private final String password = "secret123";
-    private final String hashedPassword = "something";
+    private static final String TEST_PASS = "secret123";
+    private static final String TEST_HASH_INPUT= "something";
 
+    static class ReflectionAccessException extends RuntimeException {
+        public ReflectionAccessException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
 
     private int invokeGetCost() {
         try {
@@ -20,9 +25,10 @@ class BcryptPasswordHasherTest {
             method.setAccessible(true);
             return (int) method.invoke(hasher);
         } catch (NoSuchMethodException e) {
-            throw new IllegalStateException("Refactor Error: 'getCost' method was renamed or removed in BcryptPasswordHasher.", e);
+            throw new ReflectionAccessException("'getCost' method was renamed or removed.", e);
+
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException("Reflection failed for 'getCost'. Check JVM security settings.", e);
+            throw new ReflectionAccessException("Reflection failed for 'getCost'.", e);
         }
     }
 
@@ -36,25 +42,25 @@ class BcryptPasswordHasherTest {
 
     @Test
     void testHashAndVerify() {
-        String hashing = hasher.hash(password);
+        String hashing = hasher.hash(TEST_PASS);
 
         assertNotNull(hashing);
         assertFalse(hashing.isBlank());
 
-        // verify correct password
-        assertTrue(hasher.verify(password, hashing));
+        // verify correct TEST_PASS
+        assertTrue(hasher.verify(TEST_PASS, hashing));
 
-        // verify wrong password
+        // verify wrong TEST_PASS
         assertFalse(hasher.verify("WrongPass", hashing));
 
-        // verify null password
+        // verify null TEST_PASS
         assertFalse(hasher.verify(null, hashing));
 
         // verify null hash
-        assertFalse(hasher.verify(password, null));
+        assertFalse(hasher.verify(TEST_PASS, null));
 
         // verify blank hash
-        assertFalse(hasher.verify(password, ""));
+        assertFalse(hasher.verify(TEST_PASS, ""));
     }
 
     @Test
@@ -66,31 +72,31 @@ class BcryptPasswordHasherTest {
 
     @Test
     void testVerifyValidPassword() {
-        String hash = hasher.hash(password);
-        assertTrue(hasher.verify(password, hash));
+        String hash = hasher.hash(TEST_PASS);
+        assertTrue(hasher.verify(TEST_PASS, hash));
     }
 
     @Test
     void testVerifyWrongPassword() {
-        String hash = hasher.hash(password);
+        String hash = hasher.hash(TEST_PASS);
         assertFalse(hasher.verify("wrongpass", hash));
     }
 
     @Test
     void testVerifyNullPassword() {
-       String checkHash = hasher.hash(hashedPassword);
+       String checkHash = hasher.hash(TEST_HASH_INPUT);
         assertFalse(hasher.verify(null, checkHash));
     }
 
     @Test
     void testVerifyNullHash() {
-        assertFalse(hasher.verify(hashedPassword, null));
+        assertFalse(hasher.verify(TEST_HASH_INPUT, null));
     }
 
     @Test
     void testVerifyEmptyPasswordOrHash() {
-        String hashCheck = hasher.hash(hashedPassword);
+        String hashCheck = hasher.hash(TEST_HASH_INPUT);
         assertFalse(hasher.verify("", hashCheck));
-        assertFalse(hasher.verify(hashedPassword, ""));
+        assertFalse(hasher.verify(TEST_HASH_INPUT, ""));
     }
 }

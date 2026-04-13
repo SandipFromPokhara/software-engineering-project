@@ -1,32 +1,35 @@
 package controller;
 
+import entity.entities.UserEntity;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import services.UserService;
 import testutil.JavaFxTestExtension;
 
-import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(JavaFxTestExtension.class)
 class LoginControllerTest {
 
     private static final String TEST_USERNAME = "validUser";
-    private static final String TEST_PASSWORD = "validPass";
+    private static final String TEST_PASS = "validPass";
 
-    @InjectMocks
-    private LoginController controller;
+    @Mock
+    private UserService userService;
 
     private TextField usernameField;
     private PasswordField passwordField;
@@ -34,162 +37,166 @@ class LoginControllerTest {
     private Label statusLabel;
     private Hyperlink signupLink;
     private Button backButton;
-    private Label loginWelcome;
-    private Label loginNote;
-    private Label loginNoAccount;
-    private Label privacyLabel;
 
-    private Stage testStage;
+    private Stage stage;
+    private Scene scene;
+    private Pane root;
+
+    private LoginController controller;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() throws InterruptedException {
+
         CountDownLatch latch = new CountDownLatch(1);
 
         Platform.runLater(() -> {
-            usernameField = new TextField();
-            passwordField = new PasswordField();
-            loginButton = new Button();
-            statusLabel = new Label();
-            signupLink = new Hyperlink();
-            backButton = new Button();
+            try {
+                controller = new LoginController();
 
-            loginWelcome = new Label();
-            loginNote = new Label();
-            loginNoAccount = new Label();
-            privacyLabel = new Label();
+                usernameField = new TextField();
+                passwordField = new PasswordField();
+                loginButton = new Button();
+                statusLabel = new Label();
+                signupLink = new Hyperlink();
+                backButton = new Button();
 
-            testStage = new Stage();
+                Label loginWelcome = new Label();
+                Label loginNote = new Label();
+                Label loginNoAccount = new Label();
+                Label privacyLabel = new Label();
 
-            VBox root = new VBox(
-                    usernameField,
-                    passwordField,
-                    loginButton,
-                    statusLabel,
-                    signupLink,
-                    backButton
-            );
+                controller.setUsernameField(usernameField);
+                controller.setPasswordField(passwordField);
+                controller.setLoginButton(loginButton);
+                controller.setStatusLabel(statusLabel);
+                controller.setSignupLink(signupLink);
+                controller.setBackButton(backButton);
+                controller.setLoginWelcome(loginWelcome);
+                controller.setLoginNote(loginNote);
+                controller.setLoginNoAccount(loginNoAccount);
+                controller.setPrivacyLabel(privacyLabel);
+                controller.setUserService(userService);
 
-            testStage.setScene(new Scene(root, 400, 400));
-            latch.countDown();
+                stage = new Stage();
+                root = new Pane();
+
+                root.getChildren().addAll(
+                        usernameField,
+                        passwordField,
+                        loginButton,
+                        statusLabel,
+                        signupLink,
+                        backButton
+                );
+
+                scene = new Scene(root);
+                stage.setScene(scene);
+                stage.show();
+
+                controller.setStage(stage);
+
+                controller.initView();
+
+            } finally {
+                latch.countDown();
+            }
         });
 
+        // Wait for the JavaFX thread to finish setup
         if (!latch.await(5, TimeUnit.SECONDS)) {
-            throw new AssertionError("Test timed out: JavaFX initialization took longer than 5 seconds.");
+            throw new IllegalStateException("Timeout waiting for JavaFX setup");
         }
 
-        // Inject UI fields using reflection (since we aren't changing the source)
-        setField(controller, "usernameField", usernameField);
-        setField(controller, "passwordField", passwordField);
-        setField(controller, "loginButton", loginButton);
-        setField(controller, "statusLabel", statusLabel);
-        setField(controller, "signupLink", signupLink);
-        setField(controller, "backButton", backButton);
-
-        setField(controller, "loginWelcome", loginWelcome);
-        setField(controller, "loginNote", loginNote);
-        setField(controller, "loginNoAccount", loginNoAccount);
-        setField(controller, "privacyLabel", privacyLabel);
-
-        invokePrivateMethod("initialize");
+        await().atMost(2, SECONDS).untilAsserted(() ->
+                assertNotNull(loginButton)
+        );
     }
 
-    private void setField(Object target, String fieldName, Object value) {
-        try {
-            var field = target.getClass().getDeclaredField(fieldName);
-            field.setAccessible(true);
-            field.set(target, value);
-        } catch (NoSuchFieldException e) {
-            throw new IllegalArgumentException("Refactor Error: Field '" + fieldName + "' not found.", e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException("Access denied to field '" + fieldName + "'", e);
-        }
-    }
+    /* ---------------- FIELD VALIDATION ---------------- */
 
-    private void setFieldValues(String username, String password) throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
+    @Test
+    void testLoginButtonEnabledWhenFieldsFilled() {
 
         Platform.runLater(() -> {
-            usernameField.setText(username);
-            passwordField.setText(password);
-            latch.countDown();
+            usernameField.setText(TEST_USERNAME);
+            passwordField.setText(TEST_PASS);
         });
 
-        assertTrue(latch.await(2, TimeUnit.SECONDS), "Setting field values timed out.");
-    }
-
-    private void invokePrivateMethod(String methodName, Object... args) throws Exception {
-
-        Class<?>[] paramTypes = new Class<?>[args.length];
-        for (int i = 0; i < args.length; i++) {
-            paramTypes[i] = args[i].getClass();
-        }
-
-        Method method = LoginController.class.getDeclaredMethod(methodName, paramTypes);
-        method.setAccessible(true);
-
-        CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<Throwable> error = new AtomicReference<>();
-
-        Platform.runLater(() -> {
-            try {
-                method.invoke(controller, args);
-            } catch (Throwable t) {
-                error.set(t);
-            } finally {
-                latch.countDown();
-            }
-        });
-
-        assertTrue(latch.await(2, TimeUnit.SECONDS), "FX thread invocation timed out");
-
-        if (error.get() != null) {
-            throw new RuntimeException("Controller method failed", error.get());
-        }
+        await().atMost(2, SECONDS).untilAsserted(
+                () -> assertFalse(loginButton.isDisabled())
+        );
     }
 
     @Test
-    void testLoginButtonEnabledWhenFieldsFilled() throws Exception {
-        setFieldValues(TEST_USERNAME, TEST_PASSWORD);
-        invokePrivateMethod("checkFields");
-        assertFalse(loginButton.isDisabled());
-    }
+    void testLoginButtonDisabledWhenFieldsEmpty() {
 
-    @Test
-    void testLoginButtonDisabledWhenFieldsEmpty() throws Exception {
-        setFieldValues("", "");
-        invokePrivateMethod("checkFields");
-        assertTrue(loginButton.isDisabled());
-    }
-
-    @Test
-    void testHandleSignUpNavigation() throws Exception {
-        invokePrivateMethod("handleSignUp");
-
-        CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {
-            try {
-                assertNotNull(testStage.getScene());
-            } finally {
-                latch.countDown();
-            }
+            usernameField.setText("");
+            passwordField.setText("");
         });
 
-        assertTrue(latch.await(2, TimeUnit.SECONDS));
+        await().atMost(2, SECONDS).untilAsserted(
+                () -> assertTrue(loginButton.isDisabled())
+        );
+    }
+
+    /* ---------------- LOGIN SUCCESS ---------------- */
+
+    @Test
+    void testHandleLoginSuccess() {
+
+        UserEntity mockUser = new UserEntity();
+        when(userService.login(TEST_USERNAME, TEST_PASS)).thenReturn(mockUser);
+
+        Platform.runLater(() -> {
+            usernameField.setText(TEST_USERNAME);
+            passwordField.setText(TEST_PASS);
+            loginButton.fire();
+        });
+
+        await().atMost(2, SECONDS).untilAsserted(
+                () -> verify(userService).login(TEST_USERNAME, TEST_PASS)
+        );
+    }
+
+    /* ---------------- LOGIN FAILURE ---------------- */
+
+    @Test
+    void testHandleLoginFailure() {
+
+        when(userService.login(TEST_USERNAME, TEST_PASS)).thenReturn(null);
+
+        Platform.runLater(() -> {
+            usernameField.setText(TEST_USERNAME);
+            passwordField.setText(TEST_PASS);
+            loginButton.fire();
+        });
+
+        await().atMost(2, SECONDS).untilAsserted(() -> {
+            assertTrue(statusLabel.isVisible());
+            assertFalse(loginButton.isDisabled());
+        });
+    }
+
+    /* ---------------- NAVIGATION ---------------- */
+
+    @Test
+    void testHandleSignUpNavigation() {
+
+        Platform.runLater(signupLink::fire);
+
+        await().atMost(2, SECONDS).untilAsserted(
+                () -> assertTrue(signupLink.isVisible())
+        );
     }
 
     @Test
-    void testHandleBackNavigation() throws Exception {
-        invokePrivateMethod("handleBack");
+    void testHandleBackNavigation() {
 
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            try {
-                assertNotNull(testStage.getScene());
-            } finally {
-                latch.countDown();
-            }
-        });
+        Platform.runLater(backButton::fire);
 
-        assertTrue(latch.await(2, TimeUnit.SECONDS));
+        await().atMost(2, SECONDS).untilAsserted(
+                () -> assertTrue(backButton.isVisible())
+        );
     }
 }
