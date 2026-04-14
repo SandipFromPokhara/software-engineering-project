@@ -39,6 +39,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(JavaFxTestExtension.class)
 class CreateNoteControllerTest {
 
+    private static final String IMPORTANT_TAG = "Important";
+    private static final String TEST_NOTE_TITLE = "Test Note";
+    private static final String TEST_NOTE_CONTENT = "Test Content";
+    private static final String TEST_NOTE_ANNOTATION = "Test Annotation";
+    private static final String SELECTED_TAGS_FIELD = "selectedTags";
+
     private CreateNoteController controller;
     private MockNoteService mockNoteService;
     private MockNotebookDao mockNotebookDao;
@@ -429,7 +435,7 @@ class CreateNoteControllerTest {
     @Test
     void initialize_WithExistingTags_PopulatesTagComboBox() throws Exception {
         TagEntity tag1 = new TagEntity();
-        tag1.setTagName("Important");
+        tag1.setTagName(IMPORTANT_TAG);
 
         TagEntity tag2 = new TagEntity();
         tag2.setTagName("Work");
@@ -496,9 +502,9 @@ class CreateNoteControllerTest {
         invokeInitialize();
 
         runOnFxAndWait(() -> {
-            titleField.setText("Test Note");
-            contentEditorController.setText("Test Content");
-            annotationArea.setText("Test Annotation");
+            titleField.setText(TEST_NOTE_TITLE);
+            contentEditorController.setText(TEST_NOTE_CONTENT);
+            annotationArea.setText(TEST_NOTE_ANNOTATION);
             notebookComboBox.getSelectionModel().select(0);
         });
 
@@ -508,9 +514,9 @@ class CreateNoteControllerTest {
 
         var translation = mockNoteService.savedNote.getTranslations().get(Localization.getCurrentLanguageCode());
         assertNotNull(translation);
-        assertEquals("Test Note", translation.getTitle());
-        assertEquals("Test Content", RichTextStorageUtil.decode(translation.getContent()).text());
-        assertEquals("Test Annotation", translation.getAnnotation());
+        assertEquals(TEST_NOTE_TITLE, translation.getTitle());
+        assertEquals(TEST_NOTE_CONTENT, RichTextStorageUtil.decode(translation.getContent()).text());
+        assertEquals(TEST_NOTE_ANNOTATION, translation.getAnnotation());
     }
 
     @Test
@@ -539,7 +545,7 @@ class CreateNoteControllerTest {
         invokeInitialize();
 
         runOnFxAndWait(() -> {
-            titleField.setText("Test Note");
+            titleField.setText(TEST_NOTE_TITLE);
             // Clear the notebook selection
             notebookComboBox.getSelectionModel().clearSelection();
         });
@@ -559,27 +565,27 @@ class CreateNoteControllerTest {
         mockNotebookDao.addNotebook(notebook);
 
         TagEntity tag1 = new TagEntity();
-        tag1.setTagName("Important");
+        tag1.setTagName(IMPORTANT_TAG);
         mockTagDao.addTag(tag1);
 
         invokeInitialize();
 
         runOnFxAndWait(() -> {
-            titleField.setText("Test Note");
+            titleField.setText(TEST_NOTE_TITLE);
             notebookComboBox.getSelectionModel().select(0);
         });
 
-        Field selectedTagsField = CreateNoteController.class.getDeclaredField("selectedTags");
+        Field selectedTagsField = CreateNoteController.class.getDeclaredField(SELECTED_TAGS_FIELD);
         selectedTagsField.setAccessible(true);
         @SuppressWarnings("unchecked")
         java.util.Set<String> selectedTags = (java.util.Set<String>) selectedTagsField.get(controller);
-        selectedTags.add("Important");
+        selectedTags.add(IMPORTANT_TAG);
 
         invokeSave();
 
         assertNotNull(mockNoteService.savedNote);
         assertTrue(mockNoteService.savedNote.getTags().stream()
-                .anyMatch(tag -> tag.getTagName().equals("Important")));
+                .anyMatch(tag -> tag.getTagName().equals(IMPORTANT_TAG)));
     }
 
     @Test
@@ -590,11 +596,11 @@ class CreateNoteControllerTest {
         invokeInitialize();
 
         runOnFxAndWait(() -> {
-            titleField.setText("Test Note");
+            titleField.setText(TEST_NOTE_TITLE);
             notebookComboBox.getSelectionModel().select(0);
         });
 
-        Field selectedTagsField = CreateNoteController.class.getDeclaredField("selectedTags");
+        Field selectedTagsField = CreateNoteController.class.getDeclaredField(SELECTED_TAGS_FIELD);
         selectedTagsField.setAccessible(true);
         @SuppressWarnings("unchecked")
         java.util.Set<String> selectedTags = (java.util.Set<String>) selectedTagsField.get(controller);
@@ -614,7 +620,7 @@ class CreateNoteControllerTest {
         invokeInitialize();
 
         runOnFxAndWait(() -> {
-            titleField.setText("Test Note");
+            titleField.setText(TEST_NOTE_TITLE);
             notebookComboBox.getSelectionModel().select(0);
         });
 
@@ -624,7 +630,7 @@ class CreateNoteControllerTest {
 
         var translation = mockNoteService.savedNote.getTranslations().get(Localization.getCurrentLanguageCode());
         assertNotNull(translation);
-        assertEquals("Test Note", translation.getTitle());
+        assertEquals(TEST_NOTE_TITLE, translation.getTitle());
     }
 
     @Test
@@ -633,8 +639,8 @@ class CreateNoteControllerTest {
 
         runOnFxAndWait(() -> {
             titleField.setText("Test Title");
-            contentEditorController.setText("Test Content");
-            annotationArea.setText("Test Annotation");
+            contentEditorController.setText(TEST_NOTE_CONTENT);
+            annotationArea.setText(TEST_NOTE_ANNOTATION);
         });
 
         invokeClear();
@@ -657,7 +663,7 @@ class CreateNoteControllerTest {
     void handleClear_ClearsSelectedTags() throws Exception {
         invokeInitialize();
 
-        Field selectedTagsField = CreateNoteController.class.getDeclaredField("selectedTags");
+        Field selectedTagsField = CreateNoteController.class.getDeclaredField(SELECTED_TAGS_FIELD);
         selectedTagsField.setAccessible(true);
         @SuppressWarnings("unchecked")
         java.util.Set<String> selectedTags = (java.util.Set<String>) selectedTagsField.get(controller);
@@ -677,7 +683,7 @@ class CreateNoteControllerTest {
         invokeInitialize();
 
         runOnFxAndWait(() -> {
-            titleField.setText("Test Note");
+            titleField.setText(TEST_NOTE_TITLE);
             notebookComboBox.getSelectionModel().select(0);
         });
 
@@ -699,7 +705,7 @@ class CreateNoteControllerTest {
         invokeInitialize();
 
         runOnFxAndWait(() -> {
-            titleField.setText("  Test Note  ");
+            titleField.setText("  " + TEST_NOTE_TITLE + "  ");
             notebookComboBox.getSelectionModel().select(0);
         });
 
@@ -709,7 +715,7 @@ class CreateNoteControllerTest {
 
         var translation = mockNoteService.savedNote.getTranslations().get(Localization.getCurrentLanguageCode());
         assertNotNull(translation);
-        assertEquals("Test Note", translation.getTitle());
+        assertEquals(TEST_NOTE_TITLE, translation.getTitle());
     }
 
     @Test
@@ -720,7 +726,7 @@ class CreateNoteControllerTest {
         invokeInitialize();
 
         runOnFxAndWait(() -> {
-            titleField.setText("Test Note");
+            titleField.setText(TEST_NOTE_TITLE);
             notebookComboBox.getSelectionModel().select(0);
         });
 
@@ -730,5 +736,99 @@ class CreateNoteControllerTest {
         runOnFxAndWait(() -> message.set(statusLabel.getText()));
 
         assertTrue(message.get().contains(Localization.get("create.success")));
+    }
+
+    @Test
+    void handleUndoAndRedo_ExecutesWithoutException() throws Exception {
+        invokeInitialize();
+        
+        runOnFxAndWait(() -> {
+            try {
+                java.lang.reflect.Method undoMethod = CreateNoteController.class.getDeclaredMethod("handleUndo");
+                undoMethod.setAccessible(true);
+                undoMethod.invoke(controller);
+
+                java.lang.reflect.Method redoMethod = CreateNoteController.class.getDeclaredMethod("handleRedo");
+                redoMethod.setAccessible(true);
+                redoMethod.invoke(controller);
+            } catch (Exception e) {
+                fail("Undo/Redo should not throw an exception", e);
+            }
+        });
+    }
+
+    @Test
+    void handleSave_WhenExceptionIsThrown_ShowsErrorMessage() throws Exception {
+        NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
+        mockNotebookDao.addNotebook(notebook);
+
+        invokeInitialize();
+
+        runOnFxAndWait(() -> {
+            titleField.setText(TEST_NOTE_TITLE);
+            notebookComboBox.getSelectionModel().select(0);
+        });
+
+        mockNoteService.shouldThrowException = true;
+        invokeSave();
+
+        AtomicReference<String> message = new AtomicReference<>();
+        runOnFxAndWait(() -> message.set(statusLabel.getText()));
+
+        assertTrue(message.get().contains("Error: Mock exception"));
+    }
+
+    @Test
+    void handleAddTag_AddsTagToSelectedTags() throws Exception {
+        invokeInitialize();
+
+        runOnFxAndWait(() -> {
+            tagComboBox.getEditor().setText("NewAddedTag");
+            try {
+                java.lang.reflect.Method addTagMethod = CreateNoteController.class.getDeclaredMethod("handleAddTag");
+                addTagMethod.setAccessible(true);
+                addTagMethod.invoke(controller);
+            } catch (Exception e) {
+                fail("handleAddTag should not throw an exception", e);
+            }
+        });
+
+        Field selectedTagsField = CreateNoteController.class.getDeclaredField(SELECTED_TAGS_FIELD);
+        selectedTagsField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        java.util.Set<String> selectedTags = (java.util.Set<String>) selectedTagsField.get(controller);
+
+        assertTrue(selectedTags.contains("NewAddedTag"));
+    }
+
+    @Test
+    void handleThemeToggle_TogglesIcon() throws Exception {
+        invokeInitialize();
+
+        runOnFxAndWait(() -> {
+            try {
+                java.lang.reflect.Method toggleMethod = CreateNoteController.class.getDeclaredMethod("handleThemeToggle");
+                toggleMethod.setAccessible(true);
+                toggleMethod.invoke(controller);
+            } catch (Exception e) {
+                fail("handleThemeToggle should not throw an exception", e);
+            }
+        });
+
+        AtomicReference<ImageView> graphic = new AtomicReference<>();
+        runOnFxAndWait(() -> {
+            graphic.set((ImageView) toggleBtn.getGraphic());
+        });
+
+        assertNotNull(graphic.get());
+    }
+
+    @Test
+    void getNotebookTitle_WithNullNotebook_ReturnsEmpty() throws Exception {
+        java.lang.reflect.Method getTitleMethod = CreateNoteController.class.getDeclaredMethod("getNotebookTitle", NotebookEntity.class);
+        getTitleMethod.setAccessible(true);
+        
+        String title = (String) getTitleMethod.invoke(controller, (NotebookEntity) null);
+        assertEquals("", title);
     }
 }

@@ -12,6 +12,7 @@ public final class JavaFXInitializer {
         if (!initialized) {
             try {
                 Platform.startup(() -> {});
+                Platform.setImplicitExit(false);
             } catch (IllegalStateException ignored) {
                 // JavaFX already initialized — ignore
             }
