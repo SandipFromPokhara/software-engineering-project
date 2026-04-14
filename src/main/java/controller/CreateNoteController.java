@@ -15,7 +15,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javafx.util.Duration;
+
 import services.NoteService;
 import entity.entities.NoteEntity;
 import session.UserSession;
@@ -161,8 +161,8 @@ public class CreateNoteController implements Initializable {
         addTagBtn.textProperty().bind(Localization.bind("create.add_tags"));
 
         // Tooltip delay
-        tagTooltip.setShowDelay(Duration.millis(100));
-        toggleTooltip.setShowDelay(Duration.millis(100));
+        TooltipUtil.setTooltipDelay(tagTooltip);
+        TooltipUtil.setTooltipDelay(toggleTooltip);
 
         // Load current user and notebooks
         UserEntity currentUser = UserSession.getUserInstance().getUser();
