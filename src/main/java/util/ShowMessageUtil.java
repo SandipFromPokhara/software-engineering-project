@@ -12,6 +12,7 @@ public class ShowMessageUtil {
         label.setText(message);
         applyStyle(label, type);
         label.setVisible(true);
+        label.setManaged(true);
     }
 
     // For localization keys
@@ -19,11 +20,13 @@ public class ShowMessageUtil {
         label.setText(Localization.get(key));
         applyStyle(label, type);
         label.setVisible(true);
+        label.setManaged(true);
     }
 
     public static void hideMessage(Label label) {
         label.setText("");
         label.setVisible(false);
+        label.setManaged(false);
     }
 
     private static void applyStyle(Label label, MessageType type) {
