@@ -3,10 +3,7 @@ package controller;
 import dao.user.IUserDAO;
 import entity.entities.UserEntity;
 import javafx.application.Platform;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +12,7 @@ import security.IPasswordHasher;
 import testutil.JavaFXInitializer;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SignUpControllerTest {
+
+    private static final long FX_TIMEOUT_SECONDS = 2;
 
     private SignUpController controller;
     private MockUserDAO mockUserDAO;
@@ -34,49 +34,71 @@ class SignUpControllerTest {
     private Label messageLabel, createAccount, joinAccount, haveAccount;
     private Label privacyLabel, passwordStrengthLabel;
     private ProgressBar passwordStrengthBar;
-    private Stage testStage;
 
     private static class MockUserDAO implements IUserDAO {
         private UserEntity userToReturn;
         UserEntity savedUser;
-        boolean shouldThrowRuntimeException = false;
-        boolean shouldThrowIllegalArgumentException = false;
-        boolean shouldReturnNullOnSave = false;
-        boolean shouldReturnUserWithoutId = false;
+        boolean shouldThrowRuntimeException;
+        boolean shouldThrowIllegalArgumentException;
+        boolean shouldReturnNullOnSave;
+        boolean shouldReturnUserWithoutId;
 
         @Override
         public UserEntity save(UserEntity user) {
-            if (shouldThrowIllegalArgumentException) throw new IllegalArgumentException("Validation error");
-            if (shouldThrowRuntimeException) throw new RuntimeException("Database error");
-            if (shouldReturnNullOnSave) return null;
-            if (shouldReturnUserWithoutId)
+            if (shouldThrowIllegalArgumentException) {
+                throw new IllegalArgumentException("Validation error");
+            }
+            if (shouldThrowRuntimeException) {
+                throw new RuntimeException("Database error");
+            }
+            if (shouldReturnNullOnSave) {
+                return null;
+            }
+            if (shouldReturnUserWithoutId) {
                 return new UserEntity(user.getFirstName(), user.getLastName(),
                         user.getUsername(), user.getEmail());
+            }
 
             savedUser = user;
-            UserEntity returnUser = new UserEntity(user.getFirstName(), user.getLastName(),
+            // The controller under test doesn't require an entity id for these tests.
+            return new UserEntity(user.getFirstName(), user.getLastName(),
                     user.getUsername(), user.getEmail());
-            setId(returnUser, 1L);
-            return returnUser;
         }
 
         @Override
         public UserEntity findByUsername(String username) {
-            if (userToReturn != null && userToReturn.getUsername().equals(username)) return userToReturn;
+            if (userToReturn != null && userToReturn.getUsername().equals(username)) {
+                return userToReturn;
+            }
             return null;
         }
 
         @Override
         public UserEntity findByEmail(String email) {
-            if (userToReturn != null && userToReturn.getEmail().equals(email)) return userToReturn;
+            if (userToReturn != null && userToReturn.getEmail().equals(email)) {
+                return userToReturn;
+            }
             return null;
         }
 
-        @Override public UserEntity findById(Long id) { return null; }
-        @Override public void update(UserEntity user) {}
-        @Override public void delete(UserEntity user) {}
+        @Override
+        public UserEntity findById(Long id) {
+            return null;
+        }
 
-        public void setUserToReturn(UserEntity user) { this.userToReturn = user; }
+        @Override
+        public void update(UserEntity user) {
+            // not needed for tests
+        }
+
+        @Override
+        public void delete(UserEntity user) {
+            // not needed for tests
+        }
+
+        public void setUserToReturn(UserEntity user) {
+            this.userToReturn = user;
+        }
 
         public void reset() {
             userToReturn = null;
@@ -86,14 +108,6 @@ class SignUpControllerTest {
             shouldReturnNullOnSave = false;
             shouldReturnUserWithoutId = false;
         }
-
-        private void setId(UserEntity user, Long id) {
-            try {
-                Field idField = UserEntity.class.getDeclaredField("id");
-                idField.setAccessible(true);
-                idField.set(user, id);
-            } catch (Exception ignored) {}
-        }
     }
 
     @BeforeAll
@@ -102,12 +116,11 @@ class SignUpControllerTest {
     }
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         controller = new SignUpController();
         passwordHasher = new BcryptPasswordHasher();
 
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxThreadAndWait(() -> {
             firstNameField = new TextField();
             lastNameField = new TextField();
             usernameField = new TextField();
@@ -124,21 +137,7 @@ class SignUpControllerTest {
             privacyLabel = new Label();
             passwordStrengthLabel = new Label();
             passwordStrengthBar = new ProgressBar();
-
-            testStage = new Stage();
-            VBox root = new VBox();
-            root.getChildren().addAll(
-                    signUpButton, loginLink, backButton, messageLabel,
-                    firstNameField, lastNameField, usernameField,
-                    emailField, passwordField, confirmPasswordField,
-                    createAccount, joinAccount, haveAccount,
-                    privacyLabel, passwordStrengthLabel, passwordStrengthBar
-            );
-            Scene scene = new Scene(root, 400, 600);
-            testStage.setScene(scene);
-            latch.countDown();
         });
-        latch.await(2, TimeUnit.SECONDS);
 
         // Inject UI fields first
         injectField("firstNameField", firstNameField);
@@ -159,12 +158,7 @@ class SignUpControllerTest {
         injectField("passwordStrengthBar", passwordStrengthBar);
 
         // Call initialize() — this sets userDAO = new JpaUserDao() internally
-        CountDownLatch initLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            controller.initialize();
-            initLatch.countDown();
-        });
-        initLatch.await(2, TimeUnit.SECONDS);
+        runOnFxThreadAndWait(controller::initialize);
 
         // Inject mock DAO and passwordHasher AFTER initialize() so they override JpaUserDao
         mockUserDAO = new MockUserDAO();
@@ -172,43 +166,90 @@ class SignUpControllerTest {
         controller.setPasswordHasher(passwordHasher);
     }
 
-    private void injectField(String fieldName, Object value) throws Exception {
-        Field field = SignUpController.class.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(controller, value);
+    private static void runOnFxThreadAndWait(Runnable action) {
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            try {
+                action.run();
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        try {
+            boolean completed = latch.await(FX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            assertTrue(completed, "Timed out waiting for JavaFX thread");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            fail("Interrupted while waiting for JavaFX thread");
+        }
+    }
+
+    private void injectField(String fieldName, Object value) {
+        try {
+            Field field = SignUpController.class.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(controller, value);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            fail("Failed to inject field '" + fieldName + "': " + e.getMessage());
+        }
     }
 
     private void setFieldValues(String firstName, String lastName, String username,
-                                String email, String password, String confirmPassword) throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+                                String email, String password, String confirmPassword) {
+        runOnFxThreadAndWait(() -> {
             firstNameField.setText(firstName);
             lastNameField.setText(lastName);
             usernameField.setText(username);
             emailField.setText(email);
             passwordField.setText(password);
             confirmPasswordField.setText(confirmPassword);
-            latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
     }
 
-    private void invokeHandleSignUp() throws Exception {
-        Method method = SignUpController.class.getDeclaredMethod("handleSignUp");
-        method.setAccessible(true);
+    private void invokePrivateMethod(String methodName) {
+        Method method;
+        try {
+            method = SignUpController.class.getDeclaredMethod(methodName);
+            method.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            fail("Missing method '" + methodName + "': " + e.getMessage());
+            return;
+        }
 
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxThreadAndWait(() -> {
             try {
                 method.invoke(controller);
-            } catch (Exception ignored) {}
-            latch.countDown();
+            } catch (IllegalAccessException e) {
+                fail("Cannot access method '" + methodName + "': " + e.getMessage());
+            } catch (InvocationTargetException e) {
+                // Surface the underlying exception to make failures actionable
+                fail("Invocation of '" + methodName + "' failed: " + e.getTargetException());
+            }
         });
-        latch.await(1, TimeUnit.SECONDS);
     }
 
-    private boolean hasMessage() {
-        return messageLabel.isVisible() || !messageLabel.getText().isEmpty();
+    private void invokeHandleSignUp() {
+        invokePrivateMethod("handleSignUp");
+    }
+
+    private void waitUntilMessageVisible() {
+        // Avoid Thread.sleep; poll briefly on the FX thread.
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+        while (System.nanoTime() < deadline) {
+            if (isMessageVisibleOrNonEmpty()) {
+                return;
+            }
+            runOnFxThreadAndWait(() -> {
+                // no-op; allows FX events to flush
+            });
+        }
+    }
+
+    private boolean isMessageVisibleOrNonEmpty() {
+        final boolean[] result = {false};
+        runOnFxThreadAndWait(() -> result[0] = messageLabel.isVisible() || !messageLabel.getText().isEmpty());
+        return result[0];
     }
 
     // ─── Tests ───
@@ -219,106 +260,87 @@ class SignUpControllerTest {
     }
 
     @Test
-    void testInitialize() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            // Button starts disabled until form is valid
-            assertTrue(signUpButton.isDisabled());
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
+    void testInitialize() {
+        runOnFxThreadAndWait(() -> assertTrue(signUpButton.isDisabled()));
     }
 
     @Test
-    void testHandleSignUpWithEmptyFields() throws Exception {
+    void testHandleSignUpWithEmptyFields() {
         setFieldValues("", "", "", "", "", "");
         invokeHandleSignUp();
-        Thread.sleep(500);
-        assertTrue(hasMessage());
+        waitUntilMessageVisible();
+        assertTrue(isMessageVisibleOrNonEmpty());
     }
 
     @Test
-    void testHandleSignUpWithInvalidEmail() throws Exception {
+    void testHandleSignUpWithInvalidEmail() {
         setFieldValues("John", "Doe", "johndoe", "invalid-email", "Pass123!", "Pass123!");
         invokeHandleSignUp();
-        Thread.sleep(500);
-        assertTrue(hasMessage());
+        waitUntilMessageVisible();
+        assertTrue(isMessageVisibleOrNonEmpty());
     }
 
     @Test
-    void testHandleSignUpWithPasswordMismatch() throws Exception {
+    void testHandleSignUpWithPasswordMismatch() {
         setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass456!");
         invokeHandleSignUp();
-        Thread.sleep(500);
-        assertTrue(hasMessage());
+        waitUntilMessageVisible();
+        assertTrue(isMessageVisibleOrNonEmpty());
     }
 
     @Test
-    void testHandleSignUpWithWeakPassword() throws Exception {
+    void testHandleSignUpWithWeakPassword() {
         setFieldValues("John", "Doe", "johndoe", "john@example.com", "pass", "pass");
         invokeHandleSignUp();
-        Thread.sleep(500);
-        assertTrue(hasMessage());
+        waitUntilMessageVisible();
+        assertTrue(isMessageVisibleOrNonEmpty());
     }
 
     @Test
-    void testHandleSignUpWithInvalidUsername() throws Exception {
+    void testHandleSignUpWithInvalidUsername() {
         setFieldValues("John", "Doe", "ab", "john@example.com", "Pass123!", "Pass123!");
         invokeHandleSignUp();
-        Thread.sleep(500);
-        assertTrue(hasMessage());
+        waitUntilMessageVisible();
+        assertTrue(isMessageVisibleOrNonEmpty());
     }
 
     @Test
-    void testHandleSignUpWithExistingUsername() throws Exception {
+    void testHandleSignUpWithExistingUsername() {
         UserEntity existingUser = new UserEntity("Jane", "Doe", "johndoe", "jane@example.com");
         mockUserDAO.setUserToReturn(existingUser);
 
         setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
         invokeHandleSignUp();
-        Thread.sleep(1000);
+        waitUntilMessageVisible();
 
-        CountDownLatch latch = new CountDownLatch(1);
-        final String[] text = {""};
-        final boolean[] visible = {false};
-        Platform.runLater(() -> {
-            text[0] = messageLabel.getText();
-            visible[0] = messageLabel.isVisible();
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-
-        assertTrue(visible[0] || !text[0].isEmpty(), "Message should be shown");
+        assertTrue(isMessageVisibleOrNonEmpty(), "Message should be shown");
     }
 
     @Test
-    void testHandleSignUpWithExistingEmail() throws Exception {
+    void testHandleSignUpWithExistingEmail() {
         UserEntity existingUser = new UserEntity("Jane", "Doe", "janedoe", "john@example.com");
         mockUserDAO.setUserToReturn(existingUser);
 
         setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
         invokeHandleSignUp();
-        Thread.sleep(1000);
+        waitUntilMessageVisible();
 
-        CountDownLatch latch = new CountDownLatch(1);
-        final String[] text = {""};
-        final boolean[] visible = {false};
-        Platform.runLater(() -> {
-            text[0] = messageLabel.getText();
-            visible[0] = messageLabel.isVisible();
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-
-        assertTrue(visible[0] || !text[0].isEmpty(), "Message should be shown");
+        assertTrue(isMessageVisibleOrNonEmpty(), "Message should be shown");
     }
 
     @Test
-    void testSuccessfulSignUp() throws Exception {
+    void testSuccessfulSignUp() {
         mockUserDAO.reset();
         setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
         invokeHandleSignUp();
-        Thread.sleep(2000);
+
+        // wait until DAO was called
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+        while (System.nanoTime() < deadline && mockUserDAO.savedUser == null) {
+            runOnFxThreadAndWait(() -> {
+                // no-op
+            });
+        }
 
         assertNotNull(mockUserDAO.savedUser);
         assertEquals("John", mockUserDAO.savedUser.getFirstName());
@@ -328,148 +350,97 @@ class SignUpControllerTest {
     }
 
     @Test
-    void testHandleSignUpWithNullSaveResult() throws Exception {
+    void testHandleSignUpWithNullSaveResult() {
         mockUserDAO.reset();
         mockUserDAO.shouldReturnNullOnSave = true;
 
         setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
         invokeHandleSignUp();
-        Thread.sleep(1000);
+        waitUntilMessageVisible();
 
-        CountDownLatch latch = new CountDownLatch(1);
-        final String[] text = {""};
-        final boolean[] visible = {false};
-        Platform.runLater(() -> {
-            text[0] = messageLabel.getText();
-            visible[0] = messageLabel.isVisible();
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-
-        assertTrue(visible[0] || !text[0].isEmpty(), "Message should be shown");
+        assertTrue(isMessageVisibleOrNonEmpty(), "Message should be shown");
     }
 
     @Test
-    void testHandleSignUpWithUserWithoutId() throws Exception {
+    void testHandleSignUpWithUserWithoutId() {
         mockUserDAO.reset();
         mockUserDAO.shouldReturnUserWithoutId = true;
 
         setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
         invokeHandleSignUp();
-        Thread.sleep(1000);
+        waitUntilMessageVisible();
 
-        CountDownLatch latch = new CountDownLatch(1);
-        final String[] text = {""};
-        final boolean[] visible = {false};
-        Platform.runLater(() -> {
-            text[0] = messageLabel.getText();
-            visible[0] = messageLabel.isVisible();
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-
-        assertTrue(visible[0] || !text[0].isEmpty(), "Message should be shown");
+        assertTrue(isMessageVisibleOrNonEmpty(), "Message should be shown");
     }
 
     @Test
-    void testHandleSignUpWithIllegalArgumentException() throws Exception {
+    void testHandleSignUpWithIllegalArgumentException() {
         mockUserDAO.reset();
         mockUserDAO.shouldThrowIllegalArgumentException = true;
 
         setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
         invokeHandleSignUp();
-        Thread.sleep(1000);
+        waitUntilMessageVisible();
 
-        CountDownLatch latch = new CountDownLatch(1);
-        final String[] text = {""};
-        final boolean[] visible = {false};
-        Platform.runLater(() -> {
-            text[0] = messageLabel.getText();
-            visible[0] = messageLabel.isVisible();
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-
-        assertTrue(visible[0] || !text[0].isEmpty(), "Message should be shown");
+        assertTrue(isMessageVisibleOrNonEmpty(), "Message should be shown");
     }
 
     @Test
-    void testHandleSignUpWithRuntimeException() throws Exception {
+    void testHandleSignUpWithRuntimeException() {
         mockUserDAO.reset();
         mockUserDAO.shouldThrowRuntimeException = true;
 
         setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
         invokeHandleSignUp();
-        Thread.sleep(1000);
+        waitUntilMessageVisible();
 
-        CountDownLatch latch = new CountDownLatch(1);
-        final String[] text = {""};
-        final boolean[] visible = {false};
-        Platform.runLater(() -> {
-            text[0] = messageLabel.getText();
-            visible[0] = messageLabel.isVisible();
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-
-        assertTrue(visible[0] || !text[0].isEmpty(), "Message should be shown");
+        assertTrue(isMessageVisibleOrNonEmpty(), "Message should be shown");
     }
 
     @Test
-    void testOnLogin() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+    void testOnLogin() {
+        // Navigation probably fails in test env; assert it does not crash the FX thread.
+        runOnFxThreadAndWait(() -> {
             try {
                 controller.onLogin();
-            } catch (Exception ignored) {
-                // Navigation fails in test env — expected
+            } catch (RuntimeException expectedInTestEnv) {
+                // expected in a headless test environment
             }
-            latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
-        // Just verify no crash propagated
         assertNotNull(controller);
     }
 
     @Test
-    void testHandleBack() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+    void testHandleBack() {
+        // Navigation probably fails in test env; ensure reflective call does not crash.
+        runOnFxThreadAndWait(() -> {
             try {
                 Method method = SignUpController.class.getDeclaredMethod("handleBack");
                 method.setAccessible(true);
                 method.invoke(controller);
-            } catch (Exception ignored) {}
-            latch.countDown();
+            } catch (NoSuchMethodException | IllegalAccessException e) {
+                fail("Failed to invoke handleBack: " + e.getMessage());
+            } catch (InvocationTargetException e) {
+                // tolerate navigation failure
+            }
         });
-        latch.await(1, TimeUnit.SECONDS);
         assertNotNull(controller);
     }
 
     @Test
-    void testClearFields() throws Exception {
+    void testClearFields() {
         setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
 
-        Method clearMethod = SignUpController.class.getDeclaredMethod("clearFields");
-        clearMethod.setAccessible(true);
+        invokePrivateMethod("clearFields");
 
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            try {
-                clearMethod.invoke(controller);
-            } catch (Exception e) {
-                fail("Clear fields failed");
-            }
-            latch.countDown();
+        runOnFxThreadAndWait(() -> {
+            assertEquals("", firstNameField.getText());
+            assertEquals("", lastNameField.getText());
+            assertEquals("", usernameField.getText());
+            assertEquals("", emailField.getText());
+            assertEquals("", passwordField.getText());
+            assertEquals("", confirmPasswordField.getText());
         });
-        latch.await(1, TimeUnit.SECONDS);
-
-        assertEquals("", firstNameField.getText());
-        assertEquals("", lastNameField.getText());
-        assertEquals("", usernameField.getText());
-        assertEquals("", emailField.getText());
-        assertEquals("", passwordField.getText());
-        assertEquals("", confirmPasswordField.getText());
     }
 
     @Test
@@ -480,11 +451,17 @@ class SignUpControllerTest {
     }
 
     @Test
-    void testHandleSignUpTrimsWhitespace() throws Exception {
+    void testHandleSignUpTrimsWhitespace() {
         mockUserDAO.reset();
         setFieldValues("  John  ", "  Doe  ", "  johndoe  ", "  john@example.com  ", "Pass123!", "Pass123!");
         invokeHandleSignUp();
-        Thread.sleep(2000);
+
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+        while (System.nanoTime() < deadline && mockUserDAO.savedUser == null) {
+            runOnFxThreadAndWait(() -> {
+                // no-op
+            });
+        }
 
         assertNotNull(mockUserDAO.savedUser);
         assertEquals("John", mockUserDAO.savedUser.getFirstName());
@@ -492,24 +469,36 @@ class SignUpControllerTest {
     }
 
     @Test
-    void testHandleSignUpWithFinnishCharacters() throws Exception {
+    void testHandleSignUpWithFinnishCharacters() {
         mockUserDAO.reset();
         setFieldValues("Matti-Pekka", "Jääskeläinen", "matti_jää",
                 "matti@example.fi", "Salasana123!", "Salasana123!");
         invokeHandleSignUp();
-        Thread.sleep(2000);
+
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+        while (System.nanoTime() < deadline && mockUserDAO.savedUser == null) {
+            runOnFxThreadAndWait(() -> {
+                // no-op
+            });
+        }
 
         assertNotNull(mockUserDAO.savedUser);
         assertEquals("Matti-Pekka", mockUserDAO.savedUser.getFirstName());
     }
 
     @Test
-    void testPasswordIsHashedBeforeSaving() throws Exception {
+    void testPasswordIsHashedBeforeSaving() {
         mockUserDAO.reset();
         String plainPass = "Pass123!";
         setFieldValues("John", "Doe", "johndoe", "john@example.com", plainPass, plainPass);
         invokeHandleSignUp();
-        Thread.sleep(2000);
+
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+        while (System.nanoTime() < deadline && mockUserDAO.savedUser == null) {
+            runOnFxThreadAndWait(() -> {
+                // no-op
+            });
+        }
 
         assertNotNull(mockUserDAO.savedUser);
         assertNotEquals(plainPass, mockUserDAO.savedUser.getPasswordHash());
@@ -517,64 +506,70 @@ class SignUpControllerTest {
     }
 
     @Test
-    void testInvalidNameFormat() throws Exception {
+    void testInvalidNameFormat() {
         setFieldValues("123", "456", "johndoe", "john@example.com", "Pass123!", "Pass123!");
         invokeHandleSignUp();
-        Thread.sleep(500);
-        assertTrue(hasMessage());
+        waitUntilMessageVisible();
+        assertTrue(isMessageVisibleOrNonEmpty());
     }
 
     @Test
-    void testPasswordWithoutSpecialCharacter() throws Exception {
+    void testPasswordWithoutSpecialCharacter() {
         setFieldValues("John", "Doe", "johndoe", "john@example.com", "Password123", "Password123");
         invokeHandleSignUp();
-        Thread.sleep(500);
-        assertTrue(hasMessage());
+        waitUntilMessageVisible();
+        assertTrue(isMessageVisibleOrNonEmpty());
     }
 
     @Test
-    void testPasswordWithoutNumber() throws Exception {
+    void testPasswordWithoutNumber() {
         setFieldValues("John", "Doe", "johndoe", "john@example.com", "Password!!", "Password!!");
         invokeHandleSignUp();
-        Thread.sleep(500);
-        assertTrue(hasMessage());
+        waitUntilMessageVisible();
+        assertTrue(isMessageVisibleOrNonEmpty());
     }
 
     @Test
     void testPasswordStrengthBarInitiallyHidden() {
-        assertFalse(passwordStrengthBar.isVisible());
-        assertFalse(passwordStrengthLabel.isVisible());
-    }
-
-    @Test
-    void testPasswordStrengthBarShowsOnInput() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            passwordField.setText("Pass123!");
-            latch.countDown();
+        runOnFxThreadAndWait(() -> {
+            assertFalse(passwordStrengthBar.isVisible());
+            assertFalse(passwordStrengthLabel.isVisible());
         });
-        latch.await(1, TimeUnit.SECONDS);
-        Thread.sleep(200);
-
-        assertTrue(passwordStrengthBar.isVisible());
-        assertTrue(passwordStrengthBar.getProgress() > 0);
     }
 
     @Test
-    void testNavigateToLoginMethod() throws Exception {
-        Method method = SignUpController.class.getDeclaredMethod("navigateToLogin");
-        method.setAccessible(true);
+    void testPasswordStrengthBarShowsOnInput() {
+        runOnFxThreadAndWait(() -> passwordField.setText("Pass123!"));
 
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            try {
-                method.invoke(controller);
-            } catch (Exception ignored) {
-                // Navigation fails in test env — expected
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+        while (System.nanoTime() < deadline) {
+            final double[] progress = {0};
+            final boolean[] visible = {false};
+            runOnFxThreadAndWait(() -> {
+                progress[0] = passwordStrengthBar.getProgress();
+                visible[0] = passwordStrengthBar.isVisible();
+            });
+            if (visible[0] && progress[0] > 0) {
+                return;
             }
-            latch.countDown();
+        }
+
+        fail("Password strength bar did not become visible with progress");
+    }
+
+    @Test
+    void testNavigateToLoginMethod() {
+        runOnFxThreadAndWait(() -> {
+            try {
+                Method method = SignUpController.class.getDeclaredMethod("navigateToLogin");
+                method.setAccessible(true);
+                method.invoke(controller);
+            } catch (NoSuchMethodException | IllegalAccessException e) {
+                fail("Failed to invoke navigateToLogin: " + e.getMessage());
+            } catch (InvocationTargetException e) {
+                // tolerate navigation failure
+            }
         });
-        latch.await(1, TimeUnit.SECONDS);
         assertNotNull(controller);
     }
 

@@ -23,7 +23,10 @@ import java.util.logging.Logger;
 
 public class SignUpController {
 
+    private static final String BORDER_ERROR_STYLE = "-fx-border-color: #e74c3c;";
+
     private static final Logger logger = Logger.getLogger(SignUpController.class.getName());
+
     private IPasswordHasher passwordHasher;
     private boolean skipValidation = false;
     private IUserDAO userDAO;
@@ -42,30 +45,33 @@ public class SignUpController {
     @FXML
     private TextField firstNameField, lastNameField, usernameField, emailField;
 
-    @FXML
-    private PasswordField passwordField, confirmPasswordField;
+    @FXML private TextField firstNameField;
+    @FXML private TextField lastNameField;
+    @FXML private TextField usernameField;
+    @FXML private TextField emailField;
 
-    @FXML
-    private Button signUpButton, backButton;
+    @FXML private PasswordField passwordField;
+    @FXML private PasswordField confirmPasswordField;
 
-    @FXML
-    private Hyperlink loginLink;
+    @FXML private Button signUpButton;
+    @FXML private Button backButton;
 
-    @FXML
-    private Label messageLabel, createAccount, joinAccount, haveAccount;
+    @FXML private Hyperlink loginLink;
 
-    @FXML
-    private Label privacyLabel, passwordStrengthLabel;
+    @FXML private Label messageLabel;
+    @FXML private Label createAccount;
+    @FXML private Label joinAccount;
+    @FXML private Label haveAccount;
+    @FXML private Label privacyLabel;
+    @FXML private Label passwordStrengthLabel;
 
-    @FXML
-    private ProgressBar passwordStrengthBar;
+    @FXML private ProgressBar passwordStrengthBar;
 
     @FXML
     public void initialize() {
         userDAO = new JpaUserDao();
         passwordHasher = new BcryptPasswordHasher();
 
-        // LOCALIZATION
         createAccount.textProperty().bind(Localization.bind("signup.createAccount"));
         joinAccount.textProperty().bind(Localization.bind("signup.joinAccount"));
 
@@ -119,12 +125,9 @@ public class SignUpController {
         signUpButton.setDisable(true);
     }
 
-    // Real-Time validation
     private void setupRealtimeValidation() {
-
         Runnable validator = () -> {
             if (skipValidation) return;
-
             Validation.ValidationResult result = Validation.validateSignup(
                     safe(firstNameField),
                     safe(lastNameField),
@@ -133,7 +136,6 @@ public class SignUpController {
                     passwordField.getText(),
                     confirmPasswordField.getText()
             );
-
             showValidationErrors(result);
             updateSignUpButtonState(result);
         };
@@ -154,14 +156,12 @@ public class SignUpController {
     }
 
     private void handleSignUp() {
-
         String firstName = firstNameField.getText().trim();
         String lastName = lastNameField.getText().trim();
         String username = usernameField.getText().trim();
         String email = emailField.getText().trim();
         String password = passwordField.getText();
 
-        // Final validation
         Validation.ValidationResult result = Validation.validateSignup(
                 safe(firstNameField),
                 safe(lastNameField),
@@ -172,28 +172,20 @@ public class SignUpController {
         );
 
         showValidationErrors(result);
-
-        if (!result.success()) {
-            return;
-        }
+        if (!result.success()) return;
 
         try {
-            UserEntity existingUserByUsername = userDAO.findByUsername(username);
-            if (existingUserByUsername != null) {
+            if (userDAO.findByUsername(username) != null) {
                 ShowMessageUtil.showMessageKey(messageLabel, "signup.username_taken", MessageType.ERROR);
                 return;
             }
-
-            UserEntity existingUserByEmail = userDAO.findByEmail(email);
-            if (existingUserByEmail != null) {
+            if (userDAO.findByEmail(email) != null) {
                 ShowMessageUtil.showMessageKey(messageLabel, "signup.email_exists", MessageType.ERROR);
                 return;
             }
 
-            String hashedPassword = passwordHasher.hash(password);
-
             UserEntity newUser = new UserEntity(firstName, lastName, username, email);
-            newUser.changePasswordHash(hashedPassword);
+            newUser.changePasswordHash(passwordHasher.hash(password));
 
             UserEntity savedUser = userDAO.save(newUser);
 
@@ -203,7 +195,6 @@ public class SignUpController {
                 clearFields();
 
                 Stage currentStage = (Stage) signUpButton.getScene().getWindow();
-
                 PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
                 delay.setOnFinished(event -> {
                     skipValidation = false;
@@ -230,7 +221,7 @@ public class SignUpController {
         resetStyles();
 
         for (var entry : result.errors().entrySet()) {
-            String field = entry.getKey();
+            if (entry.getValue().isEmpty()) continue;
 
             if (!entry.getValue().isEmpty()) {
                 Control c = getControlForField(field);
@@ -250,16 +241,29 @@ public class SignUpController {
                 if (firstError == null) continue;
                 String key = firstError.key();
 
-                if (key == null || key.isBlank()) {
-                    logger.warning("Validation returned empty i18n key");
-                    return;
-                }
+            ShowMessageUtil.showMessage(
+                    messageLabel,
+                    Localization.get(key, firstError.args().toArray()),
+                    MessageType.ERROR
+            );
+            return;
+        }
+    }
 
-                String message = Localization.get(key, firstError.args().toArray());
+    private void applyErrorStyle(String field) {
+        switch (field) {
+            case String f when ("firstName".equals(f) && firstNameTouched) -> firstNameField.setStyle(BORDER_ERROR_STYLE);
+            case String f when ("lastName".equals(f) && lastNameTouched) -> lastNameField.setStyle(BORDER_ERROR_STYLE);
+            case String f when ("username".equals(f) && usernameTouched) -> usernameField.setStyle(BORDER_ERROR_STYLE);
+            case String f when ("email".equals(f) && emailTouched) -> emailField.setStyle(BORDER_ERROR_STYLE);
+            case String f when ("password".equals(f) && passwordTouched) -> passwordField.setStyle(BORDER_ERROR_STYLE);
+            case String f when ("confirmPassword".equals(f) && confirmPasswordTouched) -> confirmPasswordField.setStyle(BORDER_ERROR_STYLE);
 
-                ShowMessageUtil.showMessage(messageLabel, message, MessageType.ERROR);
-                return;
-            }
+            case "firstName", "lastName", "username", "email", "password", "confirmPassword" ->
+                    // Intentional no-op.
+                    logger.log(Level.FINER, "Field not touched yet: {0}", field);
+
+            default -> logger.log(Level.FINE, "Unknown validation field: {0}", field);
         }
     }
 
@@ -307,35 +311,23 @@ public class SignUpController {
     }
 
     private void updatePasswordStrength(String password) {
-        if (strengthHideDelay != null) {
-            strengthHideDelay.stop();
-        }
+        if (strengthHideDelay != null) strengthHideDelay.stop();
 
         if (password == null || password.isEmpty()) {
-            passwordStrengthBar.setVisible(false);
-            passwordStrengthBar.setManaged(false);
-
-            passwordStrengthLabel.setVisible(false);
-            passwordStrengthLabel.setManaged(false);
-
+            setStrengthBarVisible(false);
             passwordStrengthBar.setProgress(0);
             passwordStrengthLabel.setText("");
             return;
         }
 
-        passwordStrengthBar.setVisible(true);
-        passwordStrengthBar.setManaged(true);
-
-        passwordStrengthLabel.setVisible(true);
-        passwordStrengthLabel.setManaged(true);
+        setStrengthBarVisible(true);
 
         int score = 0;
-
         if (password.length() >= 6) score++;
-        if (password.matches(".*[A-Z].*")) score++;
-        if (password.matches(".*[a-z].*")) score++;
-        if (password.matches(".*\\d.*")) score++;
-        if (password.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*")) score++;
+        if (password.chars().anyMatch(Character::isUpperCase)) score++;
+        if (password.chars().anyMatch(Character::isLowerCase)) score++;
+        if (password.chars().anyMatch(Character::isDigit)) score++;
+        if (password.chars().anyMatch(c -> "!@#$%^&*()_+=\\-[]{};\':\"\\|,.<>/?".indexOf(c) >= 0)) score++;
 
         double progress = score / 5.0;
         passwordStrengthBar.setProgress(progress);
@@ -346,17 +338,17 @@ public class SignUpController {
             passwordStrengthLabel.setText(Localization.get("password.medium"));
         } else {
             passwordStrengthLabel.setText(Localization.get("password.strong"));
-
             strengthHideDelay = new PauseTransition(Duration.seconds(2.5));
-            strengthHideDelay.setOnFinished(e -> {
-                passwordStrengthBar.setVisible(false);
-                passwordStrengthBar.setManaged(false);
-
-                passwordStrengthLabel.setVisible(false);
-                passwordStrengthLabel.setManaged(false);
-            });
+            strengthHideDelay.setOnFinished(e -> setStrengthBarVisible(false));
             strengthHideDelay.play();
         }
+    }
+
+    private void setStrengthBarVisible(boolean visible) {
+        passwordStrengthBar.setVisible(visible);
+        passwordStrengthBar.setManaged(visible);
+        passwordStrengthLabel.setVisible(visible);
+        passwordStrengthLabel.setManaged(visible);
     }
 
     private void clearFields() {

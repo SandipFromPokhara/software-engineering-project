@@ -241,4 +241,20 @@ public class LoginController {
     public void setStage(Stage stage) {
         this.stage = stage;
     }
+
+    // setters for package-private fields required for testing
+    void setUsernameField(TextField field) { this.usernameField = field; }
+    void setPasswordField(PasswordField field) { this.passwordField = field; }
+    void setLoginButton(Button button) { this.loginButton = button; }
+    void setStatusLabel(Label label) { this.statusLabel = label; }
+    void setSignupLink(Hyperlink link) { this.signupLink = link; }
+    void setBackButton(Button button) { this.backButton = button; }
+    void setLoginWelcome(Label label) { this.loginWelcome = label; }
+    void setLoginNote(Label label) { this.loginNote = label; }
+    void setLoginNoAccount(Label label) { this.loginNoAccount = label; }
+    void setPrivacyLabel(Label label) { this.privacyLabel = label; }
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
 }

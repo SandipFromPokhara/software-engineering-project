@@ -1,20 +1,19 @@
 package util;
 
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import org.fxmisc.richtext.InlineCssTextArea;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
 import java.util.function.Consumer;
 
 public class UndoRedoManager {
 
-    private final Stack<TextCommand> undoStack = new Stack<>();
-    private final Stack<TextCommand> redoStack = new Stack<>();
+    private final Deque<TextCommand> undoStack = new ArrayDeque<>();
+    private final Deque<TextCommand> redoStack = new ArrayDeque<>();
     private boolean isUndoRedoAction = false;
 
     private MenuItem undoMenuItem;
@@ -40,12 +39,7 @@ public class UndoRedoManager {
     public void registerField(String fieldName, TextInputControl field) {
         fieldMap.put(fieldName, field);
 
-        // Add listener to track changes
-        field.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (!isUndoRedoAction && oldVal != null && !oldVal.equals(newVal)) {
-                recordChange(fieldName, oldVal, newVal);
-            }
-        });
+        field.textProperty().addListener((obs, oldVal, newVal) -> onTextChanged(fieldName, oldVal, newVal));
     }
 
     // Overload for InlineCssTextArea (which is not a TextInputControl)
@@ -58,11 +52,13 @@ public class UndoRedoManager {
             }
         });
 
-        field.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (!isUndoRedoAction && oldVal != null && !oldVal.equals(newVal)) {
-                recordChange(fieldName, oldVal, newVal);
-            }
-        });
+        field.textProperty().addListener((obs, oldVal, newVal) -> onTextChanged(fieldName, oldVal, newVal));
+    }
+
+    private void onTextChanged(String fieldName, String oldVal, String newVal) {
+        if (!isUndoRedoAction && oldVal != null && !oldVal.equals(newVal)) {
+            recordChange(fieldName, oldVal, newVal);
+        }
     }
 
     // Record a text change for undo/redo
