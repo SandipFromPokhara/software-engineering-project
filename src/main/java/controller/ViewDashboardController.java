@@ -20,7 +20,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Window;
-import javafx.util.Duration;
+ 
 import services.*;
 import util.*;
 import session.UserSession;
@@ -197,11 +197,11 @@ public class ViewDashboardController {
         createTooltip.textProperty().bind(Localization.bind("note.create_label"));
         logoutTooltip.textProperty().bind(Localization.bind(LOGOUT_KEY));
 
-        toggleTooltip.setShowDelay(Duration.millis(100));
-        langTooltip.setShowDelay(Duration.millis(100));
-        manageTooltip.setShowDelay(Duration.millis(100));
-        createTooltip.setShowDelay(Duration.millis(100));
-        logoutTooltip.setShowDelay(Duration.millis(100));
+        TooltipUtil.setTooltipDelay(toggleTooltip);
+        TooltipUtil.setTooltipDelay(langTooltip);
+        TooltipUtil.setTooltipDelay(manageTooltip);
+        TooltipUtil.setTooltipDelay(createTooltip);
+        TooltipUtil.setTooltipDelay(logoutTooltip);
     }
 
     private void initTheme() {
