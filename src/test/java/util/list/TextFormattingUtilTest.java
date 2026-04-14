@@ -4,6 +4,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.api.extension.ExtendWith;
 import testutil.JavaFxTestExtension;
 
@@ -39,60 +41,31 @@ class TextFormattingUtilTest {
         assertEquals("1. ", textArea.getText());
     }
 
-    @Test
-    void toggleList_PlainText_AddsBullets() {
-        textArea.setText("Line 1\nLine 2");
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+        "Line 1\\nLine 2 | • Line 1\\n• Line 2",
+        "• Item 1\\n• Item 2 | Item 1\\nItem 2",
+        "1. First\\n2. Second | • First\\n• Second",
+        "1. First\\nSecond\\nThird | • First\\n• Second\\n• Third"
+    })
+    void toggleList_BulletStrategy_Transformations(String input, String expected) {
+        textArea.setText(input.replace("\\n", "\n"));
         textArea.selectAll();
         TextFormattingUtil.toggleList(textArea, button, bulletStrategy);
-        assertEquals("• Line 1\n• Line 2", textArea.getText());
+        assertEquals(expected.replace("\\n", "\n"), textArea.getText());
     }
 
-    @Test
-    void toggleList_PlainText_AddsNumbers() {
-        textArea.setText("First\nSecond\nThird");
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+        "First\\nSecond\\nThird | 1. First\\n2. Second\\n3. Third",
+        "1. First\\n2. Second | First\\nSecond",
+        "• Item 1\\n• Item 2 | 1. Item 1\\n2. Item 2"
+    })
+    void toggleList_NumberedStrategy_Transformations(String input, String expected) {
+        textArea.setText(input.replace("\\n", "\n"));
         textArea.selectAll();
         TextFormattingUtil.toggleList(textArea, button, numberedStrategy);
-        assertEquals("1. First\n2. Second\n3. Third", textArea.getText());
-    }
-
-    @Test
-    void toggleList_BulletedText_RemovesBullets() {
-        textArea.setText("• Item 1\n• Item 2");
-        textArea.selectAll();
-        TextFormattingUtil.toggleList(textArea, button, bulletStrategy);
-        assertEquals("Item 1\nItem 2", textArea.getText());
-    }
-
-    @Test
-    void toggleList_NumberedText_RemovesNumbers() {
-        textArea.setText("1. First\n2. Second");
-        textArea.selectAll();
-        TextFormattingUtil.toggleList(textArea, button, numberedStrategy);
-        assertEquals("First\nSecond", textArea.getText());
-    }
-
-    @Test
-    void toggleList_BulletThenNumber_ReplacesWithNumbers() {
-        textArea.setText("• Item 1\n• Item 2");
-        textArea.selectAll();
-        TextFormattingUtil.toggleList(textArea, button, numberedStrategy);
-        assertEquals("1. Item 1\n2. Item 2", textArea.getText());
-    }
-
-    @Test
-    void toggleList_NumberThenBullet_ReplacesWithBullets() {
-        textArea.setText("1. First\n2. Second");
-        textArea.selectAll();
-        TextFormattingUtil.toggleList(textArea, button, bulletStrategy);
-        assertEquals("• First\n• Second", textArea.getText());
-    }
-
-    @Test
-    void toggleList_MixedFormat_ConvertsAll() {
-        textArea.setText("1. First\n2. Second");
-        textArea.selectAll();
-        TextFormattingUtil.toggleList(textArea, button, bulletStrategy);
-        assertEquals("• First\n• Second", textArea.getText());
+        assertEquals(expected.replace("\\n", "\n"), textArea.getText());
     }
 
     @Test
@@ -174,4 +147,3 @@ class TextFormattingUtilTest {
         assertDoesNotThrow(() -> TextFormattingUtil.enableListAutoContinuation(textArea));
     }
 }
-

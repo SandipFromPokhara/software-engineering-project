@@ -43,4 +43,3 @@ public class JavaFxTestExtension implements BeforeAllCallback, ExtensionContext.
         Platform.exit();
     }
 }
-

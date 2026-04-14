@@ -13,20 +13,15 @@ import util.Localization;
 import util.NavigationUtil;
 import security.Validation;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import org.kordamp.ikonli.javafx.FontIcon;
 import util.ShowMessageUtil;
+import util.TooltipUtil;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SignUpController {
-
-    private static final String BORDER_ERROR_STYLE = "-fx-border-color: #e74c3c;";
 
     private static final Logger logger = Logger.getLogger(SignUpController.class.getName());
 
@@ -42,6 +37,8 @@ public class SignUpController {
     private boolean passwordTouched = false;
     private boolean confirmPasswordTouched = false;
 
+    private static final String ERROR_CLASS = "input-error";
+    private static final String FOCUS_CLASS = "focus";
 
     @FXML private TextField firstNameField;
     @FXML private TextField lastNameField;
@@ -83,32 +80,36 @@ public class SignUpController {
         signUpButton.textProperty().bind(Localization.bind("signup.button"));
         haveAccount.textProperty().bind(Localization.bind("signup.haveAccount"));
         loginLink.textProperty().bind(Localization.bind("signup.login"));
-        backButton.textProperty().bind(Localization.bind("signup.back"));
-        privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));
 
-        firstNameField.focusedProperty().addListener((obs, oldV, newV) -> {
-            if (Boolean.FALSE.equals(newV)) firstNameTouched = true;
-        });
-        lastNameField.focusedProperty().addListener((obs, oldV, newV) -> {
-            if (Boolean.FALSE.equals(newV)) lastNameTouched = true;
-        });
-        usernameField.focusedProperty().addListener((obs, oldV, newV) -> {
-            if (Boolean.FALSE.equals(newV)) usernameTouched = true;
-        });
-        emailField.focusedProperty().addListener((obs, oldV, newV) -> {
-            if (Boolean.FALSE.equals(newV)) emailTouched = true;
-        });
-        passwordField.focusedProperty().addListener((obs, oldV, newV) -> {
-            if (Boolean.FALSE.equals(newV)) passwordTouched = true;
-        });
-        confirmPasswordField.focusedProperty().addListener((obs, oldV, newV) -> {
-            if (Boolean.FALSE.equals(newV)) confirmPasswordTouched = true;
-        });
+        backButton.getStyleClass().add("back-button");
+        Tooltip backTip = TooltipUtil.createLocalizedTooltip("signup.back");
+        TooltipUtil.setTooltipDelay(backTip);
+        backButton.setTooltip(backTip);
+
+        try {
+            FontIcon backIcon = new FontIcon("fa-chevron-left");
+            backIcon.getStyleClass().add("back-icon");
+            backButton.setGraphic(backIcon);
+        } catch (Exception ignored) {
+            // If ikonli is not available, fall back to text-only button.
+        }
+
+        privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));// Text from the left image
+
+        // Attach focus handling (adds/removes focus CSS class and marks touched on blur)
+        attachFocusHandling(firstNameField, () -> firstNameTouched = true);
+        attachFocusHandling(lastNameField, () -> lastNameTouched = true);
+        attachFocusHandling(usernameField, () -> usernameTouched = true);
+        attachFocusHandling(emailField, () -> emailTouched = true);
+        attachFocusHandling(passwordField, () -> passwordTouched = true);
+        attachFocusHandling(confirmPasswordField, () -> confirmPasswordTouched = true);
 
         passwordStrengthBar.setVisible(false);
         passwordStrengthBar.setManaged(false);
         passwordStrengthBar.setMinHeight(12);
         passwordStrengthBar.setPrefHeight(12);
+
+        passwordStrengthBar.setId("passwordStrengthBar");
 
         passwordStrengthLabel.setVisible(false);
         passwordStrengthLabel.setManaged(false);
@@ -211,54 +212,99 @@ public class SignUpController {
 
     private void showValidationErrors(Validation.ValidationResult result) {
         ShowMessageUtil.hideMessage(messageLabel);
+        // Clear previous field-level error styles
         resetStyles();
-
         for (var entry : result.errors().entrySet()) {
-            if (entry.getValue().isEmpty()) continue;
+            String field = entry.getKey();
+            var errors = entry.getValue();
 
-            applyErrorStyle(entry.getKey());
-
-            var firstError = entry.getValue().getFirst();
-            String key = firstError.key();
-
-            if (key == null || key.isBlank()) {
-                logger.warning("Validation returned empty i18n key");
-                return;
-            }
-
-            ShowMessageUtil.showMessage(
-                    messageLabel,
-                    Localization.get(key, firstError.args().toArray()),
-                    MessageType.ERROR
-            );
-            return;
+            if (errors != null && !errors.isEmpty() && handleFieldErrors(field, errors)) return;
         }
     }
 
-    private void applyErrorStyle(String field) {
-        switch (field) {
-            case String f when ("firstName".equals(f) && firstNameTouched) -> firstNameField.setStyle(BORDER_ERROR_STYLE);
-            case String f when ("lastName".equals(f) && lastNameTouched) -> lastNameField.setStyle(BORDER_ERROR_STYLE);
-            case String f when ("username".equals(f) && usernameTouched) -> usernameField.setStyle(BORDER_ERROR_STYLE);
-            case String f when ("email".equals(f) && emailTouched) -> emailField.setStyle(BORDER_ERROR_STYLE);
-            case String f when ("password".equals(f) && passwordTouched) -> passwordField.setStyle(BORDER_ERROR_STYLE);
-            case String f when ("confirmPassword".equals(f) && confirmPasswordTouched) -> confirmPasswordField.setStyle(BORDER_ERROR_STYLE);
+    private boolean handleFieldErrors(String field, java.util.List<?> errors) {
+        Control c = getControlForField(field);
+        boolean touched = isFieldTouched(field);
 
-            case "firstName", "lastName", "username", "email", "password", "confirmPassword" ->
-                    // Intentional no-op.
-                    logger.log(Level.FINER, "Field not touched yet: {0}", field);
+        if (c != null && touched) addErrorStyle(c);
 
-            default -> logger.log(Level.FINE, "Unknown validation field: {0}", field);
+        var firstError = errors.stream().findFirst().orElse(null);
+        if (firstError == null) {
+            logger.fine(() -> "No specific error item for field: " + field);
+            return false;
         }
+
+        String key;
+        try {
+            // firstError is expected to have method key(); use toString fallback if not
+            key = (String) firstError.getClass().getMethod("key").invoke(firstError);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Error reading validation key", e);
+            return false;
+        }
+
+        if (key == null || key.isBlank()) {
+            logger.warning("Validation returned empty i18n key");
+            return false;
+        }
+
+        ShowMessageUtil.showMessageKey(messageLabel, key, MessageType.ERROR);
+        return true;
+    }
+
+    private boolean isFieldTouched(String field) {
+        return switch (field) {
+            case "firstName" -> firstNameTouched;
+            case "lastName" -> lastNameTouched;
+            case "username" -> usernameTouched;
+            case "email" -> emailTouched;
+            case "password" -> passwordTouched;
+            case "confirmPassword" -> confirmPasswordTouched;
+            default -> true;
+        };
     }
 
     private void resetStyles() {
-        firstNameField.setStyle("");
-        lastNameField.setStyle("");
-        usernameField.setStyle("");
-        emailField.setStyle("");
-        passwordField.setStyle("");
-        confirmPasswordField.setStyle("");
+        removeErrorStyle(firstNameField);
+        removeErrorStyle(lastNameField);
+        removeErrorStyle(usernameField);
+        removeErrorStyle(emailField);
+        removeErrorStyle(passwordField);
+        removeErrorStyle(confirmPasswordField);
+    }
+
+    // Map validation field name to control instance
+    private Control getControlForField(String field) {
+        return switch (field) {
+            case "firstName" -> firstNameField;
+            case "lastName" -> lastNameField;
+            case "username" -> usernameField;
+            case "email" -> emailField;
+            case "password" -> passwordField;
+            case "confirmPassword" -> confirmPasswordField;
+            default -> null;
+        };
+    }
+
+    // Attach focus listener to text input controls
+    private void attachFocusHandling(TextInputControl control, Runnable markTouched) {
+        control.focusedProperty().addListener((obs, oldV, newV) -> {
+            boolean focused = newV != null && newV;
+            if (!focused) markTouched.run();
+            if (focused) {
+                if (!control.getStyleClass().contains(FOCUS_CLASS)) control.getStyleClass().add(FOCUS_CLASS);
+            } else {
+                control.getStyleClass().removeIf(s -> s.equals(FOCUS_CLASS));
+            }
+        });
+    }
+
+    private void addErrorStyle(Control c) {
+        if (!c.getStyleClass().contains(ERROR_CLASS)) c.getStyleClass().add(ERROR_CLASS);
+    }
+
+    private void removeErrorStyle(Control c) {
+        c.getStyleClass().removeIf(s -> s.equals(ERROR_CLASS));
     }
 
     private void updatePasswordStrength(String password) {
@@ -275,10 +321,10 @@ public class SignUpController {
 
         int score = 0;
         if (password.length() >= 6) score++;
-        if (password.matches(".*[A-Z].*")) score++;
-        if (password.matches(".*[a-z].*")) score++;
-        if (password.matches(".*\\d.*")) score++;
-        if (password.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*")) score++;
+        if (password.chars().anyMatch(Character::isUpperCase)) score++;
+        if (password.chars().anyMatch(Character::isLowerCase)) score++;
+        if (password.chars().anyMatch(Character::isDigit)) score++;
+        if (password.chars().anyMatch(c -> "!@#$%^&*()_+=-[]{}:'\"\\|,.<>/?".indexOf(c) >= 0)) score++;
 
         double progress = score / 5.0;
         passwordStrengthBar.setProgress(progress);
