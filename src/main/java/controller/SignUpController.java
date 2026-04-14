@@ -14,7 +14,9 @@ import util.NavigationUtil;
 import security.Validation;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import org.kordamp.ikonli.javafx.FontIcon;
 import util.ShowMessageUtil;
+import util.TooltipUtil;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,6 +35,9 @@ public class SignUpController {
     private boolean emailTouched = false;
     private boolean passwordTouched = false;
     private boolean confirmPasswordTouched = false;
+
+    private static final String ERROR_CLASS = "input-error";
+    private static final String FOCUS_CLASS = "focus";
 
     @FXML
     private TextField firstNameField, lastNameField, usernameField, emailField;
@@ -74,37 +79,36 @@ public class SignUpController {
         signUpButton.textProperty().bind(Localization.bind("signup.button"));
         haveAccount.textProperty().bind(Localization.bind("signup.haveAccount"));
         loginLink.textProperty().bind(Localization.bind("signup.login"));
-        backButton.textProperty().bind(Localization.bind("signup.back"));
+
+        backButton.getStyleClass().add("back-button");
+        Tooltip backTip = TooltipUtil.createLocalizedTooltip("signup.back");
+        TooltipUtil.setTooltipDelay(backTip);
+        backButton.setTooltip(backTip);
+
+        try {
+            FontIcon backIcon = new FontIcon("fa-chevron-left");
+            backIcon.getStyleClass().add("back-icon");
+            backButton.setGraphic(backIcon);
+        } catch (Exception ignored) {
+            // If ikonli is not available, fall back to text-only button.
+        }
+
         privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));// Text from the left image
 
-        firstNameField.focusedProperty().addListener((obs, oldV, newV) -> {
-            if (!newV) firstNameTouched = true;
-        });
-
-        lastNameField.focusedProperty().addListener((obs, oldV, newV) -> {
-            if (!newV) lastNameTouched = true;
-        });
-
-        usernameField.focusedProperty().addListener((obs, oldV, newV) -> {
-            if (!newV) usernameTouched = true;
-        });
-
-        emailField.focusedProperty().addListener((obs, oldV, newV) -> {
-            if (!newV) emailTouched = true;
-        });
-
-        passwordField.focusedProperty().addListener((obs, oldV, newV) -> {
-            if (!newV) passwordTouched = true;
-        });
-
-        confirmPasswordField.focusedProperty().addListener((obs, oldV, newV) -> {
-            if (!newV) confirmPasswordTouched = true;
-        });
+        // Attach focus handling (adds/removes focus CSS class and marks touched on blur)
+        attachFocusHandling(firstNameField, () -> firstNameTouched = true);
+        attachFocusHandling(lastNameField, () -> lastNameTouched = true);
+        attachFocusHandling(usernameField, () -> usernameTouched = true);
+        attachFocusHandling(emailField, () -> emailTouched = true);
+        attachFocusHandling(passwordField, () -> passwordTouched = true);
+        attachFocusHandling(confirmPasswordField, () -> confirmPasswordTouched = true);
 
         passwordStrengthBar.setVisible(false);
         passwordStrengthBar.setManaged(false);
         passwordStrengthBar.setMinHeight(12);
         passwordStrengthBar.setPrefHeight(12);
+
+        passwordStrengthBar.setId("passwordStrengthBar");
 
         passwordStrengthLabel.setVisible(false);
         passwordStrengthLabel.setManaged(false);
@@ -222,24 +226,28 @@ public class SignUpController {
 
     private void showValidationErrors(Validation.ValidationResult result) {
         ShowMessageUtil.hideMessage(messageLabel);
-
+        // Clear previous field-level error styles
         resetStyles();
 
         for (var entry : result.errors().entrySet()) {
             String field = entry.getKey();
 
             if (!entry.getValue().isEmpty()) {
+                Control c = getControlForField(field);
+                boolean touched = switch (field) {
+                    case "firstName" -> firstNameTouched;
+                    case "lastName" -> lastNameTouched;
+                    case "username" -> usernameTouched;
+                    case "email" -> emailTouched;
+                    case "password" -> passwordTouched;
+                    case "confirmPassword" -> confirmPasswordTouched;
+                    default -> true;
+                };
 
-                switch (field) {
-                    case "firstName" -> { if (firstNameTouched) firstNameField.setStyle("-fx-border-color: #e74c3c;"); }
-                    case "lastName" -> { if (lastNameTouched) lastNameField.setStyle("-fx-border-color: #e74c3c;"); }
-                    case "username" -> { if (usernameTouched) usernameField.setStyle("-fx-border-color: #e74c3c;"); }
-                    case "email" -> { if (emailTouched) emailField.setStyle("-fx-border-color: #e74c3c;");  }
-                    case "password" -> { if (passwordTouched) passwordField.setStyle("-fx-border-color: #e74c3c;"); }
-                    case "confirmPassword" -> { if (confirmPasswordTouched) confirmPasswordField.setStyle("-fx-border-color: #e74c3c;"); }
-                }
+                if (c != null && touched) addErrorStyle(c);
 
-                var firstError = entry.getValue().get(0);
+                var firstError = entry.getValue().stream().findFirst().orElse(null);
+                if (firstError == null) continue;
                 String key = firstError.key();
 
                 if (key == null || key.isBlank()) {
@@ -256,12 +264,46 @@ public class SignUpController {
     }
 
     private void resetStyles() {
-        firstNameField.setStyle("");
-        lastNameField.setStyle("");
-        usernameField.setStyle("");
-        emailField.setStyle("");
-        passwordField.setStyle("");
-        confirmPasswordField.setStyle("");
+        removeErrorStyle(firstNameField);
+        removeErrorStyle(lastNameField);
+        removeErrorStyle(usernameField);
+        removeErrorStyle(emailField);
+        removeErrorStyle(passwordField);
+        removeErrorStyle(confirmPasswordField);
+    }
+
+    // Map validation field name to control instance
+    private Control getControlForField(String field) {
+        return switch (field) {
+            case "firstName" -> firstNameField;
+            case "lastName" -> lastNameField;
+            case "username" -> usernameField;
+            case "email" -> emailField;
+            case "password" -> passwordField;
+            case "confirmPassword" -> confirmPasswordField;
+            default -> null;
+        };
+    }
+
+    // Attach focus listener to text input controls
+    private void attachFocusHandling(TextInputControl control, Runnable markTouched) {
+        control.focusedProperty().addListener((obs, oldV, newV) -> {
+            boolean focused = Boolean.TRUE.equals(newV);
+            if (!focused) markTouched.run();
+            if (focused) {
+                if (!control.getStyleClass().contains(FOCUS_CLASS)) control.getStyleClass().add(FOCUS_CLASS);
+            } else {
+                control.getStyleClass().removeIf(s -> s.equals(FOCUS_CLASS));
+            }
+        });
+    }
+
+    private void addErrorStyle(Control c) {
+        if (!c.getStyleClass().contains(ERROR_CLASS)) c.getStyleClass().add(ERROR_CLASS);
+    }
+
+    private void removeErrorStyle(Control c) {
+        c.getStyleClass().removeIf(s -> s.equals(ERROR_CLASS));
     }
 
     private void updatePasswordStrength(String password) {
