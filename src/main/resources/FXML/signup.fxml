@@ -119,7 +119,7 @@
                     </HBox>
                 </VBox>
 
-                <Button fx:id="backButton" layoutX="47.0" layoutY="44.0" mnemonicParsing="false" onAction="#handleBack" prefHeight="28.0" prefWidth="29.0" style="-fx-background-color: transparent; -fx-cursor: hand;" AnchorPane.leftAnchor="47.0" AnchorPane.rightAnchor="241.0" AnchorPane.topAnchor="44.0">
+                <Button fx:id="backButton" layoutX="41.0" layoutY="30.0" mnemonicParsing="false" onAction="#handleBack" prefHeight="28.0" prefWidth="29.0" style="-fx-background-color: transparent; -fx-cursor: hand;">
                     <graphic>
                         <SVGPath content="M12 2 L4 10 L12 18 L10 20 L0 10 L10 0 Z" styleClass="back-icon" />
                     </graphic>

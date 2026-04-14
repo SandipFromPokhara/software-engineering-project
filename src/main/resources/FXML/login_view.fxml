@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Hyperlink?>
@@ -16,80 +17,83 @@
 <?import javafx.scene.shape.SVGPath?>
 <?import javafx.scene.text.Font?>
 
-<?import java.net.URL?>
 <BorderPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #EAF7F7;" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.LoginController">
     <stylesheets>
         <URL value="@/css/signup.css" />
     </stylesheets>
+
     <left>
         <StackPane prefHeight="400.0" prefWidth="241.0" BorderPane.alignment="CENTER">
-                <ImageView fitHeight="400.0" fitWidth="283.0" pickOnBounds="true" preserveRatio="true">
-                        <Image url="@../Images/NoteVault.png" />
-                </ImageView>
-                <Label fx:id="privacyLabel" alignment="CENTER" textAlignment="CENTER" textFill="WHITE" wrapText="true" StackPane.alignment="CENTER">
-                    <StackPane.margin>
-                        <Insets left="15.0" right="15.0" top="40.0" />
-                    </StackPane.margin>
-                    <font>
-                        <Font name="System Regular" size="16.0" />
-                    </font>
-                </Label>
+            <ImageView fitHeight="400.0" fitWidth="283.0" pickOnBounds="true" preserveRatio="true">
+                <Image url="@../Images/NoteVault.png" />
+            </ImageView>
+            <Label fx:id="privacyLabel" alignment="CENTER" textAlignment="CENTER" textFill="WHITE" wrapText="true" StackPane.alignment="CENTER">
+                <StackPane.margin>
+                    <Insets left="15.0" right="15.0" top="40.0" />
+                </StackPane.margin>
+                <font>
+                    <Font name="System Regular" size="16.0" />
+                </font>
+            </Label>
         </StackPane>
     </left>
     <center>
         <AnchorPane prefHeight="400.0" prefWidth="300.0" style="-fx-background-color: #ebf4f5;" BorderPane.alignment="CENTER">
-                <Label fx:id="loginWelcome" alignment="CENTER" contentDisplay="CENTER" layoutX="75.0" layoutY="31.0" prefHeight="53.0" prefWidth="189.0" textAlignment="CENTER" textFill="#297883" textOverrun="CLIP">
+            <Label fx:id="loginWelcome" alignment="CENTER" contentDisplay="CENTER" layoutX="75.0" layoutY="31.0" prefHeight="53.0" prefWidth="189.0" textAlignment="CENTER" textFill="#297883" textOverrun="CLIP">
+                <font>
+                    <Font name="System Italic" size="30.0" />
+                </font>
+            </Label>
+            <Label fx:id="loginNote" alignment="CENTER" layoutX="49.0" layoutY="74.0" prefHeight="35.0" prefWidth="237.0" textFill="#307494">
+                <font>
+                    <Font name="System Italic" size="12.0" />
+                </font>
+            </Label>
+            <VBox layoutX="54.0" layoutY="132.0" prefHeight="128.0" prefWidth="220.0" spacing="20.0" AnchorPane.topAnchor="136.0">
+                <TextField fx:id="usernameField" alignment="CENTER" prefHeight="30.0" prefWidth="150.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-padding: 6 10 6 10; -fx-border-color: rgba(37,105,115,0.18); -fx-background-color: white;">
                     <font>
-                        <Font name="System Italic" size="30.0" />
+                        <Font size="12.0" />
+                    </font>
+                </TextField>
+                <PasswordField fx:id="passwordField" alignment="CENTER" prefHeight="30.0" prefWidth="150.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-padding: 6 10 6 10; -fx-border-color: rgba(37,105,115,0.18); -fx-background-color: white;">
+                    <font>
+                        <Font size="12.0" />
+                    </font>
+                </PasswordField>
+                <Button fx:id="loginButton" alignment="CENTER" mnemonicParsing="false" onAction="#handleLogin" prefHeight="40.0" prefWidth="160.0" style="-fx-background-color: #266973; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-border-radius: 8; -fx-cursor: hand;" textAlignment="CENTER">
+                    <font>
+                        <Font name="Times New Roman Bold" size="14.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets left="24.0" />
+                    </VBox.margin>
+                </Button>
+                <padding>
+                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                </padding>
+            </VBox>
+            <Label fx:id="statusLabel" alignment="CENTER" contentDisplay="CENTER" AnchorPane.bottomAnchor="74.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                <font>
+                    <Font size="12" />
+                </font>
+            </Label>
+            <HBox alignment="CENTER" layoutX="52.0" layoutY="339.0" spacing="2.0" AnchorPane.leftAnchor="52.0" AnchorPane.rightAnchor="53.0" AnchorPane.topAnchor="339.0">
+                <Label fx:id="loginNoAccount" textFill="#455a64">
+                    <font>
+                        <Font size="11.0" />
                     </font>
                 </Label>
-                <Label fx:id="loginNote" alignment="CENTER" layoutX="49.0" layoutY="74.0" prefHeight="35.0" prefWidth="237.0" textFill="#307494" AnchorPane.topAnchor="70.0">
+                <Hyperlink fx:id="signupLink" onAction="#handleSignUp" style="-fx-text-fill: #266973; -fx-font-weight: bold;">
                     <font>
-                        <Font name="System Italic" size="12.0" />
+                        <Font size="11.0" />
                     </font>
-                </Label>
-                <VBox layoutX="54.0" layoutY="132.0" prefHeight="128.0" prefWidth="220.0" spacing="20.0" AnchorPane.topAnchor="136.0">
-                        <TextField fx:id="usernameField" alignment="CENTER" prefHeight="30.0" prefWidth="150.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-padding: 6 10 6 10; -fx-border-color: rgba(37,105,115,0.18); -fx-background-color: white;">
-                            <font>
-                                <Font size="12.0" />
-                            </font>
-                        </TextField>
-                        <PasswordField fx:id="passwordField" alignment="CENTER" prefHeight="30.0" prefWidth="150.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-padding: 6 10 6 10; -fx-border-color: rgba(37,105,115,0.18); -fx-background-color: white;">
-                            <font>
-                                <Font size="12.0" />
-                            </font>
-                        </PasswordField>
-                        <Button fx:id="loginButton" alignment="CENTER" mnemonicParsing="false" onAction="#handleLogin" prefHeight="40.0" prefWidth="160.0" style="-fx-background-color: #266973; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-border-radius: 8; -fx-cursor: hand;" textAlignment="CENTER">
-                            <font>
-                                <Font name="Times New Roman Bold" size="14.0" />
-                            </font>
-                            <VBox.margin>
-                                <Insets left="24.0" />
-                            </VBox.margin>
-                        </Button>
-                    <padding>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                    </padding>
-                </VBox>
-                <Label fx:id="statusLabel" alignment="CENTER" contentDisplay="CENTER" AnchorPane.bottomAnchor="74.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                    <font>
-                        <Font size="12" />
-                    </font>
-                </Label>
-                <HBox alignment="CENTER" layoutX="52.0" layoutY="339.0" spacing="2.0" AnchorPane.leftAnchor="52.0" AnchorPane.rightAnchor="53.0" AnchorPane.topAnchor="339.0">
-                        <Label fx:id="loginNoAccount" textFill="#455a64">
-                            <font>
-                                <Font size="11.0" />
-                            </font>
-                        </Label>
-                        <Hyperlink fx:id="signupLink" onAction="#handleSignUp" style="-fx-text-fill: #266973; -fx-font-weight: bold;">
-                            <font>
-                                <Font size="11.0" />
-                            </font>
-                        </Hyperlink>
-                </HBox>
-                <Button fx:id="backButton" alignment="CENTER" contentDisplay="CENTER" layoutX="39.0" layoutY="74.0" mnemonicParsing="false" onAction="#handleBack" prefHeight="28.0" prefWidth="23.0" style="-fx-cursor: hand; -fx-background-color: transparent; -fx-font-weight: bold;" AnchorPane.bottomAnchor="298.0" AnchorPane.leftAnchor="39.0" AnchorPane.rightAnchor="255.0" AnchorPane.topAnchor="74.0" />
-                  <SVGPath content="M12 2 L4 10 L12 18 L10 20 L0 10 L10 0 Z" layoutX="45.0" layoutY="78.0" styleClass="back-icon" AnchorPane.bottomAnchor="302.0" AnchorPane.topAnchor="78.0" />
+                </Hyperlink>
+            </HBox>
+            <Button fx:id="backButton" layoutX="38.0" layoutY="44.0" mnemonicParsing="false" onAction="#handleBack" prefHeight="26.0" prefWidth="24.0" style="-fx-cursor: hand; -fx-background-color: transparent; -fx-font-weight: bold;" AnchorPane.leftAnchor="38.0" AnchorPane.topAnchor="44.0">
+                <graphic>
+                    <SVGPath content="M12 2 L4 10 L12 18 L10 20 L0 10 L10 0 Z" styleClass="back-icon" />
+                </graphic>
+            </Button>
         </AnchorPane>
     </center>
 </BorderPane>
