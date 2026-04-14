@@ -288,7 +288,7 @@ public class SignUpController {
     // Attach focus listener to text input controls
     private void attachFocusHandling(TextInputControl control, Runnable markTouched) {
         control.focusedProperty().addListener((obs, oldV, newV) -> {
-            boolean focused = Boolean.TRUE.equals(newV);
+            boolean focused = newV != null && newV;
             if (!focused) markTouched.run();
             if (focused) {
                 if (!control.getStyleClass().contains(FOCUS_CLASS)) control.getStyleClass().add(FOCUS_CLASS);
