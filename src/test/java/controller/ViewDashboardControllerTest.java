@@ -49,6 +49,9 @@ class ViewDashboardControllerTest {
         inject(controller, "noteService", noteService);
         inject(controller, "translationService", translationService);
 
+        // Inject a synchronous executor so background tasks execute inline in tests
+        inject(controller, "taskExecutor", (java.util.concurrent.Executor) (r -> r.run()));
+
         notesTable = new TableView<>();
         inject(controller, "notesTable", notesTable);
 
