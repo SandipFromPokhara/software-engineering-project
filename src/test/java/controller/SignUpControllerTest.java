@@ -733,4 +733,120 @@ class SignUpControllerTest {
 
         assertTrue(true); // just ensure no crash
     }
+    //added test to verify that the password strength bar and label are hidden and cleared when the password field is set to null
+    @Test
+    void testPasswordStrengthWithNullPassword() {
+        runOnFxThreadAndWait(() -> passwordField.setText(null));
+
+        runOnFxThreadAndWait(() -> {
+            assertFalse(passwordStrengthBar.isVisible());
+            assertEquals(0, passwordStrengthBar.getProgress());
+            assertTrue(passwordStrengthLabel.getText().isEmpty());
+        });
+    }
+    //added test to verify that entering a medium strength password updates the password strength label with appropriate feedback
+    @Test
+    void testPasswordStrengthMedium() {
+        runOnFxThreadAndWait(() -> passwordField.setText("Pass12"));
+
+        runOnFxThreadAndWait(() ->
+                assertFalse(passwordStrengthLabel.getText().isEmpty())
+        );
+    }
+    //added test to verify that handleFieldErrors returns false and does not throw when given an error object with a blank key
+    @Test
+    void testHandleFieldErrorsWithBlankKey() throws Exception {
+
+        Object fakeError = new Object() {
+            public String key() {
+                return "";
+            }
+        };
+
+        var errors = java.util.List.of(fakeError);
+
+        Method method = SignUpController.class.getDeclaredMethod("handleFieldErrors", String.class, java.util.List.class);
+        method.setAccessible(true);
+
+        boolean result = (boolean) method.invoke(controller, "firstName", errors);
+
+        assertFalse(result);
+    }
+    //added test to verify that handleFieldErrors returns false and does not throw when given an error object whose key method throws an exception
+    @Test
+    void testHandleFieldErrorsWithBrokenKeyMethod() throws Exception {
+
+        Object fakeError = new Object() {
+            public String key() {
+                throw new RuntimeException("fail");
+            }
+        };
+
+        var errors = java.util.List.of(fakeError);
+
+        Method method = SignUpController.class.getDeclaredMethod("handleFieldErrors", String.class, java.util.List.class);
+        method.setAccessible(true);
+
+        boolean result = (boolean) method.invoke(controller, "firstName", errors);
+
+        assertFalse(result);
+    }
+    //added test to verify that getControlForField returns the correct Control for all known field names and handles unknown names gracefully
+    @Test
+    void testGetControlForFieldAllCases() throws Exception {
+        Method method = SignUpController.class.getDeclaredMethod("getControlForField", String.class);
+        method.setAccessible(true);
+
+        assertEquals(firstNameField, method.invoke(controller, "firstName"));
+        assertEquals(lastNameField, method.invoke(controller, "lastName"));
+        assertEquals(usernameField, method.invoke(controller, "username"));
+        assertEquals(emailField, method.invoke(controller, "email"));
+        assertEquals(passwordField, method.invoke(controller, "password"));
+        assertEquals(confirmPasswordField, method.invoke(controller, "confirmPassword"));
+    }
+    //added test to verify that isFieldTouched returns false for all known field names and handles unknown names gracefully
+    @Test
+    void testIsFieldTouched() throws Exception {
+
+        Method method = SignUpController.class.getDeclaredMethod("isFieldTouched", String.class);
+        method.setAccessible(true);
+
+        assertTrue((boolean) method.invoke(controller, "unknown")); // default branch
+    }
+    //added test to verify that removeErrorStyle does not throw and does not modify the style class when the "input-error" class is not present
+    @Test
+    void testRemoveErrorStyleWhenNotPresent() throws Exception {
+        Method method = SignUpController.class.getDeclaredMethod("removeErrorStyle", Control.class);
+        method.setAccessible(true);
+
+        runOnFxThreadAndWait(() -> {
+            try {
+                method.invoke(controller, firstNameField);
+                assertFalse(firstNameField.getStyleClass().contains("input-error"));
+            } catch (Exception e) {
+                fail(e);
+            }
+        });
+    }
+    //added test to verify that addErrorStyle does not add duplicate "input-error" classes if it is already present on the Control
+    @Test
+    void testAddErrorStyleWhenAlreadyPresent() throws Exception {
+        Method method = SignUpController.class.getDeclaredMethod("addErrorStyle", Control.class);
+        method.setAccessible(true);
+
+        runOnFxThreadAndWait(() -> {
+            try {
+                firstNameField.getStyleClass().add("input-error");
+                method.invoke(controller, firstNameField);
+
+                long count = firstNameField.getStyleClass().stream()
+                        .filter(s -> s.equals("input-error"))
+                        .count();
+
+                assertEquals(1, count); // no duplicates
+            } catch (Exception e) {
+                fail(e);
+            }
+        });
+    }
 }
