@@ -78,7 +78,7 @@ class GuestDashboardControllerTest {
      * Verifies that NavigationUtil.setCenter() is called correctly.
      */
     @Test
-    void handleNewFiles_shouldCallSetCenter() {
+    void handleNewFilesShouldNotCrash() {
         VBox mockVBox = mock(VBox.class);
 
         assertDoesNotThrow(() -> {
@@ -114,7 +114,7 @@ class GuestDashboardControllerTest {
      * Ensures binding does not throw errors.
      */
     @Test
-    void initialize_shouldBindTexts() throws Exception {
+    void initializeShouldBindTexts() throws Exception {
         Button loginBtn = new Button();
         Button registerBtn = new Button();
 
@@ -130,7 +130,7 @@ class GuestDashboardControllerTest {
      * Uses reflection + JavaFX thread.
      */
     @Test
-    void handleHome_shouldCallNavigationUtil() throws Exception {
+    void handleHomeShouldCallNavigationUtil() throws Exception {
         runOnFxThread(() -> {
             try {
                 Button homeBtn = new Button();
@@ -175,7 +175,7 @@ class GuestDashboardControllerTest {
      * Tests private method handleLogin()
      */
     @Test
-    void handleLogin_shouldNavigateToLoginView() throws Exception {
+    void handleLoginShouldNavigateToLoginView() throws Exception {
         runOnFxThread(() -> {
             try {
                 Button loginBtn = new Button();
@@ -218,7 +218,7 @@ class GuestDashboardControllerTest {
      * Tests private method handleSignUp()
      */
     @Test
-    void handleSignUp_shouldNavigateToSignup() throws Exception {
+    void handleSignUpShouldNavigateToSignup() throws Exception {
         runOnFxThread(() -> {
             try {
                 Button registerBtn = new Button();
