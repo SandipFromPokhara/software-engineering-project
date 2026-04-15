@@ -33,11 +33,13 @@ class GuestDashboardControllerTest {
 
         // Inject private centerPane
         Field centerPaneField = GuestDashboardController.class.getDeclaredField("centerPane");
+        // Make private field accessible for test injection
         centerPaneField.setAccessible(true);
         centerPaneField.set(controller, new VBox());
 
         // Inject private newFiles button
         Field newFilesField = GuestDashboardController.class.getDeclaredField("newFiles");
+        // Make private field accessible for test injection
         newFilesField.setAccessible(true);
         newFilesField.set(controller, new Button());
     }
@@ -45,15 +47,22 @@ class GuestDashboardControllerTest {
     private void setField(Object target, Object value) {
         try {
             Field field = target.getClass().getDeclaredField("centerPane");
+            // Make private field accessible for test injection
             field.setAccessible(true);
             field.set(target, value);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new TestReflectionException("Failed to set field 'centerPane' via reflection", e);
+        }
+    }
+
+    private static class TestReflectionException extends RuntimeException {
+        public TestReflectionException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 
     @Test
-    void handleNewFiles_shouldNotCrash() {
+    void handleNewFilesShouldNotCrash() {
         VBox mockVBox = mock(VBox.class);
         Scene mockScene = mock(Scene.class);
         Stage mockStage = mock(Stage.class);

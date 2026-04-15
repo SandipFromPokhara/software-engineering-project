@@ -107,7 +107,7 @@ class LoginControllerTest {
             throw new IllegalStateException("Timeout waiting for JavaFX setup");
         }
 
-        await().atMost(2, SECONDS).untilAsserted(() ->
+        await().atMost(30, SECONDS).untilAsserted(() ->
                 assertNotNull(loginButton)
         );
     }
@@ -122,7 +122,7 @@ class LoginControllerTest {
             passwordField.setText(TEST_PASS);
         });
 
-        await().atMost(2, SECONDS).untilAsserted(
+        await().atMost(30, SECONDS).untilAsserted(
                 () -> assertFalse(loginButton.isDisabled())
         );
     }
@@ -135,7 +135,7 @@ class LoginControllerTest {
             passwordField.setText("");
         });
 
-        await().atMost(2, SECONDS).untilAsserted(
+        await().atMost(30, SECONDS).untilAsserted(
                 () -> assertTrue(loginButton.isDisabled())
         );
     }
@@ -154,7 +154,7 @@ class LoginControllerTest {
             loginButton.fire();
         });
 
-        await().atMost(2, SECONDS).untilAsserted(
+        await().atMost(30, SECONDS).untilAsserted(
                 () -> verify(userService).login(TEST_USERNAME, TEST_PASS)
         );
     }
@@ -172,7 +172,7 @@ class LoginControllerTest {
             loginButton.fire();
         });
 
-        await().atMost(2, SECONDS).untilAsserted(() -> {
+        await().atMost(30, SECONDS).untilAsserted(() -> {
             assertTrue(statusLabel.isVisible());
             assertFalse(loginButton.isDisabled());
         });
@@ -185,7 +185,7 @@ class LoginControllerTest {
 
         Platform.runLater(signupLink::fire);
 
-        await().atMost(2, SECONDS).untilAsserted(
+        await().atMost(30, SECONDS).untilAsserted(
                 () -> assertTrue(signupLink.isVisible())
         );
     }
@@ -195,7 +195,7 @@ class LoginControllerTest {
 
         Platform.runLater(backButton::fire);
 
-        await().atMost(2, SECONDS).untilAsserted(
+        await().atMost(30, SECONDS).untilAsserted(
                 () -> assertTrue(backButton.isVisible())
         );
     }

@@ -18,7 +18,6 @@ import util.Localization;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -92,47 +91,51 @@ class LanguageDialogControllerTest {
     private void injectField(String fieldName, Object value) {
         try {
             Field field = LanguageDialogController.class.getDeclaredField(fieldName);
+            // Make private fields accessible for test injection
             field.setAccessible(true);
             field.set(controller, value);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            fail("Failed to inject field '" + fieldName + "': " + e.getMessage());
+            throw new TestReflectionException("Failed to inject field '" + fieldName + "': " + e.getMessage(), e);
         }
     }
 
     private static void setSelectedLanguage(LanguageDialogController c, Language lang) {
         try {
             Field field = LanguageDialogController.class.getDeclaredField("selectedLanguage");
+            // Make private field accessible for test injection
             field.setAccessible(true);
             field.set(c, lang);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            fail("Failed to set selectedLanguage: " + e.getMessage());
+            throw new TestReflectionException("Failed to set selectedLanguage: " + e.getMessage(), e);
         }
     }
 
     private static Language getSelectedLanguage(LanguageDialogController c) {
         try {
             Field selectedField = LanguageDialogController.class.getDeclaredField("selectedLanguage");
+            // Make private field accessible for test access
             selectedField.setAccessible(true);
             return (Language) selectedField.get(c);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            fail("Failed to access selectedLanguage: " + e.getMessage());
-            return null; // unreachable
+            throw new TestReflectionException("Failed to access selectedLanguage: " + e.getMessage(), e);
         }
     }
 
     private static void invokePrivate(LanguageDialogController c, String methodName) {
         try {
             Method m = LanguageDialogController.class.getDeclaredMethod(methodName);
+            // Make private methods accessible for test invocation
             m.setAccessible(true);
             m.invoke(c);
         } catch (ReflectiveOperationException e) {
-            fail("Failed to invoke " + methodName + ": " + e.getMessage());
+            throw new TestReflectionException("Failed to invoke " + methodName + ": " + e.getMessage(), e);
         }
     }
 
     private static void invokePrivateAllowRuntime(LanguageDialogController c, String methodName) {
         try {
             Method m = LanguageDialogController.class.getDeclaredMethod(methodName);
+            // Make private methods accessible for test invocation
             m.setAccessible(true);
             m.invoke(c);
         } catch (ReflectiveOperationException e) {
@@ -142,10 +145,31 @@ class LanguageDialogControllerTest {
                 if (target instanceof RuntimeException) {
                     return; // expected in headless env for window-closing code
                 }
-                fail("Invocation of " + methodName + " failed: " + target);
-                return;
+                throw new TestReflectionException("Invocation of " + methodName + " failed: " + target, ite);
             }
-            fail("Failed to invoke " + methodName + ": " + e.getMessage());
+            throw new TestReflectionException("Failed to invoke " + methodName + ": " + e.getMessage(), e);
+        }
+    }
+
+    private static RadioButton findDifferentRadioButton(VBox languagePane, Language selected) {
+        for (Node n : languagePane.getChildren()) {
+            if (n instanceof RadioButton rb) {
+                Object data = rb.getUserData();
+                if (data instanceof Language lang) {
+                    String langCode = lang.code();
+                    String selectedCode = selected == null ? null : selected.code();
+                    if (langCode != null && selectedCode != null && !langCode.equals(selectedCode)) {
+                        return rb;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private static class TestReflectionException extends RuntimeException {
+        public TestReflectionException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 
@@ -173,31 +197,16 @@ class LanguageDialogControllerTest {
             assertEquals(expected.code(), initiallySelected.code(),
                     "Initially selected language should match the application's locale");
 
-            List<Node> children = languagePane.getChildren();
-            RadioButton other = null;
-            for (Node n : children) {
-                if (n instanceof RadioButton rb) {
-                    Object data = rb.getUserData();
-                    if (data instanceof Language lang) {
-                        String langCode = lang.code();
-                        String selectedCode = initiallySelected.code();
-                        if (langCode != null && selectedCode != null && !langCode.equals(selectedCode)) {
-                            other = rb;
-                            break;
-                        }
-                    }
-                }
-            }
+            RadioButton other = findDifferentRadioButton(languagePane, initiallySelected);
+            if (other == null) return; // nothing to verify if no alternative exists
 
-            if (other != null) {
-                other.setSelected(true);
-                Language nowSelected = getSelectedLanguage(controller);
-                assertNotNull(nowSelected);
-                Object otherData = other.getUserData();
-                assertTrue(otherData instanceof Language);
-                assertEquals(((Language) otherData).code(), nowSelected.code(),
-                        "Selecting another radio button should update selectedLanguage");
-            }
+            other.setSelected(true);
+            Language nowSelected = getSelectedLanguage(controller);
+            assertNotNull(nowSelected);
+            Object otherData = other.getUserData();
+            assertTrue(otherData instanceof Language);
+            assertEquals(((Language) otherData).code(), nowSelected.code(),
+                    "Selecting another radio button should update selectedLanguage");
         });
     }
 

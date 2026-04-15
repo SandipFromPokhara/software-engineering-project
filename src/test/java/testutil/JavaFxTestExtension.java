@@ -30,6 +30,7 @@ public class JavaFxTestExtension implements BeforeAllCallback, ExtensionContext.
                     throw new IllegalStateException("JavaFX Platform failed to start");
                 }
             } catch (IllegalStateException ignored) {
+                // Do nothing, JavaFX is already running
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException("Interrupted while waiting for JavaFX Platform to start", e);

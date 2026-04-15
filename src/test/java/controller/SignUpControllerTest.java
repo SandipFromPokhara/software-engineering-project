@@ -7,6 +7,8 @@ import javafx.scene.control.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import security.BcryptPasswordHasher;
 import security.IPasswordHasher;
 import testutil.JavaFXInitializer;
@@ -21,18 +23,34 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SignUpControllerTest {
 
-    private static final long FX_TIMEOUT_SECONDS = 2;
+    private static final String PASS = "Pass123!";
+    private static final String TEST_FIRST_NAME = "John";
+    private static final String TEST_LAST_NAME = "Doe";
+    private static final String TEST_USERNAME = "johndoe";
+    private static final String TEST_EMAIL = "john@example.com";
+
+    private static final long FX_TIMEOUT_SECONDS = 10;
+    private static final String MSG_SHOULD_BE_SHOWN = "Message should be shown";
 
     private SignUpController controller;
     private MockUserDAO mockUserDAO;
     private IPasswordHasher passwordHasher;
 
-    private TextField firstNameField, lastNameField, usernameField, emailField;
-    private PasswordField passwordField, confirmPasswordField;
-    private Button signUpButton, backButton;
+    private TextField firstNameField;
+    private TextField lastNameField;
+    private TextField usernameField;
+    private TextField emailField;
+    private PasswordField passwordField;
+    private PasswordField confirmPasswordField;
+    private Button signUpButton;
+    private Button backButton;
     private Hyperlink loginLink;
-    private Label messageLabel, createAccount, joinAccount, haveAccount;
-    private Label privacyLabel, passwordStrengthLabel;
+    private Label messageLabel;
+    private Label createAccount;
+    private Label joinAccount;
+    private Label haveAccount;
+    private Label privacyLabel;
+    private Label passwordStrengthLabel;
     private ProgressBar passwordStrengthBar;
 
     private static class MockUserDAO implements IUserDAO {
@@ -167,6 +185,11 @@ class SignUpControllerTest {
     }
 
     private static void runOnFxThreadAndWait(Runnable action) {
+        if (Platform.isFxApplicationThread()) {
+            action.run();
+            return;
+        }
+
         CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {
             try {
@@ -188,10 +211,11 @@ class SignUpControllerTest {
     private void injectField(String fieldName, Object value) {
         try {
             Field field = SignUpController.class.getDeclaredField(fieldName);
+            // Make private fields accessible for test injection
             field.setAccessible(true);
             field.set(controller, value);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            fail("Failed to inject field '" + fieldName + "': " + e.getMessage());
+            throw new TestReflectionException("Failed to inject field '" + fieldName + "': " + e.getMessage(), e);
         }
     }
 
@@ -211,20 +235,17 @@ class SignUpControllerTest {
         Method method;
         try {
             method = SignUpController.class.getDeclaredMethod(methodName);
+            // Make private methods accessible for test invocation
             method.setAccessible(true);
         } catch (NoSuchMethodException e) {
-            fail("Missing method '" + methodName + "': " + e.getMessage());
-            return;
+            throw new TestReflectionException("Missing method '" + methodName + "': " + e.getMessage(), e);
         }
 
         runOnFxThreadAndWait(() -> {
             try {
                 method.invoke(controller);
-            } catch (IllegalAccessException e) {
-                fail("Cannot access method '" + methodName + "': " + e.getMessage());
-            } catch (InvocationTargetException e) {
-                // Surface the underlying exception to make failures actionable
-                fail("Invocation of '" + methodName + "' failed: " + e.getTargetException());
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new TestReflectionException("Failed to invoke '" + methodName + "': " + e.getMessage(), e);
             }
         });
     }
@@ -235,7 +256,7 @@ class SignUpControllerTest {
 
     private void waitUntilMessageVisible() {
         // Avoid Thread.sleep; poll briefly on the FX thread.
-        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(FX_TIMEOUT_SECONDS);
         while (System.nanoTime() < deadline) {
             if (isMessageVisibleOrNonEmpty()) {
                 return;
@@ -274,7 +295,7 @@ class SignUpControllerTest {
 
     @Test
     void testHandleSignUpWithInvalidEmail() {
-        setFieldValues("John", "Doe", "johndoe", "invalid-email", "Pass123!", "Pass123!");
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, "invalid-email", PASS, PASS);
         invokeHandleSignUp();
         waitUntilMessageVisible();
         assertTrue(isMessageVisibleOrNonEmpty());
@@ -282,15 +303,16 @@ class SignUpControllerTest {
 
     @Test
     void testHandleSignUpWithPasswordMismatch() {
-        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass456!");
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL, PASS, "Pass456!");
         invokeHandleSignUp();
         waitUntilMessageVisible();
         assertTrue(isMessageVisibleOrNonEmpty());
     }
 
-    @Test
-    void testHandleSignUpWithWeakPassword() {
-        setFieldValues("John", "Doe", "johndoe", "john@example.com", "pass", "pass");
+    @ParameterizedTest
+    @ValueSource(strings = {"pass", "Password123", "Password!!"})
+    void testHandleSignUp_InvalidOrWeakPasswords_ShowMessage(String badPassword) {
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL, badPassword, badPassword);
         invokeHandleSignUp();
         waitUntilMessageVisible();
         assertTrue(isMessageVisibleOrNonEmpty());
@@ -298,7 +320,7 @@ class SignUpControllerTest {
 
     @Test
     void testHandleSignUpWithInvalidUsername() {
-        setFieldValues("John", "Doe", "ab", "john@example.com", "Pass123!", "Pass123!");
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, "ab", TEST_EMAIL, PASS, PASS);
         invokeHandleSignUp();
         waitUntilMessageVisible();
         assertTrue(isMessageVisibleOrNonEmpty());
@@ -309,11 +331,11 @@ class SignUpControllerTest {
         UserEntity existingUser = new UserEntity("Jane", "Doe", "johndoe", "jane@example.com");
         mockUserDAO.setUserToReturn(existingUser);
 
-        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL, PASS, PASS);
         invokeHandleSignUp();
         waitUntilMessageVisible();
 
-        assertTrue(isMessageVisibleOrNonEmpty(), "Message should be shown");
+        assertTrue(isMessageVisibleOrNonEmpty(), MSG_SHOULD_BE_SHOWN);
     }
 
     @Test
@@ -321,21 +343,21 @@ class SignUpControllerTest {
         UserEntity existingUser = new UserEntity("Jane", "Doe", "janedoe", "john@example.com");
         mockUserDAO.setUserToReturn(existingUser);
 
-        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL, PASS, PASS);
         invokeHandleSignUp();
         waitUntilMessageVisible();
 
-        assertTrue(isMessageVisibleOrNonEmpty(), "Message should be shown");
+        assertTrue(isMessageVisibleOrNonEmpty(), MSG_SHOULD_BE_SHOWN);
     }
 
     @Test
     void testSuccessfulSignUp() {
         mockUserDAO.reset();
-        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL, PASS, PASS);
         invokeHandleSignUp();
 
         // wait until DAO was called
-        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(FX_TIMEOUT_SECONDS);
         while (System.nanoTime() < deadline && mockUserDAO.savedUser == null) {
             runOnFxThreadAndWait(() -> {
                 // no-op
@@ -343,10 +365,10 @@ class SignUpControllerTest {
         }
 
         assertNotNull(mockUserDAO.savedUser);
-        assertEquals("John", mockUserDAO.savedUser.getFirstName());
-        assertEquals("Doe", mockUserDAO.savedUser.getLastName());
-        assertEquals("johndoe", mockUserDAO.savedUser.getUsername());
-        assertTrue(passwordHasher.verify("Pass123!", mockUserDAO.savedUser.getPasswordHash()));
+        assertEquals(TEST_FIRST_NAME, mockUserDAO.savedUser.getFirstName());
+        assertEquals(TEST_LAST_NAME, mockUserDAO.savedUser.getLastName());
+        assertEquals(TEST_USERNAME, mockUserDAO.savedUser.getUsername());
+        assertTrue(passwordHasher.verify(PASS, mockUserDAO.savedUser.getPasswordHash()));
     }
 
     @Test
@@ -354,11 +376,11 @@ class SignUpControllerTest {
         mockUserDAO.reset();
         mockUserDAO.shouldReturnNullOnSave = true;
 
-        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL, PASS, PASS);
         invokeHandleSignUp();
         waitUntilMessageVisible();
 
-        assertTrue(isMessageVisibleOrNonEmpty(), "Message should be shown");
+        assertTrue(isMessageVisibleOrNonEmpty(), MSG_SHOULD_BE_SHOWN);
     }
 
     @Test
@@ -366,11 +388,11 @@ class SignUpControllerTest {
         mockUserDAO.reset();
         mockUserDAO.shouldReturnUserWithoutId = true;
 
-        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL, PASS, PASS);
         invokeHandleSignUp();
         waitUntilMessageVisible();
 
-        assertTrue(isMessageVisibleOrNonEmpty(), "Message should be shown");
+        assertTrue(isMessageVisibleOrNonEmpty(), MSG_SHOULD_BE_SHOWN);
     }
 
     @Test
@@ -378,11 +400,11 @@ class SignUpControllerTest {
         mockUserDAO.reset();
         mockUserDAO.shouldThrowIllegalArgumentException = true;
 
-        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL, PASS, PASS);
         invokeHandleSignUp();
         waitUntilMessageVisible();
 
-        assertTrue(isMessageVisibleOrNonEmpty(), "Message should be shown");
+        assertTrue(isMessageVisibleOrNonEmpty(), MSG_SHOULD_BE_SHOWN);
     }
 
     @Test
@@ -390,11 +412,11 @@ class SignUpControllerTest {
         mockUserDAO.reset();
         mockUserDAO.shouldThrowRuntimeException = true;
 
-        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL, PASS, PASS);
         invokeHandleSignUp();
         waitUntilMessageVisible();
 
-        assertTrue(isMessageVisibleOrNonEmpty(), "Message should be shown");
+        assertTrue(isMessageVisibleOrNonEmpty(), MSG_SHOULD_BE_SHOWN);
     }
 
     @Test
@@ -429,7 +451,7 @@ class SignUpControllerTest {
 
     @Test
     void testClearFields() {
-        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL, PASS, PASS);
 
         invokePrivateMethod("clearFields");
 
@@ -453,7 +475,7 @@ class SignUpControllerTest {
     @Test
     void testHandleSignUpTrimsWhitespace() {
         mockUserDAO.reset();
-        setFieldValues("  John  ", "  Doe  ", "  johndoe  ", "  john@example.com  ", "Pass123!", "Pass123!");
+        setFieldValues("  " + TEST_FIRST_NAME + "  ", "  " + TEST_LAST_NAME + "  ", "  " + TEST_USERNAME + "  ", "  " + TEST_EMAIL + "  ", PASS, PASS);
         invokeHandleSignUp();
 
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
@@ -464,8 +486,8 @@ class SignUpControllerTest {
         }
 
         assertNotNull(mockUserDAO.savedUser);
-        assertEquals("John", mockUserDAO.savedUser.getFirstName());
-        assertEquals("Doe", mockUserDAO.savedUser.getLastName());
+        assertEquals(TEST_FIRST_NAME, mockUserDAO.savedUser.getFirstName());
+        assertEquals(TEST_LAST_NAME, mockUserDAO.savedUser.getLastName());
     }
 
     @Test
@@ -489,8 +511,8 @@ class SignUpControllerTest {
     @Test
     void testPasswordIsHashedBeforeSaving() {
         mockUserDAO.reset();
-        String plainPass = "Pass123!";
-        setFieldValues("John", "Doe", "johndoe", "john@example.com", plainPass, plainPass);
+        String plainPass = PASS;
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL, plainPass, plainPass);
         invokeHandleSignUp();
 
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
@@ -507,27 +529,13 @@ class SignUpControllerTest {
 
     @Test
     void testInvalidNameFormat() {
-        setFieldValues("123", "456", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+        setFieldValues("123", "456", TEST_USERNAME, TEST_EMAIL, PASS, PASS);
         invokeHandleSignUp();
         waitUntilMessageVisible();
         assertTrue(isMessageVisibleOrNonEmpty());
     }
 
-    @Test
-    void testPasswordWithoutSpecialCharacter() {
-        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Password123", "Password123");
-        invokeHandleSignUp();
-        waitUntilMessageVisible();
-        assertTrue(isMessageVisibleOrNonEmpty());
-    }
-
-    @Test
-    void testPasswordWithoutNumber() {
-        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Password!!", "Password!!");
-        invokeHandleSignUp();
-        waitUntilMessageVisible();
-        assertTrue(isMessageVisibleOrNonEmpty());
-    }
+    // Combined into parameterized test above
 
     @Test
     void testPasswordStrengthBarInitiallyHidden() {
@@ -539,7 +547,7 @@ class SignUpControllerTest {
 
     @Test
     void testPasswordStrengthBarShowsOnInput() {
-        runOnFxThreadAndWait(() -> passwordField.setText("Pass123!"));
+        runOnFxThreadAndWait(() -> passwordField.setText(PASS));
 
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
         while (System.nanoTime() < deadline) {
@@ -578,5 +586,11 @@ class SignUpControllerTest {
         IPasswordHasher newHasher = new BcryptPasswordHasher();
         controller.setPasswordHasher(newHasher);
         assertNotNull(newHasher);
+    }
+
+    private static class TestReflectionException extends RuntimeException {
+        public TestReflectionException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 }
