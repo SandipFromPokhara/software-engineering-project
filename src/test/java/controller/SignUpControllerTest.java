@@ -685,7 +685,7 @@ class SignUpControllerTest {
         waitUntilMessageVisible();
 
         runOnFxThreadAndWait(() ->
-                assertTrue(passwordStrengthLabel.getText().length() > 0)
+                assertFalse(passwordStrengthLabel.getText().isEmpty())
         );
     }
     //added test to verify that the password strength bar hides after entering a strong password
