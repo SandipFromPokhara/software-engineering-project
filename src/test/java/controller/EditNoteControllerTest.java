@@ -27,6 +27,10 @@ class EditNoteControllerTest {
     private NoteEntity note;
     private RichTextEditorController editorMock;
     private NoteService noteServiceMock;
+    
+    private static final String TITLE_FIELD = "titleField";
+    private static final String ANNOTATION_FIELD = "annotationBox";
+    private static final String  TAG_COMBOBOX = "tagComboBox";
 
     // Initialize JavaFX
     @BeforeAll
@@ -44,11 +48,11 @@ class EditNoteControllerTest {
         setField("tagDao", tagDao);
 
         // Inject UI components
-        setField("titleField", new TextField());
-        setField("annotationBox", new TextField());
+        setField(TITLE_FIELD, new TextField());
+        setField(ANNOTATION_FIELD, new TextField());
         setField("updateButton", new Button());
         setField("tagFlowpane", new FlowPane());
-        setField("tagComboBox", new ComboBox<String>());
+        setField(TAG_COMBOBOX, new ComboBox<String>());
         setField("statusLabel", new Label());
 
         // Mock editor
@@ -107,7 +111,7 @@ class EditNoteControllerTest {
 
         setField("noteService", noteServiceMock);
 
-        ComboBox<String> combo = getField("tagComboBox");
+        ComboBox<String> combo = getField(TAG_COMBOBOX);
         combo.setEditable(true);
 
         controller.selectedTags = new HashSet<>();
@@ -119,10 +123,11 @@ class EditNoteControllerTest {
     private void setField(String name, Object value) {
         try {
             Field field = EditNoteController.class.getDeclaredField(name);
+            // Make private fields accessible for test injection
             field.setAccessible(true);
             field.set(controller, value);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new TestReflectionException("Failed to set field '" + name + "' via reflection", e);
         }
     }
 
@@ -130,16 +135,17 @@ class EditNoteControllerTest {
     private <T> T getField(String name) {
         try {
             Field field = EditNoteController.class.getDeclaredField(name);
+            // Make private fields accessible for test access
             field.setAccessible(true);
             return (T) field.get(controller);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new TestReflectionException("Failed to get field '" + name + "' via reflection", e);
         }
     }
 
     // ---------- setNote ----------
     @Test
-    void setNote_shouldPopulateFields() {
+    void setNoteShouldPopulateFields() {
         var translation = note.createTranslation("en");
         translation.setTitle("My Title");
         translation.setContent("My Content");
@@ -147,13 +153,13 @@ class EditNoteControllerTest {
 
         controller.setNote(note);
 
-        assertEquals("My Title", ((TextField) getField("titleField")).getText());
+        assertEquals("My Title", ((TextField) getField(TITLE_FIELD)).getText());
         verify(editorMock).setText("My Content");
-        assertEquals("My Annotation", ((TextField) getField("annotationBox")).getText());
+        assertEquals("My Annotation", ((TextField) getField(ANNOTATION_FIELD)).getText());
     }
 
     @Test
-    void setNote_shouldLoadTags() {
+    void setNoteShouldLoadTags() {
         TagEntity tag = new TagEntity();
         tag.setTagName("work");
         note.addTag(tag);
@@ -165,9 +171,9 @@ class EditNoteControllerTest {
 
     // ---------- handleUpdate ----------
     @Test
-    void handleUpdate_shouldSaveNote() {
-        TextField titleField = getField("titleField");
-        TextField annotationBox = getField("annotationBox");
+    void handleUpdateShouldSaveNote() {
+        TextField titleField = getField(TITLE_FIELD);
+        TextField annotationBox = getField(ANNOTATION_FIELD);
 
         String lang = util.Localization.getCurrentLanguageCode();
         note.createTranslation(lang);
@@ -190,9 +196,8 @@ class EditNoteControllerTest {
         );
     }
 
-
     @Test
-    void handleUpdate_shouldCallService() {
+    void handleUpdateShouldCallService() {
         assertDoesNotThrow(() -> controller.handleUpdate());
 
         verify(noteServiceMock).updateNote(
@@ -201,7 +206,7 @@ class EditNoteControllerTest {
     }
 
     @Test
-    void handleUpdate_shouldPassTagsToService() {
+    void handleUpdateShouldPassTagsToService() {
         controller.selectedTags.add("work");
 
         assertDoesNotThrow(() -> controller.handleUpdate());
@@ -218,8 +223,8 @@ class EditNoteControllerTest {
 
     // ---------- handleAddTag ----------
     @Test
-    void handleAddTag_shouldAddTag() {
-        ComboBox<String> combo = getField("tagComboBox");
+    void handleAddTagShouldAddTag() {
+        ComboBox<String> combo = getField(TAG_COMBOBOX);
         combo.getEditor().setText("work");
 
         controller.handleAddTag();
@@ -228,31 +233,33 @@ class EditNoteControllerTest {
     }
 
     @Test
-    void handleAddTag_shouldNotDuplicate() {
+    void handleAddTagShouldNotDuplicate() {
         controller.selectedTags.add("work");
 
-        ComboBox<String> combo = getField("tagComboBox");
+        ComboBox<String> combo = getField(TAG_COMBOBOX);
         combo.getEditor().setText("work");
 
         controller.handleAddTag();
 
         assertEquals(1, controller.selectedTags.size());
     }
+
     @Test
-    void setNote_shouldClearFields_whenTranslationMissing() {
+    void setNoteShouldClearFieldsWhenTranslationMissing() {
         reset(editorMock);
 
         controller.setNote(note);
 
-        assertEquals("", ((TextField) getField("titleField")).getText());
-        assertEquals("", ((TextField) getField("annotationBox")).getText());
+        assertEquals("", ((TextField) getField(TITLE_FIELD)).getText());
+        assertEquals("", ((TextField) getField(ANNOTATION_FIELD)).getText());
 
         verify(editorMock, atLeastOnce()).setText("");
     }
+
     @Test
-    void handleUpdate_shouldHandleNullValues() {
-        TextField titleField = getField("titleField");
-        TextField annotationBox = getField("annotationBox");
+    void handleUpdateShouldHandleNullValues() {
+        TextField titleField = getField(TITLE_FIELD);
+        TextField annotationBox = getField(ANNOTATION_FIELD);
 
         when(editorMock.getSerializedContent()).thenReturn(null);
 
@@ -270,21 +277,34 @@ class EditNoteControllerTest {
                 anySet()
         );
     }
+
     private void invokePrivate(String methodName) {
         try {
             var method = EditNoteController.class.getDeclaredMethod(methodName);
+            // Make private methods accessible for invocation in tests
             method.setAccessible(true);
             method.invoke(controller);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new TestReflectionException("Failed to invoke private method '" + methodName + "'", e);
         }
     }
+
+    /**
+     * Unchecked exception to indicate reflection-based test failures in a clearer way than RuntimeException.
+     */
+    private static class TestReflectionException extends RuntimeException {
+        public TestReflectionException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
     @Test
-    void handleCancel_shouldNotThrow() {
+    void handleCancelShouldNotThrow() {
         assertDoesNotThrow(() -> invokePrivate("handleCancel"));
     }
+
     @Test
-    void loadTags_shouldPopulateComboBox() {
+    void loadTagsShouldPopulateComboBox() {
         ITagDAO tagDao = mock(ITagDAO.class);
 
         TagEntity t1 = new TagEntity();
@@ -299,28 +319,31 @@ class EditNoteControllerTest {
 
         controller.setTagDao(tagDao);
 
-        ComboBox<String> combo = getField("tagComboBox");
+        ComboBox<String> combo = getField(TAG_COMBOBOX);
 
         assertTrue(combo.getItems().contains("work"));
         assertTrue(combo.getItems().contains("home"));
     }
+
     @Test
-    void handleAddTag_shouldIgnoreEmptyTag() {
-        ComboBox<String> combo = getField("tagComboBox");
+    void handleAddTagShouldIgnoreEmptyTag() {
+        ComboBox<String> combo = getField(TAG_COMBOBOX);
         combo.getEditor().setText("");
 
         controller.handleAddTag();
 
         assertTrue(controller.selectedTags.isEmpty());
     }
+
     @Test
-    void setNote_shouldHandleNullTags() {
+    void setNoteShouldHandleNullTags() {
         assertDoesNotThrow(() -> controller.setNote(note));
         assertTrue(controller.selectedTags.isEmpty());
     }
+
     @Test
-    void handleUpdate_shouldHandleEmptyStrings() {
-        TextField titleField = getField("titleField");
+    void handleUpdateShouldHandleEmptyStrings() {
+        TextField titleField = getField(TITLE_FIELD);
 
         when(editorMock.getSerializedContent()).thenReturn("");
 
@@ -328,8 +351,9 @@ class EditNoteControllerTest {
 
         assertDoesNotThrow(() -> controller.handleUpdate());
     }
+
     @Test
-    void handleUndo_shouldCallManager() {
+    void handleUndoShouldCallManager() {
         UndoRedoManager spyManager = spy(new UndoRedoManager());
         setField("undoRedoManager", spyManager);
 
@@ -339,7 +363,7 @@ class EditNoteControllerTest {
     }
 
     @Test
-    void handleRedo_shouldCallManager() {
+    void handleRedoShouldCallManager() {
         UndoRedoManager spyManager = spy(new UndoRedoManager());
         setField("undoRedoManager", spyManager);
 
@@ -347,5 +371,4 @@ class EditNoteControllerTest {
 
         verify(spyManager).redo();
     }
-
 }

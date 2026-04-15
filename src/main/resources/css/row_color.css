@@ -1,3 +1,8 @@
+/* stylelint-disable selector-pseudo-class-no-unknown */
+/* The file uses JavaFX-specific pseudo-classes like :odd, :even, :selected and :filled
+   which stylelint (and Sonar) may report as unknown. Disable that specific rule
+   for this file so JavaFX runtime behavior is preserved. */
+
 .table-row-cell:odd {
     -fx-background-color: #f2f2f2;
     -fx-background-insets: 0;

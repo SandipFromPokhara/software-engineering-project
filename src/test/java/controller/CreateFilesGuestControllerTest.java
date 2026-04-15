@@ -31,7 +31,7 @@ class CreateFilesGuestControllerTest {
         controller.annotationBox = new TextField();
     }
     @Test
-    void initialize_shouldSetupBindingsWithoutErrors() {
+    void initializeShouldSetupBindingsWithoutErrors() {
         // Arrange
         controller.title = new Label();
         controller.content = new Label();
@@ -54,7 +54,7 @@ class CreateFilesGuestControllerTest {
     }
 
     @Test
-    void handleCancel_shouldClearAllFields() {
+    void handleCancelShouldClearAllFields() {
         // Arrange
         controller.titleBox.setText("Test Title");
         controller.contentBox.setText("Test Content");
@@ -69,7 +69,7 @@ class CreateFilesGuestControllerTest {
         assertEquals("", controller.annotationBox.getText());
     }
     @Test
-    void handleCancel_shouldNotCrash_whenSomeFieldsAreNull() {
+    void handleCancelShouldNotCrashWhenSomeFieldsAreNull() {
         controller.titleBox = new TextField("Hello");
         controller.contentBox = null;
         controller.annotationBox = new TextField("World");
@@ -80,7 +80,7 @@ class CreateFilesGuestControllerTest {
         assertEquals("", controller.annotationBox.getText());
     }
     @Test
-    void initialize_shouldBindPromptTexts() {
+    void initializeShouldBindPromptTexts() {
         controller.titleBox = new TextField();
         controller.contentBox = new TextArea();
         controller.annotationBox = new TextField();

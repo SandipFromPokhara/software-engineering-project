@@ -43,12 +43,13 @@ public class SignUpController {
     private static final String FOCUS_CLASS = "focus";
 
     @FXML
-    private TextField firstNameField, lastNameField, usernameField, emailField;
-
-    @FXML private TextField firstNameField;
-    @FXML private TextField lastNameField;
-    @FXML private TextField usernameField;
-    @FXML private TextField emailField;
+    private TextField firstNameField;
+    @FXML
+    private TextField lastNameField;
+    @FXML
+    private TextField usernameField;
+    @FXML
+    private TextField emailField;
 
     @FXML private PasswordField passwordField;
     @FXML private PasswordField confirmPasswordField;
@@ -221,25 +222,24 @@ public class SignUpController {
         resetStyles();
 
         for (var entry : result.errors().entrySet()) {
+            String field = entry.getKey();
             if (entry.getValue().isEmpty()) continue;
 
-            if (!entry.getValue().isEmpty()) {
-                Control c = getControlForField(field);
-                boolean touched = switch (field) {
-                    case "firstName" -> firstNameTouched;
-                    case "lastName" -> lastNameTouched;
-                    case "username" -> usernameTouched;
-                    case "email" -> emailTouched;
-                    case "password" -> passwordTouched;
-                    case "confirmPassword" -> confirmPasswordTouched;
-                    default -> true;
-                };
+            // Determine whether the field has been touched (so we only highlight touched fields)
+            boolean touched = true;
+            if ("firstName".equals(field)) touched = firstNameTouched;
+            else if ("lastName".equals(field)) touched = lastNameTouched;
+            else if ("username".equals(field)) touched = usernameTouched;
+            else if ("email".equals(field)) touched = emailTouched;
+            else if ("password".equals(field)) touched = passwordTouched;
+            else if ("confirmPassword".equals(field)) touched = confirmPasswordTouched;
 
-                if (c != null && touched) addErrorStyle(c);
+            Control c = getControlForField(field);
+            if (c != null && touched) addErrorStyle(c);
 
-                var firstError = entry.getValue().stream().findFirst().orElse(null);
-                if (firstError == null) continue;
-                String key = firstError.key();
+            var firstError = entry.getValue().stream().findFirst().orElse(null);
+            if (firstError == null) continue;
+            String key = firstError.key();
 
             ShowMessageUtil.showMessage(
                     messageLabel,
@@ -250,145 +250,129 @@ public class SignUpController {
         }
     }
 
-    private void applyErrorStyle(String field) {
-        switch (field) {
-            case String f when ("firstName".equals(f) && firstNameTouched) -> firstNameField.setStyle(BORDER_ERROR_STYLE);
-            case String f when ("lastName".equals(f) && lastNameTouched) -> lastNameField.setStyle(BORDER_ERROR_STYLE);
-            case String f when ("username".equals(f) && usernameTouched) -> usernameField.setStyle(BORDER_ERROR_STYLE);
-            case String f when ("email".equals(f) && emailTouched) -> emailField.setStyle(BORDER_ERROR_STYLE);
-            case String f when ("password".equals(f) && passwordTouched) -> passwordField.setStyle(BORDER_ERROR_STYLE);
-            case String f when ("confirmPassword".equals(f) && confirmPasswordTouched) -> confirmPasswordField.setStyle(BORDER_ERROR_STYLE);
 
-            case "firstName", "lastName", "username", "email", "password", "confirmPassword" ->
-                    // Intentional no-op.
-                    logger.log(Level.FINER, "Field not touched yet: {0}", field);
-
-            default -> logger.log(Level.FINE, "Unknown validation field: {0}", field);
+        private void resetStyles() {
+            removeErrorStyle(firstNameField);
+            removeErrorStyle(lastNameField);
+            removeErrorStyle(usernameField);
+            removeErrorStyle(emailField);
+            removeErrorStyle(passwordField);
+            removeErrorStyle(confirmPasswordField);
         }
-    }
 
-    private void resetStyles() {
-        removeErrorStyle(firstNameField);
-        removeErrorStyle(lastNameField);
-        removeErrorStyle(usernameField);
-        removeErrorStyle(emailField);
-        removeErrorStyle(passwordField);
-        removeErrorStyle(confirmPasswordField);
-    }
+        // Map validation field name to control instance
+        private Control getControlForField(String field) {
+            return switch (field) {
+                case "firstName" -> firstNameField;
+                case "lastName" -> lastNameField;
+                case "username" -> usernameField;
+                case "email" -> emailField;
+                case "password" -> passwordField;
+                case "confirmPassword" -> confirmPasswordField;
+                default -> null;
+            };
+        }
 
-    // Map validation field name to control instance
-    private Control getControlForField(String field) {
-        return switch (field) {
-            case "firstName" -> firstNameField;
-            case "lastName" -> lastNameField;
-            case "username" -> usernameField;
-            case "email" -> emailField;
-            case "password" -> passwordField;
-            case "confirmPassword" -> confirmPasswordField;
-            default -> null;
-        };
-    }
+        // Attach focus listener to text input controls
+        private void attachFocusHandling(TextInputControl control, Runnable markTouched) {
+            control.focusedProperty().addListener((obs, oldV, newV) -> {
+                boolean focused = newV != null && newV;
+                if (!focused) markTouched.run();
+                if (focused) {
+                    if (!control.getStyleClass().contains(FOCUS_CLASS)) control.getStyleClass().add(FOCUS_CLASS);
+                } else {
+                    control.getStyleClass().removeIf(s -> s.equals(FOCUS_CLASS));
+                }
+            });
+        }
 
-    // Attach focus listener to text input controls
-    private void attachFocusHandling(TextInputControl control, Runnable markTouched) {
-        control.focusedProperty().addListener((obs, oldV, newV) -> {
-            boolean focused = newV != null && newV;
-            if (!focused) markTouched.run();
-            if (focused) {
-                if (!control.getStyleClass().contains(FOCUS_CLASS)) control.getStyleClass().add(FOCUS_CLASS);
-            } else {
-                control.getStyleClass().removeIf(s -> s.equals(FOCUS_CLASS));
+        private void addErrorStyle(Control c) {
+            if (!c.getStyleClass().contains(ERROR_CLASS)) c.getStyleClass().add(ERROR_CLASS);
+        }
+
+        private void removeErrorStyle(Control c) {
+            c.getStyleClass().removeIf(s -> s.equals(ERROR_CLASS));
+        }
+
+        private void updatePasswordStrength(String password) {
+            if (strengthHideDelay != null) strengthHideDelay.stop();
+
+            if (password == null || password.isEmpty()) {
+                setStrengthBarVisible(false);
+                passwordStrengthBar.setProgress(0);
+                passwordStrengthLabel.setText("");
+                return;
             }
-        });
-    }
 
-    private void addErrorStyle(Control c) {
-        if (!c.getStyleClass().contains(ERROR_CLASS)) c.getStyleClass().add(ERROR_CLASS);
-    }
+            setStrengthBarVisible(true);
 
-    private void removeErrorStyle(Control c) {
-        c.getStyleClass().removeIf(s -> s.equals(ERROR_CLASS));
-    }
+            int score = 0;
+            if (password.length() >= 6) score++;
+            if (password.chars().anyMatch(Character::isUpperCase)) score++;
+            if (password.chars().anyMatch(Character::isLowerCase)) score++;
+            if (password.chars().anyMatch(Character::isDigit)) score++;
+            if (password.chars().anyMatch(c -> "!@#$%^&*()_+=\\-[]{};\':\"\\|,.<>/?".indexOf(c) >= 0)) score++;
 
-    private void updatePasswordStrength(String password) {
-        if (strengthHideDelay != null) strengthHideDelay.stop();
+            double progress = score / 5.0;
+            passwordStrengthBar.setProgress(progress);
 
-        if (password == null || password.isEmpty()) {
-            setStrengthBarVisible(false);
-            passwordStrengthBar.setProgress(0);
-            passwordStrengthLabel.setText("");
-            return;
+            if (progress < 0.4) {
+                passwordStrengthLabel.setText(Localization.get("password.weak"));
+            } else if (progress < 0.7) {
+                passwordStrengthLabel.setText(Localization.get("password.medium"));
+            } else {
+                passwordStrengthLabel.setText(Localization.get("password.strong"));
+                strengthHideDelay = new PauseTransition(Duration.seconds(2.5));
+                strengthHideDelay.setOnFinished(e -> setStrengthBarVisible(false));
+                strengthHideDelay.play();
+            }
         }
 
-        setStrengthBarVisible(true);
-
-        int score = 0;
-        if (password.length() >= 6) score++;
-        if (password.chars().anyMatch(Character::isUpperCase)) score++;
-        if (password.chars().anyMatch(Character::isLowerCase)) score++;
-        if (password.chars().anyMatch(Character::isDigit)) score++;
-        if (password.chars().anyMatch(c -> "!@#$%^&*()_+=\\-[]{};\':\"\\|,.<>/?".indexOf(c) >= 0)) score++;
-
-        double progress = score / 5.0;
-        passwordStrengthBar.setProgress(progress);
-
-        if (progress < 0.4) {
-            passwordStrengthLabel.setText(Localization.get("password.weak"));
-        } else if (progress < 0.7) {
-            passwordStrengthLabel.setText(Localization.get("password.medium"));
-        } else {
-            passwordStrengthLabel.setText(Localization.get("password.strong"));
-            strengthHideDelay = new PauseTransition(Duration.seconds(2.5));
-            strengthHideDelay.setOnFinished(e -> setStrengthBarVisible(false));
-            strengthHideDelay.play();
+        private void setStrengthBarVisible(boolean visible) {
+            passwordStrengthBar.setVisible(visible);
+            passwordStrengthBar.setManaged(visible);
+            passwordStrengthLabel.setVisible(visible);
+            passwordStrengthLabel.setManaged(visible);
         }
-    }
 
-    private void setStrengthBarVisible(boolean visible) {
-        passwordStrengthBar.setVisible(visible);
-        passwordStrengthBar.setManaged(visible);
-        passwordStrengthLabel.setVisible(visible);
-        passwordStrengthLabel.setManaged(visible);
-    }
+        private void clearFields() {
+            firstNameField.clear();
+            lastNameField.clear();
+            usernameField.clear();
+            emailField.clear();
+            passwordField.clear();
+            confirmPasswordField.clear();
 
-    private void clearFields() {
-        firstNameField.clear();
-        lastNameField.clear();
-        usernameField.clear();
-        emailField.clear();
-        passwordField.clear();
-        confirmPasswordField.clear();
+            firstNameTouched = false;
+            lastNameTouched = false;
+            usernameTouched = false;
+            emailTouched = false;
+            passwordTouched = false;
+            confirmPasswordTouched = false;
+        }
 
-        firstNameTouched = false;
-        lastNameTouched = false;
-        usernameTouched = false;
-        emailTouched = false;
-        passwordTouched = false;
-        confirmPasswordTouched = false;
-    }
+        private void navigateToLogin() {
+            Stage stage = (Stage) loginLink.getScene().getWindow();
+            NavigationUtil.replaceScene(stage, "/FXML/login_view.fxml", "login.window_title", false);
+        }
 
-    private void navigateToLogin() {
-        Stage stage = (Stage) loginLink.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/login_view.fxml", "login.window_title", false);
-    }
+        @FXML
+        public void onLogin() {
+            ShowMessageUtil.hideMessage(messageLabel);
+            navigateToLogin();
+        }
 
-    @FXML
-    public void onLogin() {
-        ShowMessageUtil.hideMessage(messageLabel);
-        navigateToLogin();
-    }
+        @FXML
+        private void handleBack() {
+            Stage stage = (Stage) backButton.getScene().getWindow();
+            NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "entry.window_title", false);
+        }
 
-    @FXML
-    private void handleBack() {
-        Stage stage = (Stage) backButton.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "entry.window_title", false);
-    }
+        public void setUserDAO(IUserDAO userDAO) {
+            this.userDAO = userDAO;
+        }
 
-    public void setUserDAO(IUserDAO userDAO) {
-        this.userDAO = userDAO;
-    }
-
-    public void setPasswordHasher(IPasswordHasher hasher) {
-        this.passwordHasher = hasher;
-    }
+        public void setPasswordHasher(IPasswordHasher hasher) {
+            this.passwordHasher = hasher;
+        }
 }
