@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import security.BcryptPasswordHasher;
 import security.IPasswordHasher;
+import security.Validation;
 import testutil.JavaFXInitializer;
 
 import java.lang.reflect.Field;
@@ -578,5 +579,158 @@ class SignUpControllerTest {
         IPasswordHasher newHasher = new BcryptPasswordHasher();
         controller.setPasswordHasher(newHasher);
         assertNotNull(newHasher);
+    }
+    //added tests for sign up button enabling logic
+    @Test
+    void testSignUpButtonEnabledWhenValid() {
+        setFieldValues("John", "Doe", "johndoe", "john@example.com", "Pass123!", "Pass123!");
+
+        runOnFxThreadAndWait(() -> {
+            // Trigger validation listeners
+            passwordField.setText("Pass123!");
+        });
+
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+        while (System.nanoTime() < deadline) {
+            final boolean[] disabled = {true};
+            runOnFxThreadAndWait(() -> disabled[0] = signUpButton.isDisabled());
+
+            if (!disabled[0]) return;
+        }
+
+        fail("Sign up button did not become enabled");
+    }
+    //added test for safe() method to ensure it handles null TextField without throwing
+    @Test
+    void testSafeHandlesNull() {
+        runOnFxThreadAndWait(() -> firstNameField.setText(null));
+
+        try {
+            Method method = SignUpController.class.getDeclaredMethod("safe", TextField.class);
+            method.setAccessible(true);
+
+            String result = (String) method.invoke(controller, firstNameField);
+            assertEquals("", result);
+        } catch (Exception e) {
+            fail(e);
+        }
+    }
+    //added test to ensure resetStyles() removes error styles from fields
+    @Test
+    void testResetStylesRemovesErrorClass() {
+        runOnFxThreadAndWait(() -> {
+            firstNameField.getStyleClass().add("input-error");
+            lastNameField.getStyleClass().add("input-error");
+        });
+
+        invokePrivateMethod("resetStyles");
+
+        runOnFxThreadAndWait(() -> {
+            assertFalse(firstNameField.getStyleClass().contains("input-error"));
+            assertFalse(lastNameField.getStyleClass().contains("input-error"));
+        });
+    }
+    //added test to verify addErrorStyle and removeErrorStyle correctly modify the style class of a Control
+    @Test
+    void testAddAndRemoveErrorStyle() {
+        try {
+            Method add = SignUpController.class.getDeclaredMethod("addErrorStyle", Control.class);
+            Method remove = SignUpController.class.getDeclaredMethod("removeErrorStyle", Control.class);
+            add.setAccessible(true);
+            remove.setAccessible(true);
+
+            runOnFxThreadAndWait(() -> {
+                try {
+                    add.invoke(controller, firstNameField);
+                    assertTrue(firstNameField.getStyleClass().contains("input-error"));
+
+                    remove.invoke(controller, firstNameField);
+                    assertFalse(firstNameField.getStyleClass().contains("input-error"));
+                } catch (Exception e) {
+                    fail(e);
+                }
+            });
+
+        } catch (Exception e) {
+            fail(e);
+        }
+    }
+    //added test to verify setStrengthBarVisible correctly shows/hides the password strength bar
+    @Test
+    void testSetStrengthBarVisible() {
+        try {
+            Method method = SignUpController.class.getDeclaredMethod("setStrengthBarVisible", boolean.class);
+            method.setAccessible(true);
+
+            runOnFxThreadAndWait(() -> {
+                try {
+                    method.invoke(controller, true);
+                    assertTrue(passwordStrengthBar.isVisible());
+
+                    method.invoke(controller, false);
+                    assertFalse(passwordStrengthBar.isVisible());
+                } catch (Exception e) {
+                    fail(e);
+                }
+            });
+
+        } catch (Exception e) {
+            fail(e);
+        }
+    }
+    @Test
+    void testPasswordStrengthWeak() {
+        runOnFxThreadAndWait(() -> passwordField.setText("abc"));
+
+        waitUntilMessageVisible();
+
+        runOnFxThreadAndWait(() ->
+                assertTrue(passwordStrengthLabel.getText().length() > 0)
+        );
+    }
+    //added test to verify that the password strength bar hides after entering a strong password
+
+    @Test
+    void testPasswordStrengthStrongHidesLater() {
+        runOnFxThreadAndWait(() -> passwordField.setText("Pass123!Strong"));
+
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(3);
+        while (System.nanoTime() < deadline) {
+            final boolean[] visible = {true};
+            runOnFxThreadAndWait(() -> visible[0] = passwordStrengthBar.isVisible());
+
+            if (!visible[0]) return;
+        }
+
+        fail("Strength bar did not hide after strong password");
+    }
+    //added test to verify that getControlForField returns the correct Control for known field names and null for unknown names
+    @Test
+    void testGetControlForField() throws Exception {
+        Method method = SignUpController.class.getDeclaredMethod("getControlForField", String.class);
+        method.setAccessible(true);
+
+        assertEquals(firstNameField, method.invoke(controller, "firstName"));
+        assertEquals(passwordField, method.invoke(controller, "password"));
+        assertNull(method.invoke(controller, "unknown"));
+    }
+    //added test to verify that showValidationErrors correctly handles a ValidationResult with no errors without throwing exceptions
+    @Test
+    void testShowValidationErrorsWithNoErrors() throws Exception {
+        Validation.ValidationResult result =
+                new Validation.ValidationResult(true, java.util.Map.of());
+
+        Method method = SignUpController.class.getDeclaredMethod("showValidationErrors", Validation.ValidationResult.class);
+        method.setAccessible(true);
+
+        runOnFxThreadAndWait(() -> {
+            try {
+                method.invoke(controller, result);
+            } catch (Exception e) {
+                fail(e);
+            }
+        });
+
+        assertTrue(true); // just ensure no crash
     }
 }
