@@ -12,7 +12,6 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
-import javafx.util.Duration;
 import services.NoteService;
 import services.TranslationService;
 import util.*;
@@ -137,7 +136,7 @@ public class EditNoteController implements Initializable {
 
         WordCountUtil.bind(contentEditorController.getTextArea(), wordCountLabel);
 
-        tagTooltip.setShowDelay(Duration.millis(100));
+        TooltipUtil.setTooltipDelay(tagTooltip);
         tagComboBox.setEditable(true);
 
         // Initialize undo/redo manager

@@ -15,6 +15,10 @@ import java.util.prefs.Preferences;
 
 public class Localization {
 
+    private Localization() {
+        /* This utility class should not be instantiated */
+    }
+
     private static final String PREF_KEY = "app_language";
     private static final Preferences prefs = Preferences.userNodeForPackage(Localization.class);
     static final Logger logger = Logger.getLogger(Localization.class.getName());

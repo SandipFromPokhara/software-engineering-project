@@ -83,6 +83,9 @@ public class NavigationUtil {
      * Replace the scene on an existing stage
      */
     public static void replaceScene(Stage stage, String fxmlPath, String titleKey, boolean resizable) {
+        if (stage == null) {
+            throw new IllegalArgumentException("stage must not be null. Provide a valid Stage or use openWindow(...) to open a new window.");
+        }
         try {
             FxmlLoadResult<?> result = buildScene(fxmlPath);
 

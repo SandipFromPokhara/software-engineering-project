@@ -33,6 +33,10 @@ class UserDashboardControllerTest {
     private UserDashboardController controller;
     private MockUserDAO mockUserDAO;
     private IPasswordHasher passwordHasher;
+    private static final String TEST_FIRST_NAME = "John";
+    private static final String TEST_LAST_NAME = "Doe";
+    private static final String TEST_USERNAME = "johndoe";
+    private static final String TEST_EMAIL = "john@test.com";
 
     private TextField firstNameField;
     private TextField lastNameField;
@@ -90,6 +94,7 @@ class UserDashboardControllerTest {
 
         @Override
         public void delete(UserEntity user) {
+            throw new UnsupportedOperationException("Delete is not implemented in mock");
         }
 
         public void setUserToReturn(UserEntity user) {
@@ -170,10 +175,15 @@ class UserDashboardControllerTest {
         mockUserDAO.reset();
     }
 
-    private void injectField(String fieldName, Object value) throws Exception {
-        Field field = UserDashboardController.class.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(controller, value);
+    private void injectField(String fieldName, Object value) {
+        try {
+            Field field = UserDashboardController.class.getDeclaredField(fieldName);
+            // Make private fields accessible for test injection
+            field.setAccessible(true);
+            field.set(controller, value);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new TestReflectionException("Failed to inject field '" + fieldName + "': " + e.getMessage(), e);
+        }
     }
 
     private void setFieldValues(String firstName, String lastName, String username,
@@ -188,81 +198,99 @@ class UserDashboardControllerTest {
             confirmPasswordField.setText(confirmPassword);
             latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
+        boolean completed = latch.await(3, TimeUnit.SECONDS);
+        assertTrue(completed, "Timed out waiting for FX task in setFieldValues");
+    }
+
+    private void runOnFxAndWait(Runnable action) throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<Throwable> error = new AtomicReference<>();
+        Platform.runLater(() -> {
+            try {
+                action.run();
+            } catch (Throwable t) {
+                error.set(t);
+            } finally {
+                latch.countDown();
+            }
+        });
+        latch.await(2, TimeUnit.SECONDS);
+        if (error.get() != null) {
+            throw new RuntimeException("FX action failed", error.get());
+        }
     }
 
     private void invokeHandleUpdate() throws Exception {
-        Method method = UserDashboardController.class.getDeclaredMethod("handleUpdate");
-        method.setAccessible(true);
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        Method method;
+        try {
+            method = UserDashboardController.class.getDeclaredMethod("handleUpdate");
+            // Make private method accessible for invocation in tests
+            method.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            throw new TestReflectionException("Missing method 'handleUpdate': " + e.getMessage(), e);
+        }
+        runOnFxAndWait(() -> {
             try {
                 method.invoke(controller);
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new TestReflectionException("Failed to invoke handleUpdate: " + e.getMessage(), e);
             }
-            latch.countDown();
         });
-        latch.await(2, TimeUnit.SECONDS);
     }
 
+    private String getLabelText(Label label) throws Exception {
+        AtomicReference<String> text = new AtomicReference<>();
+        runOnFxAndWait(() -> text.set(label.getText()));
+        return text.get();
+    }
+
+
     @Test
-    void initialize_WithActiveUser_PopulatesFields() throws Exception {
-        UserEntity testUser = new UserEntity("John", "Doe", "johndoe", "john@test.com");
+    void initializeWithActiveUserPopulatesFields() throws Exception {
+        UserEntity testUser = new UserEntity(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL);
         setId(testUser, 1L);
         UserSession.getUserInstance().setUser(testUser);
 
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            controller.initialize();
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
+        runOnFxAndWait(() -> controller.initialize());
 
         AtomicReference<String> firstName = new AtomicReference<>();
         AtomicReference<String> lastName = new AtomicReference<>();
         AtomicReference<String> username = new AtomicReference<>();
         AtomicReference<String> email = new AtomicReference<>();
 
-        CountDownLatch checkLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             firstName.set(firstNameField.getText());
             lastName.set(lastNameField.getText());
             username.set(usernameField.getText());
             email.set(emailField.getText());
-            checkLatch.countDown();
         });
-        checkLatch.await(1, TimeUnit.SECONDS);
 
-        assertEquals("John", firstName.get());
-        assertEquals("Doe", lastName.get());
-        assertEquals("johndoe", username.get());
-        assertEquals("john@test.com", email.get());
+        assertEquals(TEST_FIRST_NAME, firstName.get());
+        assertEquals(TEST_LAST_NAME, lastName.get());
+        assertEquals(TEST_USERNAME, username.get());
+        assertEquals(TEST_EMAIL, email.get());
     }
 
     @Test
-    void initialize_WithNoActiveUser_ShowsErrorMessage() throws Exception {
+    void initializeWithNoActiveUserShowsErrorMessage() throws Exception {
         UserSession.getUserInstance().setUser(null);
 
-        CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<String> message = new AtomicReference<>();
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             controller.initialize();
             message.set(messageLabel.getText());
-            latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
 
         assertEquals(Localization.get("dashboard.no_session"), message.get());
     }
 
     @Test
-    void handleUpdate_ValidData_UpdatesUser() throws Exception {
-        UserEntity currentUser = new UserEntity("John", "Doe", "johndoe", "john@test.com");
+    void handleUpdateValidDataUpdatesUser() throws Exception {
+        UserEntity currentUser = new UserEntity(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL);
         setId(currentUser, 1L);
         UserSession.getUserInstance().setUser(currentUser);
 
-        setFieldValues("John", "Smith", "johnsmith", "john@test.com", "", "");
+        setFieldValues(TEST_FIRST_NAME, "Smith", "johnsmith", TEST_EMAIL, "", "");
         invokeHandleUpdate();
 
         assertNotNull(mockUserDAO.updatedUser);
@@ -272,11 +300,11 @@ class UserDashboardControllerTest {
 
     @Test
     void handleUpdate_WithNewPassword_UpdatesPassword() throws Exception {
-        UserEntity currentUser = new UserEntity("John", "Doe", "johndoe", "john@test.com");
+        UserEntity currentUser = new UserEntity(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL);
         setId(currentUser, 1L);
         UserSession.getUserInstance().setUser(currentUser);
 
-        setFieldValues("John", "Doe", "johndoe", "john@test.com", "NewPass123!", "NewPass123!");
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL, "NewPass123!", "NewPass123!");
         invokeHandleUpdate();
 
         assertNotNull(mockUserDAO.updatedUser);
@@ -286,91 +314,62 @@ class UserDashboardControllerTest {
 
     @Test
     void handleUpdate_EmptyLastName_ShowsError() throws Exception {
-        UserEntity currentUser = new UserEntity("John", "Doe", "johndoe", "john@test.com");
+        UserEntity currentUser = new UserEntity(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL);
         setId(currentUser, 1L);
         UserSession.getUserInstance().setUser(currentUser);
 
-        setFieldValues("John", "", "johndoe", "john@test.com", "", "");
+        // initialize the controller first
+        runOnFxAndWait(() -> controller.initialize());
+
+        setFieldValues(TEST_FIRST_NAME, "", TEST_USERNAME, TEST_EMAIL, "", "");
         invokeHandleUpdate();
 
-        AtomicReference<String> message = new AtomicReference<>();
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            message.set(messageLabel.getText());
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-
-        assertEquals(Localization.get("dashboard.validation_error"), message.get());
+        assertEquals(Localization.get("dashboard.validation_error"), getLabelText(messageLabel));
         assertNull(mockUserDAO.updatedUser);
     }
 
     @Test
     void handleUpdate_EmptyUsername_ShowsError() throws Exception {
-        UserEntity currentUser = new UserEntity("John", "Doe", "johndoe", "john@test.com");
+        UserEntity currentUser = new UserEntity(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL);
         setId(currentUser, 1L);
         UserSession.getUserInstance().setUser(currentUser);
 
-        setFieldValues("John", "Doe", "", "john@test.com", "", "");
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, "", TEST_EMAIL, "", "");
         invokeHandleUpdate();
 
-        AtomicReference<String> message = new AtomicReference<>();
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            message.set(messageLabel.getText());
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-
-        assertEquals(Localization.get("dashboard.validation_error"), message.get());
+        assertEquals(Localization.get("dashboard.validation_error"), getLabelText(messageLabel));
         assertNull(mockUserDAO.updatedUser);
     }
 
     @Test
     void handleUpdate_PasswordMismatch_ShowsError() throws Exception {
-        UserEntity currentUser = new UserEntity("John", "Doe", "johndoe", "john@test.com");
+        UserEntity currentUser = new UserEntity(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL);
         setId(currentUser, 1L);
         UserSession.getUserInstance().setUser(currentUser);
 
-        setFieldValues("John", "Doe", "johndoe", "john@test.com", "Pass123!", "Different123!");
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL, "Pass123!", "Different123!");
         invokeHandleUpdate();
 
-        AtomicReference<String> message = new AtomicReference<>();
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            message.set(messageLabel.getText());
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-
-        assertEquals(Localization.get("dashboard.validation_error"), message.get());
+        assertEquals(Localization.get("dashboard.validation_error"), getLabelText(messageLabel));
         assertNull(mockUserDAO.updatedUser);
     }
 
     @Test
     void handleUpdate_WeakPassword_ShowsError() throws Exception {
-        UserEntity currentUser = new UserEntity("John", "Doe", "johndoe", "john@test.com");
+        UserEntity currentUser = new UserEntity(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL);
         setId(currentUser, 1L);
         UserSession.getUserInstance().setUser(currentUser);
 
-        setFieldValues("John", "Doe", "johndoe", "john@test.com", "weak", "weak");
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL, "weak", "weak");
         invokeHandleUpdate();
 
-        AtomicReference<String> message = new AtomicReference<>();
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            message.set(messageLabel.getText());
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-
-        assertEquals(Localization.get("dashboard.validation_error"), message.get());
+        assertEquals(Localization.get("dashboard.validation_error"), getLabelText(messageLabel));
         assertNull(mockUserDAO.updatedUser);
     }
 
     @Test
     void handleUpdate_DuplicateUsername_ShowsError() throws Exception {
-        UserEntity currentUser = new UserEntity("John", "Doe", "johndoe", "john@test.com");
+        UserEntity currentUser = new UserEntity(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL);
         setId(currentUser, 1L);
         UserSession.getUserInstance().setUser(currentUser);
 
@@ -378,29 +377,21 @@ class UserDashboardControllerTest {
         setId(existingUser, 2L);
         mockUserDAO.setUserToReturn(existingUser);
 
-        setFieldValues("John", "Doe", "janesmith", "john@test.com", "", "");
+        setFieldValues(TEST_FIRST_NAME, TEST_LAST_NAME, "janesmith", TEST_EMAIL, "", "");
         invokeHandleUpdate();
 
-        AtomicReference<String> message = new AtomicReference<>();
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            message.set(messageLabel.getText());
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-
-        assertEquals(Localization.get("dashboard.username_exists"), message.get());
+        assertEquals(Localization.get("dashboard.username_exists"), getLabelText(messageLabel));
         assertNull(mockUserDAO.updatedUser);
     }
 
     @Test
-    void handleUpdate_SameUsername_AllowsUpdate() throws Exception {
-        UserEntity currentUser = new UserEntity("John", "Doe", "johndoe", "john@test.com");
+    void handleUpdateSameUsername_AllowsUpdate() throws Exception {
+        UserEntity currentUser = new UserEntity(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL);
         setId(currentUser, 1L);
         UserSession.getUserInstance().setUser(currentUser);
         mockUserDAO.setUserToReturn(currentUser);
 
-        setFieldValues("John", "Smith", "johndoe", "john@test.com", "", "");
+        setFieldValues(TEST_FIRST_NAME, "Smith", TEST_USERNAME, TEST_EMAIL, "", "");
         invokeHandleUpdate();
 
         assertNotNull(mockUserDAO.updatedUser);
@@ -408,7 +399,7 @@ class UserDashboardControllerTest {
     }
 
     @Test
-    void handleUpdate_InvalidLastName_ShowsError() throws Exception {
+    void handleUpdateInvalidLastNameShowsError() throws Exception {
         UserEntity currentUser = new UserEntity("John", "Doe", "johndoe", "john@test.com");
         setId(currentUser, 1L);
         UserSession.getUserInstance().setUser(currentUser);
@@ -416,20 +407,12 @@ class UserDashboardControllerTest {
         setFieldValues("John", "123", "johndoe", "john@test.com", "", "");
         invokeHandleUpdate();
 
-        AtomicReference<String> message = new AtomicReference<>();
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            message.set(messageLabel.getText());
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-
-        assertEquals(Localization.get("dashboard.validation_error"), message.get());
+        assertEquals(Localization.get("dashboard.validation_error"), getLabelText(messageLabel));
         assertNull(mockUserDAO.updatedUser);
     }
 
     @Test
-    void handleUpdate_InvalidUsername_ShowsError() throws Exception {
+    void handleUpdateInvalidUsernameShowsError() throws Exception {
         UserEntity currentUser = new UserEntity("John", "Doe", "johndoe", "john@test.com");
         setId(currentUser, 1L);
         UserSession.getUserInstance().setUser(currentUser);
@@ -437,92 +420,61 @@ class UserDashboardControllerTest {
         setFieldValues("John", "Doe", "ab", "john@test.com", "", "");
         invokeHandleUpdate();
 
-        AtomicReference<String> message = new AtomicReference<>();
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            message.set(messageLabel.getText());
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-
-        assertEquals(Localization.get("dashboard.validation_error"), message.get());
+        assertEquals(Localization.get("dashboard.validation_error"), getLabelText(messageLabel));
         assertNull(mockUserDAO.updatedUser);
     }
 
     @Test
-    void handleUpdate_NoActiveSession_ShowsError() throws Exception {
+    void handleUpdateNoActiveSessionShowsError() throws Exception {
         UserSession.getUserInstance().setUser(null);
 
         setFieldValues("John", "Doe", "johndoe", "john@test.com", "", "");
         invokeHandleUpdate();
 
-        AtomicReference<String> message = new AtomicReference<>();
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            message.set(messageLabel.getText());
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-
-        assertEquals(Localization.get("dashboard.no_session"), message.get());
+        assertEquals(Localization.get("dashboard.no_session"), getLabelText(messageLabel));
         assertNull(mockUserDAO.updatedUser);
     }
 
     @Test
-    void handleUpdate_SuccessfulUpdate_ClearsPasswordFields() throws Exception {
-        UserEntity currentUser = new UserEntity("John", "Doe", "johndoe", "john@test.com");
+    void handleUpdateSuccessfulUpdateClearsPasswordFields() throws Exception {
+        UserEntity currentUser = new UserEntity(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL);
         setId(currentUser, 1L);
         UserSession.getUserInstance().setUser(currentUser);
 
-        setFieldValues("John", "Smith", "johndoe", "john@test.com", "NewPass123!", "NewPass123!");
+        setFieldValues(TEST_FIRST_NAME, "Smith", TEST_USERNAME, TEST_EMAIL, "NewPass123!", "NewPass123!");
         invokeHandleUpdate();
-
-        Thread.sleep(200);
 
         AtomicReference<String> passwordText = new AtomicReference<>();
         AtomicReference<String> confirmText = new AtomicReference<>();
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> {
             passwordText.set(passwordField.getText());
             confirmText.set(confirmPasswordField.getText());
-            latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
 
         assertTrue(passwordText.get().isEmpty());
         assertTrue(confirmText.get().isEmpty());
     }
 
     @Test
-    void handleUpdate_SuccessfulUpdate_ShowsSuccessMessage() throws Exception {
-        UserEntity currentUser = new UserEntity("John", "Doe", "johndoe", "john@test.com");
+    void handleUpdateSuccessfulUpdateShowsSuccessMessage() throws Exception {
+        UserEntity currentUser = new UserEntity(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL);
         setId(currentUser, 1L);
         UserSession.getUserInstance().setUser(currentUser);
 
-        setFieldValues("John", "Smith", "johnsmith", "john@test.com", "", "");
+        setFieldValues(TEST_FIRST_NAME, "Smith", "johnsmith", TEST_EMAIL, "", "");
         invokeHandleUpdate();
 
-        Thread.sleep(200);
-
-        AtomicReference<String> message = new AtomicReference<>();
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            message.set(messageLabel.getText());
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-
-        assertEquals(Localization.get("dashboard.update_success"), message.get());
+        assertEquals(Localization.get("dashboard.update_success"), getLabelText(messageLabel));
     }
 
     @Test
-    void handleUpdate_WithoutPasswordChange_KeepsOldPassword() throws Exception {
-        UserEntity currentUser = new UserEntity("John", "Doe", "johndoe", "john@test.com");
+    void handleUpdateWithoutPasswordChangeKeepsOldPassword() throws Exception {
+        UserEntity currentUser = new UserEntity(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL);
         currentUser.changePasswordHash("oldHashedPassword");
         setId(currentUser, 1L);
         UserSession.getUserInstance().setUser(currentUser);
 
-        setFieldValues("John", "Smith", "johndoe", "john@test.com", "", "");
+        setFieldValues(TEST_FIRST_NAME, "Smith", TEST_USERNAME, TEST_EMAIL, "", "");
         invokeHandleUpdate();
 
         assertNotNull(mockUserDAO.updatedUser);
@@ -530,15 +482,13 @@ class UserDashboardControllerTest {
     }
 
     @Test
-    void handleUpdate_UpdatesUserSession() throws Exception {
-        UserEntity currentUser = new UserEntity("John", "Doe", "johndoe", "john@test.com");
+    void handleUpdateUpdatesUserSession() throws Exception {
+        UserEntity currentUser = new UserEntity(TEST_FIRST_NAME, TEST_LAST_NAME, TEST_USERNAME, TEST_EMAIL);
         setId(currentUser, 1L);
         UserSession.getUserInstance().setUser(currentUser);
 
-        setFieldValues("John", "Smith", "johnsmith", "john@test.com", "", "");
+        setFieldValues(TEST_FIRST_NAME, "Smith", "johnsmith", TEST_EMAIL, "", "");
         invokeHandleUpdate();
-
-        Thread.sleep(200);
 
         UserEntity sessionUser = UserSession.getUserInstance().getUser();
         assertNotNull(sessionUser);
@@ -547,20 +497,25 @@ class UserDashboardControllerTest {
     }
 
     @Test
-    void handleCancel_ClosesWindow() throws Exception {
+    void handleCancelClosesWindow() throws Exception {
         Method method = UserDashboardController.class.getDeclaredMethod("handleCancel");
+        // Make private method accessible for invocation in tests
         method.setAccessible(true);
 
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxAndWait(() -> testStage.show());
+
+        runOnFxAndWait(() -> {
             try {
                 method.invoke(controller);
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new RuntimeException("Invocation of handleCancel failed", e);
             }
-            latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
+
+        AtomicReference<Boolean> isShowing = new AtomicReference<>(true);
+        runOnFxAndWait(() -> isShowing.set(testStage.isShowing()));
+
+        assertFalse(isShowing.get(), "Window should be closed after cancel");
     }
 
     private void setId(Object target, Object value) {
@@ -569,15 +524,22 @@ class UserDashboardControllerTest {
         while (clazz != null) {
             try {
                 Field idField = clazz.getDeclaredField("id");
+                // Make id field accessible when injecting test id
                 idField.setAccessible(true);
                 idField.set(target, value);
                 return;
             } catch (NoSuchFieldException e) {
                 clazz = clazz.getSuperclass();
-            }catch (Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException("Failed to set ID on user entity", e);
             }
         }
         throw new RuntimeException("ID field not found in class hierarchy");
+    }
+
+    private static class TestReflectionException extends RuntimeException {
+        public TestReflectionException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 }

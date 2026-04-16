@@ -120,8 +120,7 @@ public class RichTextEditorController {
      */
     public void bindPromptText(javafx.beans.value.ObservableValue<String> binding) {
         if (placeholderLabel == null || binding == null) return;
-        String initial = binding.getValue();
-        if (initial != null) placeholderLabel.setText(initial);
+        java.util.Optional.ofNullable(binding.getValue()).ifPresent(placeholderLabel::setText);
         binding.addListener((obs, old, newText) -> {
             if (newText != null) placeholderLabel.setText(newText);
         });

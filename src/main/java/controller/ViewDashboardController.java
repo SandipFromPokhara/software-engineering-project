@@ -20,7 +20,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Window;
-import javafx.util.Duration;
+
 import services.*;
 import util.*;
 import session.UserSession;
@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,6 +56,9 @@ public class ViewDashboardController {
     private final NoteService noteService = new NoteService();
     private final TranslationService translationService = new TranslationService();
     private final ITagDAO tagDao = new JpaTagDao();
+
+    // Executor used to run background tasks; tests can inject a synchronous executor for determinism
+    private Executor taskExecutor = r -> new Thread(r).start();
 
     @FXML private BorderPane rootPane;
 
@@ -197,11 +201,11 @@ public class ViewDashboardController {
         createTooltip.textProperty().bind(Localization.bind("note.create_label"));
         logoutTooltip.textProperty().bind(Localization.bind(LOGOUT_KEY));
 
-        toggleTooltip.setShowDelay(Duration.millis(100));
-        langTooltip.setShowDelay(Duration.millis(100));
-        manageTooltip.setShowDelay(Duration.millis(100));
-        createTooltip.setShowDelay(Duration.millis(100));
-        logoutTooltip.setShowDelay(Duration.millis(100));
+        TooltipUtil.setTooltipDelay(toggleTooltip);
+        TooltipUtil.setTooltipDelay(langTooltip);
+        TooltipUtil.setTooltipDelay(manageTooltip);
+        TooltipUtil.setTooltipDelay(createTooltip);
+        TooltipUtil.setTooltipDelay(logoutTooltip);
     }
 
     private void initTheme() {
@@ -322,7 +326,8 @@ public class ViewDashboardController {
                     );
         });
 
-        new Thread(loadNotesTask).start();
+        // Use configurable executor to run the task; default starts a new Thread
+        taskExecutor.execute(loadNotesTask);
     }
 
     private void displayNote(NoteEntity note) {
