@@ -62,4 +62,8 @@ translationService.getTranslation(entity, langCode, defaultLang);
 
 Database uses UTF-8 (utf8mb4) to support Non-Latin scripts.
 
+---
+
+See [DB localization implementation details](DB-localization-implementation.md) for detailed implementation details.
+
 See [ER diagram](../Diagrams/08-updated-er-diagram.png) or [Relational Schema](../Diagrams/09-updated-relational-schema.png) for UML diagrams.
