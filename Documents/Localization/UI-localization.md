@@ -86,7 +86,7 @@ This approach follows **user-centered design principles**.
 
 ---
 
-## ⚙Implementation Details
+## Implementation Details
 
 - Java `Locale` is used to define the selected language
 - `ResourceBundle` loads the appropriate `.properties` file
