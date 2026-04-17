@@ -30,11 +30,11 @@ public class NotebookEntity extends BaseEntity implements ITranslatable<Notebook
 
     public UserEntity getUser() { return user; }
 
-    public List<NoteEntity> getNotes() { return notes; }
+    public List<NoteEntity> getNotes() { return Collections.unmodifiableList(notes); }
 
     @Override
     public Map<String, NotebookTranslationEntity> getTranslations() {
-        return translations;
+        return Collections.unmodifiableMap(translations);
     }
 
     public void setUser(UserEntity user) {
