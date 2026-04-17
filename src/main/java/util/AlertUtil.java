@@ -9,7 +9,7 @@ import javafx.stage.Window;
 /**
  * Utility class for displaying JavaFX Alerts.
  */
-public class AlertUtil {
+public final class AlertUtil {
 
     private static final ButtonType OK_BUTTON = new ButtonType(Localization.get("button.ok"), ButtonBar.ButtonData.OK_DONE);
     private static final ButtonType CANCEL_BUTTON = new ButtonType(Localization.get("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);

@@ -23,6 +23,8 @@ import java.util.logging.Logger;
 
 public class SignUpController {
 
+    private static final String BORDER_ERROR_STYLE = "-fx-border-color: #e74c3c;";
+
     private static final Logger logger = Logger.getLogger(SignUpController.class.getName());
 
     private IPasswordHasher passwordHasher;
@@ -40,10 +42,14 @@ public class SignUpController {
     private static final String ERROR_CLASS = "input-error";
     private static final String FOCUS_CLASS = "focus";
 
-    @FXML private TextField firstNameField;
-    @FXML private TextField lastNameField;
-    @FXML private TextField usernameField;
-    @FXML private TextField emailField;
+    @FXML
+    private TextField firstNameField;
+    @FXML
+    private TextField lastNameField;
+    @FXML
+    private TextField usernameField;
+    @FXML
+    private TextField emailField;
 
     @FXML private PasswordField passwordField;
     @FXML private PasswordField confirmPasswordField;
@@ -214,55 +220,36 @@ public class SignUpController {
         ShowMessageUtil.hideMessage(messageLabel);
         // Clear previous field-level error styles
         resetStyles();
+
         for (var entry : result.errors().entrySet()) {
             String field = entry.getKey();
-            var errors = entry.getValue();
+            if (entry.getValue().isEmpty()) continue;
 
-            if (errors != null && !errors.isEmpty() && handleFieldErrors(field, errors)) return;
+            // Determine whether the field has been touched (so we only highlight touched fields)
+            boolean touched = true;
+            if ("firstName".equals(field)) touched = firstNameTouched;
+            else if ("lastName".equals(field)) touched = lastNameTouched;
+            else if ("username".equals(field)) touched = usernameTouched;
+            else if ("email".equals(field)) touched = emailTouched;
+            else if ("password".equals(field)) touched = passwordTouched;
+            else if ("confirmPassword".equals(field)) touched = confirmPasswordTouched;
+
+            Control c = getControlForField(field);
+            if (c != null && touched) addErrorStyle(c);
+
+            var firstError = entry.getValue().stream().findFirst().orElse(null);
+            if (firstError == null) continue;
+            String key = firstError.key();
+
+            ShowMessageUtil.showMessage(
+                    messageLabel,
+                    Localization.get(key, firstError.args().toArray()),
+                    MessageType.ERROR
+            );
+            return;
         }
     }
 
-    private boolean handleFieldErrors(String field, java.util.List<?> errors) {
-        Control c = getControlForField(field);
-        boolean touched = isFieldTouched(field);
-
-        if (c != null && touched) addErrorStyle(c);
-
-        var firstError = errors.stream().findFirst().orElse(null);
-        if (firstError == null) {
-            logger.fine(() -> "No specific error item for field: " + field);
-            return false;
-        }
-
-        String key;
-        try {
-            // firstError is expected to have method key(); use toString fallback if not
-            key = (String) firstError.getClass().getMethod("key").invoke(firstError);
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Error reading validation key", e);
-            return false;
-        }
-
-        if (key == null || key.isBlank()) {
-            logger.warning("Validation returned empty i18n key");
-            return false;
-        }
-
-        ShowMessageUtil.showMessageKey(messageLabel, key, MessageType.ERROR);
-        return true;
-    }
-
-    private boolean isFieldTouched(String field) {
-        return switch (field) {
-            case "firstName" -> firstNameTouched;
-            case "lastName" -> lastNameTouched;
-            case "username" -> usernameTouched;
-            case "email" -> emailTouched;
-            case "password" -> passwordTouched;
-            case "confirmPassword" -> confirmPasswordTouched;
-            default -> true;
-        };
-    }
 
     private void resetStyles() {
         removeErrorStyle(firstNameField);
@@ -324,7 +311,7 @@ public class SignUpController {
         if (password.chars().anyMatch(Character::isUpperCase)) score++;
         if (password.chars().anyMatch(Character::isLowerCase)) score++;
         if (password.chars().anyMatch(Character::isDigit)) score++;
-        if (password.chars().anyMatch(c -> "!@#$%^&*()_+=-[]{}:'\"\\|,.<>/?".indexOf(c) >= 0)) score++;
+        if (password.chars().anyMatch(c -> "!@#$%^&*()_+=\\-[]{};\':\"\\|,.<>/?".indexOf(c) >= 0)) score++;
 
         double progress = score / 5.0;
         passwordStrengthBar.setProgress(progress);
