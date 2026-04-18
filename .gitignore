@@ -46,9 +46,6 @@ build/
 *.env
 .env.local
 
-Dockerfile
-
-Jenkinsfile
 
 ### Personal notes ###
 MyNotes.md

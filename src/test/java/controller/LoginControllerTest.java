@@ -2,6 +2,7 @@ package controller;
 
 import entity.entities.UserEntity;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
@@ -13,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import services.UserService;
 import testutil.JavaFxTestExtension;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -198,5 +200,157 @@ class LoginControllerTest {
         await().atMost(30, SECONDS).untilAsserted(
                 () -> assertTrue(backButton.isVisible())
         );
+    }
+    //added test to ensure that leading/trailing whitespace is trimmed before login attempt
+    @Test
+    void testGetUsernameAndPasswordTrimmed() {
+
+        Platform.runLater(() -> {
+            usernameField.setText("  user  ");
+            passwordField.setText("  pass  ");
+            loginButton.fire();
+        });
+
+        await().atMost(2, SECONDS).untilAsserted(() ->
+                verify(userService).login("user", "pass")
+        );
+    }
+    //added test to ensure that getUserService initializes the service if it is null
+    @Test
+    void testGetUserServiceLazyInitialization() throws Exception {
+
+        LoginController newController = new LoginController();
+
+        Method method = LoginController.class.getDeclaredMethod("getUserService");
+        method.setAccessible(true);
+
+        Object service = method.invoke(newController);
+
+        assertNotNull(service);
+    }
+    //added test to ensure that resolveStage correctly returns the stage from the login button
+    @Test
+    void testResolveStageFromLoginButton() throws Exception {
+
+        Method method = LoginController.class.getDeclaredMethod("resolveStage");
+        method.setAccessible(true);
+
+        Stage resolved = (Stage) method.invoke(controller);
+
+        assertNotNull(resolved);
+    }
+    //added test to ensure that resolveStage throws an exception if it cannot find a stage from the login button
+    @Test
+    void testResolveStageThrowsException() throws Exception {
+
+        LoginController newController = new LoginController();
+
+        Method method = LoginController.class.getDeclaredMethod("resolveStage");
+        method.setAccessible(true);
+
+        Exception ex = assertThrows(Exception.class, () -> method.invoke(newController));
+
+        assertNotNull(ex);
+    }
+
+    //added test to ensure that after a successful login, the username and password fields, login button, signup link, and back button are all disabled to prevent further interaction
+    @Test
+    void testFieldsDisabledAfterSuccessfulLogin() {
+
+        UserEntity mockUser = new UserEntity();
+        when(userService.login(TEST_USERNAME, TEST_PASS)).thenReturn(mockUser);
+
+        Platform.runLater(() -> {
+            usernameField.setText(TEST_USERNAME);
+            passwordField.setText(TEST_PASS);
+            loginButton.fire();
+        });
+
+        await().atMost(2, SECONDS).untilAsserted(() -> {
+            assertTrue(usernameField.isDisabled());
+            assertTrue(passwordField.isDisabled());
+            assertTrue(loginButton.isDisabled());
+            assertTrue(signupLink.isDisabled());
+            assertTrue(backButton.isDisabled());
+        });
+    }
+    //added test to ensure that after a successful login, the status label is visible and displays a success message (or has a style indicating success)
+    @Test
+    void testStatusLabelOnSuccess() {
+
+        UserEntity mockUser = new UserEntity();
+        when(userService.login(TEST_USERNAME, TEST_PASS)).thenReturn(mockUser);
+
+        Platform.runLater(() -> {
+            usernameField.setText(TEST_USERNAME);
+            passwordField.setText(TEST_PASS);
+            loginButton.fire();
+        });
+
+        await().atMost(2, SECONDS).untilAsserted(() -> {
+            assertTrue(statusLabel.isVisible());
+            assertEquals(javafx.scene.paint.Color.GREEN, statusLabel.getTextFill());
+            assertFalse(statusLabel.getText().isEmpty());
+        });
+    }
+    //added test to ensure that after a failed login, the status label is visible and displays an error message (or has a style indicating failure)
+    @Test
+    void testStatusLabelOnFailureText() {
+
+        when(userService.login(TEST_USERNAME, TEST_PASS)).thenReturn(null);
+
+        Platform.runLater(() -> {
+            usernameField.setText(TEST_USERNAME);
+            passwordField.setText(TEST_PASS);
+            loginButton.fire();
+        });
+
+        await().atMost(2, SECONDS).untilAsserted(() -> {
+            assertTrue(statusLabel.isVisible());
+            assertFalse(statusLabel.getText().isEmpty());
+        });
+    }
+    //added test to ensure that pressing the Enter key while focused on the password field triggers the login action
+    @Test
+    void testEnterKeyTriggersLogin() {
+
+        when(userService.login(TEST_USERNAME, TEST_PASS)).thenReturn(null);
+
+        Platform.runLater(() -> {
+            usernameField.setText(TEST_USERNAME);
+            passwordField.setText(TEST_PASS);
+
+            passwordField.fireEvent(new ActionEvent());
+        });
+
+        await().atMost(2, SECONDS).untilAsserted(() ->
+                verify(userService).login(TEST_USERNAME, TEST_PASS)
+        );
+    }
+    //added test to ensure that while the login task is running, the login button is disabled to prevent multiple login attempts
+    @Test
+    void testLoginButtonDisabledDuringLogin() {
+
+        // Create a controllable "long running" login
+        CountDownLatch latch = new CountDownLatch(1);
+
+        when(userService.login(TEST_USERNAME, TEST_PASS)).thenAnswer(invocation -> {
+            latch.await(); // block until we release it
+            return null;
+        });
+
+        Platform.runLater(() -> {
+            usernameField.setText(TEST_USERNAME);
+            passwordField.setText(TEST_PASS);
+            loginButton.fire();
+        });
+
+        // Verify button is disabled WHILE login is running
+        await().atMost(2, SECONDS).untilAsserted(() ->
+                assertTrue(loginButton.isDisabled())
+        );
+
+        // Finish login
+        latch.countDown();
     }
 }
