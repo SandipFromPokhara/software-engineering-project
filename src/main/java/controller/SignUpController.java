@@ -260,37 +260,11 @@ public class SignUpController {
 
         Object raw = errors.get(0);
 
-        String key = null;
-        Object[] args = new Object[0];
-
-        // Support multiple error object shapes: prefer controller.IValidationError, then
-        // security.Validation.ValidationError, then fallback to reflection.
-        if (raw instanceof IValidationError iv) {
-            key = iv.key();
-            args = iv.args();
-        } else if (raw instanceof security.Validation.ValidationError ve) {
-            key = ve.key();
-            args = ve.args().toArray();
-        } else {
-            try {
-                var m = raw.getClass().getMethod("key");
-                Object k = m.invoke(raw);
-                key = k == null ? null : k.toString();
-
-                try {
-                    var argsMethod = raw.getClass().getMethod("args");
-                    Object rawArgs = argsMethod.invoke(raw);
-                    if (rawArgs instanceof Object[] objectArray) args = objectArray;
-                    else if (rawArgs instanceof java.util.List<?> list) args = list.toArray();
-                } catch (NoSuchMethodException ignored) {
-                    // no args() available — fine
-                }
-            } catch (Exception e) {
-                return false; // cannot extract key → ignore
-            }
+        if (!(raw instanceof IValidationError error)) {
+            return false; // unknown type → ignore safely
         }
 
-        if (key == null || key.isBlank()) return false;
+        if (error.key() == null || error.key().isBlank()) return false;
 
         Control control = getControlForField(field);
         if (control != null && isFieldTouched(field)) {
@@ -300,10 +274,10 @@ public class SignUpController {
         try {
             ShowMessageUtil.showMessage(
                     messageLabel,
-                    Localization.get(key, args),
+                    Localization.get(error.key(), error.args()),
                     MessageType.ERROR
             );
-        } catch (Exception ignored) { /*Ignore exception*/}
+        } catch (Exception ignored) {/* If localization fails, just show nothing */}
 
         return true;
     }
