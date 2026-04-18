@@ -580,6 +580,7 @@ class SignUpControllerTest {
         controller.setPasswordHasher(newHasher);
         assertNotNull(newHasher);
     }
+
     //added tests for sign up button enabling logic
     @Test
     void testSignUpButtonEnabledWhenValid() {
@@ -600,6 +601,7 @@ class SignUpControllerTest {
 
         fail("Sign up button did not become enabled");
     }
+
     //added test for safe() method to ensure it handles null TextField without throwing
     @Test
     void testSafeHandlesNull() {
@@ -615,6 +617,7 @@ class SignUpControllerTest {
             fail(e);
         }
     }
+
     //added test to ensure resetStyles() removes error styles from fields
     @Test
     void testResetStylesRemovesErrorClass() {
@@ -630,6 +633,7 @@ class SignUpControllerTest {
             assertFalse(lastNameField.getStyleClass().contains("input-error"));
         });
     }
+
     //added test to verify addErrorStyle and removeErrorStyle correctly modify the style class of a Control
     @Test
     void testAddAndRemoveErrorStyle() {
@@ -655,6 +659,7 @@ class SignUpControllerTest {
             fail(e);
         }
     }
+
     //added test to verify setStrengthBarVisible correctly shows/hides the password strength bar
     @Test
     void testSetStrengthBarVisible() {
@@ -678,6 +683,7 @@ class SignUpControllerTest {
             fail(e);
         }
     }
+
     @Test
     void testPasswordStrengthWeak() {
         runOnFxThreadAndWait(() -> passwordField.setText("abc"));
@@ -688,8 +694,8 @@ class SignUpControllerTest {
                 assertFalse(passwordStrengthLabel.getText().isEmpty())
         );
     }
-    //added test to verify that the password strength bar hides after entering a strong password
 
+    //added test to verify that the password strength bar hides after entering a strong password
     @Test
     void testPasswordStrengthStrongHidesLater() {
         runOnFxThreadAndWait(() -> passwordField.setText("Pass123!Strong"));
@@ -704,6 +710,7 @@ class SignUpControllerTest {
 
         fail("Strength bar did not hide after strong password");
     }
+
     //added test to verify that getControlForField returns the correct Control for known field names and null for unknown names
     @Test
     void testGetControlForField() throws Exception {
@@ -714,6 +721,7 @@ class SignUpControllerTest {
         assertEquals(passwordField, method.invoke(controller, "password"));
         assertNull(method.invoke(controller, "unknown"));
     }
+
     //added test to verify that showValidationErrors correctly handles a ValidationResult with no errors without throwing exceptions
     @Test
     void testShowValidationErrorsWithNoErrors() throws Exception {
@@ -733,6 +741,7 @@ class SignUpControllerTest {
 
         assertTrue(true); // just ensure no crash
     }
+
     //added test to verify that the password strength bar and label are hidden and cleared when the password field is set to null
     @Test
     void testPasswordStrengthWithNullPassword() {
@@ -744,6 +753,7 @@ class SignUpControllerTest {
             assertTrue(passwordStrengthLabel.getText().isEmpty());
         });
     }
+
     //added test to verify that entering a medium strength password updates the password strength label with appropriate feedback
     @Test
     void testPasswordStrengthMedium() {
@@ -753,6 +763,7 @@ class SignUpControllerTest {
                 assertFalse(passwordStrengthLabel.getText().isEmpty())
         );
     }
+
     //added test to verify that handleFieldErrors returns false and does not throw when given an error object with a blank key
     @Test
     void testHandleFieldErrorsWithBlankKey() throws Exception {
@@ -772,6 +783,7 @@ class SignUpControllerTest {
 
         assertFalse(result);
     }
+
     //added test to verify that handleFieldErrors returns false and does not throw when given an error object whose key method throws an exception
     @Test
     void testHandleFieldErrorsWithBrokenKeyMethod() throws Exception {
@@ -791,6 +803,7 @@ class SignUpControllerTest {
 
         assertFalse(result);
     }
+
     //added test to verify that getControlForField returns the correct Control for all known field names and handles unknown names gracefully
     @Test
     void testGetControlForFieldAllCases() throws Exception {
@@ -804,6 +817,7 @@ class SignUpControllerTest {
         assertEquals(passwordField, method.invoke(controller, "password"));
         assertEquals(confirmPasswordField, method.invoke(controller, "confirmPassword"));
     }
+
     //added test to verify that isFieldTouched returns false for all known field names and handles unknown names gracefully
     @Test
     void testIsFieldTouched() throws Exception {
@@ -813,6 +827,7 @@ class SignUpControllerTest {
 
         assertTrue((boolean) method.invoke(controller, "unknown")); // default branch
     }
+
     //added test to verify that removeErrorStyle does not throw and does not modify the style class when the "input-error" class is not present
     @Test
     void testRemoveErrorStyleWhenNotPresent() throws Exception {
@@ -828,6 +843,7 @@ class SignUpControllerTest {
             }
         });
     }
+
     //added test to verify that addErrorStyle does not add duplicate "input-error" classes if it is already present on the Control
     @Test
     void testAddErrorStyleWhenAlreadyPresent() throws Exception {
@@ -849,6 +865,7 @@ class SignUpControllerTest {
             }
         });
     }
+
     //added test to verify that the password strength bar updates in real-time as the password field is modified and that it reflects the correct strength level based on the input
     @Test
     void testRealtimeValidationTriggersPasswordStrengthAndValidation() {
@@ -865,6 +882,7 @@ class SignUpControllerTest {
             assertTrue(passwordStrengthBar.getProgress() > 0);
         });
     }
+
     //added test to verify that the password strength bar and label update correctly as the password is changed to weak, medium, and strong values
     @Test
     void testPasswordStrengthTransitions() {
@@ -893,6 +911,7 @@ class SignUpControllerTest {
             assertTrue(passwordStrengthBar.getProgress() >= 0.7);
         });
     }
+
     //added test to verify that the password strength bar and label are hidden after entering a strong password and waiting for the PauseTransition to execute
     @Test
     void testStrengthBarHidesAfterStrongPassword() {
@@ -913,6 +932,7 @@ class SignUpControllerTest {
 
         fail("Strength bar did not hide after strong password");
     }
+
     //added test to verify that handleFieldErrors returns false and does not throw when given an empty list of errors
     @Test
     void testHandleFieldErrorsWithEmptyList() throws Exception {
@@ -924,6 +944,7 @@ class SignUpControllerTest {
 
         assertFalse(result);
     }
+
     //added test to verify that updateSignUpButtonState disables the signup button when validation fails
     @Test
     void testUpdateSignUpButtonStateDisabled() throws Exception {
@@ -943,6 +964,7 @@ class SignUpControllerTest {
             }
         });
     }
+
     //added test to verify that updateSignUpButtonState enables the signup button when validation passes
     @Test
     void testHandleBackDoesNotCrash() {
@@ -954,6 +976,7 @@ class SignUpControllerTest {
             });
         });
     }
+
     //added test to verify that attachFocusHandling correctly adds a focus listener to the given TextInputControl and that the provided Runnable is executed when the control gains focus
     @Test
     void testAttachFocusHandlingViaReflection() throws Exception {
@@ -980,6 +1003,7 @@ class SignUpControllerTest {
             }
         });
     }
+
     //added test to verify that the password strength bar and label are hidden when the password field is cleared, ensuring that the UI responds correctly to empty input
     @Test
     void testPasswordStrengthAllBranches() {
@@ -1001,6 +1025,7 @@ class SignUpControllerTest {
             assertTrue(passwordStrengthBar.getProgress() > 0);
         });
     }
+
     //added test to verify that the initialize() method sets the initial visibility and properties of the password strength bar and label correctly, ensuring the UI starts in the expected state
     @Test
     void testInitializeSetsInitialUIState() {
@@ -1015,6 +1040,7 @@ class SignUpControllerTest {
             assertEquals("passwordStrengthBar", passwordStrengthBar.getId());
         });
     }
+
     //added test to verify that initialize() method sets up the initial state of the UI components correctly, including visibility and properties of the password strength bar and label
     @Test
     void testInitializeFontIconFallback() {
@@ -1029,6 +1055,7 @@ class SignUpControllerTest {
             }
         });
     }
+
     //added test to verify that resetStyles() clears all error styles from the input fields, ensuring that the UI resets correctly after validation errors
     @Test
     void testResetStylesClearsAllFields() {
@@ -1046,6 +1073,7 @@ class SignUpControllerTest {
             assertFalse(emailField.getStyleClass().contains("input-error"));
         });
     }
+
     //added test to verify that getControlForField returns the correct Control for all known field names and returns null for unknown names, ensuring it handles unexpected input gracefully
     @Test
     void testGetControlForFieldCoverage() throws Exception {
@@ -1060,6 +1088,7 @@ class SignUpControllerTest {
         assertEquals(confirmPasswordField, m.invoke(controller, "confirmPassword"));
         assertNull(m.invoke(controller, "invalid"));
     }
+
     //added test to verify that handleFieldErrors returns false and does not throw when given an error object that lacks a key() method, ensuring it handles unexpected error formats gracefully
     @Test
     void testHandleFieldErrorsReturnsFalseWhenKeyReflectionFails() throws Exception {
@@ -1077,6 +1106,7 @@ class SignUpControllerTest {
 
         assertFalse(result);
     }
+
     //added test to verify that handleFieldErrors returns false and does not throw when given a null list of errors
     @Test
     void testHandleFieldErrorsWithNullFirstError() throws Exception {
@@ -1090,6 +1120,7 @@ class SignUpControllerTest {
 
         assertFalse(result);
     }
+
     //added test to verify that isFieldTouched returns true for known field names and handles unknown names by returning true (default branch)
     @Test
     void testIsFieldTouchedDefaultBranch() throws Exception {
@@ -1098,6 +1129,7 @@ class SignUpControllerTest {
 
         assertTrue((boolean) method.invoke(controller, "randomField"));
     }
+
     //added test to verify that getControlForField returns null for an unknown field name, ensuring it handles unexpected input gracefully
     @Test
     void testGetControlForFieldUnknownReturnsNull() throws Exception {
@@ -1106,6 +1138,7 @@ class SignUpControllerTest {
 
         assertNull(method.invoke(controller, "doesNotExist"));
     }
+
     //added test to verify that the safe() method returns an empty string when given a TextField with null text or only whitespace, ensuring it handles edge cases gracefully
     @Test
     void testSafeHandlesWhitespaceAndNullEdgeCases() throws Exception {
@@ -1120,6 +1153,7 @@ class SignUpControllerTest {
         assertEquals("", method.invoke(controller, firstNameField));
         assertEquals("", method.invoke(controller, emailField));
     }
+
     //added test to verify that setting the password field to an empty string hides the password strength bar and clears the label, ensuring the UI resets correctly for empty input
     @Test
     void testPasswordStrengthEmptyResetsUI() {
@@ -1130,7 +1164,9 @@ class SignUpControllerTest {
             assertEquals(0, passwordStrengthBar.getProgress());
             assertEquals("", passwordStrengthLabel.getText());
         });
-    }//added test to verify that entering a password with only length score updates the password strength bar to show some progress and makes it visible
+    }
+
+    //added test to verify that entering a password with only length score updates the password strength bar to show some progress and makes it visible
     @Test
     void testPasswordStrengthOnlyLengthScore() {
         runOnFxThreadAndWait(() -> passwordField.setText("abcdef"));
@@ -1140,6 +1176,7 @@ class SignUpControllerTest {
             assertTrue(passwordStrengthBar.isVisible());
         });
     }
+
     //added test to verify that the password strength bar hides after entering a strong password and waiting for the PauseTransition to execute, ensuring the delayed hiding logic works as intended
     @Test
     void testStrongPasswordTriggersHideDelay() {
@@ -1159,6 +1196,7 @@ class SignUpControllerTest {
 
         fail("Strength bar did not hide");
     }
+
     //added test to verify that the onLogin method can be called without throwing exceptions, even if navigation fails in the test environment
     @Test
     void testOnLoginCallsNavigationWithoutCrash() {
@@ -1166,6 +1204,7 @@ class SignUpControllerTest {
             assertDoesNotThrow(() -> controller.onLogin());
         });
     }
+
     //added test to verify that the clearFields method resets the touched flags for all fields so that validation errors are not shown immediately after clearing
     @Test
     void testClearFieldsResetsTouchedFlags() {
@@ -1181,5 +1220,4 @@ class SignUpControllerTest {
             assertEquals("", lastNameField.getText());
         });
     }
-
 }
