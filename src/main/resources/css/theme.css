@@ -1,6 +1,6 @@
 /* BASE STYLES */
 .root {
-    -fx-font-family: "System";
+    -fx-font-family: "Noto Sans", "Noto Sans Myanmar", "Noto Sans Devanagari", "Segoe UI", "Arial Unicode MS", sans-serif;
     -fx-base: #f4f4f4; /* Background */
     -fx-text-base-color: #333333;  /* Default text color */
 }
