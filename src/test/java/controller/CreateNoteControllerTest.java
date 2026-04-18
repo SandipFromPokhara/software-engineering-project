@@ -25,6 +25,7 @@ import util.Localization;
 import util.RichTextStorageUtil;
 
 import java.lang.reflect.Field;
+import java.util.logging.Logger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +47,7 @@ class CreateNoteControllerTest {
     private static final String SELECTED_TAGS_FIELD = "selectedTags";
 
     private CreateNoteController controller;
+    private static final Logger LOGGER = Logger.getLogger(CreateNoteControllerTest.class.getName());
     private MockNoteService mockNoteService;
     private MockNotebookDao mockNotebookDao;
     private MockTagDao mockTagDao;
@@ -93,10 +95,9 @@ class CreateNoteControllerTest {
                                      NotebookEntity notebook, Set<String> tagNames, String langCode) {
 
             if (shouldThrowException) {
-                throw new RuntimeException("Mock exception");
+                // Throw a specific custom exception to avoid using a raw RuntimeException
+                throw new MockServiceException("Mock exception");
             }
-
-            System.out.println("MOCK createNote called!");
 
             if (title == null || title.isBlank()) {
                 throw new IllegalArgumentException("Title cannot be empty");
@@ -128,7 +129,7 @@ class CreateNoteControllerTest {
             }
 
             savedNote = note;
-            System.out.println("assigned savedNote: " + savedNote);
+            LOGGER.fine(() -> "assigned savedNote: " + savedNote);
             return note;
         }
 
@@ -200,11 +201,21 @@ class CreateNoteControllerTest {
         private void setId(TagEntity tag, Long id) {
             try {
                 Field idField = getFieldFromHierarchy(TagEntity.class, "id");
+                // Make private id field accessible for test injection
                 idField.setAccessible(true);
                 idField.set(tag, id);
             } catch (Exception e) {
                 fail("Failed to set TagEntity id via reflection", e);
             }
+        }
+    }
+
+    /**
+     * Custom exception used by mocks to be more specific than a raw RuntimeException.
+     */
+    private static class MockServiceException extends RuntimeException {
+        public MockServiceException(String message) {
+            super(message);
         }
     }
 
@@ -305,6 +316,7 @@ class CreateNoteControllerTest {
     private void setUserId(UserEntity user) {
         try {
             Field idField = getFieldFromHierarchy(UserEntity.class, "id");
+            // Make private id field accessible for test injection
             idField.setAccessible(true);
             idField.set(user, 1L);
         } catch (Exception e) {
@@ -326,6 +338,7 @@ class CreateNoteControllerTest {
 
     private void injectField(String fieldName, Object value) throws Exception {
         Field field = CreateNoteController.class.getDeclaredField(fieldName);
+        // Make private fields accessible for test injection
         field.setAccessible(true);
         field.set(controller, value);
     }
@@ -352,7 +365,7 @@ class CreateNoteControllerTest {
         }
     }
 
-    private void invokeInitialize() throws Exception {
+    private void invokeInitialize() throws InterruptedException {
         runOnFxAndWait(() -> {
             controller.initialize(null, null);
             // Re-inject mocks after initialize in case it resets them
@@ -371,8 +384,8 @@ class CreateNoteControllerTest {
                 Field nsField = CreateNoteController.class.getDeclaredField("noteService");
                 nsField.setAccessible(true);
                 Object ns = nsField.get(controller);
-                System.out.println("Type of noteService in controller: " + (ns == null ? "null" : ns.getClass().getName()));
-                System.out.println("Is it identical to test's mockNoteService? " + (ns == mockNoteService));
+                LOGGER.fine(() -> "Type of noteService in controller: " + (ns == null ? "null" : ns.getClass().getName()));
+                LOGGER.fine(() -> "Is it identical to test's mockNoteService? " + (ns == mockNoteService));
 
                 java.lang.reflect.Method method = CreateNoteController.class.getDeclaredMethod("handleSave");
                 method.setAccessible(true);
@@ -400,7 +413,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void initialize_WithExistingNotebooks_PopulatesComboBox() throws Exception {
+    void initializeWithExistingNotebooksPopulatesComboBox() throws Exception {
         NotebookEntity notebook1 = new NotebookEntity(UserSession.getUserInstance().getUser());
         setCreatedAt(notebook1, LocalDateTime.now().minusDays(2));
         NotebookEntity notebook2 = new NotebookEntity(UserSession.getUserInstance().getUser());
@@ -433,7 +446,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void initialize_WithExistingTags_PopulatesTagComboBox() throws Exception {
+    void initializeWithExistingTagsPopulatesTagComboBox() throws Exception {
         TagEntity tag1 = new TagEntity();
         tag1.setTagName(IMPORTANT_TAG);
 
@@ -457,7 +470,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void initialize_DisablesSaveButtonInitially() throws Exception {
+    void initializeDisablesSaveButtonInitially() throws Exception {
         invokeInitialize();
 
         CountDownLatch checkLatch = new CountDownLatch(1);
@@ -472,7 +485,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void saveButton_EnabledWhenTitleAndNotebookSelected() throws Exception {
+    void saveButtonEnabledWhenTitleAndNotebookSelected() throws Exception {
         NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
@@ -495,7 +508,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void handleSave_WithValidData_SavesNote() throws Exception {
+    void handleSaveWithValidDataSavesNote() throws Exception {
         NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
@@ -520,7 +533,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void handleSave_EmptyTitle_ShowsError() throws Exception {
+    void handleSaveEmptyTitleShowsError() throws Exception {
         NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
@@ -541,7 +554,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void handleSave_NoNotebookSelected_ShowsError() throws Exception {
+    void handleSaveNoNotebookSelectedShowsError() throws Exception {
         invokeInitialize();
 
         runOnFxAndWait(() -> {
@@ -560,7 +573,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void handleSave_WithTags_AssociatesTagsWithNote() throws Exception {
+    void handleSaveWithTagsAssociatesTagsWithNote() throws Exception {
         NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
@@ -589,7 +602,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void handleSave_WithNewTag_CreatesAndAssociatesTag() throws Exception {
+    void handleSaveWithNewTagCreatesAndAssociatesTag() throws Exception {
         NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
@@ -613,7 +626,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void handleSave_SetsNoteSession() throws Exception {
+    void handleSaveSetsNoteSession() throws Exception {
         NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
@@ -634,7 +647,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void handleClear_ClearsAllFields() throws Exception {
+    void handleClearClearsAllFields() throws Exception {
         invokeInitialize();
 
         runOnFxAndWait(() -> {
@@ -660,7 +673,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void handleClear_ClearsSelectedTags() throws Exception {
+    void handleClearClearsSelectedTags() throws Exception {
         invokeInitialize();
 
         Field selectedTagsField = CreateNoteController.class.getDeclaredField(SELECTED_TAGS_FIELD);
@@ -676,7 +689,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void handleSave_WithNullContent_SavesWithEmptyContent() throws Exception {
+    void handleSaveWithNullContentSavesWithEmptyContent() throws Exception {
         NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
@@ -698,7 +711,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void handleSave_TrimsTitle() throws Exception {
+    void handleSaveTrimsTitle() throws Exception {
         NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
@@ -719,7 +732,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void handleSave_ShowsSuccessMessage() throws Exception {
+    void handleSaveShowsSuccessMessage() throws Exception {
         NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
@@ -739,7 +752,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void handleUndoAndRedo_ExecutesWithoutException() throws Exception {
+    void handleUndoAndRedoExecutesWithoutException() throws Exception {
         invokeInitialize();
         
         runOnFxAndWait(() -> {
@@ -758,7 +771,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void handleSave_WhenExceptionIsThrown_ShowsErrorMessage() throws Exception {
+    void handleSaveWhenExceptionIsThrownShowsErrorMessage() throws Exception {
         NotebookEntity notebook = new NotebookEntity(UserSession.getUserInstance().getUser());
         mockNotebookDao.addNotebook(notebook);
 
@@ -779,7 +792,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void handleAddTag_AddsTagToSelectedTags() throws Exception {
+    void handleAddTagAddsTagToSelectedTags() throws Exception {
         invokeInitialize();
 
         runOnFxAndWait(() -> {
@@ -802,7 +815,7 @@ class CreateNoteControllerTest {
     }
 
     @Test
-    void handleThemeToggle_TogglesIcon() throws Exception {
+    void handleThemeToggleTogglesIcon() throws Exception {
         invokeInitialize();
 
         runOnFxAndWait(() -> {
@@ -816,15 +829,13 @@ class CreateNoteControllerTest {
         });
 
         AtomicReference<ImageView> graphic = new AtomicReference<>();
-        runOnFxAndWait(() -> {
-            graphic.set((ImageView) toggleBtn.getGraphic());
-        });
+        runOnFxAndWait(() -> graphic.set((ImageView) toggleBtn.getGraphic()));
 
         assertNotNull(graphic.get());
     }
 
     @Test
-    void getNotebookTitle_WithNullNotebook_ReturnsEmpty() throws Exception {
+    void getNotebookTitleWithNullNotebookReturnsEmpty() throws Exception {
         java.lang.reflect.Method getTitleMethod = CreateNoteController.class.getDeclaredMethod("getNotebookTitle", NotebookEntity.class);
         getTitleMethod.setAccessible(true);
         
