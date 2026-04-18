@@ -99,8 +99,6 @@ class CreateNoteControllerTest {
                 throw new MockServiceException("Mock exception");
             }
 
-            LOGGER.info("MOCK createNote called!");
-
             if (title == null || title.isBlank()) {
                 throw new IllegalArgumentException("Title cannot be empty");
             }
