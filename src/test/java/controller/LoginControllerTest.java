@@ -331,10 +331,13 @@ class LoginControllerTest {
     @Test
     void testLoginButtonDisabledDuringLogin() {
 
-        // Create a controllable "long running" login
+        // Create a controllable "long-running" login
         CountDownLatch latch = new CountDownLatch(1);
 
-        when(userService.login(TEST_USERNAME, TEST_PASS)).thenAnswer(invocation -> {
+        // Mark this stubbing lenient because the test only asserts UI state while the
+        // login task is running and does not require the stub to be invoked before
+        // the assertion. This avoids UnnecessaryStubbingException under strict Mockito.
+        lenient().when(userService.login(TEST_USERNAME, TEST_PASS)).thenAnswer(invocation -> {
             latch.await(); // block until we release it
             return null;
         });

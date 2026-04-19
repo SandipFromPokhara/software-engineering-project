@@ -1,6 +1,6 @@
 /* BASE STYLES */
 .root {
-    -fx-font-family: "System";
+    -fx-font-family: "Noto Sans", "Noto Sans Myanmar", "Noto Sans Devanagari", "Segoe UI", "Arial Unicode MS", sans-serif;
     -fx-base: #f4f4f4; /* Background */
     -fx-text-base-color: #333333;  /* Default text color */
 }
@@ -136,6 +136,18 @@
     -fx-font-size: 12px;
 }
 
+.table-view {
+    -fx-font-family: "Noto Sans", "Noto Sans Myanmar", "Noto Sans Devanagari", sans-serif;
+}
+
+.table-column {
+    -fx-font-family: "Noto Sans", "Noto Sans Myanmar", "Noto Sans Devanagari", "Segoe UI", "Arial Unicode MS", sans-serif;
+}
+
+.table-view .column-header {
+    -fx-font-family: inherit;
+}
+
 /* LIGHT MODE */
 .root.light {
     -fx-base: #f8f8f8;
@@ -214,6 +226,16 @@
     -fx-border-color: #d0d0d0;
 }
 
+/* Editor placeholder (the label shown when editor is empty) */
+.root.light .editor-placeholder {
+    -fx-text-fill: #8a8a8a;
+}
+
+/* Scroll pane for the rich text editor - ensure viewport background matches theme */
+.root.light .editor-scroll-pane .viewport {
+    -fx-background-color: #ffffff;
+}
+
 .root.light .editor-toolbar {
     -fx-background-color: linear-gradient(to bottom, #f8f8f8 0%, #ececec 100%);
     -fx-border-color: #d0d0d0;
@@ -254,8 +276,9 @@
 /* TextAreas & TextFields - only colors */
 .root.light .editor-textarea,
 .root.light .text-area {
+    -fx-font-family: "Noto Sans", sans-serif;
     -fx-background-color: #ffffff;
-    -fx-text-fill: #000000;
+    -fx-fill: #000000;
     -fx-border-color: transparent;
 }
 
@@ -431,6 +454,28 @@
 .root.dark .editor-container {
     -fx-background-color: #212121;
     -fx-border-color: #3d2b2b;
+    -fx-fill: #e6e6e6;
+}
+
+/* Dark-mode editor placeholder */
+.root.dark .editor-placeholder {
+    -fx-text-fill: #5a5a5a;
+}
+
+/* Scroll pane for the rich text editor in dark mode */
+.root.dark .editor-scroll-pane .viewport {
+    -fx-background-color: #212121;
+}
+
+/* Rich text area base fill/background for both themes */
+.root.light .rich-text-area {
+    -fx-control-inner-background: #595959;
+    -fx-fill: #000000;
+}
+
+.root.dark .rich-text-area {
+    -fx-control-inner-background: #212121;
+    -fx-fill: #e6e6e6;
 }
 
 .root.dark .editor-toolbar {
@@ -467,14 +512,14 @@
 .root.dark .text-field .text,
 .root.dark .text-area .content {
     -fx-control-inner-background: #4a4a4a;
-    -fx-background-color: #3c3c3c;
-    -fx-text-fill: white !important;
+    -fx-background-color: #505050;
+    -fx-fill: #e6e6e6;
     -fx-prompt-text-fill: #bbbbbb !important;
 }
 
 .root.dark .text-field.focus,
 .root.dark .text-area.focus {
-    -fx-text-fill: white !important;
+    -fx-text-fill: #e6e6e6;
 }
 
 .root.dark .text-field > .text {
@@ -484,8 +529,8 @@
 /* ComboBoxes */
 .root.dark .combo-box,
 .root.dark .editor-combo {
-    -fx-background-color: #2d2d2d;
-    -fx-control-inner-background: #2d2d2d;
+    -fx-background-color: #505050;
+    -fx-control-inner-background: #505050;
     -fx-text-fill: #e6e6e6;
     -fx-border-color: #3c3c3c;
 }

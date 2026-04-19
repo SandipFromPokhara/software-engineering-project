@@ -9,10 +9,7 @@ import javafx.stage.Window;
 /**
  * Utility class for displaying JavaFX Alerts.
  */
-public class AlertUtil {
-
-    private static final ButtonType OK_BUTTON = new ButtonType(Localization.get("button.ok"), ButtonBar.ButtonData.OK_DONE);
-    private static final ButtonType CANCEL_BUTTON = new ButtonType(Localization.get("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+public final class AlertUtil {
 
     private AlertUtil() {
         throw new IllegalStateException("Utility class");
@@ -39,15 +36,15 @@ public class AlertUtil {
     }
 
     public static void showInfo(Window owner, String message) {
-        showAlert(owner, Alert.AlertType.INFORMATION, "Information", message);
+        showAlert(owner, Alert.AlertType.INFORMATION, Localization.get("alert.info"), message);
     }
 
     public static void showWarning(Window owner, String message) {
-        showAlert(owner, Alert.AlertType.WARNING, "Warning", message);
+        showAlert(owner, Alert.AlertType.WARNING, Localization.get("alert.warning"), message);
     }
 
     public static void showError(Window owner, String message) {
-        showAlert(owner, Alert.AlertType.ERROR, "Error", message);
+        showAlert(owner, Alert.AlertType.ERROR, Localization.get("alert.error"), message);
     }
 
     public static boolean showConfirmation(Window owner, String title, String message) {
@@ -60,12 +57,24 @@ public class AlertUtil {
             alert.initOwner(owner);
         }
 
-        alert.getButtonTypes().setAll(OK_BUTTON, CANCEL_BUTTON);
+        ButtonType okButton = createOkButton();
+        ButtonType cancelButton = createCancelButton();
 
-        return alert.showAndWait().filter(response -> response == OK_BUTTON).isPresent();
+        alert.getButtonTypes().setAll(okButton, cancelButton);
+
+        return alert.showAndWait().filter(response -> response == okButton).isPresent();
     }
 
     public static void addStandardButtons(Dialog<?> dialog) {
-        dialog.getDialogPane().getButtonTypes().setAll(OK_BUTTON, CANCEL_BUTTON);
+
+        dialog.getDialogPane().getButtonTypes().setAll(createOkButton(), createCancelButton());
+    }
+
+    private static ButtonType createOkButton() {
+        return new ButtonType(Localization.get("button.ok"), ButtonBar.ButtonData.OK_DONE);
+    }
+
+    private static ButtonType createCancelButton() {
+        return new ButtonType(Localization.get("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
     }
 }

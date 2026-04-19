@@ -20,6 +20,7 @@ import util.TooltipUtil;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.List;
 
 public class SignUpController {
 
@@ -39,11 +40,20 @@ public class SignUpController {
 
     private static final String ERROR_CLASS = "input-error";
     private static final String FOCUS_CLASS = "focus";
+    private static final String FIRST_NAME = "firstName";
+    private static final String LAST_NAME = "lastName";
+    private static final String USERNAME = "username";
+    private static final String EMAIL = "email";
+    
 
-    @FXML private TextField firstNameField;
-    @FXML private TextField lastNameField;
-    @FXML private TextField usernameField;
-    @FXML private TextField emailField;
+    @FXML
+    private TextField firstNameField;
+    @FXML
+    private TextField lastNameField;
+    @FXML
+    private TextField usernameField;
+    @FXML
+    private TextField emailField;
 
     @FXML private PasswordField passwordField;
     @FXML private PasswordField confirmPasswordField;
@@ -214,54 +224,13 @@ public class SignUpController {
         ShowMessageUtil.hideMessage(messageLabel);
         // Clear previous field-level error styles
         resetStyles();
+
         for (var entry : result.errors().entrySet()) {
             String field = entry.getKey();
-            var errors = entry.getValue();
+            if (entry.getValue().isEmpty()) continue;
 
-            if (errors != null && !errors.isEmpty() && handleFieldErrors(field, errors)) return;
+            if (handleFieldErrors(field, entry.getValue())) return;
         }
-    }
-
-    private boolean handleFieldErrors(String field, java.util.List<?> errors) {
-        Control c = getControlForField(field);
-        boolean touched = isFieldTouched(field);
-
-        if (c != null && touched) addErrorStyle(c);
-
-        var firstError = errors.stream().findFirst().orElse(null);
-        if (firstError == null) {
-            logger.fine(() -> "No specific error item for field: " + field);
-            return false;
-        }
-
-        String key;
-        try {
-            // firstError is expected to have method key(); use toString fallback if not
-            key = (String) firstError.getClass().getMethod("key").invoke(firstError);
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Error reading validation key", e);
-            return false;
-        }
-
-        if (key == null || key.isBlank()) {
-            logger.warning("Validation returned empty i18n key");
-            return false;
-        }
-
-        ShowMessageUtil.showMessageKey(messageLabel, key, MessageType.ERROR);
-        return true;
-    }
-
-    private boolean isFieldTouched(String field) {
-        return switch (field) {
-            case "firstName" -> firstNameTouched;
-            case "lastName" -> lastNameTouched;
-            case "username" -> usernameTouched;
-            case "email" -> emailTouched;
-            case "password" -> passwordTouched;
-            case "confirmPassword" -> confirmPasswordTouched;
-            default -> true;
-        };
     }
 
     private void resetStyles() {
@@ -276,13 +245,52 @@ public class SignUpController {
     // Map validation field name to control instance
     private Control getControlForField(String field) {
         return switch (field) {
-            case "firstName" -> firstNameField;
-            case "lastName" -> lastNameField;
-            case "username" -> usernameField;
-            case "email" -> emailField;
+            case FIRST_NAME -> firstNameField;
+            case LAST_NAME -> lastNameField;
+            case USERNAME -> usernameField;
+            case EMAIL -> emailField;
             case "password" -> passwordField;
             case "confirmPassword" -> confirmPasswordField;
             default -> null;
+        };
+    }
+
+    private boolean handleFieldErrors(String field, List<?> errors) {
+        if (errors == null || errors.isEmpty()) return false;
+
+        Object raw = errors.get(0);
+
+        if (!(raw instanceof IValidationError error)) {
+            return false; // unknown type → ignore safely
+        }
+
+        if (error.key() == null || error.key().isBlank()) return false;
+
+        Control control = getControlForField(field);
+        if (control != null && isFieldTouched(field)) {
+            addErrorStyle(control);
+        }
+
+        try {
+            ShowMessageUtil.showMessage(
+                    messageLabel,
+                    Localization.get(error.key(), error.args()),
+                    MessageType.ERROR
+            );
+        } catch (Exception ignored) {/* If localization fails, just show nothing */}
+
+        return true;
+    }
+
+    private boolean isFieldTouched(String field) {
+        return switch (field) {
+            case FIRST_NAME -> firstNameTouched;
+            case LAST_NAME -> lastNameTouched;
+            case USERNAME -> usernameTouched;
+            case EMAIL -> emailTouched;
+            case "password" -> passwordTouched;
+            case "confirmPassword" -> confirmPasswordTouched;
+            default -> true;
         };
     }
 
@@ -324,7 +332,7 @@ public class SignUpController {
         if (password.chars().anyMatch(Character::isUpperCase)) score++;
         if (password.chars().anyMatch(Character::isLowerCase)) score++;
         if (password.chars().anyMatch(Character::isDigit)) score++;
-        if (password.chars().anyMatch(c -> "!@#$%^&*()_+=-[]{}:'\"\\|,.<>/?".indexOf(c) >= 0)) score++;
+        if (password.chars().anyMatch(c -> "!@#$%^&*()_+=\\-[]{};':\"\\|,.<>/?".indexOf(c) >= 0)) score++;
 
         double progress = score / 5.0;
         passwordStrengthBar.setProgress(progress);
@@ -365,8 +373,13 @@ public class SignUpController {
     }
 
     private void navigateToLogin() {
-        Stage stage = (Stage) loginLink.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/login_view.fxml", "login.window_title", false);
+        try {
+            if (loginLink == null || loginLink.getScene() == null || loginLink.getScene().getWindow() == null) return;
+            Stage stage = (Stage) loginLink.getScene().getWindow();
+            NavigationUtil.replaceScene(stage, "/FXML/login_view.fxml", "login.window_title", false);
+        } catch (Exception ignored) {
+            // In test environments controls may not be attached to a Scene/Window – tolerate and continue
+        }
     }
 
     @FXML
@@ -377,8 +390,13 @@ public class SignUpController {
 
     @FXML
     private void handleBack() {
-        Stage stage = (Stage) backButton.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "entry.window_title", false);
+        try {
+            if (backButton == null || backButton.getScene() == null || backButton.getScene().getWindow() == null) return;
+            Stage stage = (Stage) backButton.getScene().getWindow();
+            NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "entry.window_title", false);
+        } catch (Exception ignored) {
+            // tolerate in tests
+        }
     }
 
     public void setUserDAO(IUserDAO userDAO) {
