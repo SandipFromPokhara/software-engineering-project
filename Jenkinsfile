@@ -31,7 +31,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'test', url: 'git@github.com:SandipFromPokhara/software-engineering-project.git',
+                git branch: 'guest-Dashboard', url: 'git@github.com:SandipFromPokhara/software-engineering-project.git',
                 credentialsId: 'private'
             }
         }
