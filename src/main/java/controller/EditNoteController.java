@@ -123,6 +123,8 @@ public class EditNoteController implements Initializable {
         redoMenuItem.textProperty().bind(Localization.bind("edit.redo"));
 
         content.textProperty().bind(Localization.bind("edit.content_label"));
+        titleField.promptTextProperty().bind(Localization.bind("create.placeholder_title"));
+        contentEditorController.bindPromptText(Localization.bind("edit.content_box"));
         annotation.textProperty().bind(Localization.bind("edit.annotations"));
         editTags.textProperty().bind(Localization.bind("edit.tags"));
 
