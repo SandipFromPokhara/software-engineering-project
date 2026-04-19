@@ -13,8 +13,20 @@
         <maven.compiler.target>21</maven.compiler.target>
         <javafx.version>21.0.2</javafx.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <sonar.projectKey>NoteVault</sonar.projectKey>
         <sonar.host.url>http://localhost:9000</sonar.host.url>
+
+        <sonar.coverage.exclusions>
+            **/controller/**,
+            **/model/**,
+            **/view/**,
+            **/org/example/Main.java
+        </sonar.coverage.exclusions>
+
+        <sonar.coverage.jacoco.xmlReportPaths>
+            target/site/jacoco/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <dependencies>
@@ -234,7 +246,9 @@
 
                 <configuration>
                     <excludes>
-                        <exclude>**/org.example.Main.class</exclude>
+                        <exclude>**/view/**</exclude>
+                        <exclude>**/controller/**</exclude>
+                        <exclude>org/example/Main*</exclude>
                     </excludes>
                 </configuration>
 
@@ -246,7 +260,7 @@
                     </execution>
                     <execution>
                         <id>report</id>
-                        <phase>prepare-package</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
