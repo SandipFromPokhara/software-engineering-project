@@ -243,6 +243,15 @@ public class CreateNoteController implements Initializable {
             updateToggleIcon();
             updateTagIcon();
         });
+        // Update toggle icon if theme changes in other windows
+        util.events.EventBus.subscribe(event -> {
+            if (event instanceof util.events.ThemeChangedEvent) {
+                javafx.application.Platform.runLater(() -> {
+                    updateToggleIcon();
+                    updateTagIcon();
+                });
+            }
+        });
         // Enable list auto-continuation for content area
         TextFormattingUtil.enableListAutoContinuation(contentEditorController.getTextArea());
     }
