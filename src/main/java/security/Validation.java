@@ -29,9 +29,9 @@ public class Validation {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof ValidationError other)) return false;
-            if (!Objects.equals(key, other.key)) return false;
-            return Arrays.equals(args(), other.args());
+            if (!(o instanceof ValidationError(String otherKey, Object[] otherArgs))) return false;
+            if (!Objects.equals(key, otherKey)) return false;
+            return Arrays.equals(args(), otherArgs);
         }
 
         @Override
