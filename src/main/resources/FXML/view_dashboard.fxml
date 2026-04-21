@@ -52,7 +52,7 @@
                      <tooltip>
                          <Tooltip fx:id="langTooltip">
                              <font>
-                                 <Font name="System Italic" size="12.0" />
+                                 <Font size="12.0" />
                              </font>
                          </Tooltip>
                      </tooltip></ComboBox>
@@ -80,7 +80,7 @@
                <tooltip>
                   <Tooltip fx:id="toggleTooltip">
                      <font>
-                        <Font name="System Italic" size="12.0" />
+                        <Font size="12.0" />
                      </font>
                   </Tooltip>
                </tooltip>
@@ -103,7 +103,7 @@
                <tooltip>
                    <Tooltip fx:id="manageTooltip">
                        <font>
-                           <Font name="System Italic" size="12.0" />
+                           <Font size="12.0" />
                        </font>
                    </Tooltip>
                </tooltip>
@@ -122,7 +122,7 @@
                <tooltip>
                    <Tooltip fx:id="createTooltip">
                        <font>
-                           <Font name="System Italic" size="12.0" />
+                           <Font size="12.0" />
                        </font>
                    </Tooltip>
                </tooltip>
@@ -141,7 +141,7 @@
                <tooltip>
                    <Tooltip fx:id="logoutTooltip">
                        <font>
-                           <Font name="System Italic" size="12.0" />
+                           <Font size="12.0" />
                        </font>
                    </Tooltip>
                </tooltip>
@@ -180,7 +180,7 @@
                         <HBox alignment="CENTER_RIGHT">
                               <Label fx:id="wordCountLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="15.0" prefWidth="180.0" HBox.hgrow="ALWAYS">
                                  <font>
-                                    <Font name="Arial Italic" size="12.0" />
+                                    <Font size="12.0" />
                                  </font>
                               </Label>
                            <VBox.margin>

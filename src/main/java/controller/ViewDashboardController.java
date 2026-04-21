@@ -211,6 +211,12 @@ public class ViewDashboardController {
     private void initTheme() {
         rootPane.getStyleClass().add("root");
         setupTheme();
+        // Listen for theme changes from other windows and update icons accordingly
+        util.events.EventBus.subscribe(event -> {
+            if (event instanceof util.events.ThemeChangedEvent) {
+                javafx.application.Platform.runLater(this::setToggleIcon);
+            }
+        });
     }
 
     private void initTable() {
