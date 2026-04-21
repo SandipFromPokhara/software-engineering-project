@@ -88,6 +88,7 @@ class PdfExportServiceTest {
         when(notebook.getTranslations())
                 .thenReturn(Map.of("en", notebookTranslation));
 
+        // This will save new file in the root. Delete the file manually after testing
         File file = new File("test.pdf");
         doReturn(file).when(service).chooseFile(any(), any());
 
