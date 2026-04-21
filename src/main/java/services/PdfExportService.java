@@ -81,7 +81,7 @@ public class PdfExportService {
         }
     }
 
-    private File chooseFile(String fileName, Window owner) {
+    protected File chooseFile(String fileName, Window owner) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(Localization.get("menu.exportPdf"));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
