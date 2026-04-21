@@ -2,6 +2,9 @@ package util.list;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import org.fxmisc.richtext.InlineCssTextArea;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,14 +31,14 @@ class TextFormattingUtilTest {
     }
 
     @Test
-    void toggleList_EmptyTextArea_AddsBulletPrefix() {
+    void toggleListEmptyTextAreaAddsBulletPrefix() {
         textArea.setText("");
         TextFormattingUtil.toggleList(textArea, button, bulletStrategy);
         assertEquals("• ", textArea.getText());
     }
 
     @Test
-    void toggleList_EmptyTextArea_AddsNumberPrefix() {
+    void toggleListEmptyTextAreaAddsNumberPrefix() {
         textArea.setText("");
         TextFormattingUtil.toggleList(textArea, button, numberedStrategy);
         assertEquals("1. ", textArea.getText());
@@ -48,7 +51,7 @@ class TextFormattingUtilTest {
         "1. First\\n2. Second | • First\\n• Second",
         "1. First\\nSecond\\nThird | • First\\n• Second\\n• Third"
     })
-    void toggleList_BulletStrategy_Transformations(String input, String expected) {
+    void toggleListBulletStrategyTransformations(String input, String expected) {
         textArea.setText(input.replace("\\n", "\n"));
         textArea.selectAll();
         TextFormattingUtil.toggleList(textArea, button, bulletStrategy);
@@ -61,7 +64,7 @@ class TextFormattingUtilTest {
         "1. First\\n2. Second | First\\nSecond",
         "• Item 1\\n• Item 2 | 1. Item 1\\n2. Item 2"
     })
-    void toggleList_NumberedStrategy_Transformations(String input, String expected) {
+    void toggleListNumberedStrategyTransformations(String input, String expected) {
         textArea.setText(input.replace("\\n", "\n"));
         textArea.selectAll();
         TextFormattingUtil.toggleList(textArea, button, numberedStrategy);
@@ -69,7 +72,7 @@ class TextFormattingUtilTest {
     }
 
     @Test
-    void toggleList_SingleLine_AddsBullet() {
+    void toggleListSingleLineAddsBullet() {
         textArea.setText("Single line");
         textArea.selectRange(0, 11);
         TextFormattingUtil.toggleList(textArea, button, bulletStrategy);
@@ -77,7 +80,7 @@ class TextFormattingUtilTest {
     }
 
     @Test
-    void toggleList_PartialSelection_FormatsSelectedLines() {
+    void toggleListPartialSelectionFormatsSelectedLines() {
         textArea.setText("Line 1\nLine 2\nLine 3");
         textArea.selectRange(7, 13);
         TextFormattingUtil.toggleList(textArea, button, numberedStrategy);
@@ -85,7 +88,7 @@ class TextFormattingUtilTest {
     }
 
     @Test
-    void toggleList_ButtonActivation_SetsActiveClass() {
+    void toggleListButtonActivationSetsActiveClass() {
         textArea.setText("Text");
         textArea.selectAll();
         TextFormattingUtil.toggleList(textArea, button, bulletStrategy);
@@ -93,7 +96,7 @@ class TextFormattingUtilTest {
     }
 
     @Test
-    void toggleList_ButtonDeactivation_RemovesActiveClass() {
+    void toggleListButtonDeactivationRemovesActiveClass() {
         textArea.setText("• Text");
         textArea.selectAll();
         button.getStyleClass().add("active");
@@ -102,14 +105,14 @@ class TextFormattingUtilTest {
     }
 
     @Test
-    void increaseFontSize_IncreasesFont() {
+    void increaseFontSizeIncreasesFont() {
         double initialSize = textArea.getFont().getSize();
         TextFormattingUtil.increaseFontSize(textArea);
         assertTrue(textArea.getFont().getSize() > initialSize);
     }
 
     @Test
-    void decreaseFontSize_DecreasesFont() {
+    void decreaseFontSizeDecreasesFont() {
         TextFormattingUtil.increaseFontSize(textArea);
         TextFormattingUtil.increaseFontSize(textArea);
         double largerSize = textArea.getFont().getSize();
@@ -118,7 +121,7 @@ class TextFormattingUtilTest {
     }
 
     @Test
-    void fontSizeChanges_StayWithinBounds() {
+    void fontSizeChangesStayWithinBounds() {
         for (int i = 0; i < 20; i++) {
             TextFormattingUtil.increaseFontSize(textArea);
         }
@@ -135,7 +138,7 @@ class TextFormattingUtilTest {
     }
 
     @Test
-    void toggleList_WithNullButton_WorksWithoutButton() {
+    void toggleListWithNullButtonWorksWithoutButton() {
         textArea.setText("Test");
         textArea.selectAll();
         assertDoesNotThrow(() -> TextFormattingUtil.toggleList(textArea, null, bulletStrategy));
@@ -143,7 +146,64 @@ class TextFormattingUtilTest {
     }
 
     @Test
-    void enableListAutoContinuation_RegistersEventFilter() {
+    void enableListAutoContinuationRegistersEventFilter() {
         assertDoesNotThrow(() -> TextFormattingUtil.enableListAutoContinuation(textArea));
+    }
+
+    @Test
+    void enterOnEmptyNumberedItemRemovesLine() {
+        textArea.setText("1. Item\n2. ");
+
+        textArea.positionCaret(textArea.getText().indexOf("2. "));
+
+        KeyEvent enter = new KeyEvent(KeyEvent.KEY_PRESSED,
+                "", "", KeyCode.ENTER, false, false, false, false);
+
+        TextFormattingUtil.enableListAutoContinuation(textArea);
+
+        textArea.fireEvent(enter);
+
+        assertFalse(textArea.getText().contains("2."));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "1. Item, 2.",
+            "• Item, •",
+            "1. First, 2."
+    })
+    void enterKeyContinuesList(String input, String expectedFragment) {
+        textArea.setText(input);
+        textArea.positionCaret(textArea.getText().length());
+
+        TextFormattingUtil.enableListAutoContinuation(textArea);
+
+        KeyEvent enter = new KeyEvent(
+                KeyEvent.KEY_PRESSED,
+                "", "", KeyCode.ENTER,
+                false, false, false, false
+        );
+
+        textArea.fireEvent(enter);
+
+        assertTrue(textArea.getText().contains(expectedFragment));
+    }
+
+    @Test
+    void inlineTextAreaToggleListDoesNotCrash() {
+        InlineCssTextArea area = new InlineCssTextArea();
+        Button button1 = new Button();
+
+        area.replaceText("Item 1\nItem 2");
+        area.selectAll();
+
+        assertDoesNotThrow(() -> TextFormattingUtil.toggleList(area, button1, new BulletListStrategy()));
+    }
+
+    @Test
+    void enableAutoContinuationDoesNotCrashInline() {
+        InlineCssTextArea area = new InlineCssTextArea();
+
+        assertDoesNotThrow(() -> TextFormattingUtil.enableListAutoContinuation(area));
     }
 }
