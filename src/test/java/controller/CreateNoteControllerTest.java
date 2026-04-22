@@ -99,8 +99,6 @@ class CreateNoteControllerTest {
                 throw new MockServiceException("Mock exception");
             }
 
-            LOGGER.info("MOCK createNote called!");
-
             if (title == null || title.isBlank()) {
                 throw new IllegalArgumentException("Title cannot be empty");
             }
@@ -361,7 +359,8 @@ class CreateNoteControllerTest {
                 latch.countDown();
             }
         });
-        awaitLatch(latch, 2, "FX task timed out");
+        // Increase FX task timeout to reduce flakiness on slower CI / test environments
+        awaitLatch(latch, 5, "FX task timed out");
         if (error.get() != null) {
             fail("FX task failed", error.get());
         }

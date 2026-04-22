@@ -59,17 +59,24 @@ public class NoteEntity extends BaseEntity implements ITranslatable<NoteTranslat
         if (nt != null) {
             String langCode = nt.getLangCode();
             nt.setNote(this);
-
-            if (translations.putIfAbsent(langCode, nt) != null) {
-                throw new IllegalArgumentException("Translation already exists for language: " + langCode);
+            // If a translation for this language already exists, keep it and do not throw.
+            // This makes adding translations idempotent and safe under concurrent updates.
+            NoteTranslationEntity existing = translations.putIfAbsent(langCode, nt);
+            // ensure the existing translation has the correct back-reference
+            if (existing != null && existing.getNote() == null) {
+                existing.setNote(this);
             }
-
-            translations.put(langCode, nt);
         }
     }
 
     @Override
     public NoteTranslationEntity createTranslation(String langCode) {
+        if (langCode == null) return null;
+
+        // If a translation already exists, return it (idempotent)
+        NoteTranslationEntity existing = translations.get(langCode);
+        if (existing != null) return existing;
+
         NoteTranslationEntity nt = new NoteTranslationEntity();
         nt.setLangCode(langCode);
         addTranslation(nt);

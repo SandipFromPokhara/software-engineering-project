@@ -6,12 +6,14 @@ import dao.tag.JpaTagDao;
 import entity.entities.NotebookEntity;
 import entity.entities.NoteEntity;
 import entity.entities.UserEntity;
+import entity.translationentities.NoteTranslationEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import session.UserSession;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -152,5 +154,98 @@ class NoteServiceTest {
 
         assertNotNull(result);
         verify(noteDao, times(1)).save(any(NoteEntity.class));
+    }
+
+    @Test
+    void updateNoteNullNoteThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> noteService.updateNote(null, "en", "t", "c", "a", null));
+    }
+
+    @Test
+    void updateNoteCreatesTranslationWhenMissing() {
+        UserEntity user = new UserEntity();
+        user.setFirstName("Test");
+
+        NoteEntity note = new NoteEntity();
+
+        when(noteDao.save(any())).thenReturn(note);
+
+        NoteEntity result = noteService.updateNote(note, "en", "title", "content", "annotation", Set.of("tag"));
+
+        assertNotNull(result);
+        verify(noteDao).save(note);
+    }
+
+    @Test
+    void updateNoteUpdatesExistingTranslation() {
+        NoteEntity note = new NoteEntity();
+        NoteTranslationEntity nt = new NoteTranslationEntity();
+        note.addTranslation(nt);
+
+        when(noteDao.save(any())).thenReturn(note);
+
+        NoteEntity result = noteService.updateNote(
+                note, "en", "title", "content", "annotation", null
+        );
+
+        assertNotNull(result);
+        verify(noteDao).save(note);
+    }
+
+    @Test
+    void createNotebookBlankTitleThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> noteService.createNotebook(" "));
+    }
+
+    @Test
+    void createNotebookSuccessSavesNotebook() {
+        UserEntity user = new UserEntity();
+        user.setFirstName("Test");
+
+        UserSession.getUserInstance().setUser(user);
+
+        NotebookEntity notebook = new NotebookEntity(user);
+        when(notebookDao.save(any())).thenReturn(notebook);
+
+        NotebookEntity result = noteService.createNotebook("My Notebook");
+
+        assertNotNull(result);
+        verify(notebookDao).save(any(NotebookEntity.class));
+    }
+
+    @Test
+    void createNoteExistingNotebookIsUsed() {
+        UserEntity user = new UserEntity();
+        user.setFirstName("Test");
+
+        NotebookEntity existing = new NotebookEntity(user);
+
+        UserSession.getUserInstance().setUser(user);
+
+        when(notebookDao.findByUser(user)).thenReturn(List.of(existing));
+        when(noteDao.save(any())).thenReturn(new NoteEntity());
+
+        NoteEntity result = noteService.createNote(
+                "title", "content", "annotation", null, null, "en"
+        );
+
+        assertNotNull(result);
+        verify(notebookDao).findByUser(user);
+        verify(notebookDao, never()).save(any()); // IMPORTANT branch
+    }
+
+    @Test
+    void createNoteWithNullTagsSkipsTagProcessing() {
+        UserEntity user = new UserEntity();
+        user.setFirstName("Test");
+
+        UserSession.getUserInstance().setUser(user);
+
+        when(noteDao.save(any())).thenReturn(new NoteEntity());
+
+        NoteEntity result = noteService.createNote("title", "content", "annotation", null, null, "en");
+
+        assertNotNull(result);
+        verify(noteDao).save(any());
     }
 }

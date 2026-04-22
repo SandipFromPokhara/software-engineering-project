@@ -28,6 +28,13 @@ public class DashboardService {
         this.translationService = new TranslationService();
     }
 
+    // constructor overriding for unit test
+    public DashboardService(INoteDAO noteDao, INotebookDAO notebookDao, TranslationService translationService) {
+        this.noteDao = noteDao;
+        this.notebookDao = notebookDao;
+        this.translationService = translationService;
+    }
+
     /** Load all notebooks for current user, sorted by creation time */
     public List<NotebookEntity> loadNotebooks() {
         var user = UserSession.getUserInstance().getUser();

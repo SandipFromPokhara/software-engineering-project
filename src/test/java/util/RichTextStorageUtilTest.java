@@ -9,13 +9,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class RichTextStorageUtilTest {
 
     @Test
-    void serialize_WithNullSpans_ReturnsRawText() {
+    void serializeWithNullSpansReturnsRawText() {
         String result = RichTextStorageUtil.serialize("Sample", null);
         assertEquals("Sample", result);
     }
 
     @Test
-    void serializeAndDecode_RoundTripsContent() {
+    void serializeAndDecodeRoundTripsContent() {
         String originalText = "Hello Bold World";
         StyleSpansBuilder<String> builder = new StyleSpansBuilder<>();
         builder.add("", 6); // "Hello "
@@ -38,7 +38,7 @@ class RichTextStorageUtilTest {
     }
 
     @Test
-    void decode_WithNullOrBlank_ReturnsEmptyContent() {
+    void decodeWithNullOrBlankReturnsEmptyContent() {
         RichTextStorageUtil.DecodedContent decodedNull = RichTextStorageUtil.decode(null);
         assertEquals("", decodedNull.text());
         assertNull(decodedNull.spans());
@@ -49,14 +49,14 @@ class RichTextStorageUtilTest {
     }
 
     @Test
-    void decode_WithoutPrefix_ReturnsRawTextAndNullSpans() {
+    void decodeWithoutPrefixReturnsRawTextAndNullSpans() {
         RichTextStorageUtil.DecodedContent decoded = RichTextStorageUtil.decode("Plain text");
         assertEquals("Plain text", decoded.text());
         assertNull(decoded.spans());
     }
 
     @Test
-    void toPlainText_WithValidSerializedString_ReturnsDecodedText() {
+    void toPlainTextWithValidSerializedStringReturnsDecodedText() {
         String originalText = "Hello";
         StyleSpans<String> spans = new StyleSpansBuilder<String>().add("", 5).create();
         String serialized = RichTextStorageUtil.serialize(originalText, spans);
@@ -66,7 +66,7 @@ class RichTextStorageUtilTest {
     }
 
     @Test
-    void toPlainText_WithoutPrefix_ReturnsRawText() {
+    void toPlainTextWithoutPrefixReturnsRawText() {
         String plain = RichTextStorageUtil.toPlainText("Just text");
         assertEquals("Just text", plain);
     }

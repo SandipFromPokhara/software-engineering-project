@@ -62,6 +62,22 @@ public class NotebookEntity extends BaseEntity implements ITranslatable<Notebook
         return nt;
     }
 
+    public void addNote(NoteEntity note) {
+        if (note != null) {
+            notes.add(note);
+            if (note.getNotebook() != this) {
+                note.setNotebook(this); // Keeps both sides of the relationship in sync
+            }
+        }
+    }
+
+    public void removeNote(NoteEntity note) {
+        if (note != null) {
+            notes.remove(note);
+            note.setNotebook(null);
+        }
+    }
+
     public void removeTranslation(String langCode) {
         if (langCode == null || langCode.isBlank()) return;
 
