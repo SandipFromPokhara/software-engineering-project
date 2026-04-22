@@ -18,9 +18,9 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import util.ShowMessageUtil;
 import util.TooltipUtil;
 
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.List;
 
 public class SignUpController {
 
@@ -45,15 +45,22 @@ public class SignUpController {
     private static final String USERNAME = "username";
     private static final String EMAIL = "email";
 
-    @FXML private TextField firstNameField;
-    @FXML private TextField lastNameField;
-    @FXML private TextField usernameField;
-    @FXML private TextField emailField;
+
+    @FXML
+    private TextField firstNameField;
+    @FXML
+    private TextField lastNameField;
+    @FXML
+    private TextField usernameField;
+    @FXML
+    private TextField emailField;
+
     @FXML private PasswordField passwordField;
     @FXML private PasswordField confirmPasswordField;
 
     @FXML private Button signUpButton;
     @FXML private Button backButton;
+
     @FXML private Hyperlink loginLink;
 
     @FXML private Label messageLabel;
@@ -70,18 +77,6 @@ public class SignUpController {
         userDAO = new JpaUserDao();
         passwordHasher = new BcryptPasswordHasher();
 
-        bindTexts();
-        setupBackButton();
-        attachFocusHandlers();
-
-        setupPasswordStrengthUI();
-        setupRealtimeValidation();
-
-        signUpButton.setOnAction(e -> handleSignUp());
-        signUpButton.setDisable(true);
-    }
-
-    private void bindTexts() {
         createAccount.textProperty().bind(Localization.bind("signup.createAccount"));
         joinAccount.textProperty().bind(Localization.bind("signup.joinAccount"));
 
@@ -95,48 +90,84 @@ public class SignUpController {
         signUpButton.textProperty().bind(Localization.bind("signup.button"));
         haveAccount.textProperty().bind(Localization.bind("signup.haveAccount"));
         loginLink.textProperty().bind(Localization.bind("signup.login"));
-        privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));
-    }
 
-    private void setupBackButton() {
         backButton.getStyleClass().add("back-button");
-        Tooltip tip = TooltipUtil.createLocalizedTooltip("signup.back");
-        TooltipUtil.setTooltipDelay(tip);
-        backButton.setTooltip(tip);
+        Tooltip backTip = TooltipUtil.createLocalizedTooltip("signup.back");
+        TooltipUtil.setTooltipDelay(backTip);
+        backButton.setTooltip(backTip);
 
         try {
-            FontIcon icon = new FontIcon("fa-chevron-left");
-            icon.getStyleClass().add("back-icon");
-            backButton.setGraphic(icon);
+            FontIcon backIcon = new FontIcon("fa-chevron-left");
+            backIcon.getStyleClass().add("back-icon");
+            backButton.setGraphic(backIcon);
         } catch (Exception ignored) {
-            //fallback to text-only if icon fails to load
+            // If ikonli is not available, fall back to text-only button.
         }
-    }
 
-    private void attachFocusHandlers() {
+        privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));// Text from the left image
+
+        // Attach focus handling (adds/removes focus CSS class and marks touched on blur)
         attachFocusHandling(firstNameField, () -> firstNameTouched = true);
         attachFocusHandling(lastNameField, () -> lastNameTouched = true);
         attachFocusHandling(usernameField, () -> usernameTouched = true);
         attachFocusHandling(emailField, () -> emailTouched = true);
         attachFocusHandling(passwordField, () -> passwordTouched = true);
         attachFocusHandling(confirmPasswordField, () -> confirmPasswordTouched = true);
-    }
 
-    private void setupPasswordStrengthUI() {
         passwordStrengthBar.setVisible(false);
         passwordStrengthBar.setManaged(false);
+        passwordStrengthBar.setMinHeight(12);
+        passwordStrengthBar.setPrefHeight(12);
+
         passwordStrengthBar.setId("passwordStrengthBar");
 
         passwordStrengthLabel.setVisible(false);
         passwordStrengthLabel.setManaged(false);
+
+        setupRealtimeValidation();
+
+        signUpButton.setOnAction(event -> handleSignUp());
+        signUpButton.setDisable(true);
     }
 
-    // =========================
-    // REDUCED DUPLICATION
-    // =========================
+    private void setupRealtimeValidation() {
+        Runnable validator = () -> {
+            if (skipValidation) return;
+            Validation.ValidationResult result = Validation.validateSignup(
+                    safe(firstNameField),
+                    safe(lastNameField),
+                    safe(usernameField),
+                    safe(emailField),
+                    passwordField.getText(),
+                    confirmPasswordField.getText()
+            );
+            showValidationErrors(result);
+            updateSignUpButtonState(result);
+        };
 
-    private Validation.ValidationResult validateForm() {
-        return Validation.validateSignup(
+        firstNameField.textProperty().addListener((obs, o, n) -> validator.run());
+        lastNameField.textProperty().addListener((obs, o, n) -> validator.run());
+        usernameField.textProperty().addListener((obs, o, n) -> validator.run());
+        emailField.textProperty().addListener((obs, o, n) -> validator.run());
+        passwordField.textProperty().addListener((obs, o, n) -> {
+            updatePasswordStrength(n);
+            validator.run();
+        });
+        confirmPasswordField.textProperty().addListener((obs, o, n) -> validator.run());
+    }
+
+    private String safe(TextField field) {
+        return field.getText() == null ? "" : field.getText().trim();
+    }
+
+    private void handleSignUp() {
+        String firstName = firstNameField.getText().trim();
+        String lastName = lastNameField.getText().trim();
+        String username = usernameField.getText().trim();
+        String email = emailField.getText().trim();
+        String password = passwordField.getText();
+
+        Validation.ValidationResult result = Validation.validateSignup(
                 safe(firstNameField),
                 safe(lastNameField),
                 safe(usernameField),
@@ -144,86 +175,35 @@ public class SignUpController {
                 passwordField.getText(),
                 confirmPasswordField.getText()
         );
-    }
 
-    private void addValidationListener(TextField field, Runnable validator) {
-        field.textProperty().addListener((obs, o, n) -> validator.run());
-    }
-
-    private void setupRealtimeValidation() {
-        Runnable validator = () -> {
-            if (skipValidation) return;
-            var result = validateForm();
-            showValidationErrors(result);
-            updateSignUpButtonState(result);
-        };
-
-        addValidationListener(firstNameField, validator);
-        addValidationListener(lastNameField, validator);
-        addValidationListener(usernameField, validator);
-        addValidationListener(emailField, validator);
-
-        passwordField.textProperty().addListener((obs, o, n) -> {
-            updatePasswordStrength(n);
-            validator.run();
-        });
-
-        confirmPasswordField.textProperty().addListener((obs, o, n) -> validator.run());
-    }
-
-    private Stage getStage(Control c) {
-        if (c == null || c.getScene() == null || c.getScene().getWindow() == null) return null;
-        return (Stage) c.getScene().getWindow();
-    }
-
-    // =========================
-
-    private String safe(TextField field) {
-        return field.getText() == null ? "" : field.getText().trim();
-    }
-
-    private void handleSignUp() {
-        var result = validateForm();
         showValidationErrors(result);
         if (!result.success()) return;
 
         try {
-            String username = usernameField.getText().trim();
-            String email = emailField.getText().trim();
-
             if (userDAO.findByUsername(username) != null) {
                 ShowMessageUtil.showMessageKey(messageLabel, "signup.username_taken", MessageType.ERROR);
                 return;
             }
-
             if (userDAO.findByEmail(email) != null) {
                 ShowMessageUtil.showMessageKey(messageLabel, "signup.email_exists", MessageType.ERROR);
                 return;
             }
 
-            UserEntity user = new UserEntity(
-                    safe(firstNameField),
-                    safe(lastNameField),
-                    username,
-                    email
-            );
+            UserEntity newUser = new UserEntity(firstName, lastName, username, email);
+            newUser.changePasswordHash(passwordHasher.hash(password));
 
-            user.changePasswordHash(passwordHasher.hash(passwordField.getText()));
+            UserEntity savedUser = userDAO.save(newUser);
 
-            UserEntity saved = userDAO.save(user);
-
-            if (saved != null && saved.getId() != null) {
+            if (savedUser != null && savedUser.getId() != null) {
                 ShowMessageUtil.showMessageKey(messageLabel, "signup.success", MessageType.SUCCESS);
                 skipValidation = true;
                 clearFields();
 
-                Stage stage = getStage(signUpButton);
-                if (stage == null) return;
-
+                Stage currentStage = (Stage) signUpButton.getScene().getWindow();
                 PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
-                delay.setOnFinished(e -> {
+                delay.setOnFinished(event -> {
                     skipValidation = false;
-                    NavigationUtil.replaceScene(stage, "/FXML/login_view.fxml", "login.window_title", false);
+                    NavigationUtil.replaceScene(currentStage, "/FXML/login_view.fxml", "login.window_title", false);
                 });
                 delay.play();
             } else {
@@ -242,45 +222,27 @@ public class SignUpController {
 
     private void showValidationErrors(Validation.ValidationResult result) {
         ShowMessageUtil.hideMessage(messageLabel);
+        // Clear previous field-level error styles
         resetStyles();
 
         for (var entry : result.errors().entrySet()) {
-            if (handleFieldErrors(entry.getKey(), entry.getValue())) return;
+            String field = entry.getKey();
+            if (entry.getValue().isEmpty()) continue;
+
+            if (handleFieldErrors(field, entry.getValue())) return;
         }
     }
 
     private void resetStyles() {
-        List.of(
-                firstNameField,
-                lastNameField,
-                usernameField,
-                emailField,
-                passwordField,
-                confirmPasswordField
-        ).forEach(this::removeErrorStyle);
+        removeErrorStyle(firstNameField);
+        removeErrorStyle(lastNameField);
+        removeErrorStyle(usernameField);
+        removeErrorStyle(emailField);
+        removeErrorStyle(passwordField);
+        removeErrorStyle(confirmPasswordField);
     }
 
-    private boolean handleFieldErrors(String field, List<?> errors) {
-        if (errors == null || errors.isEmpty()) return false;
-
-        Object raw = errors.get(0);
-        if (!(raw instanceof IValidationError error)) return false;
-        if (error.key() == null || error.key().isBlank()) return false;
-
-        Control control = getControlForField(field);
-        if (control != null && isFieldTouched(field)) {
-            addErrorStyle(control);
-        }
-
-        ShowMessageUtil.showMessage(
-                messageLabel,
-                Localization.get(error.key(), error.args()),
-                MessageType.ERROR
-        );
-
-        return true;
-    }
-
+    // Map validation field name to control instance
     private Control getControlForField(String field) {
         return switch (field) {
             case FIRST_NAME -> firstNameField;
@@ -291,6 +253,33 @@ public class SignUpController {
             case "confirmPassword" -> confirmPasswordField;
             default -> null;
         };
+    }
+
+    private boolean handleFieldErrors(String field, List<?> errors) {
+        if (errors == null || errors.isEmpty()) return false;
+
+        Object raw = errors.get(0);
+
+        if (!(raw instanceof IValidationError error)) {
+            return false; // unknown type → ignore safely
+        }
+
+        if (error.key() == null || error.key().isBlank()) return false;
+
+        Control control = getControlForField(field);
+        if (control != null && isFieldTouched(field)) {
+            addErrorStyle(control);
+        }
+
+        try {
+            ShowMessageUtil.showMessage(
+                    messageLabel,
+                    Localization.get(error.key(), error.args()),
+                    MessageType.ERROR
+            );
+        } catch (Exception ignored) {/* If localization fails, just show nothing */}
+
+        return true;
     }
 
     private boolean isFieldTouched(String field) {
@@ -305,15 +294,13 @@ public class SignUpController {
         };
     }
 
+    // Attach focus listener to text input controls
     private void attachFocusHandling(TextInputControl control, Runnable markTouched) {
         control.focusedProperty().addListener((obs, oldV, newV) -> {
-            boolean focused = Boolean.TRUE.equals(newV);
+            boolean focused = newV != null && newV;
             if (!focused) markTouched.run();
-
             if (focused) {
-                if (!control.getStyleClass().contains(FOCUS_CLASS)) {
-                    control.getStyleClass().add(FOCUS_CLASS);
-                }
+                if (!control.getStyleClass().contains(FOCUS_CLASS)) control.getStyleClass().add(FOCUS_CLASS);
             } else {
                 control.getStyleClass().removeIf(s -> s.equals(FOCUS_CLASS));
             }
@@ -370,14 +357,12 @@ public class SignUpController {
     }
 
     private void clearFields() {
-        List.of(
-                firstNameField,
-                lastNameField,
-                usernameField,
-                emailField,
-                passwordField,
-                confirmPasswordField
-        ).forEach(TextInputControl::clear);
+        firstNameField.clear();
+        lastNameField.clear();
+        usernameField.clear();
+        emailField.clear();
+        passwordField.clear();
+        confirmPasswordField.clear();
 
         firstNameTouched = false;
         lastNameTouched = false;
@@ -387,20 +372,30 @@ public class SignUpController {
         confirmPasswordTouched = false;
     }
 
-    @FXML
-    public void onLogin() {
-        ShowMessageUtil.hideMessage(messageLabel);
-        Stage stage = getStage(loginLink);
-        if (stage != null) {
+    private void navigateToLogin() {
+        try {
+            if (loginLink == null || loginLink.getScene() == null || loginLink.getScene().getWindow() == null) return;
+            Stage stage = (Stage) loginLink.getScene().getWindow();
             NavigationUtil.replaceScene(stage, "/FXML/login_view.fxml", "login.window_title", false);
+        } catch (Exception ignored) {
+            // In test environments controls may not be attached to a Scene/Window – tolerate and continue
         }
     }
 
     @FXML
+    public void onLogin() {
+        ShowMessageUtil.hideMessage(messageLabel);
+        navigateToLogin();
+    }
+
+    @FXML
     private void handleBack() {
-        Stage stage = getStage(backButton);
-        if (stage != null) {
+        try {
+            if (backButton == null || backButton.getScene() == null || backButton.getScene().getWindow() == null) return;
+            Stage stage = (Stage) backButton.getScene().getWindow();
             NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "entry.window_title", false);
+        } catch (Exception ignored) {
+            // tolerate in tests
         }
     }
 

@@ -56,3 +56,6 @@ src/main/java/dto/
 app-deployment.yaml
 
 docker-compose.yml
+
+Jenkinsfile
+Dockerfile
