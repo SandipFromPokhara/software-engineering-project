@@ -206,4 +206,91 @@ class TextFormattingUtilTest {
 
         assertDoesNotThrow(() -> TextFormattingUtil.enableListAutoContinuation(area));
     }
+
+    @Test
+    void enterOnNonListLineDoesNothing() {
+        textArea.setText("Just text");
+        textArea.positionCaret(textArea.getText().length());
+
+        TextFormattingUtil.enableListAutoContinuation(textArea);
+
+        KeyEvent enter = new KeyEvent(
+                KeyEvent.KEY_PRESSED,
+                "", "", KeyCode.ENTER,
+                false, false, false, false
+        );
+
+        textArea.fireEvent(enter);
+
+        // Should just insert newline normally
+        assertEquals("Just text\n", textArea.getText());
+    }
+
+    @Test
+    void inlineEnterContinuesBulletList() {
+        InlineCssTextArea area = new InlineCssTextArea();
+        area.replaceText("• Item");
+        area.moveTo(area.getLength());
+
+        TextFormattingUtil.enableListAutoContinuation(area);
+
+        KeyEvent enter = new KeyEvent(
+                KeyEvent.KEY_PRESSED,
+                "", "", KeyCode.ENTER,
+                false, false, false, false
+        );
+
+        area.fireEvent(enter);
+
+        assertTrue(area.getText().contains("\n• "));
+    }
+
+    @Test
+    void inlineEmptyListItemRemovesLine() {
+        InlineCssTextArea area = new InlineCssTextArea();
+        area.replaceText("• ");
+        area.moveTo(area.getLength());
+
+        TextFormattingUtil.enableListAutoContinuation(area);
+
+        KeyEvent enter = new KeyEvent(
+                KeyEvent.KEY_PRESSED,
+                "", "", KeyCode.ENTER,
+                false, false, false, false
+        );
+
+        area.fireEvent(enter);
+
+        assertEquals("", area.getText());
+    }
+
+    @Test
+    void toggleListWithCaretInMiddleOfText() {
+        textArea.setText("Line 1\nLine 2\nLine 3");
+
+        // Place caret in middle of "Line 2"
+        textArea.positionCaret(10);
+
+        TextFormattingUtil.toggleList(textArea, button, bulletStrategy);
+
+        assertTrue(textArea.getText().contains("• Line 2"));
+    }
+
+    @Test
+    void numberedListHandlesSpacingCorrectly() {
+        textArea.setText("1. Item");
+        textArea.positionCaret(textArea.getText().length());
+
+        TextFormattingUtil.enableListAutoContinuation(textArea);
+
+        KeyEvent enter = new KeyEvent(
+                KeyEvent.KEY_PRESSED,
+                "", "", KeyCode.ENTER,
+                false, false, false, false
+        );
+
+        textArea.fireEvent(enter);
+
+        assertTrue(textArea.getText().contains("2. "));
+    }
 }
