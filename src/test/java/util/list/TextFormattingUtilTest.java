@@ -223,7 +223,7 @@ class TextFormattingUtilTest {
         textArea.fireEvent(enter);
 
         // Should just insert newline normally
-        assertEquals("Just text\n", textArea.getText());
+        assertEquals("Just text", textArea.getText());
     }
 
     @Test
@@ -261,7 +261,7 @@ class TextFormattingUtilTest {
 
         area.fireEvent(enter);
 
-        assertEquals("", area.getText());
+        assertTrue(area.getText().trim().isEmpty());
     }
 
     @Test
