@@ -89,23 +89,15 @@ pipeline {
                 }
             }
         }
-        stage ('SonarQube Analysis') {
+        stage('SonarQube Analysis') {
             steps {
-                script {
-                    if (isUnix()) {
-                        sh '''
-                            mvn sonar:sonar \
-                                -Dsonar.projectKey=NoteVault \
-                                -Dsonar.host.url=http://localhost:9000 \
-                                -Dsonar.login=$SONAR_TOKEN
-                        '''
-                    } else {
-                        bat """
-                            mvn sonar:sonar ^
-                                -Dsonar.projectKey=NoteVault ^
-                                -Dsonar.host.url=http://localhost:9000 ^
-                                -Dsonar.login=%SONAR_TOKEN%
-                        """
+                withSonarQubeEnv(SONARQUBE_SERVER) {
+                    script {
+                        if (isUnix()) {
+                            sh 'mvn clean verify sonar:sonar'
+                        } else {
+                            bat 'mvn clean verify sonar:sonar'
+                        }
                     }
                 }
             }
