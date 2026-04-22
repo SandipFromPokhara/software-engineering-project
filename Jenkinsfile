@@ -69,7 +69,7 @@ pipeline {
                 withSonarQubeEnv('SonarQube') {
                     sh '''
                         mvn sonar:sonar \
-                        -Dsonar.projectKey=notevault \
+                        -Dsonar.projectKey=NoteVault \
                         -Dsonar.host.url=http://localhost:9000
                     '''
                 }
