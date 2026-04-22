@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DBLoadTest {
 
-    private static final String CSV_FILE = "load-test-results.csv";
+    private static final String CSV_FILE = "load-testing/load-test-results.csv";
     private static final Logger logger = LoggerFactory.getLogger(DBLoadTest.class);
 
     private static final int THREADS = 20;
