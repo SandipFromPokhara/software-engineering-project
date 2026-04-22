@@ -5,7 +5,10 @@ public class BulletListStrategy implements IListFormattingStrategy {
 
     @Override
     public boolean hasFormat(String line) {
-        return line.trim().startsWith("• ");
+        // Consider a line formatted as a bullet if it starts with the bullet character
+        // (with or without trailing space). Using trim() removes surrounding whitespace
+        // so both "•" and "• " are correctly detected.
+        return line.trim().startsWith("•");
     }
 
     @Override
