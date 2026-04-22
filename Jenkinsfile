@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        PATH = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Docker.app/Contents/Resources/bin"
+        PATH = "${env.PATH}:/usr/local/bin:/Applications/Docker.app/Contents/Resources/bin"
         DB_HOST = '127.0.0.1'
         DB_PORT = '3307'
         DB_NAME = 'notevault_db'
@@ -39,7 +39,7 @@ pipeline {
                           -e MARIADB_PASSWORD=password123 \
                           -e MARIADB_ROOT_PASSWORD=password123 \
                           mariadb:11.3
-                        # wait for MariaDB to accept connections
+
                         for i in {1..30}; do
                           docker exec $DB_CONTAINER_NAME mariadb -u$DB_USER -p$DB_PASSWORD -e "select 1" && break
                           sleep 2
@@ -49,30 +49,30 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                sh 'java -version'
-                sh 'mvn clean compile'
-            }
-        }
-
-        stage('Test') {
+        stage('Build & Test (with Coverage)') {
             steps {
                 withCredentials([usernamePassword(credentialsId: DB_CREDENTIALS_ID, usernameVariable: 'DB_USER', passwordVariable: 'DB_PASSWORD')]) {
-                    sh 'mvn test -DDB_USER=$DB_USER -DDB_PASSWORD=$DB_PASSWORD -DDB_HOST=$DB_HOST -DDB_PORT=$DB_PORT -DDB_NAME=$DB_NAME'
+                    sh '''
+                        mvn clean verify \
+                        -DDB_USER=$DB_USER \
+                        -DDB_PASSWORD=$DB_PASSWORD \
+                        -DDB_HOST=$DB_HOST \
+                        -DDB_PORT=$DB_PORT \
+                        -DDB_NAME=$DB_NAME
+                    '''
                 }
             }
         }
 
-        stage('Package') {
+        stage('SonarQube Analysis') {
             steps {
-                sh 'mvn package -DskipTests'
-            }
-        }
-
-        stage('Code Coverage') {
-            steps {
-                sh 'mvn jacoco:report'
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                        mvn sonar:sonar \
+                        -Dsonar.projectKey=notevault \
+                        -Dsonar.host.url=http://localhost:9000
+                    '''
+                }
             }
         }
 
