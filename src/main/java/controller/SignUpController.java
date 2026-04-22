@@ -45,7 +45,6 @@ public class SignUpController {
     private static final String USERNAME = "username";
     private static final String EMAIL = "email";
 
-
     @FXML
     private TextField firstNameField;
     @FXML
@@ -77,6 +76,21 @@ public class SignUpController {
         userDAO = new JpaUserDao();
         passwordHasher = new BcryptPasswordHasher();
 
+        bindTexts();
+
+        setupBackButton();
+
+        attachFocusHandlers();
+
+        setupPasswordStrengthUI();
+
+        setupRealtimeValidation();
+
+        signUpButton.setOnAction(e -> handleSignUp());
+        signUpButton.setDisable(true);
+    }
+
+    private void bindTexts() {
         createAccount.textProperty().bind(Localization.bind("signup.createAccount"));
         joinAccount.textProperty().bind(Localization.bind("signup.joinAccount"));
 
@@ -90,7 +104,10 @@ public class SignUpController {
         signUpButton.textProperty().bind(Localization.bind("signup.button"));
         haveAccount.textProperty().bind(Localization.bind("signup.haveAccount"));
         loginLink.textProperty().bind(Localization.bind("signup.login"));
+        privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));// Text from the left image
+    }
 
+    private void setupBackButton() {
         backButton.getStyleClass().add("back-button");
         Tooltip backTip = TooltipUtil.createLocalizedTooltip("signup.back");
         TooltipUtil.setTooltipDelay(backTip);
@@ -103,9 +120,9 @@ public class SignUpController {
         } catch (Exception ignored) {
             // If ikonli is not available, fall back to text-only button.
         }
+    }
 
-        privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));// Text from the left image
-
+    private void attachFocusHandlers() {
         // Attach focus handling (adds/removes focus CSS class and marks touched on blur)
         attachFocusHandling(firstNameField, () -> firstNameTouched = true);
         attachFocusHandling(lastNameField, () -> lastNameTouched = true);
@@ -113,7 +130,9 @@ public class SignUpController {
         attachFocusHandling(emailField, () -> emailTouched = true);
         attachFocusHandling(passwordField, () -> passwordTouched = true);
         attachFocusHandling(confirmPasswordField, () -> confirmPasswordTouched = true);
+    }
 
+    private void setupPasswordStrengthUI() {
         passwordStrengthBar.setVisible(false);
         passwordStrengthBar.setManaged(false);
         passwordStrengthBar.setMinHeight(12);
@@ -123,37 +142,40 @@ public class SignUpController {
 
         passwordStrengthLabel.setVisible(false);
         passwordStrengthLabel.setManaged(false);
+    }
 
-        setupRealtimeValidation();
+    private Validation.ValidationResult validateForm() {
+        return Validation.validateSignup(
+                safe(firstNameField),
+                safe(lastNameField),
+                safe(usernameField),
+                safe(emailField),
+                passwordField.getText(),
+                confirmPasswordField.getText()
+        );
+    }
 
-        signUpButton.setOnAction(event -> handleSignUp());
-        signUpButton.setDisable(true);
+    private void addValidationListener(TextField field, Runnable validator) {
+        field.textProperty().addListener((obs, o, n) -> validator.run());
     }
 
     private void setupRealtimeValidation() {
         Runnable validator = () -> {
             if (skipValidation) return;
-            Validation.ValidationResult result = Validation.validateSignup(
-                    safe(firstNameField),
-                    safe(lastNameField),
-                    safe(usernameField),
-                    safe(emailField),
-                    passwordField.getText(),
-                    confirmPasswordField.getText()
-            );
+            var result = validateForm();
             showValidationErrors(result);
             updateSignUpButtonState(result);
         };
 
-        firstNameField.textProperty().addListener((obs, o, n) -> validator.run());
-        lastNameField.textProperty().addListener((obs, o, n) -> validator.run());
-        usernameField.textProperty().addListener((obs, o, n) -> validator.run());
-        emailField.textProperty().addListener((obs, o, n) -> validator.run());
+        addValidationListener(firstNameField, validator);
+        addValidationListener(lastNameField, validator);
+        addValidationListener(usernameField, validator);
+        addValidationListener(emailField, validator);
         passwordField.textProperty().addListener((obs, o, n) -> {
             updatePasswordStrength(n);
             validator.run();
         });
-        confirmPasswordField.textProperty().addListener((obs, o, n) -> validator.run());
+        addValidationListener(confirmPasswordField, validator);
     }
 
     private String safe(TextField field) {
