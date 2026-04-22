@@ -47,9 +47,7 @@ public class NoteService {
         this(noteDao, notebookDao, tagDao, new TranslationService());
     }
 
-    /**
-     * Creates a new note with title, content, and annotation
-     */
+    // Creates a new note with title, content, and annotation
     public NoteEntity createNote(String title, String content, String annotation, NotebookEntity notebookParameter, Set<String> tagNames, String langCode) {
 
         if (title == null || title.isBlank()) {
@@ -132,9 +130,7 @@ public class NoteService {
         return notebookDao.save(notebook);
     }
 
-    /**
-     * Gets or creates a notebook for the logged-in user
-     */
+    //  Gets or creates a notebook for the logged-in user
     private NotebookEntity getOrCreatePersonalNotebook(UserEntity user) {
 
         // Find existing notebook for this user

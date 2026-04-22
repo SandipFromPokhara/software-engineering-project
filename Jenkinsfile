@@ -10,6 +10,10 @@ pipeline {
     }
 
     environment {
+
+        SONARQUBE_SERVER = 'SonarQubeServer'
+        SONAR_TOKEN = credentials('sonar-token')
+
         DB_HOST = '127.0.0.1'
         DB_PORT = '3306'
         DB_NAME = 'notevault_db'
@@ -81,19 +85,16 @@ pipeline {
                 }
             }
         }
-
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQubeServer') {
-                    bat """
-                 ${tool 'SonarScanner'}\\bin\\sonar-scanner ^
-                 -Dsonar.projectKey=devops-demo ^
-                 -Dsonar.sources=src/main ^
-                 -Dsonar.tests=src/test ^
-                 -Dsonar.projectName=DevOps-Demo ^
-                 -Dsonar.host.url=http://localhost:9000 ^
-                 -Dsonar.java.binaries=target/classes
-                 """
+                withSonarQubeEnv(SONARQUBE_SERVER) {
+                    script {
+                        if (isUnix()) {
+                            sh 'mvn clean verify sonar:sonar'
+                        } else {
+                            bat 'mvn clean verify sonar:sonar'
+                        }
+                    }
                 }
             }
         }
