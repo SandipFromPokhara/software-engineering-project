@@ -7,66 +7,71 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class TranslationServiceTest {
 
-    private final TranslationService svc = new TranslationService();
+    private final TranslationService service = new TranslationService();
 
     @Test
-    void nullEntityReturnsNull() {
-        assertNull(svc.getTranslation(null, "EN", "EN"));
+    void returnsNullWhenEntityIsNull() {
+        assertNull(service.getTranslation(null, "en", "en"));
     }
 
     @Test
-    void exactLangFoundAndCaseInsensitive() {
-        ITranslatable<String> t = new ITranslatable<>() {
-            @Override
-            public Map<String, String> getTranslations() {
-                Map<String, String> m = new HashMap<>();
-                m.put("EN", "Hello");
-                m.put("DE", "Hallo");
-                return m;
-            }
+    void returnsExactLanguageMatch() {
+        ITranslatable<String> entity = mock(ITranslatable.class);
 
-            @Override
-            public String createTranslation(String langCode) {
-                throw new UnsupportedOperationException();
-            }
-        };
+        Map<String, String> map = new HashMap<>();
+        map.put("EN", "Hello");
+        map.put("FI", "Moi");
 
-        String res = svc.getTranslation(t, "en", "DE");
-        assertEquals("Hello", res);
+        when(entity.getTranslations()).thenReturn(map);
+
+        String result = service.getTranslation(entity, "en", "fi");
+
+        assertEquals("Hello", result);
     }
 
     @Test
-    void fallbackToDefaultOrAny() {
-        // default present
-        ITranslatable<String> t1 = new ITranslatable<>() {
-            @Override
-            public Map<String, String> getTranslations() {
-                return Map.of("DE", "Hallo");
-            }
+    void fallsBackToDefaultLanguage() {
+        ITranslatable<String> entity = mock(ITranslatable.class);
 
-            @Override
-            public String createTranslation(String langCode) { throw new UnsupportedOperationException(); }
-        };
+        Map<String, String> map = new HashMap<>();
+        map.put("FI", "Moi");
 
-        String res1 = svc.getTranslation(t1, "FR", "DE");
-        assertEquals("Hallo", res1);
+        when(entity.getTranslations()).thenReturn(map);
 
-        // neither requested nor default present -> return any available translation
-        ITranslatable<String> t2 = new ITranslatable<>() {
-            @Override
-            public Map<String, String> getTranslations() {
-                return Map.of("ES", "Hola");
-            }
+        String result = service.getTranslation(entity, "en", "fi");
 
-            @Override
-            public String createTranslation(String langCode) { throw new UnsupportedOperationException(); }
-        };
+        assertEquals("Moi", result);
+    }
 
-        String res2 = svc.getTranslation(t2, "FR", "DE");
-        assertEquals("Hola", res2);
+    @Test
+    void usesAnyTranslationAsFinalFallback() {
+        ITranslatable<String> entity = mock(ITranslatable.class);
+
+        Map<String, String> map = new HashMap<>();
+        map.put("DE", "Hallo");
+
+        when(entity.getTranslations()).thenReturn(map);
+
+        String result = service.getTranslation(entity, "en", "fi");
+
+        assertEquals("Hallo", result);
+    }
+
+    @Test
+    void handlesBlankLangCodeUsesDefault() {
+        ITranslatable<String> entity = mock(ITranslatable.class);
+
+        Map<String, String> map = new HashMap<>();
+        map.put("FI", "Moi");
+
+        when(entity.getTranslations()).thenReturn(map);
+
+        String result = service.getTranslation(entity, "", "fi");
+
+        assertEquals("Moi", result);
     }
 }
-
