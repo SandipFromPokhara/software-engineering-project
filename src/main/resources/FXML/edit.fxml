@@ -22,10 +22,10 @@
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <menus>
-                <Menu mnemonicParsing="false" fx:id="editMenu">
+                <Menu fx:id="editMenu" mnemonicParsing="false">
                     <items>
-                        <MenuItem fx:id="undoMenuItem" accelerator="Ctrl+Z" mnemonicParsing="false" onAction="#handleUndo"  />
-                        <MenuItem fx:id="redoMenuItem" accelerator="Ctrl+Y" mnemonicParsing="false" onAction="#handleRedo"  />
+                        <MenuItem fx:id="undoMenuItem" accelerator="Ctrl+Z" mnemonicParsing="false" onAction="#handleUndo" />
+                        <MenuItem fx:id="redoMenuItem" accelerator="Ctrl+Y" mnemonicParsing="false" onAction="#handleRedo" />
                     </items>
                 </Menu>
             </menus>
@@ -36,7 +36,7 @@
             <children>
                 <VBox spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <VBox spacing="5.0">
-                        <Label fx:id="title" >
+                        <Label fx:id="title">
                             <font>
                                 <Font name="System Bold" size="14" />
                             </font>
@@ -47,7 +47,7 @@
                             </font>
                         </TextField>
                         <VBox.margin>
-                            <Insets left="25.0" right="25.0" top="10.0" />
+                            <Insets left="15.0" right="35.0" top="10.0" />
                         </VBox.margin>
                     </VBox>
                     <VBox spacing="5.0" VBox.vgrow="ALWAYS">
@@ -58,17 +58,17 @@
                         </Label>
 
                         <!-- Reusable rich text editor -->
-                        <fx:include source="rich_text_editor.fxml" fx:id="contentEditor" VBox.vgrow="ALWAYS" />
+                        <fx:include fx:id="contentEditor" source="rich_text_editor.fxml" VBox.vgrow="ALWAYS" />
 
                         <VBox.margin>
-                            <Insets left="25.0" right="25.0" top="5.0" />
+                            <Insets left="15.0" right="35.0" top="5.0" />
                         </VBox.margin>
                     </VBox>
                     <HBox alignment="TOP_RIGHT">
                         <children>
                             <Label fx:id="wordCountLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="18.0" prefWidth="180.0" HBox.hgrow="ALWAYS">
                                 <font>
-                                    <Font name="Arial Italic" size="12.0" />
+                                    <Font size="12.0" />
                                 </font>
                                 <HBox.margin>
                                     <Insets bottom="2.0" right="8.0" top="2.0" />
@@ -76,7 +76,7 @@
                             </Label>
                         </children>
                         <VBox.margin>
-                            <Insets bottom="2.0" top="2.0" />
+                            <Insets bottom="2.0" left="15.0" right="30.0" top="2.0" />
                         </VBox.margin>
                     </HBox>
                     <VBox spacing="5.0">
@@ -91,7 +91,7 @@
                             </font>
                         </TextField>
                         <VBox.margin>
-                            <Insets bottom="2.0" left="25.0" right="25.0" />
+                            <Insets bottom="2.0" left="15.0" right="35.0" />
                         </VBox.margin>
                     </VBox>
                     <HBox spacing="4.0">
@@ -101,16 +101,16 @@
                                     <Image url="@/Images/tag-black.png" />
                                 </image>
                             </ImageView>
-                            <Label styleClass="tag-label" fx:id="editTags">
+                            <Label fx:id="editTags" styleClass="tag-label">
                                 <font>
                                     <Font name="System Bold" size="14.0" />
                                 </font>
                             </Label>
-                            <Label alignment="CENTER" opacity="0.64" styleClass="help-label">
+                            <Label alignment="CENTER" opacity="0.64" styleClass="help-label" text="?">
                                 <tooltip>
                                     <Tooltip fx:id="tagTooltip" styleClass="tooltip">
                                         <font>
-                                            <Font name="System Italic" size="12.0" />
+                                            <Font size="12.0" />
                                         </font>
                                     </Tooltip>
                                 </tooltip>
@@ -120,28 +120,28 @@
                             </Label>
                         </children>
                         <VBox.margin>
-                            <Insets bottom="4.0" left="25.0" top="4.0" />
+                            <Insets bottom="4.0" left="15.0" right="30.0" top="4.0" />
                         </VBox.margin>
                     </HBox>
                     <FlowPane fx:id="tagFlowpane" hgap="8.0" prefWrapLength="200.0" vgap="6.0">
                         <VBox.margin>
-                            <Insets bottom="4.0" left="25.0" top="2.0" />
+                            <Insets bottom="4.0" left="15.0" right="30.0" top="2.0" />
                         </VBox.margin>
                     </FlowPane>
-                    <HBox spacing="5.0">
+                    <HBox spacing="8.0">
                         <children>
                             <ComboBox fx:id="tagComboBox" editable="true" prefWidth="160.0" styleClass="editor-combo combo-box" />
-                            <Button fx:id="addTagBtn" mnemonicParsing="false" onAction="#handleAddTag"/>
+                            <Button fx:id="addTagBtn" mnemonicParsing="false" onAction="#handleAddTag" />
                         </children>
                         <VBox.margin>
-                            <Insets bottom="4.0" left="25.0" top="2.0" />
+                            <Insets bottom="4.0" left="15.0" right="30.0" top="2.0" />
                         </VBox.margin>
                     </HBox>
                     <HBox alignment="BOTTOM_LEFT" spacing="35.0">
                         <Button fx:id="updateButton" onAction="#handleUpdate" prefWidth="100.0" HBox.hgrow="ALWAYS" />
                         <Button fx:id="cancelButton" alignment="CENTER" contentDisplay="CENTER" onAction="#handleCancel" prefWidth="100.0" HBox.hgrow="ALWAYS" />
                         <VBox.margin>
-                            <Insets left="25.0" top="4.0" />
+                            <Insets left="15.0" right="30.0" top="4.0" />
                         </VBox.margin>
                     </HBox>
                 </VBox>

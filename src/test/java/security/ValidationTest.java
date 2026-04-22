@@ -147,4 +147,61 @@ class ValidationTest {
         assertTrue(result.errors().containsKey("lastName"));
         assertTrue(result.errors().containsKey(USERNAME));
     }
+
+    @Test
+    void testValidateNameTooShortAndTooLong() {
+        Validation.ValidationResult r1 = Validation.validateSignup("A", "Doe", USER123, EMAIL, TEST_PASS, TEST_PASS);
+
+        Validation.ValidationResult r2 = Validation.validateSignup("A".repeat(60), "Doe", USER123, EMAIL, TEST_PASS, TEST_PASS);
+
+        assertFalse(r1.success());
+        assertFalse(r2.success());
+    }
+
+    @Test
+    void testValidateNameInvalidCharacters() {
+        Validation.ValidationResult result = Validation.validateSignup("Jo3n", LASTNAME, USER123, EMAIL, TEST_PASS, TEST_PASS);
+
+        assertFalse(result.success());
+    }
+
+    @Test
+    void testValidatePasswordMissingDigit() {
+        Validation.ValidationResult result = Validation.validateSignup(FIRSTNAME, LASTNAME, USER123, EMAIL, "Password!", "Password!");
+
+        assertFalse(result.success());
+    }
+
+    @Test
+    void testValidatePasswordMissingSpecial() {
+        Validation.ValidationResult result = Validation.validateSignup(
+                FIRSTNAME, LASTNAME, USER123,
+                EMAIL, "Password123", "Password123"
+        );
+
+        assertFalse(result.success());
+    }
+
+    @Test
+    void testValidateRequiredFieldsDirect() {
+        assertTrue(Validation.validateRequiredFields("a","b","c","d","e","f"));
+        assertFalse(Validation.validateRequiredFields("","b","c","d","e","f"));
+    }
+
+    @Test
+    void testUpdateInvalidUsername() {
+        Validation.ValidationResult result = Validation.validateUpdate("Doe", "!!", "", "");
+
+        assertFalse(result.success());
+    }
+
+    @Test
+    void testValidationErrorEquality() {
+        Validation.ValidationError e1 = new Validation.ValidationError("key", new Object[]{"a"});
+
+        Validation.ValidationError e2 = new Validation.ValidationError("key", new Object[]{"a"});
+
+        assertEquals(e1, e2);
+        assertEquals(e1.hashCode(), e2.hashCode());
+    }
 }
