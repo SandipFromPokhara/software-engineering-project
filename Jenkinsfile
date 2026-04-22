@@ -24,7 +24,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'feature-dashboard2', url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
+                git branch: 'feature-dev2', url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
             }
         }
 
