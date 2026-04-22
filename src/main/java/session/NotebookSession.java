@@ -1,16 +1,18 @@
 package session;
 
-import entity.NoteBookEntity;
+import entity.entities.NotebookEntity;
 
 public class NotebookSession {
 
-    private static NoteBookEntity lastCreatedNotebook;
+    private NotebookSession() { /* Private constructor to prevent instantiation */ }
 
-    public static void setLastCreatedNotebook(NoteBookEntity notebook) {
+    private static NotebookEntity lastCreatedNotebook;
+
+    public static void setLastCreatedNotebook(NotebookEntity notebook) {
         lastCreatedNotebook = notebook;
     }
 
-    public static NoteBookEntity getLastCreatedNotebook() {
+    public static NotebookEntity getLastCreatedNotebook() {
         return lastCreatedNotebook;
     }
 

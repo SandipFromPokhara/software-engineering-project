@@ -1,44 +1,45 @@
 package controller;
 
-import dao.note.NoteDAO;
-import dao.tag.TagDAO;
-import entity.NoteEntity;
-import entity.TagEntity;
-import javafx.event.ActionEvent;
+import dao.tag.ITagDAO;
+import entity.entities.NoteEntity;
+import entity.entities.TagEntity;
+import entity.translationentities.NoteTranslationEntity;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.paint.Color;
-import javafx.util.Duration;
+import services.NoteService;
+import services.TranslationService;
 import util.*;
-import util.bulletList.BulletListStrategy;
-import util.bulletList.NumberedListStrategy;
-import util.bulletList.TextFormattingUtil;
+import util.list.TextFormattingUtil;
 
+import java.net.URL;
 import java.util.HashSet;
+import java.util.ResourceBundle;
 import java.util.Set;
 
-public class EditNoteController {
+import static model.LanguageModel.DEFAULT_LANGUAGE_CODE;
 
-    private NoteDAO noteDao;
-    private TagDAO tagDao;
+public class EditNoteController implements Initializable {
+
+    private ITagDAO tagDao;
     private NoteEntity note;
     Set<String> selectedTags = new HashSet<>();
+    private TranslationService translationService;
+    private NoteService noteService;
 
     @FXML
     private Label title;
 
     @FXML
-    TextField titleField;
+    private TextField titleField;
 
     @FXML
     private Label content;
-
-    @FXML
-    private TextArea contentBox;
 
     @FXML
     private Label annotation;
@@ -93,18 +94,28 @@ public class EditNoteController {
     @FXML
     private Menu editMenu;
 
+    // Reusable rich text editor component controller (from fx:include fx:id="contentEditor")
+    @FXML
+    private RichTextEditorController contentEditorController;
+
     private UndoRedoManager undoRedoManager = new UndoRedoManager();
 
-    public void setNoteDao(NoteDAO noteDao) {
-        this.noteDao = noteDao;
-    }
-
-    public void setTagDao(TagDAO tagDao) {
+    public void setTagDao(ITagDAO tagDao) {
         this.tagDao = tagDao;
         loadTags();
     }
 
-    public void initialize() {
+    // set translationService
+    public void setTranslationService(TranslationService translationService) {
+        this.translationService = translationService;
+    }
+
+    public void setNoteService(NoteService noteService) {
+        this.noteService = noteService;
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
         // LOCALIZATION BINDINGS
         title.textProperty().bind(Localization.bind("edit.title_label"));
         editMenu.textProperty().bind(Localization.bind("edit.menu"));
@@ -112,7 +123,8 @@ public class EditNoteController {
         redoMenuItem.textProperty().bind(Localization.bind("edit.redo"));
 
         content.textProperty().bind(Localization.bind("edit.content_label"));
-        contentBox.promptTextProperty().bind(Localization.bind("edit.content_box"));
+        titleField.promptTextProperty().bind(Localization.bind("create.placeholder_title"));
+        contentEditorController.bindPromptText(Localization.bind("edit.content_box"));
         annotation.textProperty().bind(Localization.bind("edit.annotations"));
         editTags.textProperty().bind(Localization.bind("edit.tags"));
 
@@ -124,19 +136,26 @@ public class EditNoteController {
         tagComboBox.promptTextProperty().bind(Localization.bind("edit.placeholder_tags"));
         addTagBtn.textProperty().bind(Localization.bind("edit.add_tags"));
 
-        WordCountUtil.bind(contentBox, wordCountLabel);
+        WordCountUtil.bind(contentEditorController.getTextArea(), wordCountLabel);
 
-        tagTooltip.setShowDelay(Duration.millis(100));
+        TooltipUtil.setTooltipDelay(tagTooltip);
         tagComboBox.setEditable(true);
 
         // Initialize undo/redo manager
         undoRedoManager.initialize(undoMenuItem, redoMenuItem);
         undoRedoManager.registerField("title", titleField);
-        undoRedoManager.registerField("content", contentBox);
+        undoRedoManager.registerField("content", contentEditorController.getTextArea());
         undoRedoManager.registerField("annotation", annotationBox);
 
+        // Ensure update button is disabled when there's no title and enable when title is present
+        updateButton.setDisable(true);
+        titleField.textProperty().addListener((obs, old, newVal) -> {
+            boolean disable = newVal == null || newVal.isBlank();
+            updateButton.setDisable(disable);
+        });
+
         // Apply theme once scene is ready
-        javafx.application.Platform.runLater(() -> {
+        Platform.runLater(() -> {
             Scene scene = titleField.getScene();
             if (scene != null) {
                 ToggleUtil.applyTheme(scene);
@@ -144,7 +163,7 @@ public class EditNoteController {
             }
         });
         // Enable list auto-continuation for content box
-        TextFormattingUtil.enableListAutoContinuation(contentBox);
+        TextFormattingUtil.enableListAutoContinuation(contentEditorController.getTextArea());
     }
 
     @FXML
@@ -157,76 +176,52 @@ public class EditNoteController {
         undoRedoManager.redo();
     }
 
-    @FXML
-    private void handleToolbarClick(ActionEvent event) {
-        Button clickedButton = (Button) event.getSource();
-        String buttonId = clickedButton.getId();
-
-        switch (buttonId) {
-            case "bulletListButton":
-                TextFormattingUtil.toggleList(contentBox, bulletListButton, new BulletListStrategy());
-                break;
-            case "numberedListButton":
-                TextFormattingUtil.toggleList(contentBox, numberedListButton, new NumberedListStrategy());
-                break;
-            case "headingUpButton":
-                TextFormattingUtil.increaseFontSize(contentBox);
-                break;
-            case "headingDownButton":
-                TextFormattingUtil.decreaseFontSize(contentBox);
-                break;
-        }
-    }
-
     private void loadTags() {
         tagComboBox.getItems().clear();
 
-        tagComboBox.getItems().addAll(tagDao.findAll()
-                .stream()
-                .map(TagEntity::getTagName)
-                .sorted(String::compareToIgnoreCase).toList()
+        tagComboBox.getItems().addAll(
+                tagDao.findAll().stream()
+                        .map(TagEntity::getTagName)
+                        .filter(java.util.Objects::nonNull)
+                        .sorted(String.CASE_INSENSITIVE_ORDER)
+                        .toList()
         );
     }
 
     public void setNote(NoteEntity note) {
         this.note = note;
-        titleField.setText(note.getTitle());
-        contentBox.setText(note.getContent());
-        annotationBox.setText(note.getAnnotation());
+
+        String langCode = Localization.getCurrentLanguageCode();
+
+        NoteTranslationEntity translation =
+                translationService.getTranslation(note, langCode, DEFAULT_LANGUAGE_CODE);
+
+        if (translation != null) {
+            titleField.setText(translation.getTitle());
+            contentEditorController.setText(translation.getContent());
+            contentEditorController.setSerializedContent(translation.getContent());
+            annotationBox.setText(translation.getAnnotation());
+        } else {
+            titleField.clear();
+            if (contentEditorController != null) {
+                contentEditorController.setText("");
+            }
+            annotationBox.clear();
+        }
 
         selectedTags.clear();
-        note.getTags().forEach(tag -> selectedTags.add(tag.getTagName()));
+        if (note.getTags() != null) {
+            note.getTags().forEach(tag -> {
+                String tagName = tag.getTagName();
+
+                if (tagName != null) {
+                    selectedTags.add(tagName);
+                }
+            });
+        }
+        // Update updateButton state based on current title
+        updateButton.setDisable(titleField.getText() == null || titleField.getText().isBlank());
         refreshTagFlowPane();
-    }
-
-    @FXML
-    public void handleUpdate() {
-        if (noteDao == null || tagDao == null || note == null) {
-            showStatus(Localization.get("edit.update_fail_status"), true);
-            return;
-        }
-
-        note.setTitle(titleField.getText());
-        note.setContent(contentBox.getText());
-        note.setAnnotation(annotationBox.getText());
-
-        // Clear old tags first
-        for (TagEntity tag : new HashSet<>(note.getTags())) {
-            note.removeTag(tag);
-        }
-
-        // Add current selected tags
-        for (String tagName : selectedTags) {
-            TagEntity tag = tagDao.findByName(tagName);
-            if (tag == null) {
-                tag = new TagEntity(tagName);
-                tag = tagDao.save(tag);
-            }
-            note.addTag(tag);
-        }
-
-        noteDao.save(note);
-        handleCancel();
     }
 
     @FXML
@@ -234,10 +229,26 @@ public class EditNoteController {
         WindowUtil.closeWindow(updateButton);
     }
 
-    private void showStatus(String msg, boolean isError) {
-        statusLabel.setText(msg);
-        statusLabel.setTextFill(isError ? Color.RED : Color.GREEN);
-        statusLabel.setVisible(true);
+    @FXML
+    public void handleUpdate() {
+        Set<String> tags = selectedTags == null ? new HashSet<>() : new HashSet<>(selectedTags);
+        String langCode = Localization.getCurrentLanguageCode();
+
+        noteService.updateNote(
+                note,
+                langCode,
+                titleField.getText(),
+                safe(contentEditorController.getSerializedContent()),
+                safe(annotationBox.getText()),
+                tags
+        );
+
+        handleCancel();
+    }
+
+    // null-check helper
+    private String safe(String s) {
+        return s == null ? "" : s;
     }
 
     private void refreshTagFlowPane() {
@@ -245,7 +256,7 @@ public class EditNoteController {
     }
 
     @FXML
-   public  void handleAddTag() {
+    public void handleAddTag() {
         String tagName = tagComboBox.getEditor().getText();
         TagUtil.addTagToUI(selectedTags, tagFlowpane, tagComboBox, tagName);
     }

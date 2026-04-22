@@ -1,27 +1,24 @@
 package controller;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import util.Localization;
 import util.NavigationUtil;
 
-import java.util.logging.Level;
-
-import static controller.ViewDashboardController.logger;
-
-
 public class GuestDashboardController {
 
     @FXML
-    private Button home, login, register;
+    private Button home;
+
+    @FXML
+    private Button login;
+
+    @FXML
+    private Button register;
 
     @FXML
     private Button newFiles;
@@ -30,7 +27,10 @@ public class GuestDashboardController {
     private HBox topBar;
 
     @FXML
-    private Label title, content;
+    private Label title;
+
+    @FXML
+    private Label content;
 
     @FXML
     private VBox centerPane;
@@ -47,30 +47,9 @@ public class GuestDashboardController {
         NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "entry.window_title", false);
     }
 
-    private void loadContent(String fxmlFile) {
-        try {
-            Parent view = FXMLLoader.load(
-                    getClass().getResource("/FXML/" + fxmlFile)
-            );
-
-            StackPane wrapper = new StackPane(view);
-            VBox.setVgrow(wrapper, Priority.ALWAYS);
-
-            //To make responsive
-            wrapper.prefWidthProperty().bind(centerPane.widthProperty());
-            wrapper.prefHeightProperty().bind(centerPane.heightProperty());
-
-            centerPane.getChildren().setAll(wrapper);
-
-        //logger
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Failed to load content" + fxmlFile, e);
-        }
-    }
-
     @FXML
     public void handleNewFiles() {
-        loadContent("createFilesGuest.fxml");
+        NavigationUtil.setCenter(centerPane, "/FXML/create_files_guest.fxml");
     }
 
     @FXML

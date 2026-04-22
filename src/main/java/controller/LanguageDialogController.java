@@ -8,9 +8,11 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+
 import model.LanguageModel;
 import model.LanguageModel.Language;
 import util.Localization;
+import util.WindowUtil;
 
 public class LanguageDialogController {
 
@@ -18,12 +20,17 @@ public class LanguageDialogController {
     @FXML private Label titleLabel;
     @FXML private VBox languagePane;
     @FXML private Button confirmButton;
+    @FXML private Button cancelButton;
 
-    private ToggleGroup toggleGroup;
     private Language selectedLanguage;
 
     @FXML
     public void initialize() {
+
+        titleLabel.textProperty().bind(Localization.bind("entry.lang_choose"));
+        confirmButton.textProperty().bind(Localization.bind("button.select"));
+        cancelButton.textProperty().bind(Localization.bind("button.cancel"));
+
         // Apply clip once layout is complete
         dialogPane.sceneProperty().addListener((obsScene, oldScene, newScene) -> {
             if (newScene != null) {
@@ -35,7 +42,7 @@ public class LanguageDialogController {
             }
         });
 
-        toggleGroup = new ToggleGroup();
+        ToggleGroup toggleGroup = new ToggleGroup();
         Language current = LanguageModel.getByLocale(Localization.getLocale());
 
         for (Language lang : LanguageModel.LANGUAGES.values()) {
@@ -64,7 +71,7 @@ public class LanguageDialogController {
             }
 
             rb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
-                if (isSelected) {
+                if (Boolean.TRUE.equals(isSelected)) {
                     rb.setStyle(
                             "-fx-font-size: 12.5px; -fx-text-fill: #266973; -fx-font-weight: bold; " +
                                     "-fx-cursor: hand; -fx-padding: 4 8 4 8; " +
@@ -99,7 +106,13 @@ public class LanguageDialogController {
         if (selectedLanguage != null) {
             Localization.setLocale(selectedLanguage.locale());
         }
+
         Stage stage = (Stage) confirmButton.getScene().getWindow();
         stage.close();
+    }
+
+    @FXML
+    private void handleCancel() {
+        WindowUtil.closeWindow(titleLabel);
     }
 }

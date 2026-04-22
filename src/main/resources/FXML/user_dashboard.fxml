@@ -9,40 +9,40 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="TOP_LEFT" prefHeight="380.0" prefWidth="460.0" spacing="12.0" style="-fx-background-color: #f4f4f4; -fx-padding: 20;" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.UserDashboardController">
+<VBox alignment="TOP_LEFT" prefHeight="380.0" prefWidth="460.0" spacing="12.0" style="-fx-padding: 20;" styleClass="main-container" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.UserDashboardController">
     <children>
         <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" fx:id="manageAccount" text="Manage Account" />
         <Label style="-fx-text-fill: #6b6b6b;" fx:id="note" text="Note: Permission to update last name, username, and password only!" />
         <Separator />
 
-        <Label fx:id="firstLock" text="First Name (locked)" />
+        <Label fx:id="firstLock"/>
         <TextField fx:id="firstNameField" editable="false" focusTraversable="false" />
 
-        <Label fx:id="lastNameLabel" text="Last Name" />
-        <TextField fx:id="lastNameField" promptText="Enter your last name" />
+        <Label fx:id="lastNameLabel"/>
+        <TextField fx:id="lastNameField"/>
 
-        <Label fx:id="usernameLabel" text="Username" />
-        <TextField fx:id="usernameField" promptText="Enter your username" />
+        <Label fx:id="usernameLabel"/>
+        <TextField fx:id="usernameField"/>
 
-        <Label fx:id="emailLock" text="Email (locked)" />
+        <Label fx:id="emailLock"/>
         <TextField fx:id="emailField" editable="false" focusTraversable="false" />
 
-        <Label fx:id="newPassword" text="New Password (optional)" />
-        <PasswordField fx:id="passwordField" promptText="Leave blank to keep current password" />
+        <Label fx:id="newPassword"/>
+        <PasswordField fx:id="passwordField"/>
 
-        <Label fx:id="confirm" text="Confirm New Password" />
-        <PasswordField fx:id="confirmPasswordField" promptText="Repeat new password" />
+        <Label fx:id="confirm"/>
+        <PasswordField fx:id="confirmPasswordField"/>
 
         <Label fx:id="messageLabel" textFill="#d32f2f" visible="false" wrapText="true" />
 
         <HBox alignment="CENTER_RIGHT" spacing="10.0">
             <children>
-                <Button mnemonicParsing="false" fx:id="manageCancel" onAction="#handleCancel" text="Cancel">
+                <Button mnemonicParsing="false" fx:id="manageCancel" onAction="#handleCancel">
                     <HBox.margin>
                         <Insets top="8.0" />
                     </HBox.margin>
                 </Button>
-                <Button mnemonicParsing="false" fx:id="manageUpdate" onAction="#handleUpdate" style="-fx-background-color: #2e7d32; -fx-text-fill: white;" text="Update">
+                <Button mnemonicParsing="false" fx:id="manageUpdate" onAction="#handleUpdate" styleClass="secondary-label">
                     <HBox.margin>
                         <Insets top="8.0" />
                     </HBox.margin>

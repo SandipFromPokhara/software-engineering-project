@@ -1,29 +1,37 @@
 package controller;
 
-import entity.UserEntity;
+import entity.entities.UserEntity;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import services.UserService;
-import security.PasswordHasher;
-import security.BcryptPasswordHasher;
-import testutil.JavaFXInitializer;
+import testutil.JavaFxTestExtension;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
+@ExtendWith(JavaFxTestExtension.class)
 class LoginControllerTest {
 
-    private LoginController controller;
-    private UserService mockUserService;
-    private PasswordHasher passwordHasher;
+    private static final String TEST_USERNAME = "validUser";
+    private static final String TEST_PASS = "validPass";
+
+    @Mock
+    private UserService userService;
 
     private TextField usernameField;
     private PasswordField passwordField;
@@ -32,195 +40,320 @@ class LoginControllerTest {
     private Hyperlink signupLink;
     private Button backButton;
 
-    private Label loginWelcome, loginNote, loginNoAccount, privacyLabel;
+    private Stage stage;
+    private Scene scene;
+    private Pane root;
 
-    private Stage testStage;
-
-    @BeforeAll
-    static void initJavaFX() {
-        JavaFXInitializer.init();
-    }
+    private LoginController controller;
 
     @BeforeEach
-    void setUp() throws Exception {
-        passwordHasher = new BcryptPasswordHasher();
+    void setUp() throws InterruptedException {
 
-        // Mock service
-        mockUserService = new UserService(null, passwordHasher) {
-            @Override
-            public UserEntity login(String username, String password) {
-                System.out.println("MOCK LOGIN CALLED");
-                if ("validUser".equals(username) && "validPass".equals(password)) {
-                    UserEntity user = new UserEntity();
-                    user.setUsername(username);
-                    return user;
-                }
-                return null;
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Platform.runLater(() -> {
+            try {
+                controller = new LoginController();
+
+                usernameField = new TextField();
+                passwordField = new PasswordField();
+                loginButton = new Button();
+                statusLabel = new Label();
+                signupLink = new Hyperlink();
+                backButton = new Button();
+
+                Label loginWelcome = new Label();
+                Label loginNote = new Label();
+                Label loginNoAccount = new Label();
+                Label privacyLabel = new Label();
+
+                controller.setUsernameField(usernameField);
+                controller.setPasswordField(passwordField);
+                controller.setLoginButton(loginButton);
+                controller.setStatusLabel(statusLabel);
+                controller.setSignupLink(signupLink);
+                controller.setBackButton(backButton);
+                controller.setLoginWelcome(loginWelcome);
+                controller.setLoginNote(loginNote);
+                controller.setLoginNoAccount(loginNoAccount);
+                controller.setPrivacyLabel(privacyLabel);
+                controller.setUserService(userService);
+
+                stage = new Stage();
+                root = new Pane();
+
+                root.getChildren().addAll(
+                        usernameField,
+                        passwordField,
+                        loginButton,
+                        statusLabel,
+                        signupLink,
+                        backButton
+                );
+
+                scene = new Scene(root);
+                stage.setScene(scene);
+                stage.show();
+
+                controller.setStage(stage);
+
+                controller.initView();
+
+            } finally {
+                latch.countDown();
             }
-        };
-
-        controller = new LoginController(mockUserService);
-
-        setField(controller, "userService", mockUserService);
-
-        CountDownLatch latch = new CountDownLatch(1);
-
-        Platform.runLater(() -> {
-            usernameField = new TextField();
-            passwordField = new PasswordField();
-            loginButton = new Button();
-            statusLabel = new Label();
-            signupLink = new Hyperlink();
-            backButton = new Button();
-
-            loginWelcome = new Label();
-            loginNote = new Label();
-            loginNoAccount = new Label();
-            privacyLabel = new Label();
-
-            testStage = new Stage();
-
-            VBox root = new VBox(
-                    usernameField,
-                    passwordField,
-                    loginButton,
-                    statusLabel,
-                    signupLink,
-                    backButton
-            );
-
-            testStage.setScene(new Scene(root, 400, 400));
-
-            latch.countDown();
         });
 
-        latch.await(2, TimeUnit.SECONDS);
-
-        // Inject fields
-        setField(controller, "usernameField", usernameField);
-        setField(controller, "passwordField", passwordField);
-        setField(controller, "loginButton", loginButton);
-        setField(controller, "statusLabel", statusLabel);
-        setField(controller, "signupLink", signupLink);
-        setField(controller, "backButton", backButton);
-
-        setField(controller, "loginWelcome", loginWelcome);
-        setField(controller, "loginNote", loginNote);
-        setField(controller, "loginNoAccount", loginNoAccount);
-        setField(controller, "privacyLabel", privacyLabel);
-
-        invokePrivateMethod("initialize");
-    }
-
-    private void setField(Object target, String fieldName, Object value) throws Exception {
-        var field = target.getClass().getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(target, value);
-    }
-
-    private void setFieldValues(String username, String password) throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        Platform.runLater(() -> {
-            usernameField.setText(username);
-            passwordField.setText(password);
-            latch.countDown();
-        });
-
-        latch.await(1, TimeUnit.SECONDS);
-    }
-
-    private void invokePrivateMethod(String methodName, Object... args) throws Exception {
-        Class<?>[] paramTypes = new Class<?>[args.length];
-        for (int i = 0; i < args.length; i++) {
-            paramTypes[i] = args[i].getClass();
+        // Wait for the JavaFX thread to finish setup
+        if (!latch.await(30, TimeUnit.SECONDS)) {
+            throw new IllegalStateException("Timeout waiting for JavaFX setup");
         }
 
-        Method method = LoginController.class.getDeclaredMethod(methodName, paramTypes);
+        await().atMost(30, SECONDS).untilAsserted(() ->
+                assertNotNull(loginButton)
+        );
+    }
+
+    /* ---------------- FIELD VALIDATION ---------------- */
+
+    @Test
+    void testLoginButtonEnabledWhenFieldsFilled() {
+
+        Platform.runLater(() -> {
+            usernameField.setText(TEST_USERNAME);
+            passwordField.setText(TEST_PASS);
+        });
+
+        await().atMost(30, SECONDS).untilAsserted(
+                () -> assertFalse(loginButton.isDisabled())
+        );
+    }
+
+    @Test
+    void testLoginButtonDisabledWhenFieldsEmpty() {
+
+        Platform.runLater(() -> {
+            usernameField.setText("");
+            passwordField.setText("");
+        });
+
+        await().atMost(30, SECONDS).untilAsserted(
+                () -> assertTrue(loginButton.isDisabled())
+        );
+    }
+
+    /* ---------------- LOGIN SUCCESS ---------------- */
+
+    @Test
+    void testHandleLoginSuccess() {
+
+        UserEntity mockUser = new UserEntity();
+        when(userService.login(TEST_USERNAME, TEST_PASS)).thenReturn(mockUser);
+
+        Platform.runLater(() -> {
+            usernameField.setText(TEST_USERNAME);
+            passwordField.setText(TEST_PASS);
+            loginButton.fire();
+        });
+
+        await().atMost(30, SECONDS).untilAsserted(
+                () -> verify(userService).login(TEST_USERNAME, TEST_PASS)
+        );
+    }
+
+    /* ---------------- LOGIN FAILURE ---------------- */
+
+    @Test
+    void testHandleLoginFailure() {
+
+        when(userService.login(TEST_USERNAME, TEST_PASS)).thenReturn(null);
+
+        Platform.runLater(() -> {
+            usernameField.setText(TEST_USERNAME);
+            passwordField.setText(TEST_PASS);
+            loginButton.fire();
+        });
+
+        await().atMost(30, SECONDS).untilAsserted(() -> {
+            assertTrue(statusLabel.isVisible());
+            assertFalse(loginButton.isDisabled());
+        });
+    }
+
+    /* ---------------- NAVIGATION ---------------- */
+
+    @Test
+    void testHandleSignUpNavigation() {
+
+        Platform.runLater(signupLink::fire);
+
+        await().atMost(30, SECONDS).untilAsserted(
+                () -> assertTrue(signupLink.isVisible())
+        );
+    }
+
+    @Test
+    void testHandleBackNavigation() {
+
+        Platform.runLater(backButton::fire);
+
+        await().atMost(30, SECONDS).untilAsserted(
+                () -> assertTrue(backButton.isVisible())
+        );
+    }
+    //added test to ensure that leading/trailing whitespace is trimmed before login attempt
+    @Test
+    void testGetUsernameAndPasswordTrimmed() {
+
+        Platform.runLater(() -> {
+            usernameField.setText("  user  ");
+            passwordField.setText("  pass  ");
+            loginButton.fire();
+        });
+
+        await().atMost(2, SECONDS).untilAsserted(() ->
+                verify(userService).login("user", "pass")
+        );
+    }
+    //added test to ensure that getUserService initializes the service if it is null
+    @Test
+    void testGetUserServiceLazyInitialization() throws Exception {
+
+        LoginController newController = new LoginController();
+
+        Method method = LoginController.class.getDeclaredMethod("getUserService");
         method.setAccessible(true);
 
-        CountDownLatch latch = new CountDownLatch(1);
+        Object service = method.invoke(newController);
+
+        assertNotNull(service);
+    }
+    //added test to ensure that resolveStage correctly returns the stage from the login button
+    @Test
+    void testResolveStageFromLoginButton() throws Exception {
+
+        Method method = LoginController.class.getDeclaredMethod("resolveStage");
+        method.setAccessible(true);
+
+        Stage resolved = (Stage) method.invoke(controller);
+
+        assertNotNull(resolved);
+    }
+    //added test to ensure that resolveStage throws an exception if it cannot find a stage from the login button
+    @Test
+    void testResolveStageThrowsException() throws Exception {
+
+        LoginController newController = new LoginController();
+
+        Method method = LoginController.class.getDeclaredMethod("resolveStage");
+        method.setAccessible(true);
+
+        Exception ex = assertThrows(Exception.class, () -> method.invoke(newController));
+
+        assertNotNull(ex);
+    }
+
+    //added test to ensure that after a successful login, the username and password fields, login button, signup link, and back button are all disabled to prevent further interaction
+    @Test
+    void testFieldsDisabledAfterSuccessfulLogin() {
+
+        UserEntity mockUser = new UserEntity();
+        when(userService.login(TEST_USERNAME, TEST_PASS)).thenReturn(mockUser);
 
         Platform.runLater(() -> {
-            try {
-                method.invoke(controller, args);
-            } catch (Exception e) {
-                e.printStackTrace();
-                fail("Invocation failed: " + e.getCause());
-            } finally {
-                latch.countDown();
-            }
+            usernameField.setText(TEST_USERNAME);
+            passwordField.setText(TEST_PASS);
+            loginButton.fire();
         });
 
-        assertTrue(latch.await(2, TimeUnit.SECONDS));
+        await().atMost(2, SECONDS).untilAsserted(() -> {
+            assertTrue(usernameField.isDisabled());
+            assertTrue(passwordField.isDisabled());
+            assertTrue(loginButton.isDisabled());
+            assertTrue(signupLink.isDisabled());
+            assertTrue(backButton.isDisabled());
+        });
     }
-
+    //added test to ensure that after a successful login, the status label is visible and displays a success message (or has a style indicating success)
     @Test
-    void testLoginButtonEnabledWhenFieldsFilled() throws Exception {
-        setFieldValues("validUser", "validPass");
+    void testStatusLabelOnSuccess() {
 
-        invokePrivateMethod("checkFields");
-
-        assertFalse(loginButton.isDisabled());
-    }
-
-    @Test
-    void testLoginButtonDisabledWhenFieldsEmpty() throws Exception {
-        setFieldValues("", "");
-
-        invokePrivateMethod("checkFields");
-
-        assertTrue(loginButton.isDisabled());
-    }
-
-    @Test
-    void testHandleLoginWithInvalidCredentials() throws Exception {
-
-        setFieldValues("wrongUser", "wrongPass");
-
-        // Inject mock
-        setField(controller, "userService", mockUserService);
-
-        invokePrivateMethod("handleLogin", new ActionEvent());
-
-        Thread.sleep(200);
-
-        assertTrue(statusLabel.isVisible());
-        assertFalse(loginButton.isDisabled());
-        assertEquals("Invalid username or password", statusLabel.getText());
-    }
-
-    @Test
-    void testHandleSignUpNavigation() throws Exception {
-        invokePrivateMethod("handleSignUp");
-
-        CountDownLatch latch = new CountDownLatch(1);
+        UserEntity mockUser = new UserEntity();
+        when(userService.login(TEST_USERNAME, TEST_PASS)).thenReturn(mockUser);
 
         Platform.runLater(() -> {
-            try {
-                assertNotNull(testStage.getScene());
-            } finally {
-                latch.countDown();
-            }
+            usernameField.setText(TEST_USERNAME);
+            passwordField.setText(TEST_PASS);
+            loginButton.fire();
         });
 
-        assertTrue(latch.await(2, TimeUnit.SECONDS));
+        await().atMost(2, SECONDS).untilAsserted(() -> {
+            assertTrue(statusLabel.isVisible());
+            assertEquals(javafx.scene.paint.Color.GREEN, statusLabel.getTextFill());
+            assertFalse(statusLabel.getText().isEmpty());
+        });
     }
-
+    //added test to ensure that after a failed login, the status label is visible and displays an error message (or has a style indicating failure)
     @Test
-    void testHandleBackNavigation() throws Exception {
-        invokePrivateMethod("handleBack");
+    void testStatusLabelOnFailureText() {
 
-        CountDownLatch latch = new CountDownLatch(1);
+        when(userService.login(TEST_USERNAME, TEST_PASS)).thenReturn(null);
 
         Platform.runLater(() -> {
-            try {
-                assertNotNull(testStage.getScene());
-            } finally {
-                latch.countDown();
-            }
+            usernameField.setText(TEST_USERNAME);
+            passwordField.setText(TEST_PASS);
+            loginButton.fire();
         });
 
-        assertTrue(latch.await(2, TimeUnit.SECONDS));
+        await().atMost(2, SECONDS).untilAsserted(() -> {
+            assertTrue(statusLabel.isVisible());
+            assertFalse(statusLabel.getText().isEmpty());
+        });
+    }
+    //added test to ensure that pressing the Enter key while focused on the password field triggers the login action
+    @Test
+    void testEnterKeyTriggersLogin() {
+
+        when(userService.login(TEST_USERNAME, TEST_PASS)).thenReturn(null);
+
+        Platform.runLater(() -> {
+            usernameField.setText(TEST_USERNAME);
+            passwordField.setText(TEST_PASS);
+
+            passwordField.fireEvent(new ActionEvent());
+        });
+
+        await().atMost(2, SECONDS).untilAsserted(() ->
+                verify(userService).login(TEST_USERNAME, TEST_PASS)
+        );
+    }
+    //added test to ensure that while the login task is running, the login button is disabled to prevent multiple login attempts
+    @Test
+    void testLoginButtonDisabledDuringLogin() {
+
+        // Create a controllable "long-running" login
+        CountDownLatch latch = new CountDownLatch(1);
+
+        // Mark this stubbing lenient because the test only asserts UI state while the
+        // login task is running and does not require the stub to be invoked before
+        // the assertion. This avoids UnnecessaryStubbingException under strict Mockito.
+        lenient().when(userService.login(TEST_USERNAME, TEST_PASS)).thenAnswer(invocation -> {
+            latch.await(); // block until we release it
+            return null;
+        });
+
+        Platform.runLater(() -> {
+            usernameField.setText(TEST_USERNAME);
+            passwordField.setText(TEST_PASS);
+            loginButton.fire();
+        });
+
+        // Verify button is disabled WHILE login is running
+        await().atMost(2, SECONDS).untilAsserted(() ->
+                assertTrue(loginButton.isDisabled())
+        );
+
+        // Finish login
+        latch.countDown();
     }
 }

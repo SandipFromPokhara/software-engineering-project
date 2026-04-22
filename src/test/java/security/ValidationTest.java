@@ -6,11 +6,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ValidationTest {
 
+    private static final String FIRSTNAME = "John";
+    private static final String LASTNAME = "Doe";
+    private static final String USER123 = "User123";
+    private static final String USERNAME = "username";
+    private static final String EMAIL = "user@example.com";
+    private static final String TEST_PASS = "Abc123!";
+
     @Test
-    void testValidateSignup_valid() {
+    void testValidateSignupValid() {
         Validation.ValidationResult result = Validation.validateSignup(
-                "John", "Doe", "User123",
-                "user@example.com", "Abc123!", "Abc123!"
+                FIRSTNAME, LASTNAME, USER123,
+                EMAIL, TEST_PASS, TEST_PASS
         );
 
         assertTrue(result.success());
@@ -18,10 +25,10 @@ class ValidationTest {
     }
 
     @Test
-    void testValidateSignup_missingFields() {
+    void testValidateSignupMissingFields() {
         Validation.ValidationResult result = Validation.validateSignup(
-                "", "Doe", "User123",
-                "user@example.com", "Abc123!", "Abc123!"
+                "", LASTNAME, USER123,
+                EMAIL, TEST_PASS, TEST_PASS
         );
 
         assertFalse(result.success());
@@ -29,21 +36,21 @@ class ValidationTest {
     }
 
     @Test
-    void testValidateSignup_invalidUsername() {
+    void testValidateSignupInvalidUsername() {
         Validation.ValidationResult result = Validation.validateSignup(
-                "John", "Doe", "Us",
-                "user@example.com", "Abc123!", "Abc123!"
+                FIRSTNAME, LASTNAME, "Us",
+                EMAIL, TEST_PASS, TEST_PASS
         );
 
         assertFalse(result.success());
-        assertTrue(result.errors().containsKey("username"));
+        assertTrue(result.errors().containsKey(USERNAME));
     }
 
     @Test
-    void testValidateSignup_invalidEmail() {
+    void testValidateSignupInvalidEmail() {
         Validation.ValidationResult result = Validation.validateSignup(
-                "John", "Doe", "User123",
-                "invalid-email", "Abc123!", "Abc123!"
+                FIRSTNAME, LASTNAME, USER123,
+                "invalid-email", TEST_PASS, TEST_PASS
         );
 
         assertFalse(result.success());
@@ -51,10 +58,10 @@ class ValidationTest {
     }
 
     @Test
-    void testValidateSignup_passwordMismatch() {
+    void testValidateSignupPasswordMismatch() {
         Validation.ValidationResult result = Validation.validateSignup(
-                "John", "Doe", "User123",
-                "user@example.com", "Abc123!", "Wrong123!"
+                FIRSTNAME, LASTNAME, USER123,
+                EMAIL, TEST_PASS, "Wrong123!"
         );
 
         assertFalse(result.success());
@@ -62,10 +69,10 @@ class ValidationTest {
     }
 
     @Test
-    void testValidateSignup_weakPassword() {
+    void testValidateSignupWeakPassword() {
         Validation.ValidationResult result = Validation.validateSignup(
-                "John", "Doe", "User123",
-                "user@example.com", "abc", "abc"
+                FIRSTNAME, LASTNAME, USER123,
+                EMAIL, "abc", "abc"
         );
 
         assertFalse(result.success());
@@ -87,32 +94,33 @@ class ValidationTest {
 
     @Test
     void testValidatePasswordMatch() {
-        assertTrue(Validation.validatePasswordMatch("pass123!", "pass123!"));
-        assertFalse(Validation.validatePasswordMatch("pass123!", "pass124!"));
+        String validateMatch = "pass123!";
+        assertTrue(Validation.validatePasswordMatch(validateMatch, validateMatch));
+        assertFalse(Validation.validatePasswordMatch(validateMatch, "pass124!"));
     }
 
     @Test
-    void testValidateUpdate_validWithoutPasswordChange() {
+    void testValidateUpdateValidWithoutPasswordChange() {
         Validation.ValidationResult result = Validation.validateUpdate(
-                "Doe", "User123", "", ""
+                LASTNAME, USER123, "", ""
         );
 
         assertTrue(result.success());
     }
 
     @Test
-    void testValidateUpdate_withPasswordChange_valid() {
+    void testValidateUpdateWithPasswordChangeValid() {
         Validation.ValidationResult result = Validation.validateUpdate(
-                "Doe", "User123", "Abc123!", "Abc123!"
+                LASTNAME, USER123, TEST_PASS, TEST_PASS
         );
 
         assertTrue(result.success());
     }
 
     @Test
-    void testValidateUpdate_passwordMismatch() {
+    void testValidateUpdatePasswordMismatch() {
         Validation.ValidationResult result = Validation.validateUpdate(
-                "Doe", "User123", "Abc123!", "Wrong123!"
+                LASTNAME, USER123, TEST_PASS, "Wrong123!"
         );
 
         assertFalse(result.success());
@@ -120,23 +128,98 @@ class ValidationTest {
     }
 
     @Test
-    void testValidateUpdate_invalidUsername() {
+    void testValidateUpdateInvalidUsername() {
         Validation.ValidationResult result = Validation.validateUpdate(
-                "Doe", "Us", "", ""
+                LASTNAME, "Us", "", ""
         );
 
         assertFalse(result.success());
-        assertTrue(result.errors().containsKey("username"));
+        assertTrue(result.errors().containsKey(USERNAME));
     }
 
     @Test
-    void testValidateUpdate_missingRequiredFields() {
+    void testValidateUpdateMissingRequiredFields() {
         Validation.ValidationResult result = Validation.validateUpdate(
                 "", "", "", ""
         );
 
         assertFalse(result.success());
         assertTrue(result.errors().containsKey("lastName"));
-        assertTrue(result.errors().containsKey("username"));
+        assertTrue(result.errors().containsKey(USERNAME));
+    }
+
+    @Test
+    void testValidateNameTooShortAndTooLong() {
+        Validation.ValidationResult r1 = Validation.validateSignup("A", "Doe", USER123, EMAIL, TEST_PASS, TEST_PASS);
+
+        Validation.ValidationResult r2 = Validation.validateSignup("A".repeat(60), "Doe", USER123, EMAIL, TEST_PASS, TEST_PASS);
+
+        assertFalse(r1.success());
+        assertFalse(r2.success());
+    }
+
+    @Test
+    void testValidateNameInvalidCharacters() {
+        Validation.ValidationResult result = Validation.validateSignup("Jo3n", LASTNAME, USER123, EMAIL, TEST_PASS, TEST_PASS);
+
+        assertFalse(result.success());
+    }
+
+    @Test
+    void testValidatePasswordMissingDigit() {
+        Validation.ValidationResult result = Validation.validateSignup(FIRSTNAME, LASTNAME, USER123, EMAIL, "Password!", "Password!");
+
+        assertFalse(result.success());
+    }
+
+    @Test
+    void testValidatePasswordMissingSpecial() {
+        Validation.ValidationResult result = Validation.validateSignup(
+                FIRSTNAME, LASTNAME, USER123,
+                EMAIL, "Password123", "Password123"
+        );
+
+        assertFalse(result.success());
+    }
+
+    @Test
+    void testValidateRequiredFieldsDirect() {
+        assertTrue(Validation.validateRequiredFields("a","b","c","d","e","f"));
+        assertFalse(Validation.validateRequiredFields("","b","c","d","e","f"));
+    }
+
+    @Test
+    void testUpdateInvalidUsername() {
+        Validation.ValidationResult result = Validation.validateUpdate("Doe", "!!", "", "");
+
+        assertFalse(result.success());
+    }
+
+    @Test
+    void testValidationErrorEquality() {
+        Validation.ValidationError e1 = new Validation.ValidationError("key", new Object[]{"a"});
+
+        Validation.ValidationError e2 = new Validation.ValidationError("key", new Object[]{"a"});
+
+        assertEquals(e1, e2);
+        assertEquals(e1.hashCode(), e2.hashCode());
+    }
+    @Test
+    void validationError_equals_hashcode_and_toString() {
+        Validation.ValidationError a = new Validation.ValidationError("key", new Object[]{"v"});
+        Validation.ValidationError b = new Validation.ValidationError("key", new Object[]{"v"});
+        Validation.ValidationError c = new Validation.ValidationError("other", new Object[]{"v"});
+
+        assertEquals(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
+        assertNotEquals(a, c);
+        assertTrue(a.toString().contains("key"));
+    }
+
+    @Test
+    void validationError_args_null_returnsEmptyArray() {
+        Validation.ValidationError ve = new Validation.ValidationError("k", null);
+        assertNotNull(ve.args());
+        assertEquals(0, ve.args().length);
     }
 }

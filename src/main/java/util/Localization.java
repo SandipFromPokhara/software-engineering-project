@@ -4,6 +4,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import model.LanguageModel;
 
 import java.text.MessageFormat;
 import java.util.Locale;
@@ -13,6 +14,10 @@ import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 public class Localization {
+
+    private Localization() {
+        /* This utility class should not be instantiated */
+    }
 
     private static final String PREF_KEY = "app_language";
     private static final Preferences prefs = Preferences.userNodeForPackage(Localization.class);
@@ -55,5 +60,9 @@ public class Localization {
 
     public static StringBinding bind(String key) {
         return Bindings.createStringBinding(() -> get(key), locale);
+    }
+
+    public static String getCurrentLanguageCode() {
+        return LanguageModel.getByLocale(getLocale()).code();
     }
 }

@@ -1,8 +1,8 @@
 package controller;
 
 import dao.user.JpaUserDao;
-import dao.user.UserDAO;
-import entity.UserEntity;
+import dao.user.IUserDAO;
+import entity.entities.UserEntity;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -12,7 +12,7 @@ import javafx.scene.control.TextField;
 import security.MessageType;
 import session.UserSession;
 import security.BcryptPasswordHasher;
-import security.PasswordHasher;
+import security.IPasswordHasher;
 import security.Validation;
 import util.Localization;
 import util.ShowMessageUtil;
@@ -20,11 +20,15 @@ import util.WindowUtil;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Pattern;
 
 public class UserDashboardController {
 
-    private UserDAO userDao = new JpaUserDao();
-    private PasswordHasher passwordHasher;
+    private static final Pattern HAS_DIGIT = Pattern.compile("\\d");
+    private static final Pattern HAS_SPECIAL = Pattern.compile("[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?]");
+
+    private IUserDAO userDao = new JpaUserDao();
+    private IPasswordHasher passwordHasher;
 
     @FXML
     private TextField firstNameField;
@@ -108,13 +112,13 @@ public class UserDashboardController {
 
         String newLastName = lastNameField.getText() == null ? "" : lastNameField.getText().trim();
         String newUsername = usernameField.getText() == null ? "" : usernameField.getText().trim();
-        String newPassword = passwordField.getText() == null ? "" : passwordField.getText().trim();
+        String updatedPassword = passwordField.getText() == null ? "" : passwordField.getText().trim();
         String confirmPassword = confirmPasswordField.getText() == null ? "" : confirmPasswordField.getText().trim();
 
         Validation.ValidationResult result = Validation.validateUpdate(
                 newLastName,
                 newUsername,
-                newPassword,
+                updatedPassword,
                 confirmPassword
         );
 
@@ -129,22 +133,22 @@ public class UserDashboardController {
             return;
         }
 
-        if (!newPassword.isBlank()) {
+        if (!updatedPassword.isBlank()) {
 
-            if (!Validation.validatePasswordMatch(newPassword, confirmPassword)) {
+            if (!Validation.validatePasswordMatch(updatedPassword, confirmPassword)) {
                 ShowMessageUtil.showMessageKey(messageLabel, "account.password_no_match", MessageType.ERROR);
                 return;
             }
 
-            if (newPassword.length() < 6 ||
-                    !newPassword.matches(".*\\d.*") ||
-                    !newPassword.matches(".*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?].*")) {
+            if (updatedPassword.length() < 6 ||
+                    !HAS_DIGIT.matcher(updatedPassword).find() ||
+                    !HAS_SPECIAL.matcher(updatedPassword).find()) {
 
                 ShowMessageUtil.showMessageKey(messageLabel, "password.not_strong", MessageType.ERROR);
                 return;
             }
 
-            currentUser.changePasswordHash(passwordHasher.hash(newPassword));
+            currentUser.changePasswordHash(passwordHasher.hash(updatedPassword));
         }
 
         currentUser.setLastName(newLastName);
@@ -164,7 +168,7 @@ public class UserDashboardController {
             public void run() {
                 Platform.runLater(() -> WindowUtil.closeWindow(firstNameField));
             }
-        }, 1500); // 1.5 second delay
+        }, 1500);
     }
 
     @FXML
@@ -172,11 +176,11 @@ public class UserDashboardController {
         WindowUtil.closeWindow(firstNameField);
     }
 
-    public void setUserDao(UserDAO userDao) {
+    public void setUserDao(IUserDAO userDao) {
         this.userDao = userDao;
     }
 
-    public void setPasswordHasher(PasswordHasher passwordHasher) {
+    public void setPasswordHasher(IPasswordHasher passwordHasher) {
         this.passwordHasher = passwordHasher;
     }
 }
