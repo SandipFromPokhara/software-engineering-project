@@ -25,18 +25,33 @@ class UndoRedoManagerTest {
 
     @BeforeAll
     static void initJavaFX() {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        new Thread(() -> {
-            try {
-                Platform.startup(latch::countDown);
-            } catch (IllegalStateException e) {
-                // JavaFX already initialized in this JVM
-                latch.countDown();
-            }
-        }).start();
-
-        awaitOrFail(latch, 5, "Timeout waiting for JavaFX platform startup");
+        /*
+         * Ensure JavaFX platform is started before tests run.
+         *
+         * Why this is necessary / why the tests were failing previously:
+         * - The previous implementation attempted to start JavaFX using a
+         *   background thread and a CountDownLatch. In some test execution
+         *   orders that produced a race, the latch.wait() would time out
+         *   because the FX thread did not process the startup callback in
+         *   time. That produced the intermittent failure seen as
+         *   "Timeout waiting for JavaFX thread" in the test output.
+         *
+         * - Also, Platform.startup may only be invoked once per JVM; calling
+         *   it from a background thread combined with other tests that also
+         *   manipulate the JavaFX lifecycle could leave the platform in an
+         *   unexpected state and make Platform.runLater scheduling unreliable.
+         *
+         * To avoid these race conditions we call Platform.startup
+         * synchronously here and catch IllegalStateException which indicates
+         * the platform is already initialized.
+         */
+        try {
+            Platform.startup(() -> {
+                // no-op; platform initialized
+            });
+        } catch (IllegalStateException e) {
+            // JavaFX already initialized in this JVM - nothing to do
+        }
     }
 
     @BeforeEach
@@ -63,14 +78,79 @@ class UndoRedoManagerTest {
 
     private static void runOnFxThreadAndWait(Runnable action) {
         CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            try {
-                action.run();
-            } finally {
-                latch.countDown();
+        /*
+         * Run the given action on the JavaFX Application Thread and wait for
+         * completion. This helper is defensive because tests running in the
+         * same JVM can interfere with JavaFX lifecycle (platform not started,
+         * or runLater queue not being processed due to ordering). The original
+         * implementation assumed Platform.runLater would always execute
+         * quickly; when it didn't the tests hit a timeout. To make tests
+         * robust we:
+         *  - schedule with Platform.runLater and wait for the latch
+         *  - if we time out, attempt to synchronously (re)start the FX
+         *    platform (Platform.startup) and retry once
+         *  - if Platform.runLater throws IllegalStateException we start the
+         *    platform synchronously and run the action directly
+         */
+        try {
+            Platform.runLater(() -> {
+                try {
+                    action.run();
+                } finally {
+                    latch.countDown();
+                }
+            });
+
+            // Wait for the action to be run on the FX thread. If the platform
+            // is not running or the runLater queue isn't being processed we
+            // will time out — in that case attempt to start the platform and
+            // retry once.
+            boolean completed = latch.await(FX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            if (!completed) {
+                // Try to (re)start JavaFX platform synchronously and retry
+                try {
+                    Platform.startup(() -> {
+                        // no-op
+                    });
+                } catch (IllegalStateException ignored) {
+                    // already started
+                }
+
+                CountDownLatch retryLatch = new CountDownLatch(1);
+                Platform.runLater(() -> {
+                    try {
+                        action.run();
+                    } finally {
+                        retryLatch.countDown();
+                    }
+                });
+                awaitOrFail(retryLatch, FX_TIMEOUT_SECONDS, "Timeout waiting for JavaFX thread");
             }
-        });
-        awaitOrFail(latch, FX_TIMEOUT_SECONDS, "Timeout waiting for JavaFX thread");
+        } catch (IllegalStateException e) {
+            // Platform not initialized; start it synchronously and run the action
+            try {
+                Platform.startup(() -> {
+                    try {
+                        action.run();
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            } catch (IllegalStateException ignored) {
+                // If startup throws, try scheduling the action one more time
+                Platform.runLater(() -> {
+                    try {
+                        action.run();
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            }
+            awaitOrFail(latch, FX_TIMEOUT_SECONDS, "Timeout waiting for JavaFX thread");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            fail("Interrupted while waiting for JavaFX thread");
+        }
     }
 
     private void waitUntilCanUndo(int expectedUndoSize) {
