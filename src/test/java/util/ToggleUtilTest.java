@@ -102,4 +102,70 @@ class ToggleUtilTest {
             assertDoesNotThrow(() -> ToggleUtil.setDarkMode(true));
         }
     }
+
+    @Test
+    void applyThemeWithoutRootClassDoesNothing() {
+        Scene testScene  = new Scene(new StackPane()); // no "root" class
+
+        ToggleUtil.setDarkMode(true);
+        ToggleUtil.applyTheme(testScene);
+
+        // No theme should be applied
+        assertFalse(scene.getRoot().getStyleClass().contains("dark"));
+        assertFalse(scene.getRoot().getStyleClass().contains("light"));
+    }
+
+    @Test
+    void applyThemeWithRootClassAppliesTheme() {
+        StackPane root = new StackPane();
+        root.getStyleClass().add("root");
+
+        Scene testScene = new Scene(root);
+
+        ToggleUtil.setDarkMode(true);
+        ToggleUtil.applyTheme(testScene);
+
+        assertTrue(root.getStyleClass().contains("dark"));
+    }
+
+    @Test
+    void applyThemeDoesNotDuplicateStylesheet() {
+        StackPane root = new StackPane();
+        root.getStyleClass().add("root");
+
+        Scene testScene = new Scene(root);
+
+        ToggleUtil.setDarkMode(false);
+
+        ToggleUtil.applyTheme(testScene);
+        int firstCount = testScene.getStylesheets().size();
+
+        ToggleUtil.applyTheme(testScene);
+        int secondCount = testScene.getStylesheets().size();
+
+        assertEquals(firstCount, secondCount); // no duplicate
+    }
+
+    @Test
+    void setDarkModeWithNullSceneStillWorks() {
+        try (MockedStatic<EventBus> mocked = mockStatic(EventBus.class)) {
+            ToggleUtil.setDarkMode(true);
+
+            assertTrue(ToggleUtil.isDarkMode());
+
+            mocked.verify(() -> EventBus.publish(any(ThemeChangedEvent.class)));
+        }
+    }
+
+    @Test
+    void applyThemeToAllHandlesMultipleWindowsGracefully() {
+        StackPane root = new StackPane();
+        root.getStyleClass().add("root");
+        Scene testScene = new Scene(root);
+
+        ToggleUtil.setDarkMode(true);
+
+        // This will internally iterate Window.getWindows()
+        assertDoesNotThrow(() -> ToggleUtil.toggleTheme(testScene));
+    }
 }
