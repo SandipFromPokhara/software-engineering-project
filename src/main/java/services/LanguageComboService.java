@@ -2,7 +2,6 @@ package services;
 
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
-import javafx.util.StringConverter;
 import model.LanguageModel;
 import model.LanguageModel.Language;
 import util.Localization;
@@ -11,59 +10,40 @@ public class LanguageComboService {
 
     private LanguageComboService() {/* This utility class should not be instantiated */}
 
-    public static void setup(ComboBox<String> comboBox) {
+    public static void setup(ComboBox<Language> comboBox) {
 
-        comboBox.getItems().addAll(LanguageModel.LANGUAGES.keySet());
+        comboBox.getItems().addAll(LanguageModel.LANGUAGES.values());
 
         // Closed state
         comboBox.setButtonCell(new ListCell<>() {
             @Override
-            protected void updateItem(String code, boolean empty) {
-                super.updateItem(code, empty);
-                setText(empty || code == null ? "" : code);
-                getStyleClass().add("language-combo-button");
+            protected void updateItem(Language lang, boolean empty) {
+                super.updateItem(lang, empty);
+                setText(empty || lang == null ? "" : lang.nativeName());
             }
         });
 
         // Open dropdown
         comboBox.setCellFactory(listView -> new ListCell<>() {
             @Override
-            protected void updateItem(String code, boolean empty) {
-                super.updateItem(code, empty);
+            protected void updateItem(Language lang, boolean empty) {
+                super.updateItem(lang, empty);
 
-                if (empty || code == null) {
+                if (empty || lang == null) {
                     setText("");
-                    setStyle("");
                 } else {
-                    var lang = LanguageModel.LANGUAGES.get(code);
                     setText(lang.fullName() + " (" + lang.nativeName() + ")");
                 }
-
-                getStyleClass().add("language-combo-item");
-            }
-        });
-
-        comboBox.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(String code) {
-                return code == null ? "" : code;
-            }
-
-            @Override
-            public String fromString(String s) {
-                return s;
             }
         });
 
         Language current = LanguageModel.getByLocale(Localization.getLocale());
-        comboBox.setValue(current.code());
+        comboBox.setValue(current);
 
         comboBox.setOnAction(e -> {
-            String selected = comboBox.getValue();
+            Language selected = comboBox.getValue();
             if (selected != null) {
-                Localization.setLocale(
-                        LanguageModel.LANGUAGES.get(selected).locale()
-                );
+                Localization.setLocale(selected.locale());
             }
         });
     }
