@@ -21,11 +21,12 @@ public class LanguageModel {
     public static final String DEFAULT_LANGUAGE_CODE = "EN";
 
     static {
-        LANGUAGE_MAP.put("EN", new Language("EN", "English", "Default", Locale.ENGLISH));
+        LANGUAGE_MAP.put("EN", new Language("EN", "English", "English", Locale.ENGLISH));
         LANGUAGE_MAP.put("FI", new Language("FI", "Finnish", "Suomi", Locale.of("fi")));
         LANGUAGE_MAP.put("NP", new Language("NP", "Nepali", "नेपाली", Locale.of("np")));
-        LANGUAGE_MAP.put("MY", new Language("MY", "Burmese", "မြန်မာဘာသာ", Locale.of("my")));
-        LANGUAGE_MAP.put("SI", new Language("SI", "Sinhalese", "සිංහල", Locale.of("si")));
+        LANGUAGE_MAP.put("MY", new Language("MY", "Burmese", "မြန်မာ", Locale.of("my")));
+        LANGUAGE_MAP.put("SI", new Language("SI", "Sinhala", "සිංහල", Locale.of("si")));
+        LANGUAGE_MAP.put("FA", new Language("FA", "Persian", "فارسی", Locale.of("fa")));
     }
 
     public static Language getByLocale(Locale locale) {
