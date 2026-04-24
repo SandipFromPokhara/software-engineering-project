@@ -1,6 +1,7 @@
 package util;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -64,5 +65,17 @@ public class Localization {
 
     public static String getCurrentLanguageCode() {
         return LanguageModel.getByLocale(getLocale()).code();
+    }
+
+    private static final BooleanBinding RTL_BINDING = Bindings.createBooleanBinding(
+            () -> {
+                String lang = getLocale().getLanguage();
+                return lang.equalsIgnoreCase("fa");
+            },
+            locale
+    );
+
+    public static BooleanBinding isRTLProperty() {
+        return RTL_BINDING;
     }
 }
