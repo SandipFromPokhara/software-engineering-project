@@ -49,17 +49,33 @@
                     <Font size="12.0" />
                 </font>
             </Label>
-            <VBox layoutX="54.0" layoutY="132.0" prefHeight="128.0" prefWidth="220.0" spacing="20.0" AnchorPane.topAnchor="136.0">
+            <VBox layoutX="54.0" layoutY="132.0" prefHeight="128.0" prefWidth="220.0" spacing="8.0" AnchorPane.topAnchor="136.0">
+            <Label fx:id="usernameLabel">
+               <VBox.margin>
+                  <Insets left="2.0" />
+               </VBox.margin></Label>
                 <TextField fx:id="usernameField" alignment="CENTER" prefHeight="30.0" prefWidth="150.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-padding: 6 10 6 10; -fx-border-color: rgba(37,105,115,0.18); -fx-background-color: white;">
                     <font>
                         <Font size="12.0" />
                     </font>
                 </TextField>
+            <Label fx:id="passwordLabel">
+               <VBox.margin>
+                  <Insets left="2.0" />
+               </VBox.margin></Label>
                 <PasswordField fx:id="passwordField" alignment="CENTER" prefHeight="30.0" prefWidth="150.0" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-padding: 6 10 6 10; -fx-border-color: rgba(37,105,115,0.18); -fx-background-color: white;">
                     <font>
                         <Font size="12.0" />
                     </font>
                 </PasswordField>
+               <Label fx:id="statusLabel" alignment="CENTER" contentDisplay="CENTER">
+                   <font>
+                       <Font size="12" />
+                   </font>
+               <VBox.margin>
+                  <Insets left="10.0" />
+               </VBox.margin>
+               </Label>
                 <Button fx:id="loginButton" alignment="CENTER" mnemonicParsing="false" onAction="#handleLogin" prefHeight="40.0" prefWidth="160.0" style="-fx-background-color: #266973; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-border-radius: 8; -fx-cursor: hand;" textAlignment="CENTER">
                     <font>
                         <Font size="14.0" />
@@ -72,12 +88,7 @@
                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                 </padding>
             </VBox>
-            <Label fx:id="statusLabel" alignment="CENTER" contentDisplay="CENTER" AnchorPane.bottomAnchor="74.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                <font>
-                    <Font size="12" />
-                </font>
-            </Label>
-            <HBox alignment="CENTER" layoutX="52.0" layoutY="339.0" spacing="2.0" AnchorPane.leftAnchor="52.0" AnchorPane.rightAnchor="53.0" AnchorPane.topAnchor="339.0">
+            <HBox alignment="CENTER" layoutX="53.0" layoutY="358.0" spacing="2.0" AnchorPane.leftAnchor="62.0" AnchorPane.rightAnchor="52.0" AnchorPane.topAnchor="358.0">
                 <Label fx:id="loginNoAccount" textFill="#455a64">
                     <font>
                         <Font size="11.0" />
@@ -89,7 +100,7 @@
                     </font>
                 </Hyperlink>
             </HBox>
-            <Button fx:id="backButton" layoutX="38.0" layoutY="44.0" mnemonicParsing="false" onAction="#handleBack" prefHeight="26.0" prefWidth="24.0" style="-fx-cursor: hand; -fx-background-color: transparent; -fx-font-weight: bold;" AnchorPane.leftAnchor="38.0" AnchorPane.topAnchor="44.0">
+            <Button fx:id="backButton" layoutX="34.0" layoutY="44.0" mnemonicParsing="false" onAction="#handleBack" prefHeight="26.0" prefWidth="24.0" style="-fx-cursor: hand; -fx-background-color: transparent; -fx-font-weight: bold;" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="44.0">
                 <graphic>
                     <SVGPath content="M12 2 L4 10 L12 18 L10 20 L0 10 L10 0 Z" styleClass="back-icon" />
                 </graphic>
