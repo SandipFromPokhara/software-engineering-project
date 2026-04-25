@@ -70,7 +70,7 @@ public class EntryController {
                 Bindings.createStringBinding(
                         () -> LanguageModel
                                 .getByLocale(Localization.getLocale())
-                                .code(),
+                                .nativeName(),
                         Localization.localeProperty()
                 )
         );
