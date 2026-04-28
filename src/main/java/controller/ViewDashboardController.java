@@ -488,7 +488,8 @@ public class ViewDashboardController {
 
         String title = Localization.get("delete.window_title");
 
-        String message = Localization.get("delete_note.confirm", selectedNote);
+        String noteName = titleColumn.getCellData(notesTable.getSelectionModel().getSelectedIndex());
+        String message = Localization.get("delete_note.confirm", noteName);
 
         boolean confirmed = AlertUtil.showConfirmation(owner, title, message);
 
