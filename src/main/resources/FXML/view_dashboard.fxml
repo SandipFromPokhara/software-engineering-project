@@ -48,7 +48,7 @@
              <!-- Language selector: world icon + compact ComboBox -->
              <HBox alignment="CENTER">
                      <Label fx:id="languageIconLabel" style="-fx-font-size: 12px; -fx-padding: 3 2 3 6; -fx-text-fill: #266973;" text="🌐" />
-                     <ComboBox fx:id="languageCombo" prefWidth="0" style="-fx-background-color: transparent; -fx-border-width: 0; -fx-cursor: hand;" styleClass="language-combo">
+                     <ComboBox fx:id="languageCombo" maxWidth="65" style="-fx-background-color: transparent; -fx-border-width: 0; -fx-cursor: hand;" styleClass="language-combo">
                      <tooltip>
                          <Tooltip fx:id="langTooltip">
                              <font>

@@ -15,7 +15,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UndoRedoManagerTest {
 
-    private static final long FX_TIMEOUT_SECONDS = 3;
+    // Increase timeout to reduce flakiness on slower CI/machines. 3s was occasionally too short.
+    private static final long FX_TIMEOUT_SECONDS = 10;
 
     private UndoRedoManager manager;
     private TextField textField;
@@ -62,6 +63,12 @@ class UndoRedoManagerTest {
     }
 
     private static void runOnFxThreadAndWait(Runnable action) {
+        // If we're already on the FX thread, run directly to avoid scheduling delays.
+        if (Platform.isFxApplicationThread()) {
+            action.run();
+            return;
+        }
+
         CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {
             try {
@@ -70,6 +77,10 @@ class UndoRedoManagerTest {
                 latch.countDown();
             }
         });
+
+        // Wait for the FX thread to execute the action. Larger timeout helps avoid flakiness
+        // on CI or loaded machines. If this still times out, consider inspecting for deadlocks
+        // or long-running work on the FX thread.
         awaitOrFail(latch, FX_TIMEOUT_SECONDS, "Timeout waiting for JavaFX thread");
     }
 

@@ -21,6 +21,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Window;
 
+import model.LanguageModel;
 import services.*;
 import util.*;
 import session.UserSession;
@@ -132,7 +133,7 @@ public class ViewDashboardController {
 
     @FXML private ImageView sideBtn3;
 
-    @FXML private ComboBox<String> languageCombo;
+    @FXML private ComboBox<LanguageModel.Language> languageCombo;
 
     @FXML private Label languageIconLabel;
 
@@ -487,7 +488,7 @@ public class ViewDashboardController {
 
         String title = Localization.get("delete.window_title");
 
-        String message = Localization.get("delete_note.confirm", title);
+        String message = Localization.get("delete_note.confirm", selectedNote);
 
         boolean confirmed = AlertUtil.showConfirmation(owner, title, message);
 
@@ -536,7 +537,7 @@ public class ViewDashboardController {
 
     @FXML
     private void handleAbout() {
-        DialogUtil.showAbout(rootPane.getScene().getWindow());
+        AlertUtil.showAbout(rootPane.getScene().getWindow());
     }
 
     @FXML
@@ -568,7 +569,6 @@ public class ViewDashboardController {
         }
 
         ChoiceDialog<String> dialog = new ChoiceDialog<>(
-                Localization.get(EXPORT_SELECTED),
                 Localization.get(EXPORT_SELECTED),
                 Localization.get("export.dialog.option.notebook")
         );
