@@ -381,7 +381,7 @@ public class SignUpController {
             passwordStrengthLabel.setText(Localization.get("password.medium"));
         } else {
             passwordStrengthLabel.setText(Localization.get("password.strong"));
-            strengthHideDelay = new PauseTransition(Duration.seconds(2.5));
+            strengthHideDelay = new PauseTransition(Duration.seconds(1.5));
             strengthHideDelay.setOnFinished(e -> setStrengthBarVisible(false));
             strengthHideDelay.play();
         }
