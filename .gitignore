@@ -57,3 +57,6 @@ app-deployment.yaml
 
 
 load-testing/.idea
+
+Jenkinsfile
+Dockerfile
