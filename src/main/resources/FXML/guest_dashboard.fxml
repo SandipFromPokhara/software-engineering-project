@@ -12,7 +12,7 @@
 <?import javafx.scene.text.Font?>
 <BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.GuestDashboardController">
     <left>
-        <VBox alignment="TOP_CENTER" prefWidth="150" spacing="25" style="-fx-background-color: #6B7280;" BorderPane.alignment="CENTER">
+        <VBox alignment="TOP_CENTER" prefWidth="150" spacing="25" style="-fx-background-color: #9bbab0;" BorderPane.alignment="CENTER">
             <padding>
                 <Insets bottom="10" left="20" right="20" top="20" />
             </padding>
