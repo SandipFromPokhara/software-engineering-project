@@ -18,25 +18,27 @@
 <?import javafx.scene.shape.SVGPath?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #EAF7F7;" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.SignUpController">
+<BorderPane prefHeight="530.0" prefWidth="670.0" style="-fx-background-color: #EAF7F7;" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.SignUpController">
     <stylesheets>
         <URL value="@/css/signup.css" />
     </stylesheets>
 
     <left>
-        <StackPane prefHeight="400.0" prefWidth="241.0" BorderPane.alignment="CENTER">
+        <StackPane prefHeight="530.0" prefWidth="320.0" BorderPane.alignment="CENTER">
             <children>
-                <ImageView fitHeight="400.0" fitWidth="283.0" pickOnBounds="true" preserveRatio="true">
+                <ImageView fitHeight="530.0" fitWidth="320.0" preserveRatio="false" smooth="true">
                     <image>
                         <Image url="@../Images/NoteVault.png" />
                     </image>
                 </ImageView>
-                <Label fx:id="privacyLabel" alignment="CENTER" textAlignment="CENTER" textFill="WHITE" wrapText="true" StackPane.alignment="CENTER">
+                <Label fx:id="privacyLabel" alignment="CENTER" textAlignment="CENTER"
+                       textFill="WHITE" wrapText="true"
+                       StackPane.alignment="CENTER">
                     <StackPane.margin>
-                        <Insets left="15.0" right="15.0" top="40.0" />
+                        <Insets left="20.0" right="20.0" top="40.0" />
                     </StackPane.margin>
                     <font>
-                        <Font name="System Regular" size="16.0" />
+                        <Font name="System Regular" size="18.0" />
                     </font>
                 </Label>
             </children>
@@ -44,10 +46,10 @@
     </left>
 
     <center>
-        <AnchorPane prefHeight="400.0" prefWidth="300.0" style="-fx-background-color: #ebf4f5;" BorderPane.alignment="CENTER">
+        <AnchorPane prefHeight="530.0" prefWidth="300.0" style="-fx-background-color: #ebf4f5;" BorderPane.alignment="CENTER">
             <children>
 
-            <VBox alignment="CENTER" layoutX="61.0" layoutY="14.0" prefHeight="60.0" prefWidth="204.0" AnchorPane.topAnchor="14.0">
+            <VBox alignment="CENTER" layoutX="61.0" layoutY="14.0" prefHeight="60.0" prefWidth="204.0" AnchorPane.topAnchor="14.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                <children>
    
                        <Label fx:id="createAccount" alignment="CENTER" prefHeight="32.0" prefWidth="200.0" textFill="#297883">
@@ -63,45 +65,72 @@
                        </Label>
                </children>
             </VBox>
-                <VBox alignment="TOP_CENTER" layoutX="55.0" layoutY="79.0" prefHeight="303.0" prefWidth="220.0" spacing="8.0" AnchorPane.topAnchor="79.0">
+
+                <VBox alignment="TOP_CENTER" layoutX="55.0" layoutY="79.0" prefWidth="220.0" spacing="4.0"
+                      AnchorPane.topAnchor="85.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="10.0">
 
                     <padding>
                         <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
                     </padding>
 
+                    <!-- First name -->
+                    <Label fx:id="firstNameLabel" text="First Name" maxWidth="220" textFill="#455A64" />
                     <TextField fx:id="firstNameField" maxWidth="220">
                   <font>
                      <Font size="12.0" />
                   </font></TextField>
+
+                    <!-- Last name -->
+                    <Label fx:id="lastNameLabel" text="Last Name" maxWidth="220" textFill="#455A64" />
                     <TextField fx:id="lastNameField" maxWidth="220">
                   <font>
                      <Font size="12.0" />
                   </font></TextField>
+
+                    <!-- Username -->
+                    <Label fx:id="usernameLabel" text="Username" maxWidth="220" textFill="#455A64" />
                     <TextField fx:id="usernameField" maxWidth="220">
                   <font>
                      <Font size="12.0" />
                   </font></TextField>
+
+                    <!-- Email -->
+                    <Label fx:id="emailLabel" text="Email" maxWidth="220" textFill="#455A64" />
                     <TextField fx:id="emailField" maxWidth="220">
                   <font>
                      <Font size="12.0" />
                   </font></TextField>
+
+                    <!-- Password -->
+                    <Label fx:id="passwordLabel" text="Password" maxWidth="220" textFill="#455A64" />
                     <PasswordField fx:id="passwordField" maxWidth="220">
                   <font>
                      <Font size="12.0" />
                   </font></PasswordField>
-                   <ProgressBar fx:id="passwordStrengthBar" maxWidth="220" prefHeight="12.0" prefWidth="200.0" visible="false" />
-                   <Label fx:id="passwordStrengthLabel" prefHeight="10.0">
+                    <ProgressBar fx:id="passwordStrengthBar" maxWidth="220" prefHeight="12.0" prefWidth="200.0" visible="false" />
+                    <Label fx:id="passwordStrengthLabel" prefHeight="10.0">
                   <font>
                      <Font size="10.0" />
                   </font></Label>
+
+                    <!-- Confirm password -->
+                    <Label fx:id="confirmPasswordLabel" text="Confirm Password" maxWidth="220" textFill="#455A64" />
                     <PasswordField fx:id="confirmPasswordField" maxWidth="220">
                   <font>
                      <Font size="12.0" />
                   </font></PasswordField>
 
-                    <Button fx:id="signUpButton" maxWidth="140" prefHeight="30" prefWidth="107.0" style="-fx-background-color: #2c5f77; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;" />
+                    <Button fx:id="signUpButton" maxWidth="140" prefHeight="30" prefWidth="107.0"
+                            style="-fx-background-color: #2c5f77; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;">
+                        <VBox.margin>
+                            <Insets top="8.0" />
+                        </VBox.margin>
+                    </Button>
 
                     <Label fx:id="messageLabel" alignment="CENTER" maxWidth="240.0" textAlignment="CENTER" textFill="#d32f2f" visible="false" wrapText="true">
+                        <VBox.margin>
+                            <Insets top="3.0" bottom="1.0" />
+                        </VBox.margin>
                         <font>
                             <Font size="11.0" />
                         </font>

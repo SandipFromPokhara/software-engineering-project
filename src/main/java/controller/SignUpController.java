@@ -69,6 +69,14 @@ public class SignUpController {
     @FXML private Label privacyLabel;
     @FXML private Label passwordStrengthLabel;
 
+    @FXML private Label firstNameLabel;
+    @FXML private Label lastNameLabel;
+    @FXML private Label usernameLabel;
+    @FXML private Label emailLabel;
+    @FXML private Label passwordLabel;
+    @FXML private Label confirmPasswordLabel;
+
+
     @FXML private ProgressBar passwordStrengthBar;
 
     @FXML
@@ -93,6 +101,14 @@ public class SignUpController {
     private void bindTexts() {
         createAccount.textProperty().bind(Localization.bind("signup.createAccount"));
         joinAccount.textProperty().bind(Localization.bind("signup.joinAccount"));
+
+        firstNameLabel.textProperty().bind(Localization.bind("signup.placeholder_firstname"));
+        lastNameLabel.textProperty().bind(Localization.bind("signup.placeholder_lastname"));
+        usernameLabel.textProperty().bind(Localization.bind("signup.placeholder_username"));
+        emailLabel.textProperty().bind(Localization.bind("signup.placeholder_email"));
+        passwordLabel.textProperty().bind(Localization.bind("signup.placeholder_password"));
+        confirmPasswordLabel.textProperty().bind(Localization.bind("signup.placeholder_confirm_password"));
+
 
         firstNameField.promptTextProperty().bind(Localization.bind("signup.placeholder_firstname"));
         lastNameField.promptTextProperty().bind(Localization.bind("signup.placeholder_lastname"));
