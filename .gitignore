@@ -55,6 +55,5 @@ src/main/java/dto/
 
 app-deployment.yaml
 
-docker-compose.yml
 
 load-testing/.idea
