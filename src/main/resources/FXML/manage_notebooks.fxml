@@ -30,7 +30,7 @@
       </ListView>
    </center>
    <bottom>
-      <HBox alignment="CENTER" prefHeight="60.0" prefWidth="200.0" spacing="30.0" BorderPane.alignment="CENTER">
+      <HBox alignment="CENTER_LEFT" prefHeight="70.0" prefWidth="457.0" spacing="40.0" BorderPane.alignment="CENTER_LEFT">
             <Button fx:id="openBtn" defaultButton="true" mnemonicParsing="false" onAction="#handleOpen" style="-fx-cursor: hand;">
                <font>
                   <Font name="System Bold" size="12.0" />
@@ -41,21 +41,21 @@
                   <Font name="System Bold" size="12.0" />
                </font>
             </Button>
-            <Button fx:id="deleteBtn" mnemonicParsing="false" onAction="#handleDelete" style="-fx-cursor: hand;">
-               <font>
-                  <Font name="System Bold" size="12.0" />
-               </font>
-            </Button>
             <Button fx:id="closeBtn" mnemonicParsing="false" onAction="#handleClose" style="-fx-cursor: hand;">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>
             </Button>
+            <Button fx:id="deleteBtn" mnemonicParsing="false" onAction="#handleDelete" style="-fx-cursor: hand;" styleClass="danger-button">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Button>
          <BorderPane.margin>
-            <Insets left="4.0" right="4.0" top="2.0" />
+            <Insets left="20.0" right="4.0" top="2.0" />
          </BorderPane.margin>
          <padding>
-            <Insets bottom="4.0" left="6.0" right="6.0" top="2.0" />
+            <Insets bottom="4.0" right="6.0" top="2.0" />
          </padding>
       </HBox>
    </bottom>

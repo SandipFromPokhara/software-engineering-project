@@ -571,7 +571,6 @@ public class ViewDashboardController {
 
         ChoiceDialog<String> dialog = new ChoiceDialog<>(
                 Localization.get(EXPORT_SELECTED),
-                Localization.get(EXPORT_SELECTED),
                 Localization.get("export.dialog.option.notebook")
         );
 

@@ -39,7 +39,13 @@ public class LoginController {
     private Label privacyLabel;
 
     @FXML
+    private Label usernameLabel;
+
+    @FXML
     private TextField usernameField;
+
+    @FXML
+    private Label passwordLabel;
 
     @FXML
     private PasswordField passwordField;
@@ -63,6 +69,15 @@ public class LoginController {
         this.userService = userService;
     }
 
+    /**
+     * Helper to bind a label's text property to the localization key if the label is present.
+     */
+    private void bindLabel(Label label, String key) {
+        if (label != null) {
+            label.textProperty().bind(Localization.bind(key));
+        }
+    }
+
     private UserService getUserService() {
         if (userService == null) {
             JpaUserDao userDao = new JpaUserDao();
@@ -78,17 +93,33 @@ public class LoginController {
     }
 
     void initView() {
-        loginButton.setDisable(true);
-        statusLabel.setVisible(false);
+        setupInitialState();
+        setupLocalization();
+        setupBackButton();
+        setupFieldListeners();
+        setupActions();
+    }
 
-        // LOCALIZATION BINDINGS
-        loginWelcome.textProperty().bind(Localization.bind("login.welcome_label"));
-        loginNote.textProperty().bind(Localization.bind("login.note_label"));
-        usernameField.promptTextProperty().bind(Localization.bind("login.placeholder_name"));
-        passwordField.promptTextProperty().bind(Localization.bind("login.placeholder_password"));
-        loginButton.textProperty().bind(Localization.bind("login.button"));
-        loginNoAccount.textProperty().bind(Localization.bind("login.noAccount_label"));
-        signupLink.textProperty().bind(Localization.bind("login.signup"));
+    private void setupInitialState() {
+        if (loginButton != null) loginButton.setDisable(true);
+        if (statusLabel != null) statusLabel.setVisible(false);
+    }
+
+    private void setupLocalization() {
+        bindLabel(loginWelcome, "login.welcome_label");
+        bindLabel(loginNote, "login.note_label");
+        bindLabel(usernameLabel, "login.placeholder_name");
+        if (usernameField != null) usernameField.promptTextProperty().bind(Localization.bind("login.placeholder_name"));
+        bindLabel(passwordLabel, "login.placeholder_password");
+        if (passwordField != null) passwordField.promptTextProperty().bind(Localization.bind("login.placeholder_password"));
+        if (loginButton != null) loginButton.textProperty().bind(Localization.bind("login.button"));
+        bindLabel(loginNoAccount, "login.noAccount_label");
+        if (signupLink != null) signupLink.textProperty().bind(Localization.bind("login.signup"));
+        bindLabel(privacyLabel, "entry.privacy");
+    }
+
+    private void setupBackButton() {
+        if (backButton == null) return;
 
         backButton.getStyleClass().add("back-button");
         Tooltip backTip = TooltipUtil.createLocalizedTooltip("login.back");
@@ -103,34 +134,31 @@ public class LoginController {
         } catch (Exception ignored) {
             // If ikonli is not available, fall back to text-only button.
         }
+    }
 
-        privacyLabel.textProperty().bind(Localization.bind("entry.privacy"));
+    private void setupFieldListeners() {
+        setupFieldListener(usernameField);
+        setupFieldListener(passwordField);
+    }
 
-        usernameField.textProperty().addListener((o, oldV, newV) -> checkFields());
-        passwordField.textProperty().addListener((o, oldV, newV) -> checkFields());
+    private void setupFieldListener(TextInputControl field) {
+        if (field == null) return;
 
-        // Add/remove a "focus" CSS class to avoid relying on JavaFX pseudo-class selectors
-        usernameField.focusedProperty().addListener((o, oldV, newV) -> {
+        field.textProperty().addListener((o, oldV, newV) -> checkFields());
+        field.focusedProperty().addListener((o, oldV, newV) -> {
             boolean focused = Boolean.TRUE.equals(newV);
             if (focused) {
-                if (!usernameField.getStyleClass().contains(FOCUS_CLASS)) usernameField.getStyleClass().add(FOCUS_CLASS);
+                if (!field.getStyleClass().contains(FOCUS_CLASS)) field.getStyleClass().add(FOCUS_CLASS);
             } else {
-                usernameField.getStyleClass().removeIf(s -> s.equals(FOCUS_CLASS));
+                field.getStyleClass().removeIf(s -> s.equals(FOCUS_CLASS));
             }
         });
+    }
 
-        passwordField.focusedProperty().addListener((o, oldV, newV) -> {
-            boolean focused = Boolean.TRUE.equals(newV);
-            if (focused) {
-                if (!passwordField.getStyleClass().contains(FOCUS_CLASS)) passwordField.getStyleClass().add(FOCUS_CLASS);
-            } else {
-                passwordField.getStyleClass().removeIf(s -> s.equals(FOCUS_CLASS));
-            }
-        });
-
-        usernameField.setOnAction(this::handleLogin);
-        passwordField.setOnAction(this::handleLogin);
-        loginButton.setOnAction(this::handleLogin);
+    private void setupActions() {
+        if (usernameField != null) usernameField.setOnAction(this::handleLogin);
+        if (passwordField != null) passwordField.setOnAction(this::handleLogin);
+        if (loginButton != null) loginButton.setOnAction(this::handleLogin);
     }
 
     @FXML
@@ -139,11 +167,11 @@ public class LoginController {
     }
 
     private String getUsername() {
-        return usernameField.getText().trim();
+        return usernameField == null ? "" : usernameField.getText().trim();
     }
 
     private String getPassword() {
-        return passwordField.getText().trim();
+        return passwordField == null ? "" : passwordField.getText().trim();
     }
 
     private void checkFields() {
