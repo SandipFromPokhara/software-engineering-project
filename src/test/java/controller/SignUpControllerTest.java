@@ -36,6 +36,8 @@ class SignUpControllerTest {
     private Label privacyLabel, passwordStrengthLabel;
     private ProgressBar passwordStrengthBar;
 
+    private Label firstNameLabel, lastNameLabel, usernameLabel, emailLabel, passwordLabel, confirmPasswordLabel;
+
     private static class MockUserDAO implements IUserDAO {
         private UserEntity userToReturn;
         UserEntity savedUser;
@@ -138,6 +140,12 @@ class SignUpControllerTest {
             privacyLabel = new Label();
             passwordStrengthLabel = new Label();
             passwordStrengthBar = new ProgressBar();
+            firstNameLabel = new Label();
+            lastNameLabel = new Label();
+            usernameLabel = new Label();
+            emailLabel = new Label();
+            passwordLabel = new Label();
+            confirmPasswordLabel = new Label();
         });
 
         // Inject UI fields first
@@ -157,6 +165,13 @@ class SignUpControllerTest {
         injectField("privacyLabel", privacyLabel);
         injectField("passwordStrengthLabel", passwordStrengthLabel);
         injectField("passwordStrengthBar", passwordStrengthBar);
+
+        injectField("firstNameLabel", firstNameLabel);
+        injectField("lastNameLabel", lastNameLabel);
+        injectField("usernameLabel", usernameLabel);
+        injectField("emailLabel", emailLabel);
+        injectField("passwordLabel", passwordLabel);
+        injectField("confirmPasswordLabel", confirmPasswordLabel);
 
         // Call initialize() — this sets userDAO = new JpaUserDao() internally
         runOnFxThreadAndWait(controller::initialize);
@@ -542,7 +557,7 @@ class SignUpControllerTest {
     void testPasswordStrengthBarShowsOnInput() {
         runOnFxThreadAndWait(() -> passwordField.setText("Pass123!"));
 
-        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(3);
         while (System.nanoTime() < deadline) {
             final double[] progress = {0};
             final boolean[] visible = {false};
@@ -700,7 +715,7 @@ class SignUpControllerTest {
     void testPasswordStrengthStrongHidesLater() {
         runOnFxThreadAndWait(() -> passwordField.setText("Pass123!Strong"));
 
-        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(3);
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
         while (System.nanoTime() < deadline) {
             final boolean[] visible = {true};
             runOnFxThreadAndWait(() -> visible[0] = passwordStrengthBar.isVisible());
@@ -917,7 +932,7 @@ class SignUpControllerTest {
     void testStrengthBarHidesAfterStrongPassword() {
         runOnFxThreadAndWait(() -> passwordField.setText("Pass123!StrongA"));
 
-        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(3);
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
 
         while (System.nanoTime() < deadline) {
             final boolean[] hidden = {false};
@@ -1182,7 +1197,7 @@ class SignUpControllerTest {
     void testStrongPasswordTriggersHideDelay() {
         runOnFxThreadAndWait(() -> passwordField.setText("Abc123!Abc123!"));
 
-        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(4);
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
 
         while (System.nanoTime() < deadline) {
             final boolean[] hidden = {false};

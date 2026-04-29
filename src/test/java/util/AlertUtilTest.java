@@ -237,4 +237,48 @@ class AlertUtilTest {
             verify(alert.getButtonTypes()).setAll(any(ButtonType.class));
         }
     }
+
+    @Test
+    void showAboutDisplaysAboutDialog() {
+        try (MockedConstruction<Alert> mocked =
+                     mockConstruction(Alert.class, (alert, ctx) -> {
+                         DialogPane pane = mock(DialogPane.class);
+                         when(alert.getDialogPane()).thenReturn(pane);
+                         @SuppressWarnings("unchecked")
+                         ObservableList<ButtonType> btnList = mock(ObservableList.class);
+                         when(pane.getButtonTypes()).thenReturn(btnList);
+                         when(alert.getButtonTypes()).thenReturn(btnList);
+                         when(alert.showAndWait()).thenReturn(Optional.empty());
+                     })) {
+
+            Window owner = mock(Window.class);
+            AlertUtil.showAbout(owner);
+
+            Alert alert = mocked.constructed().get(0);
+
+            verify(alert).initOwner(owner);
+            verify(alert).showAndWait();
+        }
+    }
+
+    @Test
+    void showAboutWithNullOwnerDoesNotInitOwner() {
+        try (MockedConstruction<Alert> mocked =
+                     mockConstruction(Alert.class, (alert, ctx) -> {
+                         DialogPane pane = mock(DialogPane.class);
+                         when(alert.getDialogPane()).thenReturn(pane);
+                         @SuppressWarnings("unchecked")
+                         ObservableList<ButtonType> btnList = mock(ObservableList.class);
+                         when(pane.getButtonTypes()).thenReturn(btnList);
+                         when(alert.getButtonTypes()).thenReturn(btnList);
+                         when(alert.showAndWait()).thenReturn(Optional.empty());
+                     })) {
+
+            AlertUtil.showAbout(null);
+
+            Alert alert = mocked.constructed().get(0);
+            verify(alert, never()).initOwner(any());
+            verify(alert).showAndWait();
+        }
+    }
 }
