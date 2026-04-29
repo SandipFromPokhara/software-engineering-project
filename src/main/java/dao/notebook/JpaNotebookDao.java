@@ -105,4 +105,36 @@ public class JpaNotebookDao extends GenericAbstractDAO<NotebookEntity, Long> imp
             return null;
         });
     }
+
+    @Override
+    public void deleteWithNotes(NotebookEntity noteBook) {
+        if (noteBook == null || noteBook.getId() == null) throw new IllegalArgumentException("Notebook cannot be null");
+
+        executeInTransaction(em -> {
+            NotebookEntity managedNotebook = em.find(NotebookEntity.class, noteBook.getId());
+
+            if (managedNotebook != null) {
+                // Remove association from user
+                UserEntity user = managedNotebook.getUser();
+                if (user != null) {
+                    user.removeNotebook(managedNotebook);
+                }
+
+                // Attempt to remove notes first using a bulk delete by notebook id. Using the id
+                // avoids issues with proxy entity types when binding parameters and keeps the
+                // operation entirely at the SQL level. This runs in the same transaction so the
+                // operation is atomic.
+                em.createQuery("DELETE FROM NoteEntity n WHERE n.notebook.id = :nbId")
+                        .setParameter("nbId", managedNotebook.getId())
+                        .executeUpdate();
+
+                // Remove the notebook row by id using a bulk delete to avoid any managed/detached
+                // entity pitfalls during tests and batch operations.
+                em.createQuery("DELETE FROM NotebookEntity n WHERE n.id = :id")
+                        .setParameter("id", managedNotebook.getId())
+                        .executeUpdate();
+            }
+            return null;
+        });
+    }
 }

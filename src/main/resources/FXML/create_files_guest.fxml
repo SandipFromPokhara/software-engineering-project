@@ -7,7 +7,6 @@
 <?import javafx.scene.layout.AnchorPane?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateFilesGuestController">
-
     <!-- title -->
     <Label fx:id="title"  AnchorPane.leftAnchor="20" AnchorPane.topAnchor="10" />
     <TextField fx:id="titleBox"  AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="40" />

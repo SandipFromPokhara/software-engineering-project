@@ -893,9 +893,7 @@ class SignUpControllerTest {
             confirmPasswordField.setText("Pass123!");
         });
 
-        runOnFxThreadAndWait(() -> {
-            assertTrue(passwordStrengthBar.getProgress() > 0);
-        });
+        runOnFxThreadAndWait(() -> assertTrue(passwordStrengthBar.getProgress() > 0));
     }
 
     //added test to verify that the password strength bar and label update correctly as the password is changed to weak, medium, and strong values
@@ -905,26 +903,20 @@ class SignUpControllerTest {
             passwordField.setText("abc"); // weak
         });
 
-        runOnFxThreadAndWait(() -> {
-            assertTrue(passwordStrengthLabel.getText().contains("weak")
-                    || passwordStrengthBar.getProgress() < 0.4);
-        });
+        runOnFxThreadAndWait(() -> assertTrue(passwordStrengthLabel.getText().contains("weak")
+                || passwordStrengthBar.getProgress() < 0.4));
 
         runOnFxThreadAndWait(() -> {
             passwordField.setText("Pass12"); // medium
         });
 
-        runOnFxThreadAndWait(() -> {
-            assertTrue(passwordStrengthBar.getProgress() > 0.2);
-        });
+        runOnFxThreadAndWait(() -> assertTrue(passwordStrengthBar.getProgress() > 0.2));
 
         runOnFxThreadAndWait(() -> {
             passwordField.setText("Pass123!StrongA"); // strong
         });
 
-        runOnFxThreadAndWait(() -> {
-            assertTrue(passwordStrengthBar.getProgress() >= 0.7);
-        });
+        runOnFxThreadAndWait(() -> assertTrue(passwordStrengthBar.getProgress() >= 0.7));
     }
 
     //added test to verify that the password strength bar and label are hidden after entering a strong password and waiting for the PauseTransition to execute
@@ -937,10 +929,8 @@ class SignUpControllerTest {
         while (System.nanoTime() < deadline) {
             final boolean[] hidden = {false};
 
-            runOnFxThreadAndWait(() -> {
-                hidden[0] = !passwordStrengthBar.isVisible()
-                        && !passwordStrengthLabel.isVisible();
-            });
+            runOnFxThreadAndWait(() -> hidden[0] = !passwordStrengthBar.isVisible()
+                    && !passwordStrengthLabel.isVisible());
 
             if (hidden[0]) return;
         }
@@ -983,13 +973,12 @@ class SignUpControllerTest {
     //added test to verify that updateSignUpButtonState enables the signup button when validation passes
     @Test
     void testHandleBackDoesNotCrash() {
-        runOnFxThreadAndWait(() -> {
+        runOnFxThreadAndWait(() ->
             assertDoesNotThrow(() -> {
                 Method m = SignUpController.class.getDeclaredMethod("handleBack");
                 m.setAccessible(true);
                 m.invoke(controller);
-            });
-        });
+            }));
     }
 
     //added test to verify that attachFocusHandling correctly adds a focus listener to the given TextInputControl and that the provided Runnable is executed when the control gains focus
@@ -1026,9 +1015,7 @@ class SignUpControllerTest {
             passwordField.setText(""); // EMPTY branch
         });
 
-        runOnFxThreadAndWait(() -> {
-            assertFalse(passwordStrengthBar.isVisible());
-        });
+        runOnFxThreadAndWait(() -> assertFalse(passwordStrengthBar.isVisible()));
 
         runOnFxThreadAndWait(() -> {
             passwordField.setText("abc"); // weak
@@ -1202,9 +1189,7 @@ class SignUpControllerTest {
         while (System.nanoTime() < deadline) {
             final boolean[] hidden = {false};
 
-            runOnFxThreadAndWait(() -> {
-                hidden[0] = !passwordStrengthBar.isVisible();
-            });
+            runOnFxThreadAndWait(() -> hidden[0] = !passwordStrengthBar.isVisible());
 
             if (hidden[0]) return;
         }
@@ -1215,9 +1200,7 @@ class SignUpControllerTest {
     //added test to verify that the onLogin method can be called without throwing exceptions, even if navigation fails in the test environment
     @Test
     void testOnLoginCallsNavigationWithoutCrash() {
-        runOnFxThreadAndWait(() -> {
-            assertDoesNotThrow(() -> controller.onLogin());
-        });
+        runOnFxThreadAndWait(() -> assertDoesNotThrow(() -> controller.onLogin()));
     }
 
     //added test to verify that the clearFields method resets the touched flags for all fields so that validation errors are not shown immediately after clearing

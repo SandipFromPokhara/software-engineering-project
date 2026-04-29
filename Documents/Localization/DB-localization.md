@@ -33,7 +33,7 @@ Each translatable entity follows this pattern:
 ```java
 Map<String, TranslationEntity> translations;
 ```
-- Key → language code (EN, FI, NP, etc.)
+- Key → language code (EN, FI, NP, MY, SI, FA)
 - Value → translated content
 
 ---
@@ -57,6 +57,7 @@ translationService.getTranslation(entity, langCode, defaultLang);
 - Burmese
 - Finnish
 - Sinhala
+- Farsi
 
 **Encoding**
 

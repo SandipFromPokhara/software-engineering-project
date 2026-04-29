@@ -2,6 +2,9 @@ package controller;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
@@ -40,10 +43,18 @@ class GuestDashboardControllerTest {
     void setUp() throws Exception {
         controller = new GuestDashboardController();
 
-        // Inject required UI components (since no FXML loader is used)
-        injectField("centerPane", new VBox());
+        injectField("home", new Button());
+        injectField("login", new Button());
+        injectField("register", new Button());
         injectField("newFiles", new Button());
+        injectField("topBar", new HBox());
+        injectField("title", new Label());
+        injectField("content", new Label());
+        injectField("centerPane", new VBox());
+        injectField("homeTooltip", new Tooltip());
+        injectField("createTooltip", new Tooltip());
     }
+
 
     /**
      * Helper method to inject values into private fields using reflection.
