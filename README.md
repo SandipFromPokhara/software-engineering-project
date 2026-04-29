@@ -49,7 +49,7 @@ The application supports multi-language localization using Java ResourceBundles,
 - **Backend:** `Java 21`, `JPA/Hibernate`
 - **Database:** `MariaDB`
 - **DevOps:** `Docker`, `JaCoCo`, `JUnit`, `Jenkins`, `Kubernetes (Minikube)`, `Maven`
-- **Quality Assurance:** `SonarQube`
+- **Quality Assurance:** `SonarQube`, `SpotBugs`, `PMD`
 - **Project Management:** `Git (feature branches)`, `Trello`
 
 ---
@@ -92,7 +92,7 @@ Developed by a team of 4 students as part of:
 
 ---
 
-## Useful Links
+## See more
 
 - **GitHub repository:** [software-engineering-project](https://github.com/SandipFromPokhara/software-engineering-project.git)
 
@@ -103,3 +103,5 @@ Developed by a team of 4 students as part of:
 - **UI and DB Localization Documentations:** [Localization Details](Documents/Localization)
 
 - **Sprint reports and reviews:** [Sprint Documentations](Documents/Sprint_Reports)
+
+- **Sprint 7 summary:** [Sprint 7 Summary](Documents/Related_Files/sprint7-summary.md)
