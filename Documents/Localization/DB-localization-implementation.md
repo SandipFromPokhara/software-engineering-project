@@ -9,7 +9,7 @@ from language-specific translation entities and uses object-relational mapping t
 ## Entity Structure
 
 Each translatable entity maintains a collection of translations using a `Map<String, TranslationEntity>`, where:
-- Key = Language code (e.g., EN, FI, NP, MY, SI)
+- Key = Language code (e.g., EN, FI, NP, MY, SI, FA)
 - Value = Corresponding translation entity
 
 Example from `NotebookEntity`:
