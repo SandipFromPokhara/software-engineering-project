@@ -10,15 +10,11 @@ pipeline {
     }
 
     environment {
-
-        SONARQUBE_SERVER = 'SonarQubeServer'
-        SONAR_TOKEN = credentials('sonar-token')
-
         DB_HOST = '127.0.0.1'
         DB_PORT = '3306'
         DB_NAME = 'notevault_db'
-        DB_CREDENTIALS_ID = 'db-credentials'
-        DOCKERHUB_CREDENTIALS_ID = 'docker_Id'
+        DB_CREDENTIALS_ID = 'DB_CREDENTIALS'
+        DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
         DOCKERHUB_REPO = 'sandipranjit/notevault'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
         BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
@@ -28,7 +24,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'feature-dev2', url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
+                git branch: 'feature-dashboard2', url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
             }
         }
 
@@ -85,16 +81,17 @@ pipeline {
                 }
             }
         }
+
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv(SONARQUBE_SERVER) {
-                    script {
-                        if (isUnix()) {
-                            sh 'mvn clean verify sonar:sonar'
-                        } else {
-                            bat 'mvn clean verify sonar:sonar'
-                        }
-                    }
+                withSonarQubeEnv('SonarQubeServer') {
+                    bat """
+                          mvn clean verify sonar:sonar ^
+                         -Dsonar.projectKey=NoteVault ^
+                         -Dsonar.projectName=NoteVault ^
+                         -Dsonar.host.url=http://localhost:9000 ^
+                         -Dsonar.login=%SONAR_TOKEN% ^
+                         """
                 }
             }
         }
