@@ -668,6 +668,20 @@
     -fx-text-fill: #e6e6e6; /* light gray on dark background */
 }
 
+/* Title styling inside list cells */
+.list-cell-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
+/* Count badge styling inside list cells */
+.list-cell-count {
+    -fx-background-color: transparent;
+    -fx-text-fill: derive(-fx-text-base-color, -30%);
+    -fx-font-size: 11px;
+    -fx-padding: 2 4 2 4;
+}
+
 /* Fallback for any label inside list cells */
 .list-view .label {
     -fx-text-fill: inherit;
