@@ -19,7 +19,7 @@ pipeline {
         DB_NAME = 'notevault_db'
         DB_CREDENTIALS_ID = 'db-credentials'
         DOCKERHUB_CREDENTIALS_ID = 'docker_Id'
-        DOCKERHUB_REPO = 'dinal1999/notevault'
+        DOCKERHUB_REPO = 'sandipranjit/notevault'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
         BUILD_DATE = "${new Date().format('yyyy-MM-dd')}"
     }
@@ -28,7 +28,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'feature-sinhala', url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
+                git branch: 'feature-dev2', url: 'https://github.com/SandipFromPokhara/software-engineering-project.git'
             }
         }
 
