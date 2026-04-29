@@ -711,13 +711,13 @@
 
 /* Selection state */
 .root.dark #notebookListView .list-cell.selected-notebook {
-    -fx-background-color: #c6d6d6;
+    -fx-background-color: #5c6161;
     -fx-text-fill: #000000;
 }
 
 /* Ensure selected+hover uses same styling */
 .root.dark #notebookListView .list-cell.selected-notebook:hover {
-    -fx-background-color: #c6d6d6;
+    -fx-background-color: #5c6161;
     -fx-text-fill: #000000;
 }
 

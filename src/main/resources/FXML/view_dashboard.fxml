@@ -226,7 +226,7 @@
            <Button fx:id="editButton" onAction="#handleOpenEditWindow" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 15;" />
            <Button fx:id="deleteButton" onAction="#handleDelete" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 15;" />
             <BorderPane.margin>
-            <Insets bottom="6.0" right="120.0" />
+            <Insets bottom="12.0" right="120.0" />
             </BorderPane.margin>
        </HBox>
    </bottom>
