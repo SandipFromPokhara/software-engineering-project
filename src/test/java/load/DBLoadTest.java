@@ -163,7 +163,8 @@ class DBLoadTest {
         System.out.println("Min ms: " + min);
         System.out.println("Max ms: " + max);
         System.out.println("P95 ms: " + p95);
-        System.out.println("Throughput ops/sec: " + throughput);
+        System.out.printf("Throughput ops/sec: %.2f", throughput);
+        System.out.println();
 
         // Export to CSV
         try (PrintWriter writer = new PrintWriter(CSV_FILE)) {

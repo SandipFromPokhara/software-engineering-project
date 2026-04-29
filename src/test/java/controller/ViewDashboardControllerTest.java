@@ -91,9 +91,7 @@ class ViewDashboardControllerTest {
         var mainSplitLocal = new SplitPane();
         var noteTitleLabelLocal = new Label();
         var wordCountLabelLocal = new Label();
-        var dbStatusLabelLocal = new Label();
         var annotationLabelLocal = new Label();
-        var openDataLocal = new Button();
 
         // Inject all UI controls
         inject(controller, "rootPane", rootPane);
@@ -131,9 +129,7 @@ class ViewDashboardControllerTest {
         inject(controller, "mainSplit", mainSplitLocal);
         inject(controller, "noteTitleLabel", noteTitleLabelLocal);
         inject(controller, "wordCountLabel", wordCountLabelLocal);
-        inject(controller, "dbStatusLabel", dbStatusLabelLocal);
         inject(controller, "annotation", annotationLabelLocal);
-        inject(controller, "openData", openDataLocal);
 
         note = mock(NoteEntity.class);
         notebook = mock(NotebookEntity.class);
