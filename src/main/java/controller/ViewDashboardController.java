@@ -3,6 +3,7 @@ package controller;
 import dao.tag.*;
 import entity.entities.*;
 import entity.translationentities.NoteTranslationEntity;
+import entity.translationentities.NotebookTranslationEntity;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
@@ -33,9 +34,6 @@ import javafx.stage.Stage;
 import util.events.EventBus;
 import util.events.NoteCreatedEvent;
 
-import java.awt.*;
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -85,8 +83,6 @@ public class ViewDashboardController {
 
     @FXML private MenuItem aboutItem;
 
-    @FXML private Button openData;
-
     @FXML private Button deleteButton;
 
     @FXML private Button editButton;
@@ -97,11 +93,11 @@ public class ViewDashboardController {
 
     @FXML private TableColumn<NoteEntity, String> dateColumn;
 
+    @FXML private Label notebookTitleLabel;
+
     @FXML private Label noteTitleLabel;
 
     @FXML private Label wordCountLabel;
-
-    @FXML private Label dbStatusLabel;
 
     @FXML private Label annotation;
 
@@ -150,6 +146,11 @@ public class ViewDashboardController {
         setupEventBusSubscription();
         initSplitPane();
         loadInitialData();
+        watchLocaleChanges();
+    }
+
+    private void watchLocaleChanges() {
+        util.Localization.localeProperty().addListener((obs, oldVal, newVal) -> updateNotebookMenu());
     }
 
     private void initLocalization() {
@@ -174,9 +175,7 @@ public class ViewDashboardController {
         deleteButton.textProperty().bind(Localization.bind("button.delete"));
 
         annotation.textProperty().bind(Localization.bind("dashboard.annotations"));
-        dbStatusLabel.textProperty().bind(Localization.bind("dashboard.dbStatus"));
-        openData.textProperty().bind(Localization.bind("dashboard.openData"));
-
+        if (notebookTitleLabel != null) notebookTitleLabel.setText("");
         noteTitleLabel.textProperty().bind(Localization.bind("dashboard.selectNote"));
     }
 
@@ -270,7 +269,66 @@ public class ViewDashboardController {
     private void loadInitialData() {
         // Determine initial notebook
         activeNotebook = dashboardService.getInitialNotebook();
+        updateNotebookMenu();
         if (activeNotebook != null) loadNotes();
+    }
+
+    private void updateNotebookMenu() {
+        Platform.runLater(() -> {
+            if (notebookTitleLabel == null) return;
+            String prefix = Localization.get("dashboard.notebookTitle");
+            if (activeNotebook != null) {
+                String name = getNotebookTitle(activeNotebook);
+                notebookTitleLabel.setText(prefix + " " + name);
+                javafx.scene.control.Tooltip tt = notebookTitleLabel.getTooltip();
+                if (tt == null) {
+                    tt = util.TooltipUtil.createTooltip(name);
+                    notebookTitleLabel.setTooltip(tt);
+                } else {
+                    tt.setText(name);
+                }
+            } else {
+                notebookTitleLabel.setText(prefix);
+                javafx.scene.control.Tooltip tt = notebookTitleLabel.getTooltip();
+                if (tt != null) tt.setText("");
+            }
+        });
+    }
+
+    // Helper methods copied from ManageNotebookController to resolve notebook title with localization
+    private String getNotebookTitle(NotebookEntity nb) {
+        if (nb == null) return "";
+
+        String currentCode = Localization.getCurrentLanguageCode();
+
+        // 1) Try exact/case-insensitive match for current language
+        String title = findTitleByLanguage(nb, currentCode);
+        if (title != null) return title;
+
+        // 2) Fallback to English
+        title = findTitleByLanguage(nb, "en");
+        if (title != null) {
+            logger.fine(() -> "Falling back to en translation for notebook id=" + nb.getId());
+            return title;
+        }
+
+        // 3) Any other available translation
+        return nb.getTranslations().values().stream()
+                .map(NotebookTranslationEntity::getTitle)
+                .filter(t -> t != null && !t.isBlank())
+                .findFirst()
+                .orElseGet(() -> "");
+    }
+
+    private String findTitleByLanguage(NotebookEntity nb, String langCode) {
+        if (langCode == null) return null;
+
+        return nb.getTranslations().entrySet().stream()
+                .filter(entry -> langCode.equalsIgnoreCase(entry.getKey()))
+                .map(entry -> entry.getValue().getTitle())
+                .filter(t -> t != null && !t.isBlank())
+                .findFirst()
+                .orElse(null);
     }
 
     private void setupLanguageCombo() {
@@ -405,6 +463,7 @@ public class ViewDashboardController {
 
     private void setupTheme() {
         Platform.runLater(() -> {
+            if (rootPane == null || rootPane.getScene() == null) return;
             ToggleUtil.applyTheme(rootPane.getScene());
             setToggleIcon();
         });
@@ -419,13 +478,16 @@ public class ViewDashboardController {
     }
 
     private void setToggleIcon() {
+        // Guard against being called when UI is not initialized (tests may call controller methods without Scene)
+        if (rootPane == null || rootPane.getScene() == null) return;
+
         ImageView icon = new ImageView(new Image(ToggleUtil.isDarkMode() ? "/Images/light-theme.png" : "/Images/dark-theme.png"));
 
         icon.setFitWidth(20);
         icon.setFitHeight(20);
         icon.setPreserveRatio(true);
 
-        toggleBtn.setGraphic(icon);
+        if (toggleBtn != null) toggleBtn.setGraphic(icon);
 
         updateIcons();
 
@@ -456,12 +518,15 @@ public class ViewDashboardController {
         try {
             Stage owner = (Stage) rootPane.getScene().getWindow();
 
-            DashboardNavigationService.openManageNotebooks( owner, activeNotebook, notebook -> activeNotebook = notebook);
+            DashboardNavigationService.openManageNotebooks(owner, activeNotebook, notebook -> {
+                activeNotebook = notebook;
+                // after the manage window closes, refresh menu and notes
+                updateNotebookMenu();
+                if (activeNotebook != null) loadNotes();
+            });
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Failed to open Manage Notebooks window", e);
         }
-
-        loadNotes();
     }
 
     @FXML
@@ -608,38 +673,5 @@ public class ViewDashboardController {
     private void handleOpenFAQ() {
         Stage stage = (Stage) rootPane.getScene().getWindow();
         NavigationUtil.<FAQController>openWindow(stage, "/FXML/faq_view.fxml", "faq.window_title", true, true, controller -> controller.initFaq(false));
-    }
-
-    @FXML
-    private void handleOpenDataFolder() {
-        Window owner = rootPane.getScene().getWindow();
-
-        String title = Localization.get("dashboard.folder.title");
-        String message = Localization.get("dashboard.folder.message");
-
-        boolean confirmed = AlertUtil.showConfirmation(owner, title, message);
-
-        if (confirmed) {
-            try {
-                String userHome = System.getProperty("user.home");
-                File dataDir = new File(userHome, ".NoteVault/data");
-                if (!dataDir.exists()) {
-                    boolean created = dataDir.mkdirs();
-                    if (!created) {
-                        logger.warning("Failed to create data directory: " + dataDir.getAbsolutePath());
-                        AlertUtil.showError(owner, Localization.get("dashboard.folder.error_create"));
-                        return;
-                    }
-                }
-                if (Desktop.isDesktopSupported()) {
-                    Desktop.getDesktop().open(dataDir);
-                } else {
-                    AlertUtil.showWarning(owner, Localization.get("dashboard.folder.warning"));
-                }
-            } catch (IOException e) {
-                logger.log(Level.SEVERE, "Failed to open folder", e);
-                AlertUtil.showError(owner, Localization.get("dashboard.folder.error", e.getMessage()));
-            }
-        }
     }
 }
