@@ -9,6 +9,7 @@ import entity.translationentities.NotebookTranslationEntity;
 import javafx.concurrent.Task;
 import dao.note.JpaNoteDao;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import javafx.beans.binding.Bindings;
@@ -29,6 +30,7 @@ public class ManageNotebookController {
     private static final String NOTEBOOKS_RENAME_KEY = "notebooks.rename";
     private static final String DELETE_BUTTON = "button.delete";
     private static final String NULL = "<null>";
+    private static final String SELECTED_NOTEBOOK_STYLE = "selected-notebook";
 
     private INotebookDAO notebookDao;
     private NotebookEntity activeNotebook;
@@ -114,67 +116,113 @@ public class ManageNotebookController {
     }
 
     private ListCell<NotebookEntity> createNotebookListCell(ListView<NotebookEntity> lv, StringConverter<NotebookEntity> converter) {
-        return new ListCell<>() {
-            private final Label titleLabel = new Label();
-            private final Label countLabel = new Label();
-            private final javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(8);
+        return new NotebookListCell(lv, converter);
+    }
 
-            {
-                titleLabel.setWrapText(true);
-                titleLabel.getStyleClass().addAll("list-cell-text", "list-cell-title");
-                // Title label should take available width, count label stays compact
-                titleLabel.maxWidthProperty().bind(lv.widthProperty().subtract(90));
+    /**
+     * Extracted ListCell implementation to reduce cognitive complexity of the factory method.
+     */
+    private class NotebookListCell extends ListCell<NotebookEntity> {
+        private final Label titleLabel = new Label();
+        private final Label countLabel = new Label();
+        private final HBox container = new javafx.scene.layout.HBox(8);
+        private final StringConverter<NotebookEntity> converter;
 
-                countLabel.getStyleClass().addAll("list-cell-text", "list-cell-count");
+        NotebookListCell(ListView<NotebookEntity> lv, StringConverter<NotebookEntity> converter) {
+            this.converter = converter;
+            titleLabel.setWrapText(true);
+            titleLabel.getStyleClass().addAll("list-cell-text", "list-cell-title");
+            // Title label should take available width, count label stays compact
+            titleLabel.maxWidthProperty().bind(lv.widthProperty().subtract(90));
 
-                // Tooltip shows full title (and optionally count)
-                Tooltip tooltip = new Tooltip();
-                tooltip.textProperty().bind(titleLabel.textProperty());
-                util.TooltipUtil.setTooltipDelay(tooltip);
-                titleLabel.setTooltip(tooltip);
+            countLabel.getStyleClass().addAll("list-cell-text", "list-cell-count");
 
-                Tooltip countTooltip = new Tooltip();
-                util.TooltipUtil.setTooltipDelay(countTooltip);
-                // Localized tooltip for notes count; updates when locale or count changes
-                countTooltip.textProperty().bind(Bindings.createStringBinding(() -> {
-                    String txt = countLabel.getText();
-                    if (txt == null || txt.isBlank()) return "";
-                    return util.Localization.get("notebooks.count", txt);
-                }, util.Localization.localeProperty(), countLabel.textProperty()));
-                countLabel.setTooltip(countTooltip);
+            // Tooltip shows full title (and optionally count)
+            Tooltip tooltip = new Tooltip();
+            tooltip.textProperty().bind(titleLabel.textProperty());
+            util.TooltipUtil.setTooltipDelay(tooltip);
+            titleLabel.setTooltip(tooltip);
 
-                container.getChildren().addAll(titleLabel, countLabel);
-            }
+            Tooltip countTooltip = new Tooltip();
+            util.TooltipUtil.setTooltipDelay(countTooltip);
+            // Localized tooltip for notes count; updates when locale or count changes
+            countTooltip.textProperty().bind(Bindings.createStringBinding(() -> {
+                String txt = countLabel.getText();
+                if (txt == null || txt.isBlank()) return "";
+                return util.Localization.get("notebooks.count", txt);
+            }, util.Localization.localeProperty(), countLabel.textProperty()));
+            countLabel.setTooltip(countTooltip);
 
-            @Override
-            protected void updateItem(NotebookEntity item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setGraphic(null);
-                    setText(null);
+            container.getChildren().addAll(titleLabel, countLabel);
+
+            selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
+                // primitive boolean expression to satisfy static analysis
+                boolean nowSelected = Boolean.TRUE.equals(isNowSelected);
+                if (nowSelected) {
+                    if (!getStyleClass().contains(SELECTED_NOTEBOOK_STYLE)) {
+                        getStyleClass().add(SELECTED_NOTEBOOK_STYLE);
+                    }
                 } else {
-                    updateCellContent(item, converter);
+                    getStyleClass().remove(SELECTED_NOTEBOOK_STYLE);
                 }
+            });
+        }
+
+        @Override
+        protected void updateItem(NotebookEntity item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                clearCell();
+            } else {
+                renderCell(item);
             }
+        }
 
-            private void updateCellContent(NotebookEntity item, StringConverter<NotebookEntity> converter) {
-                String title = converter.toString(item);
-                Integer count = notebookNoteCounts.get(item.getId());
+        private void renderCell(NotebookEntity item) {
+            String title = converter.toString(item);
+            Integer count = notebookNoteCounts.get(item.getId());
 
-                titleLabel.setText(title == null ? "" : title);
-                if (count != null) {
-                    countLabel.setText(String.format("%d", count));
-                    countLabel.setVisible(true);
-                } else {
-                    countLabel.setText("");
-                    countLabel.setVisible(false);
+            titleLabel.setText(title == null ? "" : title);
+
+            applyCount(count);
+            applySelectionStyle(isSelected());
+
+            // Use container as graphic (avoid setText to allow richer layout)
+            setText(null);
+            setGraphic(container);
+        }
+
+        private void clearCell() {
+            setGraphic(null);
+            setText(null);
+            titleLabel.setText("");
+            countLabel.setText("");
+            countLabel.setVisible(false);
+            // remove selection style from the cell itself
+            getStyleClass().remove(SELECTED_NOTEBOOK_STYLE);
+            // also defensively remove from container in case previous code added it there
+            container.getStyleClass().remove(SELECTED_NOTEBOOK_STYLE);
+        }
+
+        private void applyCount(Integer count) {
+            if (count != null) {
+                countLabel.setText(String.format("%d", count));
+                countLabel.setVisible(true);
+            } else {
+                countLabel.setText("");
+                countLabel.setVisible(false);
+            }
+        }
+
+        private void applySelectionStyle(boolean selected) {
+            if (selected) {
+                if (!getStyleClass().contains(SELECTED_NOTEBOOK_STYLE)) {
+                    getStyleClass().add(SELECTED_NOTEBOOK_STYLE);
                 }
-
-                // Use container as graphic (avoid setText to allow richer layout)
-                setText(null);
-                setGraphic(container);
+            } else {
+                getStyleClass().remove(SELECTED_NOTEBOOK_STYLE);
             }
-        };
+        }
     }
 
     public void loadNotebooks() {
