@@ -101,6 +101,7 @@
                                     <Image url="@/Images/tag-black.png" />
                                 </image>
                             </ImageView>
+
                             <Label fx:id="editTags" styleClass="tag-label">
                                 <font>
                                     <Font name="System Bold" size="14.0" />
@@ -131,7 +132,9 @@
                     <HBox spacing="8.0">
                         <children>
                             <ComboBox fx:id="tagComboBox" editable="true" prefWidth="160.0" styleClass="editor-combo combo-box" />
+
                             <Button fx:id="addTagBtn" mnemonicParsing="false" onAction="#handleAddTag" />
+
                         </children>
                         <VBox.margin>
                             <Insets bottom="4.0" left="15.0" right="30.0" top="2.0" />
