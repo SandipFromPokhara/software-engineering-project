@@ -41,7 +41,10 @@ class JpaNoteDaoTest {
     @AfterAll
     static void cleanup() {
         List<NoteEntity> notes = noteDao.findByNotebookWithTranslations(testNotebook);
-        notes.forEach(noteDao::delete);
+        for (NoteEntity note : notes) {
+            note.getTranslations().clear();
+            noteDao.delete(note);
+        }
 
         notebookDao.delete(testNotebook);
         userDao.delete(testUser);
@@ -58,7 +61,7 @@ class JpaNoteDaoTest {
         cTranslation.setAnnotation("Ok");
 
         note.setNotebook(testNotebook);
-        testNotebook.getNotes().add(note);
+        testNotebook.addNote(note);
 
         noteDao.save(note);
 
@@ -88,7 +91,7 @@ class JpaNoteDaoTest {
         createTranslation.setAnnotation("Old Annotation");
 
         note.setNotebook(testNotebook);
-        testNotebook.getNotes().add(note);
+        testNotebook.addNote(note);
         noteDao.save(note);
 
         createTranslation.setTitle("Updated Title");

@@ -15,12 +15,12 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javafx.util.Duration;
+
 import services.NoteService;
 import entity.entities.NoteEntity;
 import session.UserSession;
 import util.*;
-import util.bulletList.TextFormattingUtil;
+import util.list.TextFormattingUtil;
 import util.events.EventBus;
 import util.events.NoteCreatedEvent;
 
@@ -35,8 +35,10 @@ import java.util.HashSet;
  */
 public class CreateNoteController implements Initializable {
 
+    private static final String NEW_NOTEBOOK_KEY = "create.new_notebook";
+
     private NoteService noteService;
-    private Set<String> selectedTags = new HashSet<>();
+    private final Set<String> selectedTags = new HashSet<>();
     private JpaNotebookDao notebookDao;
     private JpaTagDao tagDao;
 
@@ -116,13 +118,14 @@ public class CreateNoteController implements Initializable {
     @FXML
     private MenuItem redoMenuItem;
 
-    private UndoRedoManager undoRedoManager = new UndoRedoManager();
+    private final UndoRedoManager undoRedoManager = new UndoRedoManager();
 
     // Reusable rich text editor component controller (from fx:include fx:id="contentEditor")
     @FXML
     private RichTextEditorController contentEditorController;
 
     public CreateNoteController() {
+        // Required by FXMLLoader; dependencies are injected/set later.
     }
 
     @Override
@@ -158,8 +161,8 @@ public class CreateNoteController implements Initializable {
         addTagBtn.textProperty().bind(Localization.bind("create.add_tags"));
 
         // Tooltip delay
-        tagTooltip.setShowDelay(Duration.millis(100));
-        toggleTooltip.setShowDelay(Duration.millis(100));
+        TooltipUtil.setTooltipDelay(tagTooltip);
+        TooltipUtil.setTooltipDelay(toggleTooltip);
 
         // Load current user and notebooks
         UserEntity currentUser = UserSession.getUserInstance().getUser();
@@ -178,7 +181,7 @@ public class CreateNoteController implements Initializable {
 
         NotebookTranslationEntity t = new NotebookTranslationEntity();
         t.setLangCode(Localization.getCurrentLanguageCode());
-        t.setTitle(Localization.get("create.new_notebook"));
+        t.setTitle(Localization.get(NEW_NOTEBOOK_KEY));
         t.setNotebook(createNewItem);
 
         createNewItem.addTranslation(t);
@@ -240,6 +243,15 @@ public class CreateNoteController implements Initializable {
             updateToggleIcon();
             updateTagIcon();
         });
+        // Update toggle icon if theme changes in other windows
+        util.events.EventBus.subscribe(event -> {
+            if (event instanceof util.events.ThemeChangedEvent) {
+                javafx.application.Platform.runLater(() -> {
+                    updateToggleIcon();
+                    updateTagIcon();
+                });
+            }
+        });
         // Enable list auto-continuation for content area
         TextFormattingUtil.enableListAutoContinuation(contentEditorController.getTextArea());
     }
@@ -264,7 +276,7 @@ public class CreateNoteController implements Initializable {
     private void handleSave() {
         try {
             String title = titleField.getText().trim();
-            String content = contentEditorController != null ? contentEditorController.getText() : "";
+            String content = contentEditorController != null ? contentEditorController.getSerializedContent() : "";
             String annotation = annotationArea.getText() == null ? "" : annotationArea.getText();
 
             NotebookEntity selectedNotebook = notebookComboBox.getSelectionModel().getSelectedItem();
@@ -282,7 +294,7 @@ public class CreateNoteController implements Initializable {
             // Handle "Create New Notebook"
             String notebookTitle = getNotebookTitle(selectedNotebook);
 
-            if (Localization.get("create.new_notebook").equals(notebookTitle)) {
+            if (Localization.get(NEW_NOTEBOOK_KEY).equals(notebookTitle)) {
 
                 String name = promptForNotebookName();
                 if (name == null) {
@@ -405,8 +417,8 @@ public class CreateNoteController implements Initializable {
 
     private String promptForNotebookName() {
         TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle(Localization.get("create.new_notebook"));
-        dialog.setHeaderText(Localization.get("create.new_notebook"));
+        dialog.setTitle(Localization.get(NEW_NOTEBOOK_KEY));
+        dialog.setHeaderText(Localization.get(NEW_NOTEBOOK_KEY));
         dialog.setContentText(Localization.get("create.placeholder_title"));
 
         if (titleField.getScene() != null) {
@@ -421,7 +433,7 @@ public class CreateNoteController implements Initializable {
 
     private void addNotebookToComboBox(NotebookEntity newNotebook) {
         // Remove the "Create new notebook" placeholder(s) by comparing the displayed title using getNotebookTitle
-        notebookComboBox.getItems().removeIf(nb -> Localization.get("create.new_notebook").equals(getNotebookTitle(nb)));
+        notebookComboBox.getItems().removeIf(nb -> Localization.get(NEW_NOTEBOOK_KEY).equals(getNotebookTitle(nb)));
         notebookComboBox.getItems().add(newNotebook);
 
         notebookComboBox.getItems().sort((n1, n2) -> {
@@ -435,7 +447,7 @@ public class CreateNoteController implements Initializable {
 
         NotebookTranslationEntity t = new NotebookTranslationEntity();
         t.setLangCode(Localization.getCurrentLanguageCode());
-        t.setTitle(Localization.get("create.new_notebook"));
+        t.setTitle(Localization.get(NEW_NOTEBOOK_KEY));
         t.setNotebook(placeholder);
 
         placeholder.addTranslation(t);
@@ -447,44 +459,66 @@ public class CreateNoteController implements Initializable {
 
     // Robust notebook title lookup: case-insensitive keys and fallbacks (mirrors ManageNotebookController logic)
     private String getNotebookTitle(NotebookEntity nb) {
-        if (nb == null) return "";
+        if (nb == null || nb.getTranslations() == null || nb.getTranslations().isEmpty()) {
+            return "";
+        }
 
         String currentCode = Localization.getCurrentLanguageCode();
+        String title = findTranslationTitle(nb, currentCode);
+        if (!title.isBlank()) {
+            return title;
+        }
 
-        NotebookTranslationEntity translation = nb.getTranslations().get(currentCode);
-        if (translation == null) {
-            translation = nb.getTranslations().get(currentCode == null ? null : currentCode.toLowerCase());
+        title = findTranslationTitle(nb, "en");
+        if (!title.isBlank()) {
+            return title;
         }
-        if (translation == null) {
-            translation = nb.getTranslations().get(currentCode == null ? null : currentCode.toUpperCase());
+
+        return findAnyTranslationTitle(nb);
+    }
+
+    private String findTranslationTitle(NotebookEntity nb, String langCode) {
+        if (langCode == null || langCode.isBlank()) {
+            return "";
         }
-        if (translation == null && currentCode != null) {
-            for (String key : nb.getTranslations().keySet()) {
-                if (key != null && key.equalsIgnoreCase(currentCode)) {
-                    translation = nb.getTranslations().get(key);
-                    break;
-                }
+
+        NotebookTranslationEntity translation = findTranslation(nb, langCode);
+        if (translation == null) {
+            return "";
+        }
+
+        String title = translation.getTitle();
+        return title == null || title.isBlank() ? "" : title;
+    }
+
+    private NotebookTranslationEntity findTranslation(NotebookEntity nb, String langCode) {
+        String code = langCode.trim();
+
+        NotebookTranslationEntity translation = nb.getTranslations().get(code);
+        if (translation != null) {
+            return translation;
+        }
+
+        translation = nb.getTranslations().get(code.toLowerCase());
+        if (translation != null) {
+            return translation;
+        }
+
+        translation = nb.getTranslations().get(code.toUpperCase());
+        if (translation != null) {
+            return translation;
+        }
+
+        for (String key : nb.getTranslations().keySet()) {
+            if (key != null && key.equalsIgnoreCase(code)) {
+                return nb.getTranslations().get(key);
             }
         }
-        if (translation != null && translation.getTitle() != null && !translation.getTitle().isBlank()) {
-            return translation.getTitle();
-        }
 
-        // Fallback to English
-        translation = nb.getTranslations().get("en");
-        if (translation == null) translation = nb.getTranslations().get("EN");
-        if (translation == null) {
-            for (String key : nb.getTranslations().keySet()) {
-                if (key != null && key.equalsIgnoreCase("en")) {
-                    translation = nb.getTranslations().get(key);
-                    break;
-                }
-            }
-        }
-        if (translation != null && translation.getTitle() != null && !translation.getTitle().isBlank()) {
-            return translation.getTitle();
-        }
+        return null;
+    }
 
+    private String findAnyTranslationTitle(NotebookEntity nb) {
         for (NotebookTranslationEntity t : nb.getTranslations().values()) {
             if (t != null && t.getTitle() != null && !t.getTitle().isBlank()) {
                 return t.getTitle();

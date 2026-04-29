@@ -15,6 +15,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UndoRedoManagerTest {
 
+    // Increase timeout to reduce flakiness on slower CI/machines. 3s was occasionally too short.
+    private static final long FX_TIMEOUT_SECONDS = 10;
+
     private UndoRedoManager manager;
     private TextField textField;
     private TextArea textArea;
@@ -22,73 +25,103 @@ class UndoRedoManagerTest {
     private MenuItem redoMenuItem;
 
     @BeforeAll
-    static void initJavaFX() throws InterruptedException {
+    static void initJavaFX() {
         CountDownLatch latch = new CountDownLatch(1);
 
         new Thread(() -> {
             try {
                 Platform.startup(latch::countDown);
             } catch (IllegalStateException e) {
+                // JavaFX already initialized in this JVM
                 latch.countDown();
             }
         }).start();
 
-        latch.await(5, TimeUnit.SECONDS);
+        awaitOrFail(latch, 5, "Timeout waiting for JavaFX platform startup");
     }
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         manager = new UndoRedoManager();
 
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxThreadAndWait(() -> {
             textField = new TextField();
             textArea = new TextArea();
             undoMenuItem = new MenuItem();
             redoMenuItem = new MenuItem();
-            latch.countDown();
         });
+    }
 
-        if (!latch.await(3, TimeUnit.SECONDS)) {
-            throw new RuntimeException("Timeout waiting for JavaFX controls creation");
+    private static void awaitOrFail(CountDownLatch latch, long timeoutSeconds, String message) {
+        try {
+            boolean completed = latch.await(timeoutSeconds, TimeUnit.SECONDS);
+            assertTrue(completed, message);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            fail("Interrupted while waiting: " + message);
+        }
+    }
+
+    private static void runOnFxThreadAndWait(Runnable action) {
+        // If we're already on the FX thread, run directly to avoid scheduling delays.
+        if (Platform.isFxApplicationThread()) {
+            action.run();
+            return;
         }
 
-        Thread.sleep(100);
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            try {
+                action.run();
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        // Wait for the FX thread to execute the action. Larger timeout helps avoid flakiness
+        // on CI or loaded machines. If this still times out, consider inspecting for deadlocks
+        // or long-running work on the FX thread.
+        awaitOrFail(latch, FX_TIMEOUT_SECONDS, "Timeout waiting for JavaFX thread");
+    }
+
+    private void waitUntilCanUndo(int expectedUndoSize) {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+        while (System.nanoTime() < deadline) {
+            if (manager.canUndo() && manager.getUndoStackSize() >= expectedUndoSize) {
+                return;
+            }
+            runOnFxThreadAndWait(() -> {
+                // flush FX events
+            });
+        }
+        fail("Undo stack did not reach expected size: " + expectedUndoSize);
+    }
+
+    private void setupTitleField() {
+        runOnFxThreadAndWait(() -> {
+            manager.initialize(undoMenuItem, redoMenuItem);
+            manager.registerField("title", textField);
+        });
     }
 
     @Test
-    void testInitializeWithBothMenuItems() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            manager.initialize(undoMenuItem, redoMenuItem);
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
+    void testInitializeWithBothMenuItems() {
+        runOnFxThreadAndWait(() -> manager.initialize(undoMenuItem, redoMenuItem));
 
         assertTrue(undoMenuItem.isDisable());
         assertTrue(redoMenuItem.isDisable());
     }
 
     @Test
-    void testInitializeWithNullUndoMenuItem() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            manager.initialize(null, redoMenuItem);
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
+    void testInitializeWithNullUndoMenuItem() {
+        runOnFxThreadAndWait(() -> manager.initialize(null, redoMenuItem));
 
         assertTrue(redoMenuItem.isDisable());
     }
 
     @Test
-    void testInitializeWithNullRedoMenuItem() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            manager.initialize(undoMenuItem, null);
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
+    void testInitializeWithNullRedoMenuItem() {
+        runOnFxThreadAndWait(() -> manager.initialize(undoMenuItem, null));
 
         assertTrue(undoMenuItem.isDisable());
     }
@@ -99,189 +132,119 @@ class UndoRedoManagerTest {
     }
 
     @Test
-    void testRegisterTextField() throws Exception {
+    void testRegisterTextField() {
         assertNotNull(textField, "TextField should not be null");
 
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxThreadAndWait(() -> {
             manager.initialize(undoMenuItem, redoMenuItem);
             manager.registerField("title", textField);
-            latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
     }
 
     @Test
-    void testRegisterTextArea() throws Exception {
+    void testRegisterTextArea() {
         assertNotNull(textArea, "TextArea should not be null");
 
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxThreadAndWait(() -> {
             manager.initialize(undoMenuItem, redoMenuItem);
             manager.registerField("content", textArea);
-            latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
     }
 
     @Test
-    void testRegisterMultipleFields() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+    void testRegisterMultipleFields() {
+        runOnFxThreadAndWait(() -> {
             manager.initialize(undoMenuItem, redoMenuItem);
             manager.registerField("title", textField);
             manager.registerField("content", textArea);
-            latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
     }
 
     @Test
-    void testTextChangeCreatesUndoEntry() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            manager.initialize(undoMenuItem, redoMenuItem);
-            manager.registerField("title", textField);
+    void testTextChangeCreatesUndoEntry() {
+        setupTitleField();
+        runOnFxThreadAndWait(() -> textField.setText("Hello"));
 
-            textField.setText("Hello");
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-
-        Thread.sleep(500);
-
-        assertTrue(manager.canUndo());
+        waitUntilCanUndo(1);
         assertEquals(1, manager.getUndoStackSize());
     }
 
     @Test
-    void testMultipleTextChanges() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+    void testMultipleTextChanges() {
+        runOnFxThreadAndWait(() -> {
             manager.initialize(undoMenuItem, redoMenuItem);
             manager.registerField("title", textField);
-
             textField.setText("Hello");
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
-        Thread.sleep(200);
-
-        CountDownLatch latch2 = new CountDownLatch(1);
-        Platform.runLater(() -> {
             textField.setText("Hello World");
-            latch2.countDown();
-        });
-        latch2.await(1, TimeUnit.SECONDS);
-        Thread.sleep(200);
-
-        CountDownLatch latch3 = new CountDownLatch(1);
-        Platform.runLater(() -> {
             textField.setText("Hello World!");
-            latch3.countDown();
         });
-        latch3.await(1, TimeUnit.SECONDS);
-        Thread.sleep(200);
 
+        waitUntilCanUndo(3);
         assertEquals(3, manager.getUndoStackSize());
     }
 
     @Test
-    void testEmptyStringChange() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            manager.initialize(undoMenuItem, redoMenuItem);
-            manager.registerField("title", textField);
-            textField.setText("Hello");
-            latch.countDown();
-        });
-        latch.await(1, TimeUnit.SECONDS);
+    void testEmptyStringChange() {
+        // Validate that clearing a non-empty field also creates an undo entry.
+        setupTitleField();
 
-        Thread.sleep(500);
+        runOnFxThreadAndWait(() -> textField.setText("Hello"));
+        waitUntilCanUndo(1);
 
-        assertTrue(manager.canUndo());
-        assertEquals(1, manager.getUndoStackSize());
+        runOnFxThreadAndWait(() -> textField.setText(""));
+        waitUntilCanUndo(2);
+
+        assertEquals(2, manager.getUndoStackSize());
     }
 
     @Test
-    void testUndoWithEmptyStack() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+    void testUndoWithEmptyStack() {
+        runOnFxThreadAndWait(() -> {
             manager.initialize(undoMenuItem, redoMenuItem);
-            manager.undo(); // Should not crash
-            latch.countDown();
+            manager.undo();
         });
-        latch.await(1, TimeUnit.SECONDS);
 
         assertFalse(manager.canUndo());
     }
 
     @Test
-    void testUndoRestoresOldValue() throws Exception {
-        assertNotNull(textField, "TextField must not be null");
-
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+    void testUndoRestoresOldValue() {
+        runOnFxThreadAndWait(() -> {
             manager.initialize(undoMenuItem, redoMenuItem);
             manager.registerField("title", textField);
-
             textField.setText("Hello");
-            latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
 
-        Thread.sleep(500);
+        waitUntilCanUndo(1);
 
-        CountDownLatch undoLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            manager.undo();
-            undoLatch.countDown();
-        });
-        undoLatch.await(1, TimeUnit.SECONDS);
-
-        Thread.sleep(200);
+        runOnFxThreadAndWait(manager::undo);
 
         assertEquals("", textField.getText());
     }
 
     @Test
-    void testRedoWithEmptyStack() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+    void testRedoWithEmptyStack() {
+        runOnFxThreadAndWait(() -> {
             manager.initialize(undoMenuItem, redoMenuItem);
             manager.redo();
-            latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
 
         assertFalse(manager.canRedo());
     }
 
     @Test
-    void testRedoAfterUndo() throws Exception {
-        assertNotNull(textField);
-
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+    void testRedoAfterUndo() {
+        runOnFxThreadAndWait(() -> {
             manager.initialize(undoMenuItem, redoMenuItem);
             manager.registerField("title", textField);
-
             textField.setText("Hello");
-            latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
+        waitUntilCanUndo(1);
 
-        Thread.sleep(500);
-
-        CountDownLatch undoRedoLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        runOnFxThreadAndWait(() -> {
             manager.undo();
             manager.redo();
-            undoRedoLatch.countDown();
         });
-        undoRedoLatch.await(1, TimeUnit.SECONDS);
-
-        Thread.sleep(200);
 
         assertEquals("Hello", textField.getText());
     }
@@ -295,18 +258,14 @@ class UndoRedoManagerTest {
     }
 
     @Test
-    void testClearWithHistory() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+    void testClearWithHistory() {
+        runOnFxThreadAndWait(() -> {
             manager.initialize(undoMenuItem, redoMenuItem);
             manager.registerField("title", textField);
-
             textField.setText("Hello");
-            latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
 
-        Thread.sleep(500);
+        waitUntilCanUndo(1);
 
         manager.clear();
 
@@ -337,26 +296,21 @@ class UndoRedoManagerTest {
     }
 
     @Test
-    void testSameTextDoesNotCreateUndoEntry() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+    void testSameTextDoesNotCreateUndoEntry() {
+        runOnFxThreadAndWait(() -> {
             manager.initialize(undoMenuItem, redoMenuItem);
             manager.registerField("title", textField);
-
             textField.setText("Hello");
-            latch.countDown();
         });
-        latch.await(1, TimeUnit.SECONDS);
 
-        Thread.sleep(500);
-        CountDownLatch latch2 = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            textField.setText("Hello");
-            latch2.countDown();
+        waitUntilCanUndo(1);
+
+        runOnFxThreadAndWait(() -> textField.setText("Hello"));
+
+        // Allow any queued listener updates to process
+        runOnFxThreadAndWait(() -> {
+            // no-op
         });
-        latch2.await(1, TimeUnit.SECONDS);
-
-        Thread.sleep(500);
 
         assertEquals(1, manager.getUndoStackSize());
     }

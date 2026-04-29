@@ -19,9 +19,9 @@ public class LanguageDialogController {
     @FXML private VBox dialogPane;
     @FXML private Label titleLabel;
     @FXML private VBox languagePane;
-    @FXML private Button confirmButton, cancelButton;
+    @FXML private Button confirmButton;
+    @FXML private Button cancelButton;
 
-    private ToggleGroup toggleGroup;
     private Language selectedLanguage;
 
     @FXML
@@ -42,7 +42,7 @@ public class LanguageDialogController {
             }
         });
 
-        toggleGroup = new ToggleGroup();
+        ToggleGroup toggleGroup = new ToggleGroup();
         Language current = LanguageModel.getByLocale(Localization.getLocale());
 
         for (Language lang : LanguageModel.LANGUAGES.values()) {
@@ -71,7 +71,7 @@ public class LanguageDialogController {
             }
 
             rb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
-                if (isSelected) {
+                if (Boolean.TRUE.equals(isSelected)) {
                     rb.setStyle(
                             "-fx-font-size: 12.5px; -fx-text-fill: #266973; -fx-font-weight: bold; " +
                                     "-fx-cursor: hand; -fx-padding: 4 8 4 8; " +

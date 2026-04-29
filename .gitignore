@@ -46,9 +46,6 @@ build/
 *.env
 .env.local
 
-Dockerfile
-
-Jenkinsfile
 
 ### Personal notes ###
 MyNotes.md
@@ -59,3 +56,8 @@ src/main/java/dto/
 app-deployment.yaml
 
 docker-compose.yml
+
+load-testing/.idea
+
+Jenkinsfile
+Dockerfile

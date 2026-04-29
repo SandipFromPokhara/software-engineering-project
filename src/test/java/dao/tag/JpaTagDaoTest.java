@@ -20,12 +20,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JpaTagDaoTest {
 
-    private static JpaTagDao tagDao;
+    private JpaTagDao tagDao;
     private EntityManager em;
 
     @BeforeAll
-    static void setupAll() {
-        tagDao = new JpaTagDao();
+    void setupAll() {
+        this.tagDao = new JpaTagDao();
     }
 
     @BeforeEach
@@ -261,7 +261,7 @@ class JpaTagDaoTest {
     void testDeleteNonExistentTag() {
         TagEntity tag = new TagEntity();
         tag.setTagName("NonExistent");
-        setId(tag, 99999L); // reflection to set fake ID
+        applyMockId(tag, 99999L);
         assertThrows(RuntimeException.class, () -> tagDao.delete(tag));
     }
 
@@ -313,13 +313,20 @@ class JpaTagDaoTest {
         assertThrows(IllegalArgumentException.class, () -> tagDao.save(null));
     }
 
-    private void setId(BaseEntity entity, Long id) {
+    private void applyMockId(BaseEntity entity, Long id) {
         try {
             Field idField = BaseEntity.class.getDeclaredField("id");
+            // Make private id field accessible for test injection
             idField.setAccessible(true);
             idField.set(entity, id);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new TestReflectionException("Failed to inject mock ID for test", e);
+        }
+    }
+
+    private static class TestReflectionException extends RuntimeException {
+        public TestReflectionException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 }

@@ -12,11 +12,10 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
-import javafx.util.Duration;
 import services.NoteService;
 import services.TranslationService;
 import util.*;
-import util.bulletList.TextFormattingUtil;
+import util.list.TextFormattingUtil;
 
 import java.net.URL;
 import java.util.HashSet;
@@ -124,6 +123,8 @@ public class EditNoteController implements Initializable {
         redoMenuItem.textProperty().bind(Localization.bind("edit.redo"));
 
         content.textProperty().bind(Localization.bind("edit.content_label"));
+        titleField.promptTextProperty().bind(Localization.bind("create.placeholder_title"));
+        contentEditorController.bindPromptText(Localization.bind("edit.content_box"));
         annotation.textProperty().bind(Localization.bind("edit.annotations"));
         editTags.textProperty().bind(Localization.bind("edit.tags"));
 
@@ -137,7 +138,7 @@ public class EditNoteController implements Initializable {
 
         WordCountUtil.bind(contentEditorController.getTextArea(), wordCountLabel);
 
-        tagTooltip.setShowDelay(Duration.millis(100));
+        TooltipUtil.setTooltipDelay(tagTooltip);
         tagComboBox.setEditable(true);
 
         // Initialize undo/redo manager
@@ -198,6 +199,7 @@ public class EditNoteController implements Initializable {
         if (translation != null) {
             titleField.setText(translation.getTitle());
             contentEditorController.setText(translation.getContent());
+            contentEditorController.setSerializedContent(translation.getContent());
             annotationBox.setText(translation.getAnnotation());
         } else {
             titleField.clear();
@@ -229,18 +231,24 @@ public class EditNoteController implements Initializable {
 
     @FXML
     public void handleUpdate() {
+        Set<String> tags = selectedTags == null ? new HashSet<>() : new HashSet<>(selectedTags);
         String langCode = Localization.getCurrentLanguageCode();
 
         noteService.updateNote(
                 note,
                 langCode,
                 titleField.getText(),
-                contentEditorController.getText(),
-                annotationBox.getText(),
-                selectedTags
+                safe(contentEditorController.getSerializedContent()),
+                safe(annotationBox.getText()),
+                tags
         );
 
         handleCancel();
+    }
+
+    // null-check helper
+    private String safe(String s) {
+        return s == null ? "" : s;
     }
 
     private void refreshTagFlowPane() {
@@ -248,7 +256,7 @@ public class EditNoteController implements Initializable {
     }
 
     @FXML
-   public  void handleAddTag() {
+    public void handleAddTag() {
         String tagName = tagComboBox.getEditor().getText();
         TagUtil.addTagToUI(selectedTags, tagFlowpane, tagComboBox, tagName);
     }

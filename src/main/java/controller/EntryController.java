@@ -14,10 +14,11 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.Duration;
+
 import model.LanguageModel;
 import util.Localization;
 import util.NavigationUtil;
+import util.TooltipUtil;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -28,10 +29,20 @@ public class EntryController {
     static final Logger logger = Logger.getLogger(EntryController.class.getName());
 
     @FXML
-    private Label hello, welcome, privacyLabel, languageDisplay;
+    private Label hello;
+    @FXML
+    private Label welcome;
+    @FXML
+    private Label privacyLabel;
+    @FXML
+    private Label languageDisplay;
 
     @FXML
-    private Button guestButton, loginButton, registerButton;
+    private Button guestButton;
+    @FXML
+    private Button loginButton;
+    @FXML
+    private Button registerButton;
 
     @FXML
     private Hyperlink faqLink;
@@ -53,13 +64,13 @@ public class EntryController {
         tooltip.textProperty().bind(Localization.bind("tooltip.lang_info"));
 
         Tooltip.install(languageSwitcher, tooltip);
-        tooltip.setShowDelay(Duration.millis(100));
+        TooltipUtil.setTooltipDelay(tooltip);
 
         languageDisplay.textProperty().bind(
                 Bindings.createStringBinding(
                         () -> LanguageModel
                                 .getByLocale(Localization.getLocale())
-                                .code(),
+                                .nativeName(),
                         Localization.localeProperty()
                 )
         );

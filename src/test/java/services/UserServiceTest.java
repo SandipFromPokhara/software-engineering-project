@@ -23,33 +23,33 @@ class UserServiceTest {
     }
 
     @Test
-    void test_login_nullUsername_returnsNull() {
+    void testLoginNullUsernameReturnsNull() {
         assertNull(userService.login(null, "password"));
     }
 
     @Test
-    void test_login_blankUsername_returnsNull() {
+    void testLoginBlankUsernameReturnsNull() {
         assertNull(userService.login("   ", "password"));
     }
 
     @Test
-    void test_login_nullPassword_returnsNull() {
+    void testLoginNullPasswordReturnsNull() {
         assertNull(userService.login("username", null));
     }
 
     @Test
-    void test_login_blankPassword_returnsNull() {
+    void testLoginBlankPasswordReturnsNull() {
         assertNull(userService.login("username", "   "));
     }
 
     @Test
-    void test_login_userNotFound_returnsNull() {
+    void testLoginUserNotFoundReturnsNull() {
         when(userDao.findByUsername("user")).thenReturn(null);
         assertNull(userService.login("user", "password"));
     }
 
     @Test
-    void test_login_wrongPassword_returnsNull() {
+    void testLoginWrongPasswordReturnsNull() {
         UserEntity user = new UserEntity();
         user.setUsername("user");
         user.changePasswordHash("$2a$10$randomHashpassword");
@@ -60,7 +60,7 @@ class UserServiceTest {
     }
 
     @Test
-    void test_login_correctPassword_returnsUser() {
+    void testLoginCorrectPasswordReturnsUser() {
         UserEntity user = new UserEntity();
         user.setUsername("user");
         user.changePasswordHash("$2a$10$correcthashedpassword");

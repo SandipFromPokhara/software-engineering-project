@@ -12,6 +12,7 @@ import entity.translationentities.NotebookTranslationEntity;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import util.Localization;
+import util.RichTextStorageUtil;
 
 import java.io.File;
 import java.util.List;
@@ -61,7 +62,7 @@ public class PdfExportService {
                 NoteTranslationEntity translation = dashboardService.getDisplayTranslation(note);
 
                 document.add(new Paragraph(translation.getTitle()).setBold().setFontSize(18));
-                document.add(new Paragraph(translation.getContent()));
+                document.add(new Paragraph(RichTextStorageUtil.toPlainText(translation.getContent())));
 
                 if (translation.getAnnotation() != null && !translation.getAnnotation().isEmpty()) {
                     document.add(new Paragraph("\nAnnotation:").setBold());
@@ -80,7 +81,7 @@ public class PdfExportService {
         }
     }
 
-    private File chooseFile(String fileName, Window owner) {
+    protected File chooseFile(String fileName, Window owner) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(Localization.get("menu.exportPdf"));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));

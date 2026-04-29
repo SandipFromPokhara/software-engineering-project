@@ -23,10 +23,19 @@ public class DeleteUserController {
     private PasswordField passwordField;
 
     @FXML
-    private Label deleteTitle, deleteWarning, deleteConfirmLabel;
+    private Label deleteTitle;
 
     @FXML
-    private Button cancelButton, deleteButton;
+    private Label deleteConfirmLabel;
+
+    @FXML
+    private Label deleteWarning;
+
+    @FXML
+    private Button cancelButton;
+
+    @FXML
+    Button deleteButton;
 
     @FXML
     private Label messageLabel;
@@ -35,35 +44,59 @@ public class DeleteUserController {
     public void initialize() {
 
         // LOCALIZATION BINDINGS
-        deleteTitle.textProperty().bind(Localization.bind("account.delete_title"));
-        deleteWarning.textProperty().bind(Localization.bind("account.delete_warning"));
-        deleteConfirmLabel.textProperty().bind(Localization.bind("account.confirm_password_label"));
+        if (deleteTitle != null) {
+            deleteTitle.textProperty().bind(Localization.bind("account.delete_title"));
+        }
+        if (deleteWarning != null) {
+            deleteWarning.textProperty().bind(Localization.bind("account.delete_warning"));
+        }
+        if (deleteConfirmLabel != null) {
+            deleteConfirmLabel.textProperty().bind(Localization.bind("account.confirm_password_label"));
+        }
 
-        passwordField.promptTextProperty().bind(Localization.bind("account.confirm_password_placeholder"));
+        if (passwordField != null) {
+            passwordField.promptTextProperty().bind(Localization.bind("account.confirm_password_placeholder"));
+        }
 
-        deleteButton.textProperty().bind(Localization.bind("button.delete"));
-        cancelButton.textProperty().bind(Localization.bind("button.cancel"));
+        if (deleteButton != null) {
+            deleteButton.textProperty().bind(Localization.bind("button.delete"));
+        }
+        if (cancelButton != null) {
+            cancelButton.textProperty().bind(Localization.bind("button.cancel"));
+        }
 
-        ShowMessageUtil.hideMessage(messageLabel);
-        passwordHasher = new BcryptPasswordHasher();
+        if (messageLabel != null) {
+            ShowMessageUtil.hideMessage(messageLabel);
+        }
+
+        // Only create a BcryptPasswordHasher when no hasher was injected (tests inject a mock)
+        if (passwordHasher == null) {
+            passwordHasher = new BcryptPasswordHasher();
+        }
     }
 
     @FXML
     private void handleDelete() {
         UserEntity currentUser = UserSession.getUserInstance().getUser();
         if (currentUser == null) {
-            ShowMessageUtil.showMessageKey(messageLabel, Localization.get("delete.no_session"), MessageType.ERROR);
+            if (messageLabel != null) {
+                ShowMessageUtil.showMessageKey(messageLabel, Localization.get("delete.no_session"), MessageType.ERROR);
+            }
             return;
         }
 
-        String password = passwordField.getText() == null ? "" : passwordField.getText();
+        String password = passwordField == null || passwordField.getText() == null ? "" : passwordField.getText();
         if (password.isBlank()) {
-            ShowMessageUtil.showMessageKey(messageLabel, "delete.password_required", MessageType.ERROR);
+            if (messageLabel != null) {
+                ShowMessageUtil.showMessageKey(messageLabel, "delete.password_required", MessageType.ERROR);
+            }
             return;
         }
 
         if (!passwordHasher.verify(password, currentUser.getPasswordHash())) {
-            ShowMessageUtil.showMessageKey(messageLabel, "delete.incorrect_password", MessageType.ERROR);
+            if (messageLabel != null) {
+                ShowMessageUtil.showMessageKey(messageLabel, "delete.incorrect_password", MessageType.ERROR);
+            }
             return;
         }
 
@@ -72,7 +105,9 @@ public class DeleteUserController {
             UserSession.getUserInstance().setUser(null);
             closeWindow();
         } catch (Exception e) {
-            ShowMessageUtil.showMessageKey(messageLabel,Localization.get("delete.failed"), MessageType.ERROR);
+            if (messageLabel != null) {
+                ShowMessageUtil.showMessageKey(messageLabel, Localization.get("delete.failed"), MessageType.ERROR);
+            }
         }
     }
 
@@ -82,7 +117,12 @@ public class DeleteUserController {
     }
 
     private void closeWindow() {
-        Stage stage = (Stage) passwordField.getScene().getWindow();
+        if (passwordField == null) return;
+        var scene = passwordField.getScene();
+        if (scene == null) return;
+        var window = scene.getWindow();
+        if (window == null) return;
+        Stage stage = (Stage) window;
         stage.close();
     }
 }

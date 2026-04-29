@@ -8,10 +8,10 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.layout.HBox?>
 
 <BorderPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #EAF7F7;" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.EntryController">
 
@@ -23,12 +23,12 @@
                         <Image url="@../Images/NoteVault.png" />
                     </image>
                 </ImageView>
-                <Label fx:id="privacyLabel" alignment="CENTER" text="" textAlignment="CENTER" textFill="WHITE" wrapText="true" StackPane.alignment="CENTER">
+                <Label fx:id="privacyLabel" alignment="CENTER" textAlignment="CENTER" textFill="WHITE" wrapText="true" StackPane.alignment="CENTER">
                     <StackPane.margin>
                         <Insets left="15.0" right="15.0" top="40.0" />
                     </StackPane.margin>
                     <font>
-                        <Font name="System Regular" size="16.0" />
+                        <Font size="16.0" />
                     </font>
                 </Label>
             </children>
@@ -39,40 +39,40 @@
         <AnchorPane prefHeight="400.0" prefWidth="300.0" style="-fx-background-color: #ebf4f5;" BorderPane.alignment="CENTER">
             <children>
 
-                <HBox fx:id="languageSwitcher" alignment="CENTER" spacing="4" AnchorPane.topAnchor="8.0" AnchorPane.rightAnchor="15.0" styleClass="language-switcher">
+                <HBox fx:id="languageSwitcher" alignment="CENTER" spacing="4" styleClass="language-switcher" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="8.0">
                     <children>
                         <!-- Globe icon -->
-                        <Label text="🌐"/>
+                        <Label text="🌐" />
 
                         <!-- Language code -->
-                        <Label fx:id="languageDisplay" style="-fx-font-weight: bold;"/>
+                        <Label fx:id="languageDisplay" style="-fx-font-weight: bold;" />
                     </children>
                 </HBox>
 
-                <Label fx:id="hello" alignment="CENTER" contentDisplay="CENTER" layoutX="96.0" layoutY="48.0" prefHeight="46.0" prefWidth="137.0" textFill="#297883" textOverrun="CLIP">
+                <Label fx:id="hello" alignment="CENTER" contentDisplay="CENTER" layoutX="96.0" layoutY="48.0" prefHeight="46.0" prefWidth="137.0" textFill="#297883" textOverrun="CLIP" AnchorPane.leftAnchor="96.0" AnchorPane.rightAnchor="60.0">
                     <font>
-                        <Font name="System Italic" size="30.0" />
+                        <Font size="30.0" />
                     </font>
                 </Label>
 
-                <Label fx:id="welcome" alignment="CENTER" contentDisplay="CENTER" layoutX="75.0" layoutY="83.0" prefHeight="35.0" prefWidth="170.0" textFill="#307494" AnchorPane.topAnchor="83.0">
+                <Label fx:id="welcome" alignment="CENTER" contentDisplay="CENTER" layoutX="75.0" layoutY="83.0" prefHeight="35.0" prefWidth="170.0" textFill="#307494" AnchorPane.leftAnchor="92.0" AnchorPane.rightAnchor="60.0" AnchorPane.topAnchor="83.0">
                     <font>
-                        <Font name="System Italic" size="12.0" />
+                        <Font size="12.0" />
                     </font>
                 </Label>
 
                 <VBox alignment="CENTER" layoutX="76.0" layoutY="162.0" maxWidth="1.7976931348623157E308" prefHeight="155.0" prefWidth="205.0" spacing="18.0" AnchorPane.leftAnchor="76.0" AnchorPane.rightAnchor="36.0" AnchorPane.topAnchor="170.0">
                     <children>
                         <Button fx:id="loginButton" mnemonicParsing="false" onAction="#onLogin" prefHeight="26.0" prefWidth="165.0" style="-fx-background-color: #266973; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-border-radius: 6;">
-                            <font><Font name="Times New Roman Bold" size="13.0" /></font>
+                            <font><Font size="13.0" /></font>
                         </Button>
 
                         <Button fx:id="registerButton" mnemonicParsing="false" onAction="#onRegister" prefHeight="26.0" prefWidth="165.0" style="-fx-background-color: #266973; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-border-radius: 6;">
-                            <font><Font name="Times New Roman Bold" size="13.0" /></font>
+                            <font><Font size="13.0" /></font>
                         </Button>
 
                         <Button fx:id="guestButton" mnemonicParsing="false" onAction="#onContinueAsGuest" prefHeight="26.0" prefWidth="165.0" style="-fx-background-color: #266973; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-border-radius: 6;">
-                            <font><Font name="Times New Roman Bold" size="13.0" /></font>
+                            <font><Font size="13.0" /></font>
                         </Button>
 
                         <Hyperlink fx:id="faqLink" alignment="CENTER" contentDisplay="CENTER" graphicTextGap="5.0" maxWidth="1.7976931348623157E308" onAction="#handleOpenFAQ" prefHeight="22.0" prefWidth="200.0" textFill="#266973" underline="true">

@@ -1,4 +1,4 @@
-package util.bulletList;
+package util.list;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -8,6 +8,8 @@ import javafx.scene.text.Font;
 import org.fxmisc.richtext.InlineCssTextArea;
 
 public class TextFormattingUtil {
+
+    private static final String ACTIVE_CLASS = "active";
 
     // -----------------------------------------------------------------------
     // Legacy font-size controls (TextArea-based, kept for tests)
@@ -50,9 +52,9 @@ public class TextFormattingUtil {
         }
 
         int start = textArea.getSelection().getStart();
-        int end   = textArea.getSelection().getEnd();
+        int end = textArea.getSelection().getEnd();
         int lineStart = findLineStart(text, start);
-        int lineEnd   = findLineEnd(text, end);
+        int lineEnd = findLineEnd(text, end);
 
         String[] lines = text.substring(lineStart, lineEnd).split("\n", -1);
 
@@ -76,7 +78,7 @@ public class TextFormattingUtil {
         }
 
         String before = text.substring(0, lineStart);
-        String after  = lineEnd < text.length() ? text.substring(lineEnd) : "";
+        String after = lineEnd < text.length() ? text.substring(lineEnd) : "";
         textArea.setText(before + newLines + after);
         textArea.selectRange(lineStart, lineStart + newLines.length());
 
@@ -85,20 +87,19 @@ public class TextFormattingUtil {
 
     public static void enableListAutoContinuation(TextArea textArea) {
         textArea.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                if (!handleListEnter(textArea, event, new BulletListStrategy())) {
-                    handleListEnter(textArea, event, new NumberedListStrategy());
-                }
+            if (event.getCode() == KeyCode.ENTER
+                    && !handleListEnter(textArea, event, new BulletListStrategy())) {
+                handleListEnter(textArea, event, new NumberedListStrategy());
             }
         });
     }
 
     private static boolean handleListEnter(TextArea textArea, KeyEvent event,
                                            IListFormattingStrategy strategy) {
-        String text     = textArea.getText();
-        int caretPos    = textArea.getCaretPosition();
-        int lineStart   = findLineStart(text, caretPos);
-        int lineEnd     = findLineEnd(text, caretPos);
+        String text = textArea.getText();
+        int caretPos = textArea.getCaretPosition();
+        int lineStart = findLineStart(text, caretPos);
+        int lineEnd = findLineEnd(text, caretPos);
         String currentLine = text.substring(lineStart, lineEnd);
 
         if (!strategy.hasFormat(currentLine)) return false;
@@ -109,13 +110,13 @@ public class TextFormattingUtil {
 
         if (contentAfter.trim().isEmpty()) {
             String before = text.substring(0, lineStart);
-            String after  = lineEnd < text.length() ? text.substring(lineEnd) : "";
+            String after = lineEnd < text.length() ? text.substring(lineEnd) : "";
             textArea.setText(before + after);
             textArea.positionCaret(lineStart);
         } else {
             String nextPrefix = getNextPrefix(currentLine, strategy);
             String before = text.substring(0, caretPos);
-            String after  = caretPos < text.length() ? text.substring(caretPos) : "";
+            String after = caretPos < text.length() ? text.substring(caretPos) : "";
             textArea.setText(before + "\n" + nextPrefix + after);
             textArea.positionCaret(caretPos + 1 + nextPrefix.length());
         }
@@ -136,10 +137,10 @@ public class TextFormattingUtil {
             return;
         }
 
-        int start     = textArea.getSelection().getStart();
-        int end       = textArea.getSelection().getEnd();
+        int start = textArea.getSelection().getStart();
+        int end = textArea.getSelection().getEnd();
         int lineStart = findLineStart(text, start);
-        int lineEnd   = findLineEnd(text, end);
+        int lineEnd = findLineEnd(text, end);
 
         String[] lines = text.substring(lineStart, lineEnd).split("\n", -1);
 
@@ -171,20 +172,19 @@ public class TextFormattingUtil {
 
     public static void enableListAutoContinuation(InlineCssTextArea textArea) {
         textArea.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                if (!handleListEnter(textArea, event, new BulletListStrategy())) {
-                    handleListEnter(textArea, event, new NumberedListStrategy());
-                }
+            if (event.getCode() == KeyCode.ENTER
+                    && !handleListEnter(textArea, event, new BulletListStrategy())) {
+                handleListEnter(textArea, event, new NumberedListStrategy());
             }
         });
     }
 
     private static boolean handleListEnter(InlineCssTextArea textArea, KeyEvent event,
                                            IListFormattingStrategy strategy) {
-        String text      = textArea.getText();
-        int caretPos     = textArea.getCaretPosition();
-        int lineStart    = findLineStart(text, caretPos);
-        int lineEnd      = findLineEnd(text, caretPos);
+        String text = textArea.getText();
+        int caretPos = textArea.getCaretPosition();
+        int lineStart = findLineStart(text, caretPos);
+        int lineEnd = findLineEnd(text, caretPos);
         String currentLine = text.substring(lineStart, lineEnd);
 
         if (!strategy.hasFormat(currentLine)) return false;
@@ -232,11 +232,14 @@ public class TextFormattingUtil {
 
     private static void setButtonActive(Button button, boolean active) {
         if (button == null) return;
-        if (active) {
-            if (!button.getStyleClass().contains("active"))
-                button.getStyleClass().add("active");
-        } else {
-            button.getStyleClass().remove("active");
+        if (active && !button.getStyleClass().contains(ACTIVE_CLASS)) {
+            button.getStyleClass().add(ACTIVE_CLASS);
+        } else if (!active) {
+            button.getStyleClass().remove(ACTIVE_CLASS);
         }
+    }
+
+    private TextFormattingUtil() {
+        // Utility class
     }
 }

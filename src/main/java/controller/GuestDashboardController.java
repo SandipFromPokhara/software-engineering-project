@@ -49,7 +49,7 @@ public class GuestDashboardController {
 
     @FXML
     public void handleNewFiles() {
-        NavigationUtil.setCenter(centerPane, "/FXML/createFilesGuest.fxml");
+        NavigationUtil.setCenter(centerPane, "/FXML/create_files_guest.fxml");
     }
 
     @FXML

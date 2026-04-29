@@ -1,6 +1,8 @@
 package util;
 
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.NodeOrientation;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -13,6 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Objects;
 
 public class NavigationUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(NavigationUtil.class);
@@ -82,6 +89,9 @@ public class NavigationUtil {
      * Replace the scene on an existing stage
      */
     public static void replaceScene(Stage stage, String fxmlPath, String titleKey, boolean resizable) {
+        if (stage == null) {
+            throw new IllegalArgumentException("stage must not be null. Provide a valid Stage or use openWindow(...) to open a new window.");
+        }
         try {
             FxmlLoadResult<?> result = buildScene(fxmlPath);
 
@@ -115,8 +125,15 @@ public class NavigationUtil {
     }
 
     private static <T> FxmlLoadResult<T> buildScene(String fxmlPath) throws IOException {
-        FXMLLoader loader = new FXMLLoader(NavigationUtil.class.getResource(fxmlPath));
+        URL fxmlUrl = resolveFxmlUrl(fxmlPath);
+        FXMLLoader loader = new FXMLLoader(fxmlUrl);
         Parent root = loader.load();
+
+        root.nodeOrientationProperty().bind(
+                Bindings.when(Localization.isRTLProperty())
+                        .then(NodeOrientation.RIGHT_TO_LEFT)
+                        .otherwise(NodeOrientation.LEFT_TO_RIGHT)
+        );
 
         Scene scene = new Scene(root);
 
@@ -124,8 +141,10 @@ public class NavigationUtil {
             scene.getRoot().getStyleClass().add("root");
         }
 
+        scene.getStylesheets().add(css("/css/theme.css"));
+        scene.getStylesheets().add(css("/css/row_color.css"));
+
         ToggleUtil.applyTheme(scene);
-        scene.getStylesheets().add("/css/row_color.css");
 
         return new FxmlLoadResult<>(scene, loader.getController());
     }
@@ -142,6 +161,7 @@ public class NavigationUtil {
             stage.setMinHeight(400);
         }
     }
+
     public static void setCenter(VBox centerPane, String fxmlPath) {
         try {
             FxmlLoadResult<?> result = buildScene(fxmlPath);
@@ -159,5 +179,76 @@ public class NavigationUtil {
         } catch (IOException e) {
             LOGGER.error("Failed to load center FXML: {}", fxmlPath, e);
         }
+    }
+
+    private static String css(String path) {
+        return Objects.requireNonNull(
+                NavigationUtil.class.getResource(path),
+                "Missing CSS file: " + path
+        ).toExternalForm();
+    }
+
+    /*
+     * Resolve the FXML URL using the following order:
+     * 1. Classpath resource (NavigationUtil.class.getResource or classloader)
+     * 2. Developer workspace file (src/main/resources/...) if it exists and is preferred
+     * The dev file is preferred when the classpath resource is missing, when the
+     * classpath resource is packaged in a JAR, or when the workspace file is newer.
+     */
+    private static URL resolveFxmlUrl(String fxmlPath) throws IOException {
+        String normalized = fxmlPath.startsWith("/") ? fxmlPath.substring(1) : fxmlPath;
+
+        // 1) Try classpath
+        URL classpathUrl = NavigationUtil.class.getResource(fxmlPath);
+        if (classpathUrl == null) {
+            classpathUrl = NavigationUtil.class.getClassLoader().getResource(normalized);
+        }
+
+        // 2) Prepare dev workspace path
+        Path devPath = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", normalized.replace('/', java.io.File.separatorChar));
+
+        // If dev file doesn't exist, return whatever classpath gave us (may be null)
+        if (!Files.exists(devPath)) {
+            if (classpathUrl != null) return classpathUrl;
+            throw new IOException("FXML resource not found on classpath: " + fxmlPath + " - ensure it exists under src/main/resources and is packaged.");
+        }
+
+        // If classpath is missing, prefer dev file
+        if (classpathUrl == null) {
+            URL devUrl = devPath.toUri().toURL();
+            LOGGER.warn("Loading FXML from filesystem during development: {}", devPath);
+            return devUrl;
+        }
+
+        // If classpath resource is not a plain file URL (e.g. inside a JAR), prefer dev file
+        String proto = classpathUrl.getProtocol();
+        if (!"file".equalsIgnoreCase(proto)) {
+            LOGGER.warn("Loading FXML from filesystem during development (classpath is jar): {}", devPath);
+            return devPath.toUri().toURL();
+        }
+
+        // Both are files on disk: prefer the newer (dev file wins if newer)
+        try {
+            Path classpathPath = Paths.get(classpathUrl.toURI());
+            if (!Files.exists(classpathPath)) {
+                LOGGER.warn("Loading FXML from filesystem during development (classpath missing file): {}", devPath);
+                return devPath.toUri().toURL();
+            }
+
+            long devMillis = Files.getLastModifiedTime(devPath).toMillis();
+            long cpMillis = Files.getLastModifiedTime(classpathPath).toMillis();
+            if (devMillis > cpMillis) {
+                URL devUrl = devPath.toUri().toURL();
+                LOGGER.warn("Loading FXML from filesystem during development (dev is newer): {}", devPath);
+                return devUrl;
+            }
+        } catch (Exception e) {
+            // If anything goes wrong comparing timestamps, fall back to dev to make iteration easier
+            LOGGER.debug("Error comparing dev/classpath FXML timestamps, preferring dev: {}", e.toString());
+            return devPath.toUri().toURL();
+        }
+
+        // Default to classpath resource
+        return classpathUrl;
     }
 }
