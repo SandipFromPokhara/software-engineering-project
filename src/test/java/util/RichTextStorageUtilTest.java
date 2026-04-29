@@ -1,63 +1,73 @@
 package util;
 
-
+import org.junit.jupiter.api.Test;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class RichTextStorageUtilTest {
 
     @Test
-    void serialize_nullSpans_returnsPlainText() {
-        String sample = "Hello World";
-        String stored = RichTextStorageUtil.serialize(sample, null);
-        assertEquals(sample, stored);
+    void serializeWithNullSpansReturnsRawText() {
+        String result = RichTextStorageUtil.serialize("Sample", null);
+        assertEquals("Sample", result);
     }
 
     @Test
-    void serialize_and_decode_roundtrip_withRuns() {
-        String sample = "abc";
+    void serializeAndDecodeRoundTripsContent() {
+        String originalText = "Hello Bold World";
         StyleSpansBuilder<String> builder = new StyleSpansBuilder<>();
-        builder.add("bold", 1);
-        builder.add("", 2);
+        builder.add("", 6); // "Hello "
+        builder.add("-fx-font-weight: bold;", 4); // "Bold"
+        builder.add("", 6); // " World"
+
         StyleSpans<String> spans = builder.create();
 
-        String stored = RichTextStorageUtil.serialize(sample, spans);
-        assertNotNull(stored);
-        assertTrue(stored.startsWith("RTF1|"));
+        String serialized = RichTextStorageUtil.serialize(originalText, spans);
+        assertNotNull(serialized);
+        assertTrue(serialized.startsWith("RTF1"));
 
-        RichTextStorageUtil.DecodedContent decoded = RichTextStorageUtil.decode(stored);
-        assertEquals(sample, decoded.text());
+        RichTextStorageUtil.DecodedContent decoded = RichTextStorageUtil.decode(serialized);
+
+        assertEquals(originalText, decoded.text());
         assertNotNull(decoded.spans());
+        assertEquals(3, decoded.spans().getSpanCount());
+        assertEquals("", decoded.spans().getStyleSpan(0).getStyle());
+        assertEquals("-fx-font-weight: bold;", decoded.spans().getStyleSpan(1).getStyle());
     }
 
     @Test
-    void decode_nullOrBlank_returnsEmptyContent() {
-        RichTextStorageUtil.DecodedContent d1 = RichTextStorageUtil.decode(null);
-        assertEquals("", d1.text());
-        assertNull(d1.spans());
+    void decodeWithNullOrBlankReturnsEmptyContent() {
+        RichTextStorageUtil.DecodedContent decodedNull = RichTextStorageUtil.decode(null);
+        assertEquals("", decodedNull.text());
+        assertNull(decodedNull.spans());
 
-        RichTextStorageUtil.DecodedContent d2 = RichTextStorageUtil.decode("");
-        assertEquals("", d2.text());
-        assertNull(d2.spans());
+        RichTextStorageUtil.DecodedContent decodedEmpty = RichTextStorageUtil.decode("   ");
+        assertEquals("", decodedEmpty.text());
+        assertNull(decodedEmpty.spans());
     }
 
     @Test
-    void decode_withoutPrefix_returnsOriginalText() {
-        String plain = "just plain";
-        RichTextStorageUtil.DecodedContent d = RichTextStorageUtil.decode(plain);
-        assertEquals(plain, d.text());
-        assertNull(d.spans());
+    void decodeWithoutPrefixReturnsRawTextAndNullSpans() {
+        RichTextStorageUtil.DecodedContent decoded = RichTextStorageUtil.decode("Plain text");
+        assertEquals("Plain text", decoded.text());
+        assertNull(decoded.spans());
     }
 
+    @Test
+    void toPlainTextWithValidSerializedStringReturnsDecodedText() {
+        String originalText = "Hello";
+        StyleSpans<String> spans = new StyleSpansBuilder<String>().add("", 5).create();
+        String serialized = RichTextStorageUtil.serialize(originalText, spans);
+
+        String plain = RichTextStorageUtil.toPlainText(serialized);
+        assertEquals(originalText, plain);
+    }
 
     @Test
-    void toPlainText_usesDecodeText() {
-        String sample = "Hello";
-        String stored = RichTextStorageUtil.serialize(sample, null);
-        assertEquals(sample, RichTextStorageUtil.toPlainText(stored));
+    void toPlainTextWithoutPrefixReturnsRawText() {
+        String plain = RichTextStorageUtil.toPlainText("Just text");
+        assertEquals("Just text", plain);
     }
 }
-
