@@ -7,9 +7,11 @@ import entity.entities.NotebookEntity;
 import entity.entities.UserEntity;
 import entity.translationentities.NotebookTranslationEntity;
 import javafx.concurrent.Task;
+import dao.note.JpaNoteDao;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import javafx.beans.binding.Bindings;
 import session.NotebookSession;
 import session.UserSession;
 import javafx.fxml.FXML;
@@ -25,9 +27,13 @@ import java.util.logging.Logger;
 public class ManageNotebookController {
     private static final Logger logger = Logger.getLogger(ManageNotebookController.class.getName());
     private static final String NOTEBOOKS_RENAME_KEY = "notebooks.rename";
+    private static final String DELETE_BUTTON = "button.delete";
+    private static final String NULL = "<null>";
 
     private INotebookDAO notebookDao;
     private NotebookEntity activeNotebook;
+    // Cache of notebook -> note count for display in the list
+    private final java.util.Map<Long, Integer> notebookNoteCounts = new java.util.HashMap<>();
 
     @FXML
     private Label manageTitle;
@@ -73,7 +79,7 @@ public class ManageNotebookController {
         manageTitle.textProperty().bind(Localization.bind("notebooks.title"));
         openBtn.textProperty().bind(Localization.bind("notebooks.open"));
         renameBtn.textProperty().bind(Localization.bind(NOTEBOOKS_RENAME_KEY));
-        deleteBtn.textProperty().bind(Localization.bind("button.delete"));
+        deleteBtn.textProperty().bind(Localization.bind(DELETE_BUTTON));
         closeBtn.textProperty().bind(Localization.bind("notebooks.close"));
 
         // Disable buttons initially
@@ -109,18 +115,35 @@ public class ManageNotebookController {
 
     private ListCell<NotebookEntity> createNotebookListCell(ListView<NotebookEntity> lv, StringConverter<NotebookEntity> converter) {
         return new ListCell<>() {
-            private final Label label = new Label();
+            private final Label titleLabel = new Label();
+            private final Label countLabel = new Label();
+            private final javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(8);
 
             {
-                label.setWrapText(true);
-                // Bind the label max width to the list view width minus padding so it can wrap correctly
-                label.maxWidthProperty().bind(lv.widthProperty().subtract(35));
-                // Show full title on hover in a tooltip (helps when titles are long)
+                titleLabel.setWrapText(true);
+                titleLabel.getStyleClass().addAll("list-cell-text", "list-cell-title");
+                // Title label should take available width, count label stays compact
+                titleLabel.maxWidthProperty().bind(lv.widthProperty().subtract(90));
+
+                countLabel.getStyleClass().addAll("list-cell-text", "list-cell-count");
+
+                // Tooltip shows full title (and optionally count)
                 Tooltip tooltip = new Tooltip();
-                tooltip.textProperty().bind(label.textProperty());
-                label.setTooltip(tooltip);
-                // Ensure label picks up a theme-aware color via CSS
-                label.getStyleClass().add("list-cell-text");
+                tooltip.textProperty().bind(titleLabel.textProperty());
+                util.TooltipUtil.setTooltipDelay(tooltip);
+                titleLabel.setTooltip(tooltip);
+
+                Tooltip countTooltip = new Tooltip();
+                util.TooltipUtil.setTooltipDelay(countTooltip);
+                // Localized tooltip for notes count; updates when locale or count changes
+                countTooltip.textProperty().bind(Bindings.createStringBinding(() -> {
+                    String txt = countLabel.getText();
+                    if (txt == null || txt.isBlank()) return "";
+                    return util.Localization.get("notebooks.count", txt);
+                }, util.Localization.localeProperty(), countLabel.textProperty()));
+                countLabel.setTooltip(countTooltip);
+
+                container.getChildren().addAll(titleLabel, countLabel);
             }
 
             @Override
@@ -129,7 +152,6 @@ public class ManageNotebookController {
                 if (empty || item == null) {
                     setGraphic(null);
                     setText(null);
-                    setStyle(null);
                 } else {
                     updateCellContent(item, converter);
                 }
@@ -137,14 +159,20 @@ public class ManageNotebookController {
 
             private void updateCellContent(NotebookEntity item, StringConverter<NotebookEntity> converter) {
                 String title = converter.toString(item);
-                logger.fine(() -> "Updating notebook list cell: id=" + (item.getId() == null ? "<null>" : item.getId()) + ", title='" + title + "'");
-                label.setText(title);
-                setText(title);
-                setGraphic(null);
+                Integer count = notebookNoteCounts.get(item.getId());
 
-                // Inline fallback for text color
-                String colorStyle = util.ToggleUtil.isDarkMode() ? "-fx-text-fill: #e6e6e6;" : "-fx-text-fill: #000000;";
-                setStyle(colorStyle);
+                titleLabel.setText(title == null ? "" : title);
+                if (count != null) {
+                    countLabel.setText(String.format("%d", count));
+                    countLabel.setVisible(true);
+                } else {
+                    countLabel.setText("");
+                    countLabel.setVisible(false);
+                }
+
+                // Use container as graphic (avoid setText to allow richer layout)
+                setText(null);
+                setGraphic(container);
             }
         };
     }
@@ -164,40 +192,76 @@ public class ManageNotebookController {
                 }
             };
 
-            loadNotebooksTask.setOnSucceeded(e -> {
-                List<NotebookEntity> notebooks = loadNotebooksTask.getValue();
+            loadNotebooksTask.setOnSucceeded(e -> processLoadedNotebooks(loadNotebooksTask.getValue()));
 
-                if (notebooks != null) {
-                    String currentCode = Localization.getCurrentLanguageCode();
-                    for (NotebookEntity n : notebooks) {
-                        String title = getNotebookTitle(n);
-                        logger.fine(() -> "Notebook id=" + (n.getId() == null ? "<null>" : n.getId()) + ", title='" + title + "', lang=" + currentCode);
-                    }
-
-                    // Ensure the list is not null before sorting or setting items
-                    notebooks.sort((n1, n2) -> {
-                        String t1 = getNotebookTitle(n1);
-                        String t2 = getNotebookTitle(n2);
-                        return String.CASE_INSENSITIVE_ORDER.compare(t1, t2);
-                    });
-                    notebookListView.getItems().setAll(notebooks);
-                } else {
-                    notebookListView.getItems().clear();
-                }
-
-                // Select active notebook if available
-                if (activeNotebook != null) {
-                    notebookListView.getSelectionModel().select(activeNotebook);
-                }
-            });
-
-            loadNotebooksTask.setOnFailed(e ->
-                    logger.log(Level.SEVERE, "Failed to load notebooks", loadNotebooksTask.getException())
-            );
+            loadNotebooksTask.setOnFailed(e -> logger.log(Level.SEVERE, "Failed to load notebooks", loadNotebooksTask.getException()));
 
             new Thread(loadNotebooksTask).start();
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Failed to load notebooks", e);
+        }
+    }
+
+    // Process results from the background task. Extracted to reduce complexity in loadNotebooks().
+    private void processLoadedNotebooks(List<NotebookEntity> notebooks) {
+        if (notebooks == null) {
+            notebookListView.getItems().clear();
+            return;
+        }
+
+        String currentCode = Localization.getCurrentLanguageCode();
+        for (NotebookEntity n : notebooks) {
+            String title = getNotebookTitle(n);
+            logger.fine(() -> "Notebook id=" + (n.getId() == null ? NULL : n.getId()) + ", title='" + title + "', lang=" + currentCode);
+        }
+
+        // Sort notebooks by title (localized)
+        notebooks.sort((n1, n2) -> {
+            String t1 = getNotebookTitle(n1);
+            String t2 = getNotebookTitle(n2);
+            return String.CASE_INSENSITIVE_ORDER.compare(t1, t2);
+        });
+
+        // Populate note counts (may hit DB) — acceptable for small number of notebooks
+        computeNoteCounts(notebooks);
+
+        notebookListView.getItems().setAll(notebooks);
+        notebookListView.refresh();
+
+        // Select active notebook if available
+        if (activeNotebook != null) {
+            notebookListView.getSelectionModel().select(activeNotebook);
+        }
+    }
+
+    private void computeNoteCounts(List<NotebookEntity> notebooks) {
+        try {
+            JpaNoteDao noteDao = new JpaNoteDao();
+            notebookNoteCounts.clear();
+            for (NotebookEntity n : notebooks) {
+                if (n == null || n.getId() == null) {
+                    // skip null entries defensively
+                    continue;
+                }
+
+                int count = safeCountForNotebook(noteDao, n);
+                notebookNoteCounts.put(n.getId(), count);
+            }
+        } catch (Exception ex) {
+            logger.log(Level.FINE, "Failed to compute notebook note counts", ex);
+        }
+    }
+
+    private int safeCountForNotebook(JpaNoteDao noteDao, NotebookEntity notebook) {
+        if (notebook == null || notebook.getId() == null) return 0;
+
+        try {
+            var notes = noteDao.findByNotebook(notebook);
+            return notes == null ? 0 : notes.size();
+        } catch (Exception ex) {
+            String idStr = notebook.getId() == null ? NULL : String.valueOf(notebook.getId());
+            logger.log(Level.FINE, () -> "Failed to load notes for notebook id=" + idStr + ex);
+            return 0;
         }
     }
 
@@ -261,27 +325,86 @@ public class ManageNotebookController {
         NotebookEntity selected = notebookListView.getSelectionModel().getSelectedItem();
         if (selected == null) return;
 
+        // initial confirmation
         boolean confirmed = AlertUtil.showConfirmation(
                 notebookListView.getScene().getWindow(),
-                Localization.get("button.delete"),
+                Localization.get(DELETE_BUTTON),
                 Localization.get("notebooks.delete_confirm", getNotebookTitle(selected))
         );
 
-        if (confirmed) {
-            try {
-                notebookDao.delete(selected);
-                notebookListView.getItems().remove(selected);
+        if (!confirmed) return;
 
-                // If deleted notebook was active, clear session
-                NotebookEntity active = NotebookSession.getLastCreatedNotebook();
-                if (active != null && active.getId().equals(selected.getId())) {
-                    NotebookSession.clear();
-                }
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Failed to delete notebook", e);
-                AlertUtil.showError(notebookListView.getScene().getWindow(), Localization.get("notebook.deleteAlert"));
+        try {
+            int noteCount = getNoteCount(selected);
+
+            if (noteCount > 0) {
+                boolean deleteAll = confirmDeleteAllDialog(selected, noteCount);
+                if (!deleteAll) return;
+
+                // user confirmed: perform an atomic delete of notes + notebook in one transaction
+                notebookDao.deleteWithNotes(selected);
+
+                // Update UI and session state after successful deletion
+                onNotebookRemoved(selected);
+            } else {
+                // no notes, just delete the notebook
+                safeDeleteNotebook(selected);
             }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Failed to delete notebook", e);
+            AlertUtil.showError(notebookListView.getScene().getWindow(), Localization.get("notebook.deleteAlert"));
         }
+    }
+
+    // --- extracted helpers to reduce cognitive complexity ---
+    private int getNoteCount(NotebookEntity notebook) {
+        JpaNoteDao noteDao = new JpaNoteDao();
+        try {
+            java.util.List<entity.entities.NoteEntity> notes = noteDao.findByNotebook(notebook);
+            return notes == null ? 0 : notes.size();
+        } catch (Exception e) {
+            String idStr = notebook == null || notebook.getId() == null ? NULL : String.valueOf(notebook.getId());
+            logger.log(Level.FINE, () -> "Failed to get note count for notebook id=" + idStr + e);
+            return 0;
+        }
+    }
+
+    private boolean confirmDeleteAllDialog(NotebookEntity notebook, int noteCount) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle(Localization.get(DELETE_BUTTON));
+        confirm.setHeaderText(null);
+        confirm.setContentText(Localization.get("notebooks.delete_with_notes_confirm", getNotebookTitle(notebook), String.valueOf(noteCount)));
+        if (notebookListView.getScene() != null && notebookListView.getScene().getWindow() != null) {
+            confirm.initOwner(notebookListView.getScene().getWindow());
+        }
+
+        ButtonType deleteAll = new ButtonType(Localization.get(DELETE_BUTTON), ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType(Localization.get("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        confirm.getButtonTypes().setAll(deleteAll, cancel);
+
+        var res = confirm.showAndWait();
+        return res.isPresent() && res.get() == deleteAll;
+    }
+    
+    private void safeDeleteNotebook(NotebookEntity notebook) {
+        notebookDao.delete(notebook);
+        onNotebookRemoved(notebook);
+    }
+
+    /**
+     * Common UI/session cleanup after a notebook has been removed from the database.
+     */
+    private void onNotebookRemoved(NotebookEntity notebook) {
+        if (notebook == null) return;
+
+        notebookListView.getItems().remove(notebook);
+
+        NotebookEntity active = NotebookSession.getLastCreatedNotebook();
+        if (active != null && active.getId() != null && active.getId().equals(notebook.getId())) {
+            NotebookSession.clear();
+        }
+
+        notebookNoteCounts.remove(notebook.getId());
     }
 
     @FXML
