@@ -107,7 +107,7 @@
                                     <Font name="System Bold" size="14.0" />
                                 </font>
                             </Label>
-                            <Label alignment="CENTER" opacity="0.64" styleClass="help-label">
+                            <Label alignment="CENTER" opacity="0.64" styleClass="help-label" text="?">
                                 <tooltip>
                                     <Tooltip fx:id="tagTooltip" styleClass="tooltip">
                                         <font>

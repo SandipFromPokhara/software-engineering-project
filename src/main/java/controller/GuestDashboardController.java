@@ -3,6 +3,7 @@ package controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -34,11 +35,15 @@ public class GuestDashboardController {
 
     @FXML
     private VBox centerPane;
+    @FXML private Tooltip homeTooltip;
+    @FXML private Tooltip createTooltip;
 
     @FXML
     public void initialize() {
         login.textProperty().bind(Localization.bind("guest.login"));
         register.textProperty().bind(Localization.bind("guest.register"));
+        homeTooltip.textProperty().bind(Localization.bind("guest.home"));
+        createTooltip.textProperty().bind(Localization.bind("note.create_label"));
     }
 
     @FXML
