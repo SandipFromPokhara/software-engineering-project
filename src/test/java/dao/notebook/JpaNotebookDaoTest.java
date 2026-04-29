@@ -1,7 +1,9 @@
 package dao.notebook;
 
+import dao.note.JpaNoteDao;
 import dao.user.JpaUserDao;
 import datasource.MariaDbJpaConnection;
+import entity.entities.NoteEntity;
 import entity.entities.NotebookEntity;
 import entity.entities.UserEntity;
 import org.junit.jupiter.api.*;
@@ -111,6 +113,11 @@ class JpaNotebookDaoTest {
         assertThrows(IllegalArgumentException.class, () -> notebookDao.findByUser(null));
     }
 
+    @Test
+    void testFindByIdReturnsNullWhenMissing() {
+        NotebookEntity result = notebookDao.findById(999999L);
+        assertNull(result);
+    }
 
     @Test
     void testUpdateNotebook() {
@@ -161,5 +168,47 @@ class JpaNotebookDaoTest {
     @Test
     void testDeleteNull() {
         assertThrows(IllegalArgumentException.class, () -> notebookDao.delete(null));
+    }
+
+    @Test
+    void deleteWithNotesRemovesNotesAndNotebookAtomically() {
+        JpaUserDao userDao = new JpaUserDao();
+        JpaNoteDao noteDao = new JpaNoteDao();
+
+        // Create and persist a user
+        UserEntity user = new UserEntity("Test", "User", "it_user", "it@example.com");
+        user = userDao.save(user);
+        MariaDbJpaConnection.closeEntityManager();
+
+        // Create and persist a notebook for the user
+        NotebookEntity notebook = new NotebookEntity(user);
+        notebook = notebookDao.save(notebook);
+        MariaDbJpaConnection.closeEntityManager();
+
+        // Create and persist a couple of notes attached to the notebook
+        NoteEntity n1 = new NoteEntity();
+        n1.setNotebook(notebook);
+        noteDao.save(n1);
+
+        NoteEntity n2 = new NoteEntity();
+        n2.setNotebook(notebook);
+        noteDao.save(n2);
+
+        MariaDbJpaConnection.closeEntityManager();
+
+        List<NoteEntity> before = noteDao.findByNotebook(notebook);
+        assertEquals(2, before.size(), "There should be 2 notes before deletion");
+
+        // Perform atomic delete
+        notebookDao.deleteWithNotes(notebook);
+        MariaDbJpaConnection.closeEntityManager();
+
+        // Notebook should be gone
+        NotebookEntity maybe = notebookDao.findById(notebook.getId());
+        assertNull(maybe, "Notebook should be removed by deleteWithNotes");
+
+        // Notes should also be gone
+        List<NoteEntity> after = noteDao.findByNotebook(notebook);
+        assertTrue(after.isEmpty(), "All notes belonging to the notebook should be deleted");
     }
 }

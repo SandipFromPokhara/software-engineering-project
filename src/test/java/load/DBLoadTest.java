@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DBLoadTest {
 
-    private static final String CSV_FILE = "load-test-results.csv";
+    private static final String CSV_FILE = "load-testing/load-test-results.csv";
     private static final Logger logger = LoggerFactory.getLogger(DBLoadTest.class);
 
     private static final int THREADS = 20;
@@ -163,7 +163,8 @@ class DBLoadTest {
         System.out.println("Min ms: " + min);
         System.out.println("Max ms: " + max);
         System.out.println("P95 ms: " + p95);
-        System.out.println("Throughput ops/sec: " + throughput);
+        System.out.printf("Throughput ops/sec: %.2f", throughput);
+        System.out.println();
 
         // Export to CSV
         try (PrintWriter writer = new PrintWriter(CSV_FILE)) {

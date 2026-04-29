@@ -28,11 +28,27 @@ public final class AlertUtil {
         alert.setHeaderText(null);
         alert.setContentText(content);
 
+        setCloseOnly(alert);
+
         if (owner != null) {
             alert.initOwner(owner);
         }
 
         alert.showAndWait();
+    }
+
+    public static void showAbout(Window owner) {
+        Alert about = new Alert(Alert.AlertType.INFORMATION);
+        about.setTitle(Localization.get("about.window_title"));
+        about.setHeaderText(Localization.get("about.header"));
+        about.setContentText(Localization.get("about.content"));
+
+        setCloseOnly(about);
+
+        if (owner != null) {
+            about.initOwner(owner);
+        }
+        about.showAndWait();
     }
 
     public static void showInfo(Window owner, String message) {
@@ -66,8 +82,11 @@ public final class AlertUtil {
     }
 
     public static void addStandardButtons(Dialog<?> dialog) {
-
         dialog.getDialogPane().getButtonTypes().setAll(createOkButton(), createCancelButton());
+    }
+
+    private static void setCloseOnly(Dialog<?> dialog) {
+        dialog.getDialogPane().getButtonTypes().setAll(createCloseButton());
     }
 
     private static ButtonType createOkButton() {
@@ -76,5 +95,10 @@ public final class AlertUtil {
 
     private static ButtonType createCancelButton() {
         return new ButtonType(Localization.get("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+    }
+
+    private static ButtonType createCloseButton() {
+        return new ButtonType(Localization.get("menu.close"), ButtonBar.ButtonData.CANCEL_CLOSE
+        );
     }
 }

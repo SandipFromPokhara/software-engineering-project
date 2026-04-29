@@ -204,8 +204,9 @@ class ValidationTest {
         assertEquals(e1, e2);
         assertEquals(e1.hashCode(), e2.hashCode());
     }
+
     @Test
-    void validationError_equals_hashcode_and_toString() {
+    void validationErrorEqualsHashcodeAndToString() {
         Validation.ValidationError a = new Validation.ValidationError("key", new Object[]{"v"});
         Validation.ValidationError b = new Validation.ValidationError("key", new Object[]{"v"});
         Validation.ValidationError c = new Validation.ValidationError("other", new Object[]{"v"});
@@ -217,9 +218,69 @@ class ValidationTest {
     }
 
     @Test
-    void validationError_args_null_returnsEmptyArray() {
+    void validationErrorArgsNullReturnsEmptyArray() {
         Validation.ValidationError ve = new Validation.ValidationError("k", null);
         assertNotNull(ve.args());
         assertEquals(0, ve.args().length);
+    }
+
+    @Test
+    void validateNameNullAndBlankDoesNothing() {
+        var errors = new java.util.HashMap<String, java.util.List<Validation.ValidationError>>();
+
+        // null
+        Validation.validateName(null, "firstName", errors, "First name");
+
+        // blank
+        Validation.validateName("   ", "firstName", errors, "First name");
+
+        assertTrue(errors.isEmpty());
+    }
+
+    @Test
+    void validatePasswordNullAndBlankDoesNothing() {
+        var errors = new java.util.HashMap<String, java.util.List<Validation.ValidationError>>();
+
+        Validation.validatePassword(null, errors, "password");
+        Validation.validatePassword("   ", errors, "password");
+
+        assertTrue(errors.isEmpty());
+    }
+
+    @Test
+    void validateUpdateHandlesNullValues() {
+        Validation.ValidationResult result = Validation.validateUpdate(
+                null, null, null, null
+        );
+
+        assertFalse(result.success());
+        assertTrue(result.errors().containsKey("lastName"));
+    }
+
+    @Test
+    void validateSignupTrimsInputs() {
+        Validation.ValidationResult result = Validation.validateSignup(
+                "  John  ", "  Doe  ", "  User123  ",
+                "  user@example.com  ", "  Abc123!  ", "  Abc123!  "
+        );
+
+        assertTrue(result.success());
+    }
+
+    @Test
+    void validationErrorEqualsHandlesDifferentTypes() {
+        Validation.ValidationError error = new Validation.ValidationError("key", new Object[]{"a"});
+
+        assertNotEquals(null, error);
+        assertNotEquals("some string", error);
+    }
+
+    @Test
+    void validateUpdateSkipsPasswordValidationWhenBlank() {
+        Validation.ValidationResult result = Validation.validateUpdate(
+                "Doe", "User123", "   ", "   "
+        );
+
+        assertTrue(result.success()); // password ignored
     }
 }

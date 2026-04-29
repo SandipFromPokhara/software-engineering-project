@@ -1,6 +1,7 @@
 package services;
 
 import javafx.scene.control.ComboBox;
+import model.LanguageModel;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,14 +17,14 @@ class LanguageComboServiceTest {
 
     @Test
     void setupInitializesComboBox() {
-        ComboBox<String> comboBox = new ComboBox<>();
+        ComboBox<LanguageModel.Language> comboBox = new ComboBox<>();
 
         assertDoesNotThrow(() -> LanguageComboService.setup(comboBox));
 
         // real keys from LanguageModel
-        assertTrue(comboBox.getItems().contains("EN"));
-        assertTrue(comboBox.getItems().contains("FI"));
-        assertTrue(comboBox.getItems().contains("NP"));
+        assertTrue(comboBox.getItems().stream().anyMatch(l -> l.code().equals("EN")));
+        assertTrue(comboBox.getItems().stream().anyMatch(l -> l.code().equals("FI")));
+        assertTrue(comboBox.getItems().stream().anyMatch(l -> l.code().equals("NP")));
 
         // default value should be one of the valid keys
         assertNotNull(comboBox.getValue());

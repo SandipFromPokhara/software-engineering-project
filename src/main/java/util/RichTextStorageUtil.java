@@ -99,5 +99,5 @@ public final class RichTextStorageUtil {
         }
     }
 
-    public record DecodedContent(String text, StyleSpans<String> spans) {}
+    public record DecodedContent(String text, StyleSpans<String> spans) {/* record class */}
 }
