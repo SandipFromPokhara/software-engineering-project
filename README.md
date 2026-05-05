@@ -1,37 +1,39 @@
 # NoteVault - A digital note management application
 
-**NoteVault** is a JavaFX-based desktop application designed for hierarchical note management.
-It enables users to securely create, organize, and manage notes within structured notebooks.
+**NoteVault** is a JavaFX-based desktop application designed to solve the problem of scattered and 
+unstructured note-taking by providing a hierarchical, secure, and multilingual note management system.
 
 The system is primarily targeted at students and individuals who require an efficient and organized way to manage personal or academic notes. 
 The application ensures secure authentication and structured data handling while maintaining a responsive user interface.
 
 The project was developed over 8 sprints (2 weeks each) as part of Software Engineering Project 1 (SEP1) and Software Engineering Project 2 (SEP2). 
-It emphasizes the complete software development lifecycle, including DevOps practices, CI/CD pipelines, testing, and deployment.
+It emphasizes the complete software development lifecycle, including DevOps practices, CI pipelines, testing, and deployment.
 
-Main technologies used include JavaFX, MariaDB, Docker, Jenkins, Kubernetes, and Maven.
+The application integrates modern technologies including Java, JavaFX, MariaDB, and DevOps tools such as Docker, Jenkins, and Kubernetes.
 
 ---
 
 ## Product Vision
 
-**Vision Statement**  
+**Vision Statement** 
+
 To develop a secure, scalable, and user-friendly desktop application that allows efficient hierarchical note management with modern DevOps integration.
 
 **Goals**
 - Provide structured note organization using notebooks
 - Ensure secure authentication and data protection
 - Support multiple languages for broader accessibility
-- Implement a complete DevOps pipeline for automation and deployment
+- Implement a complete CI pipeline
 
 **Key Features**
 - Hierarchical notebook and note management
-- Secure login using BCrypt
+- Secure authentication using BCrypt
 - Multi-language UI support (Burmese, English, Farsi, Finnish, Nepali, Sinhala)
-- CI pipeline using Jenkins
+- CI pipeline with Jenkins
 - Containerized deployment using Docker and Kubernetes
 
 **Definition of Success**
+
 The project is considered successful when all core features are implemented,
 tested, documented, and deployed through an automated DevOps pipeline with acceptable code quality metrics.
 
@@ -62,24 +64,26 @@ The project follows an Agile Scrum methodology with iterative development and co
 
 ## Sprint 1 – Project Planning & Vision
 
-Sprint 1 focused on project setup and alignment: the team was formed and roles were formed, collaboration tools (GitHub, Trello, communication channels) and the development environment were discussed and configured, 
+**Sprint 1** focused on project setup and alignment: the team and roles were formed, collaboration tools (GitHub, Trello, communication channels) and the development environment were discussed and configured, 
 an initial product vision and backlog were created, and low-fidelity UI mockups (Figma) and the initial project plan were produced.
 The sprint delivered the repository structure, and the first set of prioritized user stories.
 
-🔗 [Sprint 1 Planning](Documents/Sprint_Reports/Sprint1/Sprint_1_Planning_Report.md)  
+🔗 [User Journey Map](Documents/Diagrams/07-user-journey-map.png)
+
+🔗 [Sprint 1 Planning](Documents/Sprint_Reports/Sprint1/Sprint_1_Planning_Report.md)
 🔗 [Sprint 1 Review](Documents/Sprint_Reports/Sprint1/Sprint_1_Review_Report.md)
 
 ---
 
 ## Sprint 2 – Requirements & Database
 
-Sprint 2 established the application's core foundations: the relational database schema was designed and implemented in MariaDB, 
+**Sprint 2** established the application's core foundations: the initial relational database schema was designed and implemented in MariaDB, 
 and CRUD operations for users and notes were completed. Initial JavaFX screens (Entry, Login, Registration, Guest and Notes dashboards) were built and basic input validation added; 
 unit testing (JUnit) and JaCoCo coverage reporting were integrated to prepare the codebase for CI work.
 
 🔗 [Use Case Diagram](Documents/Diagrams/01-use-case-overview.png)
-🔗 [ER Diagram](Documents/Diagrams/02-initial-er-diagram.png)
-🔗 [Relational Schema](Documents/Diagrams/03-initial-relational_schema.png)
+🔗 [Initial ER Diagram](Documents/Diagrams/02-initial-er-diagram.png)
+🔗 [Initial Relational Schema](Documents/Diagrams/03-initial-relational_schema.png)
 
 🔗 [Database architecture](Documents/Database/database-architecture.md)
 
@@ -90,9 +94,10 @@ unit testing (JUnit) and JaCoCo coverage reporting were integrated to prepare th
 
 ## Sprint 3 – UI Implementation & CI
 
-Sprint 3 extended features and introduced DevOps automation: advanced note-management features (undo/redo, text editing tools, tagging, PDF export, theme toggle) were implemented, 
+**Sprint 3** extended features and introduced DevOps automation: advanced note-management features (undo/redo, text editing tools, tagging, PDF export, theme toggle) were implemented, 
 and a Jenkins CI pipeline was configured to run builds, tests and JaCoCo coverage reports. A Docker image was also created and tested locally to prepare for later deployment.
 
+🔗 [Activity Diagram](Documents/Diagrams/04-create-note-activity.png)
 🔗 [Sprint 3 Planning](Documents/Sprint_Reports/Sprint3/Sprint_3_Planning_Report.md)
 🔗 [Sprint 3 Review](Documents/Sprint_Reports/Sprint3/Sprint_3_Review_Report.md)
 
@@ -100,7 +105,7 @@ and a Jenkins CI pipeline was configured to run builds, tests and JaCoCo coverag
 
 ## Sprint 4 – Docker Containerization
 
-Sprint 4 finalized the prototype and prepared it for deployment: final testing and bug fixes were performed, the application was containerized with a Dockerfile, 
+**Sprint 4** finalized the prototype and prepared it for deployment: final testing and bug fixes were performed, the application was containerized with a Dockerfile, 
 the image was pushed to Docker Hub, and deployment testing verified that frontend and backend integrate correctly in a containerized environment. 
 Documentation and the final presentation were also prepared in this sprint.
 
@@ -111,7 +116,7 @@ Documentation and the final presentation were also prepared in this sprint.
 
 ## Sprint 5 – UI Localization & Kubernetes Deployment
 
-Sprint 5 implemented UI localization and runtime language switching: all UI text was externalized into resource bundles, a language selector was added, 
+**Sprint 5** implemented UI localization and runtime language switching: all UI text was externalized into resource bundles, a language selector was added, 
 and support for English, Nepali, Burmese, Finnish and Sinhala (including non-Latin scripts) was implemented and tested. 
 Docker configuration was updated to include localization resources; the app can switch languages without restarting.
 
@@ -124,7 +129,7 @@ Docker configuration was updated to include localization resources; the app can 
 
 ## Sprint 6 – Database Localization
 
-Sprint 6 moved localization into the data layer and improved code quality: the database schema and JPA entities were updated to store multilingual content with UTF-8 encoding, 
+**Sprint 6** moved localization into the data layer and improved code quality: the database schema and JPA entities were updated to store multilingual content with UTF-8 encoding, 
 and SonarQube-driven static analysis guided focused refactoring to reduce complexity and duplication. 
 The team also produced an acceptance test plan and updated ER/UML diagrams to reflect localization changes.
 
@@ -141,8 +146,10 @@ The team also produced an acceptance test plan and updated ER/UML diagrams to re
 
 ## Sprint 7 – Quality Assurance
 
-Sprint 7 concentrated on validation and acceptance: the team prepared a formal test plan, executed final unit tests, ran SonarQube analysis via Jenkins, 
+**Sprint 7** concentrated on validation and acceptance: the team prepared a formal test plan, executed final unit tests, ran SonarQube analysis via Jenkins, 
 and carried out heuristic evaluation and user acceptance testing (UAT). A bug-tracking table was maintained and all findings were addressed to ensure the application met acceptance criteria for submission.
+
+Farsi language support was also added in this sprint to complete the multilingual feature set.
 
 🔗 [Quality Assurance Summary](Documents/Reports/Quality_Assurance_Summary.pdf)
 
@@ -153,8 +160,8 @@ and carried out heuristic evaluation and user acceptance testing (UAT). A bug-tr
 
 ## Sprint 8 – Documentation & Finalization
 
-Sprint 8 (finalization) focused on finishing documentation, polishing the UI and codebase, preparing final deliverables and the project presentation.
-The team consolidated technical reports, user guides, architecture diagrams and test artifacts so the project is ready for submission and demonstration.
+**Sprint 8** (finalization) focused on finishing documentation, polishing the UI and codebase, preparing final deliverables and the project presentation.
+The team consolidated technical reports, architecture diagrams and test artifacts so the project is ready for submission and demonstration.
 
 🔗 [Sprint 8 Planning](Documents/Sprint_Reports/Sprint8/Sprint_8_Planning_Report.md)
 
@@ -166,28 +173,54 @@ The team consolidated technical reports, user guides, architecture diagrams and 
 - Java 21
 - Git
 - Maven
-- Docker or Docker Compose
-- MariaDB (if not using Docker)
+- MariaDB
+- Docker (optional)
 
 ### Steps
 
-1. Clone the repository
+**1.** Clone the repository
 ```bash
-git clone https://github.com/SandipFromPokhara/software-engineering-project.git
-cd software-engineering-project
+  git clone https://github.com/SandipFromPokhara/software-engineering-project.git
+  cd software-engineering-project
 ```
 
-2. Run the application using Docker:
-   ```bash
-   docker-compose up --build
+**2.** Set up the database
 
+Make sure MariaDB is installed and running.
+
+Create a database:
+```sql
+CREATE DATABASE your_database_name;
+USE your_database_name;
+```
+
+```md
+> Replace `your_database_name` with the database name used in your configuration.
+> ⚠️ Make sure the database name matches the one in your configuration file.
+> Update your database credentials in the configuration file (e.g., application.properties).
+```
+
+Run the application using Maven
+
+```bash
+  mvn javafx:run
+```
+ OR
+
+Run the application using Docker
+
+```bash
+  docker build -t notevault .
+  docker run --rm -it -e DISPLAY=host.docker.internal:0.0 -e DB_HOST=host.docker.internal -e DB_PORT=3306 notevault
+```
 ---
 
 ## Testing Instructions
 
 - Run unit tests:
-  ```bash
+```bash
   mvn test
+```
 
 - View test coverage:
   - Located at: /target/site/jacoco/index.html
@@ -197,8 +230,8 @@ cd software-engineering-project
 ---
 
 ## Repository Structure
-    /Documents → Project documentation (design docs, sprint reports, user guides and other project artifacts)
-    /src       → Application source code (Java sources, FXML, resources) and tests
+    /Documents → Documentation and reports  
+    /src       → Source code and tests  
 
 **Repository `src/` layout**
 
