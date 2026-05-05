@@ -1,3 +1,8 @@
+/* stylelint-disable selector-pseudo-class-no-unknown */
+/* The file uses JavaFX-specific pseudo-classes like :odd, :even, :selected and :filled
+   which stylelint (and Sonar) may report as unknown. Disable that specific rule
+   for this file so JavaFX runtime behavior is preserved. */
+
 .table-row-cell:odd {
     -fx-background-color: #f2f2f2;
     -fx-background-insets: 0;
@@ -15,4 +20,108 @@
 .table-row-cell:selected {
     -fx-background-color: #2196F3;
     -fx-text-fill: white;
+}
+
+.root.dark .column-header .label {
+    -fx-text-fill: #dadada;
+    -fx-font-weight: bold;
+}
+
+.root.dark .placeholder .label {
+    -fx-text-fill: #808080;
+}
+
+.root.dark .label,
+.root.dark .table-cell,
+.root.dark .text {
+    -fx-text-fill: inherit;
+}
+
+.root.dark .table-row-cell {
+    -fx-background-color: #333333;
+    -fx-text-fill: #e6e6e6;
+}
+
+.root.dark .table-row-cell:odd {
+    -fx-background-color: #4a4a4a;
+}
+
+.root.dark .table-row-cell:even {
+    -fx-background-color: #333333;
+}
+
+.root.dark .table-row-cell:hover {
+    -fx-background-color: #444444;
+}
+
+.root.dark .table-row-cell:selected {
+    -fx-background-color: #02b7ba;
+    -fx-text-fill: #000000;
+}
+
+.root.dark .table-view {
+    -fx-background-color: #2b2b2b;
+    -fx-border-color: #3d2b2b;
+}
+
+.root.dark .column-header, .root.dark .column-header-background {
+    -fx-background-color: #2b2b2b;
+}
+
+/* ─── Language ComboBox ─── */
+.language-combo .combo-box-base {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+}
+
+.language-combo .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 2 0 0;
+}
+
+.language-combo .arrow-button .arrow {
+    -fx-background-color: #266973;
+    -fx-shape: "M 0 0 L 4 4 L 8 0 Z";
+}
+
+.root.dark .language-combo .arrow-button .arrow {
+    -fx-background-color: white;
+}
+
+/* ─── Dropdown popup list ─── */
+.language-combo .list-view {
+    -fx-background-color: white;
+    -fx-border-color: #266973;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0, 0, 3);
+}
+
+.language-combo .list-view .list-cell {
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 12px;
+    -fx-text-fill: #266973;
+    -fx-background-color: white;
+}
+
+.language-combo .list-view .list-cell:hover {
+    -fx-background-color: #eaf6f7; /* pale teal */
+    -fx-text-fill: #07323a; /* dark teal/near-black for contrast */
+    -fx-font-weight: bold;
+}
+
+/* Dark-theme override: keep dark hover and white text */
+.root.dark .language-combo .list-view .list-cell:hover {
+    -fx-background-color: #575757;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+.language-combo .list-view .list-cell:filled:selected {
+    -fx-background-color: #266973;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
 }

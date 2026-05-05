@@ -16,11 +16,16 @@ public class FAQController {
     @FXML
     private Accordion faqAccordion;
 
+    @FXML
+    public void initialize() {
+        closeBtn.textProperty().bind(Localization.bind("faq.close"));
+    }
+
     public void initFaq(boolean isGuest) {
         faqAccordion.getPanes().clear(); // Reset content
 
         if (isGuest) {
-//            Get Questions and answer form resource bundle
+            // Get Questions and answer form resource bundle
             addPane(Localization.get("faq.q1"),Localization.get("faq.a1"));
             addPane(Localization.get("faq.q2"),Localization.get("faq.a2"));
             addPane(Localization.get("faq.q3"),Localization.get("faq.a3"));
@@ -28,7 +33,6 @@ public class FAQController {
             addPane(Localization.get("faq.q5"),Localization.get("faq.a5"));
             addPane(Localization.get("faq.q6"),Localization.get("faq.a6"));
             addPane(Localization.get("faq.q7"),Localization.get("faq.a7"));
-
         } else {
             addPane(Localization.get("faq.q8"),Localization.get("faq.a8"));
             addPane(Localization.get("faq.q9"),Localization.get("faq.a9"));
@@ -46,7 +50,9 @@ public class FAQController {
         Label contentLabel = new Label(contentText);
         contentLabel.setWrapText(true);
         contentLabel.setMaxWidth(Double.MAX_VALUE);
-        contentLabel.setStyle("-fx-padding: 10; -fx-text-fill: #333333;");
+
+        contentLabel.getStyleClass().add("faq-answer-label");
+        contentLabel.setStyle("-fx-padding: 10;");
 
         TitledPane pane = new TitledPane(title, contentLabel);
         faqAccordion.getPanes().add(pane);
@@ -56,9 +62,4 @@ public class FAQController {
     private void handleClose() {
         WindowUtil.closeWindow(faqAccordion);
     }
-    @FXML
-    public void initialize() {
-        closeBtn.textProperty().bind(Localization.bind("faq.close"));
-    }
-
 }

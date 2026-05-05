@@ -1,33 +1,40 @@
 package dao.user;
 
 import datasource.MariaDbJpaConnection;
-import entity.UserEntity;
+import entity.entities.UserEntity;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JpaUserDaoTest {
 
     private static JpaUserDao dao;
-    private static UserEntity testUser;
+    private UserEntity testUser;
 
     @BeforeAll
     static void setupBeforeClass() {
-    dao = new JpaUserDao();
+        dao = new JpaUserDao();
     }
 
     @BeforeEach
     void setUp() {
+        EntityManager em = MariaDbJpaConnection.getEntityManager();
+        em.getTransaction().begin();
+
         String unique = String.valueOf(System.currentTimeMillis());
-        testUser = new UserEntity("Test", "User", "tester" + unique, "tester" + unique + "@example.com");
+        this.testUser = new UserEntity("Test", "User", "tester" + unique, "tester" + unique + "@example.com");
         dao.save(testUser);
+
+        em.flush();
     }
 
     @AfterEach
     void tearDown() {
-        if (testUser != null) {
-            dao.delete(testUser);
+        EntityManager em = MariaDbJpaConnection.getEntityManager();
+        if (em.getTransaction().isActive()) {
+            em.getTransaction().rollback();
         }
-        MariaDbJpaConnection.shutdown();
+        em.clear();
     }
 
     @Test
@@ -100,6 +107,7 @@ class JpaUserDaoTest {
     void testUpdateNullUser() {
         assertThrows(IllegalArgumentException.class, () -> dao.update(null));
     }
+
     @Test
     void testDeleteNullUser() {
         assertThrows(IllegalArgumentException.class, () -> dao.delete(null));

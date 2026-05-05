@@ -1,22 +1,14 @@
 package controller;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import util.Localization;
 import util.NavigationUtil;
-
-import java.util.logging.Level;
-
-import static controller.ViewDashboardController.logger;
-
 
 public class GuestDashboardController {
 
@@ -24,13 +16,13 @@ public class GuestDashboardController {
     private Button home;
 
     @FXML
-    private Button newFiles;
-
-    @FXML
     private Button login;
 
     @FXML
     private Button register;
+
+    @FXML
+    private Button newFiles;
 
     @FXML
     private HBox topBar;
@@ -42,39 +34,27 @@ public class GuestDashboardController {
     private Label content;
 
     @FXML
-    VBox centerPane;
+    private VBox centerPane;
+    @FXML private Tooltip homeTooltip;
+    @FXML private Tooltip createTooltip;
+
+    @FXML
+    public void initialize() {
+        login.textProperty().bind(Localization.bind("guest.login"));
+        register.textProperty().bind(Localization.bind("guest.register"));
+        homeTooltip.textProperty().bind(Localization.bind("guest.home"));
+        createTooltip.textProperty().bind(Localization.bind("note.create_label"));
+    }
 
     @FXML
     private void handleHome() {
         Stage stage = (Stage) home.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", Localization.get("entry.window_title"), false
-        );
-    }
-
-    private void loadContent(String fxmlFile) {
-        try {
-            Parent view = FXMLLoader.load(
-                    getClass().getResource("/FXML/" + fxmlFile)
-            );
-
-            StackPane wrapper = new StackPane(view);
-            VBox.setVgrow(wrapper, Priority.ALWAYS);
-
-            //To make responsive
-            wrapper.prefWidthProperty().bind(centerPane.widthProperty());
-            wrapper.prefHeightProperty().bind(centerPane.heightProperty());
-
-            centerPane.getChildren().setAll(wrapper);
-
-        //logger
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, Localization.get("error.fxml_load") + fxmlFile, e);
-        }
+        NavigationUtil.replaceScene(stage, "/FXML/entry.fxml", "entry.window_title", false);
     }
 
     @FXML
-    void handleNewFiles() {
-        loadContent("createFilesGuest.fxml");
+    public void handleNewFiles() {
+        NavigationUtil.setCenter(centerPane, "/FXML/create_files_guest.fxml");
     }
 
     @FXML
@@ -83,7 +63,7 @@ public class GuestDashboardController {
         NavigationUtil.replaceScene(
                 stage,
                 "/FXML/login_view.fxml",
-                Localization.get("login.window_title"),
+                "login.window_title",
                 false
         );
     }
@@ -91,15 +71,6 @@ public class GuestDashboardController {
     @FXML
     private void handleSignUp() {
         Stage stage = (Stage) register.getScene().getWindow();
-        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml",Localization.get("register.window_title"), false
-        );
-
-    }
-
-    @FXML
-    public void initialize() {
-        login.textProperty().bind(Localization.bind("guest.login"));
-        register.textProperty().bind(Localization.bind("guest.register"));
-
+        NavigationUtil.replaceScene(stage, "/FXML/signup.fxml", "register.window_title", false);
     }
 }

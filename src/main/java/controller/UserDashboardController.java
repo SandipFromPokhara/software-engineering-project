@@ -1,28 +1,35 @@
 package controller;
 
 import dao.user.JpaUserDao;
-import dao.user.UserDAO;
-import entity.UserEntity;
+import dao.user.IUserDAO;
+import entity.entities.UserEntity;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import security.MessageType;
 import session.UserSession;
 import security.BcryptPasswordHasher;
-import security.PasswordHasher;
+import security.IPasswordHasher;
 import security.Validation;
 import util.Localization;
+import util.ShowMessageUtil;
 import util.WindowUtil;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Pattern;
 
 public class UserDashboardController {
 
-    private UserDAO userDao = new JpaUserDao();
-    private PasswordHasher passwordHasher;
+    private static final Pattern HAS_DIGIT = Pattern.compile("\\d");
+    private static final Pattern HAS_SPECIAL = Pattern.compile("[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?]");
+
+    private IUserDAO userDao = new JpaUserDao();
+    private IPasswordHasher passwordHasher;
+
     @FXML
     private TextField firstNameField;
 
@@ -40,8 +47,6 @@ public class UserDashboardController {
 
     @FXML
     private PasswordField confirmPasswordField;
-    @FXML
-    private Label confirm;
 
     @FXML
     private Label messageLabel;
@@ -68,30 +73,26 @@ public class UserDashboardController {
     @FXML
     public void initialize() {
         passwordHasher = new BcryptPasswordHasher();
-        Validation.hideMessage(messageLabel);
+        ShowMessageUtil.hideMessage(messageLabel);
 
         // LOCALIZATION BINDINGS
         manageAccount.textProperty().bind(Localization.bind("account.title"));
         note.textProperty().bind(Localization.bind("account.note"));
-        confirm.textProperty().bind(Localization.bind("account.confirm_password"));
 
         firstLock.textProperty().bind(Localization.bind("account.first_name"));
         lastNameLabel.textProperty().bind(Localization.bind("account.last_name"));
         usernameLabel.textProperty().bind(Localization.bind("account.username"));
         emailLock.textProperty().bind(Localization.bind("account.email"));
         newPassword.textProperty().bind(Localization.bind("account.new_password"));
-        confirm.textProperty().bind(Localization.bind("account.confirm_password"));
         passwordField.promptTextProperty().bind(Localization.bind("account.password_hint"));
         confirmPasswordField.promptTextProperty().bind(Localization.bind("account.password_repeat"));
-        manageCancel.textProperty().bind(Localization.bind("account.cancel"));
+        manageCancel.textProperty().bind(Localization.bind("button.cancel"));
         manageUpdate.textProperty().bind(Localization.bind("account.update"));
-
-
 
         // Load user data
         UserEntity currentUser = UserSession.getUserInstance().getUser();
         if (currentUser == null) {
-            Validation.showMessage(messageLabel, Localization.get("dashboard.no_session"), Validation.MessageType.ERROR);
+            ShowMessageUtil.showMessageKey(messageLabel, "dashboard.no_session", MessageType.ERROR);
             return;
         }
 
@@ -99,50 +100,55 @@ public class UserDashboardController {
         lastNameField.setText(currentUser.getLastName());
         usernameField.setText(currentUser.getUsername());
         emailField.setText(currentUser.getEmail());
-
     }
-
 
     @FXML
     private void handleUpdate() {
         UserEntity currentUser = UserSession.getUserInstance().getUser();
         if (currentUser == null) {
-            Validation.showMessage(messageLabel,Localization.get("dashboard.no_session") , Validation.MessageType.ERROR);
+            ShowMessageUtil.showMessageKey(messageLabel, "dashboard.no_session", MessageType.ERROR);
             return;
         }
 
         String newLastName = lastNameField.getText() == null ? "" : lastNameField.getText().trim();
         String newUsername = usernameField.getText() == null ? "" : usernameField.getText().trim();
-        String newPassword = passwordField.getText() == null ? "" : passwordField.getText();
-        String confirmPassword = confirmPasswordField.getText() == null ? "" : confirmPasswordField.getText();
+        String updatedPassword = passwordField.getText() == null ? "" : passwordField.getText().trim();
+        String confirmPassword = confirmPasswordField.getText() == null ? "" : confirmPasswordField.getText().trim();
 
-        if (newLastName.isEmpty() || newUsername.isEmpty()) {
-            Validation.showMessage(messageLabel, Localization.get("dashboard.required_fields"), Validation.MessageType.ERROR);
-            return;
-        }
+        Validation.ValidationResult result = Validation.validateUpdate(
+                newLastName,
+                newUsername,
+                updatedPassword,
+                confirmPassword
+        );
 
-        if (!Validation.validateName(newLastName, "Last name", messageLabel)) {
-            return;
-        }
-
-        if (!Validation.validateUsername(newUsername, messageLabel)) {
+        if (!result.success()) {
+            ShowMessageUtil.showMessageKey(messageLabel, "dashboard.validation_error", MessageType.ERROR);
             return;
         }
 
         UserEntity existingUserWithUsername = userDao.findByUsername(newUsername);
         if (existingUserWithUsername != null && !existingUserWithUsername.getId().equals(currentUser.getId())) {
-            Validation.showMessage(messageLabel, Localization.get("dashboard.username_exists"), Validation.MessageType.ERROR);
+            ShowMessageUtil.showMessageKey(messageLabel, "dashboard.username_exists", MessageType.ERROR);
             return;
         }
 
-        if (!newPassword.isBlank()) {
-            if (!Validation.validatePasswordMatch(newPassword, confirmPassword, messageLabel)) {
+        if (!updatedPassword.isBlank()) {
+
+            if (!Validation.validatePasswordMatch(updatedPassword, confirmPassword)) {
+                ShowMessageUtil.showMessageKey(messageLabel, "account.password_no_match", MessageType.ERROR);
                 return;
             }
-            if (!Validation.validatePasswordStrength(newPassword, messageLabel)) {
+
+            if (updatedPassword.length() < 6 ||
+                    !HAS_DIGIT.matcher(updatedPassword).find() ||
+                    !HAS_SPECIAL.matcher(updatedPassword).find()) {
+
+                ShowMessageUtil.showMessageKey(messageLabel, "password.not_strong", MessageType.ERROR);
                 return;
             }
-            currentUser.changePasswordHash(passwordHasher.hash(newPassword));
+
+            currentUser.changePasswordHash(passwordHasher.hash(updatedPassword));
         }
 
         currentUser.setLastName(newLastName);
@@ -151,7 +157,7 @@ public class UserDashboardController {
         userDao.update(currentUser);
         UserSession.getUserInstance().setUser(currentUser);
 
-        Validation.showMessage(messageLabel,Localization.get("dashboard.update_success"), Validation.MessageType.SUCCESS);
+        ShowMessageUtil.showMessageKey(messageLabel,"dashboard.update_success", MessageType.SUCCESS);
         passwordField.clear();
         confirmPasswordField.clear();
 
@@ -162,7 +168,7 @@ public class UserDashboardController {
             public void run() {
                 Platform.runLater(() -> WindowUtil.closeWindow(firstNameField));
             }
-        }, 1500); // 1.5 second delay
+        }, 1500);
     }
 
     @FXML
@@ -170,11 +176,11 @@ public class UserDashboardController {
         WindowUtil.closeWindow(firstNameField);
     }
 
-    public void setUserDao(UserDAO userDao) {
+    public void setUserDao(IUserDAO userDao) {
         this.userDao = userDao;
     }
 
-    public void setPasswordHasher(PasswordHasher passwordHasher) {
+    public void setPasswordHasher(IPasswordHasher passwordHasher) {
         this.passwordHasher = passwordHasher;
     }
 }

@@ -3,9 +3,17 @@ package util;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.stage.Window;
 
-public class AlertUtil {
+/**
+ * Utility class for displaying JavaFX Alerts.
+ */
+public final class AlertUtil {
+
+    private AlertUtil() {
+        throw new IllegalStateException("Utility class");
+    }
 
     /**
      * Generic alert method
@@ -20,6 +28,8 @@ public class AlertUtil {
         alert.setHeaderText(null);
         alert.setContentText(content);
 
+        setCloseOnly(alert);
+
         if (owner != null) {
             alert.initOwner(owner);
         }
@@ -27,16 +37,30 @@ public class AlertUtil {
         alert.showAndWait();
     }
 
+    public static void showAbout(Window owner) {
+        Alert about = new Alert(Alert.AlertType.INFORMATION);
+        about.setTitle(Localization.get("about.window_title"));
+        about.setHeaderText(Localization.get("about.header"));
+        about.setContentText(Localization.get("about.content"));
+
+        setCloseOnly(about);
+
+        if (owner != null) {
+            about.initOwner(owner);
+        }
+        about.showAndWait();
+    }
+
     public static void showInfo(Window owner, String message) {
-        showAlert(owner, Alert.AlertType.INFORMATION, "Information", message);
+        showAlert(owner, Alert.AlertType.INFORMATION, Localization.get("alert.info"), message);
     }
 
     public static void showWarning(Window owner, String message) {
-        showAlert(owner, Alert.AlertType.WARNING, "Warning", message);
+        showAlert(owner, Alert.AlertType.WARNING, Localization.get("alert.warning"), message);
     }
 
     public static void showError(Window owner, String message) {
-        showAlert(owner, Alert.AlertType.ERROR, "Error", message);
+        showAlert(owner, Alert.AlertType.ERROR, Localization.get("alert.error"), message);
     }
 
     public static boolean showConfirmation(Window owner, String title, String message) {
@@ -49,13 +73,32 @@ public class AlertUtil {
             alert.initOwner(owner);
         }
 
-        // Localized buttons
-        ButtonType okButton = new ButtonType(Localization.get("account.logout_ok"), ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancelButton = new ButtonType(Localization.get("account.logout_cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType okButton = createOkButton();
+        ButtonType cancelButton = createCancelButton();
 
         alert.getButtonTypes().setAll(okButton, cancelButton);
 
         return alert.showAndWait().filter(response -> response == okButton).isPresent();
     }
 
+    public static void addStandardButtons(Dialog<?> dialog) {
+        dialog.getDialogPane().getButtonTypes().setAll(createOkButton(), createCancelButton());
+    }
+
+    private static void setCloseOnly(Dialog<?> dialog) {
+        dialog.getDialogPane().getButtonTypes().setAll(createCloseButton());
+    }
+
+    private static ButtonType createOkButton() {
+        return new ButtonType(Localization.get("button.ok"), ButtonBar.ButtonData.OK_DONE);
+    }
+
+    private static ButtonType createCancelButton() {
+        return new ButtonType(Localization.get("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+    }
+
+    private static ButtonType createCloseButton() {
+        return new ButtonType(Localization.get("menu.close"), ButtonBar.ButtonData.CANCEL_CLOSE
+        );
+    }
 }

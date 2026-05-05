@@ -1,6 +1,6 @@
 package session;
 
-import entity.UserEntity;
+import entity.entities.UserEntity;
 
 public class UserSession {
     private static final UserSession INSTANCE = new UserSession();

@@ -1,117 +1,91 @@
 package dao.user;
 
-import datasource.MariaDbJpaConnection;
-import entity.UserEntity;
-import jakarta.persistence.EntityManager;
+import dao.basedao.GenericAbstractDAO;
+import entity.entities.UserEntity;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
-public class JpaUserDao implements UserDAO{
+public class JpaUserDao extends GenericAbstractDAO<UserEntity, Long> implements IUserDAO {
 
-    public JpaUserDao() {}
+    public JpaUserDao() {/* Prevent instantiation. JPA only*/}
 
     @Override
     public UserEntity save(UserEntity user) {
         if (user == null) throw new IllegalArgumentException("User cannot be null");
 
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        try {
-            em.getTransaction().begin();
-            UserEntity managedUser;
-
-            if (user.getId() == null) {
-                em.persist(user);
-                managedUser = user;
-            } else {
-                managedUser = em.merge(user);
+        return executeInTransaction(em-> {
+            try {
+                if (user.getId() == null) {
+                    em.persist(user);
+                    return user;
+                } else {
+                    return em.merge(user);
+                }
+            } catch (Exception e) {
+                if (isUniqueConstraintViolation(e)) {
+                    throw new IllegalArgumentException("Username or email already exists");
+                }
+                throw e;
             }
-            em.getTransaction().commit();
-            return managedUser;
-
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw new RuntimeException("Failed to persist user", e);
-        } finally {
-            em.close();
-        }
+        });
     }
 
     @Override
     public UserEntity findById(Long id) {
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        try {
-            return em.find(UserEntity.class, id);
-        } finally {
-            em.close();
-        }
+        if (id == null) throw new IllegalArgumentException("ID cannot be null");
+
+        return execute(em-> em.find(UserEntity.class, id));
     }
 
     @Override
     public UserEntity findByUsername(String username) {
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        try {
-            TypedQuery<UserEntity> query = em.createQuery("Select u from UserEntity u where u.username = :username", UserEntity.class);
+        if (username == null) throw new IllegalArgumentException("Username cannot be null");
+
+        return execute(em-> {
+            TypedQuery<UserEntity> query = em.createQuery("SELECT u FROM UserEntity u WHERE u.username = :username", UserEntity.class);
             query.setParameter("username", username);
             List<UserEntity> result = query.getResultList();
 
             return result.isEmpty() ? null : result.get(0);
-        } finally {
-            em.close();
-        }
+        });
     }
 
     @Override
     public UserEntity findByEmail(String email) {
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        try {
-            TypedQuery<UserEntity> query = em.createQuery("Select u from UserEntity u where u.email = :email", UserEntity.class);
+        if (email == null) throw new IllegalArgumentException("Email cannot be null");
+
+        return execute(em-> {
+            TypedQuery<UserEntity> query = em.createQuery("SELECT u FROM UserEntity u WHERE u.email = :email", UserEntity.class);
             query.setParameter("email", email);
             List<UserEntity> result = query.getResultList();
 
             return result.isEmpty() ? null : result.get(0);
-        } finally {
-            em.close();
-        }
+        });
     }
 
     @Override
     public void update(UserEntity user) {
         if (user == null) throw new IllegalArgumentException("User cannot be null");
 
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        try {
-            em.getTransaction().begin();
+        executeInTransaction(em-> {
             em.merge(user);
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
-            throw new RuntimeException("Failed to update user", e);
-        } finally {
-            em.close();
-        }
+            return null;
+        });
     }
 
     @Override
     public void delete(UserEntity user) {
         if (user == null) throw new IllegalArgumentException("User cannot be null");
 
-        EntityManager em = MariaDbJpaConnection.createEntityManager();
-        try {
-            em.getTransaction().begin();
+        executeInTransaction(em-> {
             UserEntity managedUser = em.find(UserEntity.class, user.getId());
 
             if (managedUser != null) {
                 em.remove(managedUser);
             }
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
-            throw new RuntimeException("Failed to delete user" + user, e);
-        } finally {
-            em.close();
-        }
+
+            return null;
+        });
     }
 }

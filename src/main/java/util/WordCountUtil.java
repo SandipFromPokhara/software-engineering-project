@@ -1,32 +1,44 @@
 package util;
 
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import org.fxmisc.richtext.InlineCssTextArea;
 
 public class WordCountUtil {
 
+    private WordCountUtil() {/* Private constructor to prevent instantiation of utility class */}
+
     public static void bind(TextArea textArea, Label wordCountLabel) {
         if (textArea == null || wordCountLabel == null) return;
+        setupListeners(textArea.textProperty(), textArea::getText, wordCountLabel);
+    }
 
-        // Update on every text change
-        textArea.textProperty().addListener((obs, oldText, newText) -> {
-            updateLabel(newText, wordCountLabel);
-        });
+    public static void bind(InlineCssTextArea textArea, Label wordCountLabel) {
+        if (textArea == null || wordCountLabel == null) return;
+        setupListeners(textArea.textProperty(), textArea::getText, wordCountLabel);
+    }
 
-        // Initialize with localized template
-        updateLabel(textArea.getText(), wordCountLabel);
+    private static void setupListeners(ObservableValue<String> textProp,
+                                       java.util.function.Supplier<String> textSupplier,
+                                       Label label) {
+
+        // Listen for text changes
+        textProp.addListener((obs, old, newVal) -> updateLabel(newVal, label));
+
+        // Listen for language changes (localization)
+        Localization.localeProperty().addListener((obs, old, newLoc) ->
+                updateLabel(textSupplier.get(), label));
+
+        // Initial count
+        updateLabel(textSupplier.get(), label);
     }
 
     private static void updateLabel(String text, Label label) {
         int words = countWords(text);
         int chars = text != null ? text.length() : 0;
 
-        String template = Localization.get("create.words_chars_label");
-        String formatted = template
-                .replace("{{words}}", String.valueOf(words))
-                .replace("{{chars}}", String.valueOf(chars));
-
-        label.setText(formatted);
+        label.setText(Localization.get("create.words_chars_label", words, chars));
     }
 
     private static int countWords(String text) {

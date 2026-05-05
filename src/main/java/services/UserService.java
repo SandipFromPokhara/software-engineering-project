@@ -1,14 +1,14 @@
 package services;
 
 import dao.user.JpaUserDao;
-import entity.UserEntity;
-import security.PasswordHasher;
+import entity.entities.UserEntity;
+import security.IPasswordHasher;
 
 public class UserService {
     private final JpaUserDao userDao;
-    private final PasswordHasher passwordHasher;
+    private final IPasswordHasher passwordHasher;
 
-    public UserService(JpaUserDao userDao, PasswordHasher passwordHasher) {
+    public UserService(JpaUserDao userDao, IPasswordHasher passwordHasher) {
         this.userDao = userDao;
         this.passwordHasher = passwordHasher;
     }

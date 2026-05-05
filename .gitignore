@@ -46,5 +46,18 @@ build/
 *.env
 .env.local
 
+
 ### Personal notes ###
 MyNotes.md
+src/main/java/dto/
+
+.scannerwork/
+
+app-deployment.yaml
+
+docker-compose.yml
+
+load-testing/.idea
+
+Jenkinsfile
+Dockerfile
