@@ -10,15 +10,16 @@ The application is designed using **internationalization (i18n)** principles, wh
 
 ## Supported Languages
 
-NoteVault currently supports the following languages:
+NoteVault supports the following languages:
 
 - Burmese (my) 🇲🇲
 - English (en) 🇬🇧
+- Farsi (fa) 🇮🇷
 - Finnish (fi) 🇫🇮
 - Nepali (np) 🇳🇵
 - Sinhala (si) 🇱🇰
 
-> Note: Nepali, Sinhala, and Burmese are non-Latin languages.
+> Note: Nepali, Sinhala, Farsi and Burmese are non-Latin languages.
 
 ---
 
@@ -42,6 +43,7 @@ MessagesBundle_fi.properties
 MessagesBundle_np.properties
 MessagesBundle_si.properties
 MessagesBundle_my.properties
+MessagesBundle_fa.properties
 
 ```
 Each file contans key-value pairs for UI text.
@@ -92,24 +94,6 @@ This approach follows **user-centered design principles**.
 - `ResourceBundle` loads the appropriate `.properties` file
 - All UI components retrieve text dynamically using keys
 - JavaFX UI elements update dynamically upon language change
-
----
-
-## Current Limitations
-
-- RTL (Right-to-Left) and LTR layout adjustments are not implemented
-- Localization currently focuses only on UI text
-- Database localization is not implemented yet
-
----
-
-## Future Improvements
-
-- Addition of more languages (e.g., Farsi, Russian)
-- Implementation of database-level localization
-- RTL/LTR layout support
-- Improved testing for localization features
-- Integration with advanced quality tools (e.g., SonarQube)
 
 ---
 

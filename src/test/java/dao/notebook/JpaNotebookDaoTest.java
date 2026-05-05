@@ -175,8 +175,9 @@ class JpaNotebookDaoTest {
         JpaUserDao userDao = new JpaUserDao();
         JpaNoteDao noteDao = new JpaNoteDao();
 
-        // Create and persist a user
-        UserEntity user = new UserEntity("Test", "User", "it_user", "it@example.com");
+        // Create and persist a user with a unique username/email to avoid collisions with other tests
+        String unique = String.valueOf(System.currentTimeMillis());
+        UserEntity user = new UserEntity("Test", "User", "it_user_" + unique, "it_" + unique + "@example.com");
         user = userDao.save(user);
         MariaDbJpaConnection.closeEntityManager();
 
@@ -210,5 +211,9 @@ class JpaNotebookDaoTest {
         // Notes should also be gone
         List<NoteEntity> after = noteDao.findByNotebook(notebook);
         assertTrue(after.isEmpty(), "All notes belonging to the notebook should be deleted");
+        
+        // Clean up the user we created for this test
+        MariaDbJpaConnection.closeEntityManager();
+        userDao.delete(user);
     }
 }
