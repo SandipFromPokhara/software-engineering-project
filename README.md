@@ -156,6 +156,8 @@ and carried out heuristic evaluation and user acceptance testing (UAT). A bug-tr
 Sprint 8 (finalization) focused on finishing documentation, polishing the UI and codebase, preparing final deliverables and the project presentation.
 The team consolidated technical reports, user guides, architecture diagrams and test artifacts so the project is ready for submission and demonstration.
 
+🔗 [Sprint 8 Planning](Documents/Sprint_Reports/Sprint8/Sprint_8_Planning_Report.md)
+
 ---
 
 ## How to Run the Project
