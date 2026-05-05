@@ -68,7 +68,7 @@ The project follows an Agile Scrum methodology with iterative development and co
 an initial product vision and backlog were created, and low-fidelity UI mockups (Figma) and the initial project plan were produced.
 The sprint delivered the repository structure, and the first set of prioritized user stories.
 
-🔗 [User Journey Map](Documents/Diagrams/07-user-journey-map.png)
+🔗 ![User Journey Map](Documents/Diagrams/07-user-journey-map.png)
 
 🔗 [Sprint 1 Planning](Documents/Sprint_Reports/Sprint1/Sprint_1_Planning_Report.md)
 🔗 [Sprint 1 Review](Documents/Sprint_Reports/Sprint1/Sprint_1_Review_Report.md)
@@ -81,7 +81,7 @@ The sprint delivered the repository structure, and the first set of prioritized 
 and CRUD operations for users and notes were completed. Initial JavaFX screens (Entry, Login, Registration, Guest and Notes dashboards) were built and basic input validation added; 
 unit testing (JUnit) and JaCoCo coverage reporting were integrated to prepare the codebase for CI work.
 
-🔗 [Use Case Diagram](Documents/Diagrams/01-use-case-overview.png)
+🔗 ![Use Case Diagram](Documents/Diagrams/01-use-case-overview.png)
 🔗 [Initial ER Diagram](Documents/Diagrams/02-initial-er-diagram.png)
 🔗 [Initial Relational Schema](Documents/Diagrams/03-initial-relational_schema.png)
 
